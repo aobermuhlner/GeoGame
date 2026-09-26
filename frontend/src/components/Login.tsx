@@ -68,6 +68,7 @@ export function Login({ onSignedIn, roomCode }: { onSignedIn: (u: UserView) => v
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [devName, setDevName] = useState('');
+  const [guestName, setGuestName] = useState('');
 
   useEffect(() => {
     api
@@ -88,7 +89,7 @@ export function Login({ onSignedIn, roomCode }: { onSignedIn: (u: UserView) => v
     }
   }
 
-  const none = config && !config.googleClientId && !config.devLogin;
+  const none = config && !config.googleClientId && !config.devLogin && !config.guestLogin;
 
   return (
     <main class="stack">
@@ -102,7 +103,7 @@ export function Login({ onSignedIn, roomCode }: { onSignedIn: (u: UserView) => v
         <p class="tagline">
           {roomCode
             ? `Sign in to join lobby ${roomCode}.`
-            : 'Daily flag challenges and real-time duels. Sign in to keep your scores.'}
+            : 'Daily flag challenges and real-time duels. Pick a name to start playing.'}
         </p>
 
         <ul class="login-points">
@@ -118,6 +119,31 @@ export function Login({ onSignedIn, roomCode }: { onSignedIn: (u: UserView) => v
         </ul>
 
         {!config && !error && <p class="muted center">Loading…</p>}
+        {config?.guestLogin && (
+          <form
+            class="dev-login"
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (guestName.trim()) run(api.loginGuest(guestName.trim()));
+            }}
+          >
+            <div class="join-row">
+              <input
+                class="text-input"
+                maxLength={16}
+                value={guestName}
+                placeholder="Your name"
+                aria-label="Your name"
+                onInput={(e) => setGuestName((e.target as HTMLInputElement).value)}
+              />
+              <button class="btn btn-primary" type="submit" disabled={!guestName.trim() || busy}>
+                Play
+              </button>
+            </div>
+            <p class="muted center">Your scores are saved in this browser.</p>
+          </form>
+        )}
+
         {config?.googleClientId && (
           <GoogleButton clientId={config.googleClientId} onCredential={(c) => run(api.loginGoogle(c))} />
         )}

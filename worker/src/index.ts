@@ -86,6 +86,7 @@ async function accountRoutes(request: Request, env: Env, url: URL, origin: strin
     const config: AuthConfig = {
       googleClientId: env.GOOGLE_CLIENT_ID || null,
       devLogin: env.DEV_LOGIN === 'true' && isLocalOrigin(origin),
+      guestLogin: true,
     };
     return json(config);
   }
@@ -96,6 +97,11 @@ async function accountRoutes(request: Request, env: Env, url: URL, origin: strin
     const claims = await verifyGoogleIdToken(credential, env.GOOGLE_CLIENT_ID).catch(() => null);
     if (!claims) return fail(401, 'Invalid Google sign-in');
     return json(await db.loginGoogle(claims));
+  }
+  if (path === '/auth/guest' && method === 'POST') {
+    const name = cleanName((await readBody(request)).name);
+    if (!name) return fail(400, 'Enter a name');
+    return json(await db.loginGuest(name));
   }
   if (path === '/auth/dev' && method === 'POST') {
     // Two locks: the env flag (off in production) and a localhost page.

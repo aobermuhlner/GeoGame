@@ -9,6 +9,8 @@ export interface UserView {
   email: string | null;
   picture: string | null;
   createdAt: number;
+  /** Name-only guest account: tied to this browser, lost on sign-out */
+  guest: boolean;
 }
 
 export interface ModeStats {
@@ -35,6 +37,8 @@ export interface AuthConfig {
   googleClientId: string | null;
   /** Local development: name-only sign-in without Google */
   devLogin: boolean;
+  /** Name-only guest sign-in (until proper logins are required) */
+  guestLogin: boolean;
 }
 
 export interface LoginResponse {

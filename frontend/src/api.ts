@@ -87,6 +87,7 @@ export const api = {
   config: () => request<AuthConfig>('/auth/config'),
   loginGoogle: (credential: string) =>
     request<LoginResponse>('/auth/google', { method: 'POST', body: { credential } }).then(signedIn),
+  loginGuest: (name: string) => request<LoginResponse>('/auth/guest', { method: 'POST', body: { name } }).then(signedIn),
   loginDev: (name: string) => request<LoginResponse>('/auth/dev', { method: 'POST', body: { name } }).then(signedIn),
   async logout() {
     await request('/auth/logout', { method: 'POST' }).catch(() => {});

@@ -72,7 +72,7 @@ function AccountCard({
         )}
         {error && <p class="form-error">{error}</p>}
         <p class="muted small">
-          {user.email ?? 'Local dev account'} · member since{' '}
+          {user.email ?? (user.guest ? 'Guest account (this browser)' : 'Local dev account')} · member since{' '}
           {new Date(user.createdAt).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}
         </p>
         <p class="muted small">Your display name is shown on the ranking and to your opponents.</p>

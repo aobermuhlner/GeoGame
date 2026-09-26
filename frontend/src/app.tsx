@@ -62,6 +62,7 @@ export function App() {
   }
 
   async function signOut() {
+    if (user?.guest && !confirm('Guest accounts can’t sign back in. Sign out and lose this account’s scores?')) return;
     await api.logout();
     setUser(null);
   }

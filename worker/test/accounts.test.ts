@@ -76,11 +76,26 @@ describe('auth', () => {
     expect((await call('/me', { token: b.token })).status).toBe(200);
   });
 
+  it('guest login works from production and makes a new account each time', async () => {
+    const origin = 'https://aobermuhlner.github.io';
+    const login = async (name: string) => {
+      const res = await call('/auth/guest', { method: 'POST', body: { name }, origin });
+      expect(res.status).toBe(200);
+      return (await res.json()) as LoginResponse;
+    };
+    const a = await login('Guesty');
+    const b = await login('Guesty');
+    expect(a.user).toMatchObject({ displayName: 'Guesty', guest: true });
+    expect(b.user.id).not.toBe(a.user.id);
+    expect((await call('/me', { token: a.token, origin })).status).toBe(200);
+    expect((await call('/auth/guest', { method: 'POST', body: { name: '   ' }, origin })).status).toBe(400);
+  });
+
   it('dev login is refused from non-local origins', async () => {
     const res = await call('/auth/dev', { method: 'POST', body: { name: 'Eve' }, origin: 'https://aobermuhlner.github.io' });
     expect(res.status).toBe(404);
     const cfg = await (await call('/auth/config', { origin: 'https://aobermuhlner.github.io' })).json();
-    expect(cfg).toEqual({ googleClientId: 'test-client.apps.googleusercontent.com', devLogin: false });
+    expect(cfg).toEqual({ googleClientId: 'test-client.apps.googleusercontent.com', devLogin: false, guestLogin: true });
   });
 
   it('rejects forbidden origins and bad Google credentials', async () => {

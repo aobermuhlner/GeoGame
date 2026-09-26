@@ -31,6 +31,8 @@ import { FLAGS } from './generated/flags';
 import type { GoogleClaims } from './google';
 
 export const SESSION_TTL_MS = 90 * 24 * 3600_000;
+/** Guests can't sign back in, so their session is their account. */
+export const GUEST_SESSION_TTL_MS = 5 * 365 * 24 * 3600_000;
 /** Flag tokens of daily rounds are kept this many days. */
 const FLAG_TOKEN_DAYS = 3;
 
@@ -40,6 +42,7 @@ interface UserRow {
   email: string | null;
   picture: string | null;
   created_at: number;
+  provider_id: string;
   [k: string]: SqlStorageValue;
 }
 
@@ -49,6 +52,7 @@ const toView = (u: UserRow): UserView => ({
   email: u.email,
   picture: u.picture,
   createdAt: u.created_at,
+  guest: u.provider_id.startsWith('guest:'),
 });
 
 function randomHex(bytes: number): string {
@@ -127,12 +131,18 @@ export class Accounts extends DurableObject<Env> {
     return this.login(`dev:${name.toLowerCase()}`, name, null, null, now);
   }
 
+  /** A fresh name-only account; the browser keeps the session token, so it lives as long as that does. */
+  async loginGuest(name: string, now = Date.now()): Promise<LoginResponse> {
+    return this.login(`guest:${crypto.randomUUID()}`, name, null, null, now, GUEST_SESSION_TTL_MS);
+  }
+
   private async login(
     providerId: string,
     name: string,
     email: string | null,
     picture: string | null,
     now: number,
+    ttl = SESSION_TTL_MS,
   ): Promise<LoginResponse> {
     let user = this.sql.exec<UserRow>('SELECT * FROM users WHERE provider_id = ?', providerId).toArray()[0];
     if (user) {
@@ -140,7 +150,7 @@ export class Accounts extends DurableObject<Env> {
       this.sql.exec('UPDATE users SET email = ?, picture = ? WHERE id = ?', email, picture, user.id);
       user = { ...user, email, picture };
     } else {
-      user = { id: crypto.randomUUID(), display_name: name, email, picture, created_at: now };
+      user = { id: crypto.randomUUID(), provider_id: providerId, display_name: name, email, picture, created_at: now };
       this.sql.exec(
         'INSERT INTO users (id, provider_id, display_name, email, picture, created_at) VALUES (?, ?, ?, ?, ?, ?)',
         user.id,
@@ -156,7 +166,7 @@ export class Accounts extends DurableObject<Env> {
       'INSERT INTO sessions (token_hash, user_id, expires_at) VALUES (?, ?, ?)',
       await sha256(token),
       user.id,
-      now + SESSION_TTL_MS,
+      now + ttl,
     );
     this.sql.exec('DELETE FROM sessions WHERE expires_at < ?', now);
     return { token, user: toView(user) };
