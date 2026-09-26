@@ -60,6 +60,24 @@ export function TopCard({ vm }: { vm: GameVM }) {
   );
 }
 
+/** Shows a placeholder until the SVG has arrived, so a slow download never flashes half a flag. */
+function FlagImage({ src }: { src: string }) {
+  const [loaded, setLoaded] = useState(false);
+  return (
+    <>
+      {!loaded && <div class="flag-skeleton" aria-hidden="true" />}
+      <img
+        class={`flag${loaded ? '' : ' pending'}`}
+        src={src}
+        alt="Flag to guess"
+        draggable={false}
+        onLoad={() => setLoaded(true)}
+        onError={() => setLoaded(true)}
+      />
+    </>
+  );
+}
+
 function Countdown({ endsAt }: { endsAt: number }) {
   const now = useNow(true, 100);
   const n = Math.max(1, Math.ceil((endsAt - now) / 1000));
@@ -117,7 +135,7 @@ export function GameScreen({ vm, actions }: { vm: GameVM; actions: GameActions }
           {vm.phase === 'countdown' && vm.countdownEndsAt ? (
             <Countdown endsAt={vm.countdownEndsAt} />
           ) : vm.flagUrl ? (
-            <img class="flag" src={vm.flagUrl} alt="Flag to guess" draggable={false} key={vm.flagUrl} />
+            <FlagImage src={vm.flagUrl} key={vm.flagUrl} />
           ) : null}
         </div>
         <StatusLine vm={vm} />

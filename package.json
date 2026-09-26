@@ -2,13 +2,18 @@
   "name": "flag-duel",
   "private": true,
   "type": "module",
-  "workspaces": ["shared", "frontend", "worker"],
+  "workspaces": [
+    "shared",
+    "frontend",
+    "worker"
+  ],
   "scripts": {
     "dev": "concurrently -k -n worker,web -c green,blue \"npm run dev -w worker\" \"npm run dev -w frontend\"",
     "dev:web": "npm run dev -w frontend",
     "test": "npm run test -w shared && npm run test -w worker --if-present",
     "build": "npm run build -w frontend",
-    "typecheck": "tsc -p shared && tsc -p frontend --noEmit"
+    "typecheck": "tsc -p shared && npm run typecheck -w frontend && npm run gen:flags -w worker && tsc -p worker",
+    "deploy:worker": "npm run deploy -w worker"
   },
   "devDependencies": {
     "concurrently": "^9.1.0",
