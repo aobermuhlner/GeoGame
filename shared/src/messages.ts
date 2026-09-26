@@ -1,11 +1,18 @@
 // WebSocket protocol between the browser and the Room Durable Object.
 import type { GuessOutcome, MatchResult, RoundEnd, Slot } from './game';
 import { MODE_IDS, type ModeId } from './modes';
+import type { RankedView } from './ranked';
 import { REGION_IDS, type RegionId } from './regions';
 
 export const ROOM_CODE_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // no 0/O/1/I
 export const ROOM_CODE_LENGTH = 5;
 export const ROOM_CODE_RE = /^[ABCDEFGHJKLMNPQRSTUVWXYZ23456789]{5}$/;
+
+export function randomRoomCode(): string {
+  const bytes = crypto.getRandomValues(new Uint8Array(ROOM_CODE_LENGTH));
+  // 32-char alphabet → no modulo bias
+  return Array.from(bytes, (b) => ROOM_CODE_ALPHABET[b % ROOM_CODE_ALPHABET.length]).join('');
+}
 /** Flag tokens: room code + 16 random hex chars (lets the Worker route to the right room). */
 export const FLAG_TOKEN_RE = /^[ABCDEFGHJKLMNPQRSTUVWXYZ23456789]{5}[0-9a-f]{16}$/;
 export const MIN_POOL_SIZE = 10;
@@ -95,6 +102,8 @@ export interface RoomView {
   result: MatchResult | null;
   /** Why the match ended early, if it did */
   forfeitReason: ForfeitReason | null;
+  /** Ranked match info; null in friend lobbies */
+  ranked: RankedView | null;
 }
 
 export type ErrorCode = 'room_full' | 'not_found' | 'bad_message' | 'not_allowed' | 'pool_too_small' | 'in_progress';

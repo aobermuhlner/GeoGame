@@ -1,3 +1,4 @@
+import type { ComponentChildren } from 'preact';
 import { useState } from 'preact/hooks';
 import { ROOM_CODE_LENGTH } from '@flagduel/shared';
 import { Logo } from './common';
@@ -11,11 +12,15 @@ interface Props {
   onCreate: () => void;
   onJoin: (code: string) => void;
   onDemo: () => void;
+  /** Ranked card, shown under the header card */
+  ranked?: ComponentChildren;
+  /** Shown at the bottom */
+  below?: ComponentChildren;
 }
 
 const NOT_CODE_CHARS = /[^ABCDEFGHJKLMNPQRSTUVWXYZ23456789]/g;
 
-export function Home({ name, initialCode, busy, error, onCreate, onJoin, onDemo }: Props) {
+export function Home({ name, initialCode, busy, error, onCreate, onJoin, onDemo, ranked, below }: Props) {
   const [code, setCode] = useState(initialCode);
   const codeOk = code.length === ROOM_CODE_LENGTH;
 
@@ -32,7 +37,12 @@ export function Home({ name, initialCode, busy, error, onCreate, onJoin, onDemo 
         <p class="muted small center playing-as">
           Playing as <strong>{name}</strong>
         </p>
+      </section>
 
+      {ranked}
+
+      <section class="card home-card friend-card">
+        <h2>Play a friend</h2>
         <form
           class="home-actions"
           onSubmit={(e) => {
@@ -87,6 +97,8 @@ export function Home({ name, initialCode, busy, error, onCreate, onJoin, onDemo 
           </div>
         )}
       </section>
+
+      {below}
     </main>
   );
 }

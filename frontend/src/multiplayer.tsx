@@ -1,11 +1,13 @@
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
-import { MODE_IDS, REGION_IDS, ROOM_CODE_RE, type RoomView, type Slot } from '@flagduel/shared';
+import { MODES, MODE_IDS, REGION_IDS, ROOM_CODE_RE, type ModeId, type RoomView, type Slot } from '@flagduel/shared';
 import type { GameActions, GameVM } from './types';
+import { api } from './api';
 import { Home } from './components/Home';
+import { DivisionBadge, RankedBoard, RankedCard, type Searching } from './components/Ranked';
 import { Lobby } from './components/Lobby';
 import { GameScreen } from './components/GameScreen';
 import { Results } from './components/Results';
-import { RoomConnection, createRoom, flagSrc, roomExists, type ConnStatus } from './net';
+import { RankedQueue, RoomConnection, createRoom, flagSrc, getSessionId, roomExists, type ConnStatus } from './net';
 
 // The current room is remembered per tab.
 const LAST_ROOM_KEY = 'flagduel.lastRoom';
@@ -23,6 +25,26 @@ function storeLastRoom(value: string | null) {
     else sessionStorage.setItem(LAST_ROOM_KEY, value);
   } catch {
     /* storage unavailable — ignore */
+  }
+}
+
+// Seat ticket of the ranked room this tab is in ({ code, ticket }), so a reload can reclaim the seat.
+const TICKET_KEY = 'flagduel.ticket';
+
+function loadTicket(code: string): string | null {
+  try {
+    const t = JSON.parse(sessionStorage.getItem(TICKET_KEY) ?? 'null') as { code: string; ticket: string } | null;
+    return t?.code === code ? t.ticket : null;
+  } catch {
+    return null;
+  }
+}
+function storeTicket(value: { code: string; ticket: string } | null) {
+  try {
+    if (value === null) sessionStorage.removeItem(TICKET_KEY);
+    else sessionStorage.setItem(TICKET_KEY, JSON.stringify(value));
+  } catch {
+    /* storage unavailable — a reload then can't rejoin */
   }
 }
 
@@ -87,6 +109,7 @@ function toVM(o: Online): GameVM | null {
     history: room.history.map((h) => ({ ...h, flagUrl: flagSrc(h.flag) })),
     result: room.result,
     forfeitReason: room.forfeitReason,
+    ranked: room.ranked,
   };
 }
 
@@ -102,6 +125,11 @@ export function Multiplayer({ name, onImmersive }: { name: string; onImmersive: 
   const [error, setError] = useState<string | null>(null);
   const onlineRef = useRef<Online | null>(null);
 
+  // Ranked queue
+  const [searching, setSearching] = useState<Searching | null>(null);
+  const [rankedError, setRankedError] = useState<string | null>(null);
+  const queueRef = useRef<RankedQueue | null>(null);
+
   // Local bot demo (dev only)
   const [demoVm, setDemoVm] = useState<GameVM | null>(null);
   const demoRef = useRef<(GameActions & { dispose(): void }) | null>(null);
@@ -112,24 +140,31 @@ export function Multiplayer({ name, onImmersive }: { name: string; onImmersive: 
     setOnline(onlineRef.current);
   };
 
-  function connect(code: string) {
+  /** `ticket`: seat ticket of a ranked room (friend lobbies use the tab's session id). */
+  function connect(code: string, ticket: string | null = null) {
     onlineRef.current?.conn.stop();
     setError(null);
     storeLastRoom(code);
+    storeTicket(ticket ? { code, ticket } : null);
     setRoomInUrl(code);
-    const conn: RoomConnection = new RoomConnection(code, name, {
-      onState: (room, you) => update((o) => ({ ...o, room, you })),
-      onStatus: (status) => update((o) => ({ ...o, status })),
-      onOppWrong: () => update((o) => ({ ...o, oppWrongSeq: o.oppWrongSeq + 1 })),
-      onError: (_code, message, fatal) => {
-        if (fatal) {
-          leave(message);
-        } else {
-          setError(message);
-          setTimeout(() => setError(null), 3000);
-        }
+    const conn: RoomConnection = new RoomConnection(
+      code,
+      name,
+      {
+        onState: (room, you) => update((o) => ({ ...o, room, you })),
+        onStatus: (status) => update((o) => ({ ...o, status })),
+        onOppWrong: () => update((o) => ({ ...o, oppWrongSeq: o.oppWrongSeq + 1 })),
+        onError: (_code, message, fatal) => {
+          if (fatal) {
+            leave(message);
+          } else {
+            setError(message);
+            setTimeout(() => setError(null), 3000);
+          }
+        },
       },
-    });
+      ticket ?? getSessionId(),
+    );
     onlineRef.current = { conn, room: null, you: 0, status: 'connecting', oppWrongSeq: 0 };
     setOnline(onlineRef.current);
   }
@@ -142,9 +177,37 @@ export function Multiplayer({ name, onImmersive }: { name: string; onImmersive: 
       o.conn.stop();
     }
     storeLastRoom(null);
+    storeTicket(null);
     setRoomInUrl(null);
     setOnline(null);
     setError(message);
+  }
+
+  function findMatch(mode: ModeId) {
+    const token = api.token();
+    if (!token) return setRankedError('Please sign in again.');
+    queueRef.current?.stop();
+    setRankedError(null);
+    setError(null);
+    setSearching({ mode, since: Date.now() });
+    queueRef.current = new RankedQueue(token, mode, {
+      onMatched: (m) => {
+        queueRef.current = null;
+        setSearching(null);
+        connect(m.code, m.ticket);
+      },
+      onError: (message) => {
+        queueRef.current = null;
+        setSearching(null);
+        setRankedError(message);
+      },
+    });
+  }
+
+  function cancelSearch() {
+    queueRef.current?.stop();
+    queueRef.current = null;
+    setSearching(null);
   }
 
   async function onCreate() {
@@ -174,8 +237,9 @@ export function Multiplayer({ name, onImmersive }: { name: string; onImmersive: 
 
   // Reload with ?room=CODE of the room we were in → rejoin automatically (same session id).
   useEffect(() => {
-    if (ROOM_CODE_RE.test(urlRoom) && urlRoom === loadLastRoom()) connect(urlRoom);
+    if (ROOM_CODE_RE.test(urlRoom) && urlRoom === loadLastRoom()) connect(urlRoom, loadTicket(urlRoom));
     return () => {
+      queueRef.current?.stop();
       onlineRef.current?.conn.stop();
       demoRef.current?.dispose();
     };
@@ -219,12 +283,19 @@ export function Multiplayer({ name, onImmersive }: { name: string; onImmersive: 
   const actions: GameActions | null = useMemo(() => {
     if (!online) return null;
     const { conn } = online;
+    const ranked = () => onlineRef.current?.room?.ranked ?? null;
     return {
       guess: (text) => conn.guess(onlineRef.current?.room?.round ?? 0, text),
       pass: () => conn.send({ t: 'pass', round: onlineRef.current?.room?.round ?? 0 }),
       giveUp: () => conn.send({ t: 'giveUp' }),
-      rematch: () => conn.send({ t: 'rematch' }),
-      leave: () => conn.send({ t: 'backToLobby' }),
+      // Ranked rooms hold one match: "rematch" searches for a new opponent, "leave" leaves.
+      rematch: () => {
+        const r = ranked();
+        if (!r) return conn.send({ t: 'rematch' });
+        leave();
+        findMatch(r.mode);
+      },
+      leave: () => (ranked() ? leave() : conn.send({ t: 'backToLobby' })),
     };
   }, [online?.conn]);
 
@@ -268,7 +339,9 @@ export function Multiplayer({ name, onImmersive }: { name: string; onImmersive: 
       <>
         {banner}
         {toast}
-        {vm && actions ? (
+        {!vm && online.room.ranked ? (
+          <MatchFound room={online.room} you={online.you} onCancel={() => leave()} />
+        ) : vm && actions ? (
           vm.phase === 'finished' ? (
             <Results vm={vm} actions={actions} />
           ) : (
@@ -293,11 +366,37 @@ export function Multiplayer({ name, onImmersive }: { name: string; onImmersive: 
     <Home
       name={name}
       initialCode={ROOM_CODE_RE.test(urlRoom) ? urlRoom : ''}
-      busy={busy}
+      busy={busy || !!searching}
       error={error}
       onCreate={onCreate}
       onJoin={onJoin}
       onDemo={startDemo}
+      ranked={<RankedCard searching={searching} error={rankedError} onFind={findMatch} onCancel={cancelSearch} />}
+      below={<RankedBoard />}
     />
+  );
+}
+
+/** Ranked room before the first round: both players are still connecting. */
+function MatchFound({ room, you, onCancel }: { room: RoomView; you: Slot; onCancel: () => void }) {
+  const ranked = room.ranked!;
+  const opp = you === 0 ? 1 : 0;
+  return (
+    <main class="stack">
+      <section class="card center-card match-found">
+        <p class="muted small">Ranked {MODES[ranked.mode].label}</p>
+        <h2>Opponent found!</h2>
+        {room.players[opp] && (
+          <p class="vs">
+            <strong>{room.players[opp].name}</strong> <DivisionBadge division={ranked.players[opp].division} small />{' '}
+            <span class="muted">{ranked.players[opp].rating}</span>
+          </p>
+        )}
+        <p class="muted small">Waiting for both players to connect…</p>
+        <button class="link" onClick={onCancel}>
+          Cancel
+        </button>
+      </section>
+    </main>
   );
 }

@@ -9,6 +9,8 @@ import type {
   LoginResponse,
   MeResponse,
   ModeId,
+  RankedBoardResponse,
+  RankedProfile,
   UserView,
 } from '@flagduel/shared';
 import { WORKER_URL } from './net';
@@ -84,6 +86,8 @@ function signedIn(r: LoginResponse): UserView {
 
 export const api = {
   hasSession: () => token !== null,
+  /** The session token (the ranked queue sends it over its WebSocket) */
+  token: () => token,
   config: () => request<AuthConfig>('/auth/config'),
   loginGoogle: (credential: string) =>
     request<LoginResponse>('/auth/google', { method: 'POST', body: { credential } }).then(signedIn),
@@ -108,6 +112,8 @@ export const api = {
   dailyNext: (mode: ModeId, round: number) =>
     request<DailyResponse>(`/daily/${mode}/next`, { method: 'POST', body: { round } }),
   leaderboard: (board: BoardId) => request<LeaderboardResponse>(`/leaderboard?board=${board}`),
+  ranked: () => request<RankedProfile>('/ranked'),
+  rankedBoard: (mode: ModeId) => request<RankedBoardResponse>(`/ranked/leaderboard?mode=${mode}`),
 };
 
 export const dailyFlagSrc = (flagToken: string) => `${WORKER_URL}/daily/flags/${flagToken}`;

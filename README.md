@@ -33,10 +33,36 @@ In the lobby the host picks one or more **games** (played in order, 10 rounds ea
 A match with several games has a short "Next up" countdown between them; the overall winner has the most
 points across all games (tie → fewer wrong guesses in total).
 
+### Ranked
+
+**Find match** under Multiplayer queues you against a stranger in one game (Flags, Capitals or GeoLocate,
+10 rounds). Each game has its own rating, **Glicko-2** (`shared/src/ranked.ts`): everyone starts at 1000
+with a high rating deviation, so the first games move the rating a lot (about ±80). The swings shrink
+to about ±15 as the deviation drops, and grow again after a long break. Losing to a stronger player costs
+less than losing to a weaker one. Giving up or leaving counts as a loss; a match where someone never
+connects is cancelled and not rated.
+
+| Division | Rating | Regions played |
+|---|---|---|
+| Bronze | start | Europe |
+| Silver | 1200+ | + South America, North America |
+| Gold | 1400+ | + Central America, Asia |
+| Platinum | 1600+ | + Africa |
+| Diamond | 1800+ | + Caribbean, Oceania (all) |
+
+Players from different divisions play the **lower** division's regions. The `Matchmaker` Durable Object
+pairs waiting players whose rating gap fits a window that starts at 150 and widens by 25 per second of
+waiting. The pair gets a fresh ranked `Room` whose two seats are claimed with secret tickets.
+
+To try ranked locally you need two accounts, but both tabs of one origin share the login. Use
+`http://localhost:5173` in one tab and `http://127.0.0.1:5173` in the other (both are in `ALLOWED_ORIGINS`;
+if Vite only answers on one of them, start it with `--host 127.0.0.1`).
+
 ```
 /frontend   Vite + TypeScript + Preact  → GitHub Pages
-/worker     Cloudflare Worker + SQLite-backed Durable Objects: `Room` (one per lobby) and
-            `Accounts` (one instance: users, sessions, daily runs, leaderboards)
+/worker     Cloudflare Worker + SQLite-backed Durable Objects: `Room` (one per lobby or ranked match),
+            `Matchmaker` (one instance: the ranked queue) and
+            `Accounts` (one instance: users, sessions, daily runs, ratings, leaderboards)
 /shared     Country data, region table, guess normalization, game + daily rules, API types
 ```
 
@@ -88,6 +114,9 @@ without the backend. Append `?bot=lazy` for a bot that never answers correctly.
 | `POST /daily/:mode/guess` · `/pass` · `/next` | `{ round, text? }` → updated run (guess also returns `outcome`) |
 | `GET /daily/flags/:token` | SVG of a started daily round's flag |
 | `GET /leaderboard?board=flags\|capitals\|overall` | Today's ranking (top 50 + your own placing) |
+| `GET /ranked` | Your rating, division and record per game |
+| `GET /ranked/leaderboard?mode=flags\|capitals\|locate` | Ranked ladder (top 50 + your own placing) |
+| `GET /ranked/ws` | WebSocket to the ranked queue: send `{ t: 'queue', token, mode }`, get `matched` with a room code + seat ticket |
 
 Account routes use `Authorization: Bearer <session token>` (random, 90 days, only its SHA-256 is stored).
 

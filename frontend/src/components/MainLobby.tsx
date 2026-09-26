@@ -1,8 +1,17 @@
 import { useEffect, useState } from 'preact/hooks';
-import { MAX_NAME_LENGTH, MODE_IDS, MODES, type DailySummary, type MeResponse, type UserView } from '@flagduel/shared';
+import {
+  MAX_NAME_LENGTH,
+  MODE_IDS,
+  MODES,
+  type DailySummary,
+  type MeResponse,
+  type RankedProfile,
+  type UserView,
+} from '@flagduel/shared';
 import { api } from '../api';
 import { NextDaily } from './Daily';
 import { Leaderboard } from './Leaderboard';
+import { DivisionBadge } from './Ranked';
 import { Avatar, type Tab } from './NavBar';
 
 function AccountCard({
@@ -106,9 +115,11 @@ export function MainLobby({
 }) {
   const [me, setMe] = useState<MeResponse | null>(null);
   const [today, setToday] = useState<DailySummary | null>(null);
+  const [ranked, setRanked] = useState<RankedProfile | null>(null);
 
   useEffect(() => {
     api.me().then(setMe).catch(() => {});
+    api.ranked().then(setRanked).catch(() => {});
     api.dailySummary().then(setToday).catch(() => {});
   }, []);
 
@@ -154,16 +165,16 @@ export function MainLobby({
           <p class="muted small">1 vs 1 in real time: same flag, same moment — the first correct answer wins the point.</p>
           <ul class="today-list">
             <li>
-              <span>Games</span>
-              <span class="today-status">{MODE_IDS.map((m) => MODES[m].label).join(' · ')}</span>
+              <span>Ranked</span>
+              <span class="today-status">play strangers, climb from Bronze to Diamond</span>
             </li>
             <li>
-              <span>Invite</span>
+              <span>Friends</span>
               <span class="today-status">share a 5-letter code</span>
             </li>
           </ul>
           <button class="btn btn-primary" onClick={() => onNavigate('multi')}>
-            Play a friend
+            Play multiplayer
           </button>
         </section>
       </div>
@@ -180,7 +191,21 @@ export function MainLobby({
             <Stat key={`a${m}`} value={stats?.daily[m].average ?? dash} label={`avg ${MODES[m].label.toLowerCase()}`} />
           ))}
         </div>
-        <p class="muted small coming">Multiplayer stats (wins, losses, win rate) — coming soon.</p>
+        <h3 class="stats-sub">Ranked</h3>
+        <div class="stats-row">
+          {MODE_IDS.map((m) => {
+            const r = ranked?.[m];
+            return (
+              <div class="stat" key={`r${m}`}>
+                <span class="stat-value">{r ? r.rating : dash}</span>
+                {r && <DivisionBadge division={r.division} small />}
+                <span class="stat-label">
+                  {MODES[m].label.toLowerCase()} · {r && r.played ? `${r.wins}W ${r.losses}L` : 'unplayed'}
+                </span>
+              </div>
+            );
+          })}
+        </div>
       </section>
 
       <Leaderboard limit={5} />

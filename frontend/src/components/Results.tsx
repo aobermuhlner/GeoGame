@@ -1,6 +1,35 @@
-import { MODES, type ModeId } from '@flagduel/shared';
+import { DIVISIONS, DIVISION_IDS, MODES, divisionOf, type ModeId, type RankedView, type Slot } from '@flagduel/shared';
 import type { GameActions, GameVM, RoundSummary } from '../types';
 import { Logo } from './common';
+import { DivisionBadge } from './Ranked';
+
+/** "1000 → 1078 (+78)", plus a promotion/demotion note. */
+function RatingChange({ ranked, me }: { ranked: RankedView; me: Slot }) {
+  const p = ranked.players[me];
+  if (p.delta === null || p.after === null) return <p class="rating-change muted">Updating rating…</p>;
+  const before = divisionOf(p.rating);
+  const after = divisionOf(p.after);
+  const moved = DIVISION_IDS.indexOf(after) - DIVISION_IDS.indexOf(before);
+  return (
+    <>
+      <p class="rating-change">
+        {MODES[ranked.mode].label} rating {p.rating} → {p.after}{' '}
+        <span class={p.delta > 0 ? 'up' : p.delta < 0 ? 'down' : 'muted'}>
+          ({p.delta > 0 ? '+' : ''}
+          {p.delta})
+        </span>{' '}
+        <DivisionBadge division={after} small />
+      </p>
+      {moved !== 0 && (
+        <p class="banner-sub">
+          {moved > 0
+            ? `Promoted to ${DIVISIONS[after].label}! New regions are in play now.`
+            : `Dropped to ${DIVISIONS[after].label}.`}
+        </p>
+      )}
+    </>
+  );
+}
 
 /** Points per player in each minigame, in play order. */
 function stageScores(vm: GameVM): { mode: ModeId; scores: [number, number] }[] {
@@ -97,15 +126,27 @@ export function Results({ vm, actions }: { vm: GameVM; actions: GameActions }) {
             </tfoot>
           </table>
         )}
-        <div class="btn-row">
-          <button class="btn btn-primary" disabled={me.rematch || oppGone} onClick={actions.rematch}>
-            {me.rematch ? 'Waiting…' : opp.rematch ? 'Accept rematch' : 'Rematch'}
-          </button>
-          <button class="btn btn-ghost" onClick={actions.leave}>
-            Back to lobby
-          </button>
-        </div>
-        {oppGone ? (
+        {vm.ranked && <RatingChange ranked={vm.ranked} me={meSlot} />}
+        {vm.ranked ? (
+          <div class="btn-row">
+            <button class="btn btn-primary" onClick={actions.rematch}>
+              Find new match
+            </button>
+            <button class="btn btn-ghost" onClick={actions.leave}>
+              Back
+            </button>
+          </div>
+        ) : (
+          <div class="btn-row">
+            <button class="btn btn-primary" disabled={me.rematch || oppGone} onClick={actions.rematch}>
+              {me.rematch ? 'Waiting…' : opp.rematch ? 'Accept rematch' : 'Rematch'}
+            </button>
+            <button class="btn btn-ghost" onClick={actions.leave}>
+              Back to lobby
+            </button>
+          </div>
+        )}
+        {vm.ranked ? null : oppGone ? (
           <p class="rematch-note off">{opp.name} has left.</p>
         ) : me.rematch ? (
           <p class="rematch-note">Waiting for {opp.name} to accept…</p>

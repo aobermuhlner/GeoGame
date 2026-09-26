@@ -1130,3 +1130,48 @@ em {
 }
 .locate-overlay .countdown { width: auto; height: auto; }
 .map-card .locate-board { align-self: stretch; width: 100%; }
+
+/* ---------- Ranked ---------- */
+.friend-card { margin-top: 0; padding-top: 22px; }
+.friend-card h2 { margin: 0 0 14px; font-size: 1.1rem; font-weight: 800; text-align: center; }
+.ranked-card, .home-card ~ .board-card { max-width: 460px; width: 100%; margin: 0 auto; }
+.ranked-card h2 { margin: 0; font-size: 1.1rem; font-weight: 800; }
+.ranked-card > .btn-lg { width: 100%; }
+.rating-row { display: flex; align-items: center; gap: 12px; margin: 4px 0 8px; }
+.rating-main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+.rating-num { font-size: 1.9rem; font-weight: 800; line-height: 1.1; color: var(--green); font-variant-numeric: tabular-nums; }
+.record { font-weight: 700; color: #4b5048; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.ranked-regions { margin: 0 0 14px; }
+.division {
+  display: inline-block; border-radius: 999px; padding: 4px 11px; font-size: 0.8rem; font-weight: 800;
+  letter-spacing: .02em; border: 1px solid transparent; white-space: nowrap; vertical-align: middle;
+}
+.division.sm { padding: 1px 8px; font-size: 0.7rem; }
+.division.bronze { background: #f6e3d3; color: #8a4b1c; border-color: #e6c3a5; }
+.division.silver { background: #eceff2; color: #4f5963; border-color: #cfd5db; }
+.division.gold { background: #fff1c9; color: #7a5a00; border-color: #f0d98a; }
+.division.platinum { background: #dff3f0; color: #1c6b61; border-color: #a9dcd4; }
+.division.diamond { background: #e4ebff; color: #2d4bb0; border-color: #b6c6f5; }
+.searching {
+  display: flex; align-items: center; gap: 10px; padding: 10px 12px;
+  background: #f5faf6; border: 1px solid #cfe0d3; border-radius: 12px; font-weight: 600;
+}
+.searching > span:nth-child(2) { flex: 1; }
+.elapsed { font-variant-numeric: tabular-nums; color: var(--muted); margin-left: 4px; }
+.spinner {
+  width: 18px; height: 18px; border-radius: 50%; flex: none;
+  border: 3px solid #cfe0d3; border-top-color: var(--green); animation: spin 0.9s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .spinner { animation-duration: 3s; } }
+.ladder { margin-top: 14px; }
+.ladder summary { cursor: pointer; color: var(--muted); font-weight: 600; }
+.ladder ul { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 6px; }
+.ladder li { display: grid; grid-template-columns: 5.5em 3.5em 1fr; align-items: center; gap: 8px; }
+.match-found h2 { margin: 4px 0 8px; font-size: 1.4rem; }
+.match-found .vs { font-size: 1.1rem; margin: 0 0 8px; }
+.rating-change { margin: 12px 0 16px; font-weight: 700; font-size: 1.05rem; }
+.rating-change .up { color: var(--green); }
+.rating-change .down { color: var(--red); }
+.rating-change .muted { font-weight: 500; }
+.stats-sub { margin: 16px 0 0; font-size: 0.9rem; font-weight: 800; color: #4b5048; }

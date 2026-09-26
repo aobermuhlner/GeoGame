@@ -1,4 +1,14 @@
-import type { ClientMessage, ErrorCode, GuessOutcome, RoomView, ServerMessage, Slot } from '@flagduel/shared';
+import type {
+  ClientMessage,
+  ErrorCode,
+  GuessOutcome,
+  ModeId,
+  QueueClientMessage,
+  QueueServerMessage,
+  RoomView,
+  ServerMessage,
+  Slot,
+} from '@flagduel/shared';
 
 export const WORKER_URL = ((import.meta.env.VITE_WORKER_URL as string | undefined) || 'http://localhost:8787').replace(
   /\/$/,
@@ -62,10 +72,12 @@ export class RoomConnection {
   /** serverTime - localTime, updated from every snapshot */
   offset = 0;
 
+  /** `sessionId`: the seat ticket of a ranked room; friend lobbies use the per-tab session id. */
   constructor(
     readonly code: string,
     private name: string,
     private h: Handlers,
+    private sessionId: string = getSessionId(),
   ) {
     this.open();
   }
@@ -76,7 +88,7 @@ export class RoomConnection {
     this.ws = ws;
     ws.onopen = () => {
       this.attempt = 0;
-      this.send({ t: 'hello', name: this.name, sessionId: getSessionId() });
+      this.send({ t: 'hello', name: this.name, sessionId: this.sessionId });
       this.h.onStatus('open');
       this.pingTimer = setInterval(() => this.send({ t: 'ping' }), 30_000);
     };
@@ -145,5 +157,58 @@ export class RoomConnection {
     this.flushGuesses('ignored');
     this.ws?.close(1000, 'leave');
     this.h.onStatus('closed');
+  }
+}
+
+type Matched = Extract<QueueServerMessage, { t: 'matched' }>;
+
+/**
+ * Waiting in the ranked queue. The socket is the queue spot: stop() (or closing the tab) leaves it.
+ * The session token goes in the first message, not the URL, so it never lands in access logs.
+ */
+export class RankedQueue {
+  private ws: WebSocket;
+  private done = false;
+  private pingTimer: ReturnType<typeof setInterval> | null = null;
+
+  constructor(
+    token: string,
+    readonly mode: ModeId,
+    private h: { onMatched(m: Matched): void; onError(message: string): void },
+  ) {
+    const ws = new WebSocket(`${WORKER_URL.replace(/^http/, 'ws')}/ranked/ws`);
+    this.ws = ws;
+    ws.onopen = () => {
+      this.send({ t: 'queue', token, mode });
+      this.pingTimer = setInterval(() => ws.readyState === WebSocket.OPEN && ws.send('{"t":"ping"}'), 30_000);
+    };
+    ws.onmessage = (e) => {
+      const m = JSON.parse(e.data as string) as QueueServerMessage | { t: 'pong' };
+      if (m.t === 'matched') {
+        this.done = true;
+        h.onMatched(m);
+      } else if (m.t === 'error') {
+        this.done = true;
+        h.onError(m.message);
+      }
+    };
+    ws.onclose = () => {
+      if (this.pingTimer) clearInterval(this.pingTimer);
+      if (!this.done) {
+        this.done = true;
+        h.onError('Lost connection to the matchmaker.');
+      }
+    };
+  }
+
+  private send(m: QueueClientMessage) {
+    if (this.ws.readyState === WebSocket.OPEN) this.ws.send(JSON.stringify(m));
+  }
+
+  stop() {
+    this.done = true;
+    if (this.pingTimer) clearInterval(this.pingTimer);
+    this.send({ t: 'cancel' });
+    this.ws.close(1000, 'cancel');
   }
 }

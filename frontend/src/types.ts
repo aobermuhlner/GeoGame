@@ -1,4 +1,4 @@
-import type { ForfeitReason, GuessOutcome, MatchResult, ModeId, RegionId, RoundEnd, Slot } from '@flagduel/shared';
+import type { ForfeitReason, GuessOutcome, MatchResult, ModeId, RankedView, RegionId, RoundEnd, Slot } from '@flagduel/shared';
 
 export interface PlayerVM {
   name: string;
@@ -55,6 +55,8 @@ export interface GameVM {
   history: RoundSummary[];
   result: MatchResult | null;
   forfeitReason: ForfeitReason | null;
+  /** Ranked match info (absent for friend lobbies and the bot demo) */
+  ranked?: RankedView | null;
 }
 
 export interface GameActions {
