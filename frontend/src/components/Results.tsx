@@ -1,5 +1,15 @@
-import type { GameActions, GameVM } from '../types';
+import { MODES, type ModeId } from '@flagduel/shared';
+import type { GameActions, GameVM, RoundSummary } from '../types';
 import { Logo } from './common';
+
+/** Points per player in each minigame, in play order. */
+function stageScores(vm: GameVM): { mode: ModeId; scores: [number, number] }[] {
+  return vm.modes.map((mode) => {
+    const scores: [number, number] = [0, 0];
+    for (const r of vm.history) if (r.mode === mode && r.winner !== null) scores[r.winner]++;
+    return { mode, scores };
+  });
+}
 
 export function Results({ vm, actions }: { vm: GameVM; actions: GameActions }) {
   const res = vm.result!;
@@ -10,7 +20,17 @@ export function Results({ vm, actions }: { vm: GameVM; actions: GameActions }) {
   const iWon = res.winner === meSlot;
   const oppGone = opp.left || !opp.connected;
 
-  const title = res.winner === null ? "It's a draw!" : iWon ? 'You win!' : `${opp.name} wins!`;
+  const multi = vm.modes.length > 1;
+  const title =
+    res.winner === null
+      ? "It's a draw!"
+      : iWon
+        ? multi
+          ? 'You are the overall winner!'
+          : 'You win!'
+        : `${opp.name} wins${multi ? ' overall' : ''}!`;
+  const byRoundMode = (mode: ModeId) =>
+    vm.history.map((r, i) => [r, i] as [RoundSummary, number]).filter(([r]) => r.mode === mode);
   let sub = '';
   if (res.decidedBy === 'forfeit') {
     const who = iWon ? opp.name : 'You';
@@ -50,6 +70,33 @@ export function Results({ vm, actions }: { vm: GameVM; actions: GameActions }) {
             </span>
           </div>
         </div>
+        {multi && (
+          <table class="stage-table">
+            <thead>
+              <tr>
+                <th class="left">Game</th>
+                <th>{me.name}</th>
+                <th>{opp.name}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {stageScores(vm).map(({ mode, scores }) => (
+                <tr key={mode}>
+                  <td class="left">{MODES[mode].label}</td>
+                  <td class={scores[meSlot] > scores[oppSlot] ? 'lead' : ''}>{scores[meSlot]}</td>
+                  <td class={scores[oppSlot] > scores[meSlot] ? 'lead' : ''}>{scores[oppSlot]}</td>
+                </tr>
+              ))}
+            </tbody>
+            <tfoot>
+              <tr>
+                <td class="left">Total</td>
+                <td>{res.scores[meSlot]}</td>
+                <td>{res.scores[oppSlot]}</td>
+              </tr>
+            </tfoot>
+          </table>
+        )}
         <div class="btn-row">
           <button class="btn btn-primary" disabled={me.rematch || oppGone} onClick={actions.rematch}>
             {me.rematch ? 'Waiting…' : opp.rematch ? 'Accept rematch' : 'Rematch'}
@@ -67,47 +114,52 @@ export function Results({ vm, actions }: { vm: GameVM; actions: GameActions }) {
         ) : null}
       </section>
 
-      {vm.history.length > 0 && (
-        <section class="card rounds-card">
-          <h2>Rounds</h2>
-          <table class="rounds">
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>Flag</th>
-                <th class="left">Country</th>
-                <th>Point</th>
-                <th title="Wrong guesses">
-                  ✗ <span class="th-sub">{me.name} / {opp.name}</span>
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {vm.history.map((r, i) => (
-                <tr key={i}>
-                  <td class="num">{i + 1}</td>
-                  <td>
-                    <img class="thumb" src={r.flagUrl} alt="" />
-                  </td>
-                  <td class="left country">{r.countryName}</td>
-                  <td>
-                    {r.winner === null ? (
-                      <span class="pill none">—</span>
-                    ) : (
-                      <span class={`pill ${r.winner === meSlot ? 'me' : 'opp'}`}>
-                        {vm.players[r.winner].name}
-                      </span>
-                    )}
-                  </td>
-                  <td class="num">
-                    {r.wrong[meSlot]} / {r.wrong[oppSlot]}
-                  </td>
+      {vm.modes
+        .filter((mode) => byRoundMode(mode).length > 0)
+        .map((mode) => (
+          <section class="card rounds-card" key={mode}>
+            <h2>{multi ? `${MODES[mode].label} rounds` : 'Rounds'}</h2>
+            <table class="rounds">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Flag</th>
+                  <th class="left">{mode === 'capitals' ? 'Capital' : 'Country'}</th>
+                  <th>Point</th>
+                  <th title="Wrong guesses">
+                    ✗ <span class="th-sub">{me.name} / {opp.name}</span>
+                  </th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </section>
-      )}
+              </thead>
+              <tbody>
+                {byRoundMode(mode).map(([r, i], k) => (
+                  <tr key={i}>
+                    <td class="num">{k + 1}</td>
+                    <td>
+                      <img class="thumb" src={r.flagUrl} alt="" />
+                    </td>
+                    <td class="left country">
+                      {r.answer}
+                      {r.mode === 'capitals' && <span class="of-country">{r.countryName}</span>}
+                    </td>
+                    <td>
+                      {r.winner === null ? (
+                        <span class="pill none">—</span>
+                      ) : (
+                        <span class={`pill ${r.winner === meSlot ? 'me' : 'opp'}`}>
+                          {vm.players[r.winner].name}
+                        </span>
+                      )}
+                    </td>
+                    <td class="num">
+                      {r.wrong[meSlot]} / {r.wrong[oppSlot]}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </section>
+        ))}
     </main>
   );
 }

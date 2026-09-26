@@ -1,11 +1,43 @@
 # Flag Duel
 
-Real-time 2-player flag guessing game. Both players see the same flag at the same moment; whoever names it first wins the point. 10 rounds per match, server-authoritative.
+Geography flag games with accounts (Google sign-in), a **daily single-player challenge** with a daily
+ranking, and a **real-time 1 vs 1 duel**. After signing in you land in the main lobby (account, stats,
+today's status); the menu bar switches between **Lobby**, **Daily Games**, **Practice** and **Multiplayer**.
+
+### Daily Games
+
+Every game (Flags, Capitals) can be played **once per day** (UTC). Everyone gets the same 10 countries,
+picked at random on the first request of the day. A correct answer scores 50 points plus up to 50 for
+speed, minus 5 per wrong guess (minimum 10); passes and timeouts score 0. Finished runs go on today's
+ranking (per game, plus an overall board summing both). The run is server-side: the timer keeps
+running if you close the tab, and answers are only revealed after each round.
+
+### Practice
+
+Hovering **Practice** in the menu bar lists the games; picking one opens its settings (game + regions,
+like the multiplayer lobby). A practice run is one game of 10 random countries from the chosen regions,
+played as often as you like. It runs entirely in the browser with the shared solo rules and is never
+sent to the server, ranked or counted in stats. Flags come from `GET /practice/flags/:code`.
+
+### Multiplayer — 1 vs 1
+
+Real-time 2-player geography duel. Your account display name is your in-game name. Both players see the same flag at the same moment; whoever answers first wins the point. Server-authoritative.
+
+In the lobby the host picks one or more **games** (played in order, 10 rounds each) and the regions:
+
+| Game | Shown | Answer |
+|---|---|---|
+| Flags | flag | country name |
+| Capitals | flag + country name | capital city |
+
+A match with several games has a short "Next up" countdown between them; the overall winner has the most
+points across all games (tie → fewer wrong guesses in total).
 
 ```
 /frontend   Vite + TypeScript + Preact  → GitHub Pages
-/worker     Cloudflare Worker + SQLite-backed Durable Object `Room` (one per lobby)
-/shared     Country data, region table, guess normalization, game rules
+/worker     Cloudflare Worker + SQLite-backed Durable Objects: `Room` (one per lobby) and
+            `Accounts` (one instance: users, sessions, daily runs, leaderboards)
+/shared     Country data, region table, guess normalization, game + daily rules, API types
 ```
 
 ## Setup
@@ -22,6 +54,10 @@ npm install
 npm run dev          # wrangler dev on :8787 + Vite on :5173, together
 npm test             # Vitest: shared rules/data + Worker/Durable Object tests (workerd)
 ```
+
+Local sign-in: `worker/.dev.vars` (copy `worker/.dev.vars.example`) sets `DEV_LOGIN=true`, which shows a
+name-only **"local dev sign-in"** on the login page. It only works from a `localhost` page and is off in
+production. To try real Google sign-in locally, set `GOOGLE_CLIENT_ID` there as well (see Deploy).
 
 Open http://localhost:5173 in two tabs to play against yourself: create a lobby in one, then open
 the copied invite link (`?room=CODE`) in the other. Each tab is its own player (the session id lives
@@ -41,6 +77,19 @@ without the backend. Append `?bot=lazy` for a bot that never answers correctly.
 | `GET /rooms/:code` | Lobby exists? → `{ code, phase, players }` or 404 |
 | `GET /rooms/:code/ws` | WebSocket to the room's Durable Object (protocol: `shared/src/messages.ts`) |
 | `GET /flags/:token` | SVG of a started round's flag. Tokens are random per round, so URLs never reveal the country |
+| `GET /auth/config` | `{ googleClientId, devLogin }` for the login page |
+| `POST /auth/google` | `{ credential }` (Google ID token) → `{ token, user }`; the Worker verifies the JWT against Google's keys |
+| `POST /auth/dev` | `{ name }` → `{ token, user }` (only with `DEV_LOGIN=true` and a localhost origin) |
+| `POST /auth/logout` | Ends the session |
+| `GET /me`, `PATCH /me` | Account + stats; `{ displayName }` to rename |
+| `GET /daily` | Today's status per game and when the next daily unlocks |
+| `POST /daily/:mode/start` | Start (or resume) today's run → `{ run, now }` |
+| `GET /daily/:mode` | Current run (settles a timed-out round) |
+| `POST /daily/:mode/guess` · `/pass` · `/next` | `{ round, text? }` → updated run (guess also returns `outcome`) |
+| `GET /daily/flags/:token` | SVG of a started daily round's flag |
+| `GET /leaderboard?board=flags\|capitals\|overall` | Today's ranking (top 50 + your own placing) |
+
+Account routes use `Authorization: Bearer <session token>` (random, 90 days, only its SHA-256 is stored).
 
 ## Deploy
 
@@ -56,7 +105,14 @@ npm run deploy:worker              # bundles flags + deploys worker/ with Wrangl
 Wrangler prints the URL, e.g. `https://flag-duel.<your-subdomain>.workers.dev`. On a new account,
 Cloudflare asks you to pick a `workers.dev` subdomain the first time.
 
-- The Durable Object is SQLite-backed (`new_sqlite_classes` migration), as the free plan requires.
+- The Durable Objects are SQLite-backed (`new_sqlite_classes` migrations), as the free plan requires.
+- **Google sign-in:** in [Google Cloud Console](https://console.cloud.google.com/apis/credentials) create an
+  *OAuth client ID* of type **Web application**. Under *Authorized JavaScript origins* add
+  `https://aobermuhlner.github.io` and `http://localhost:5173` (no redirect URIs needed — it uses the
+  popup/ID-token flow). Put the client id (`…apps.googleusercontent.com`, public, not a secret) into
+  `worker/wrangler.jsonc` → `vars.GOOGLE_CLIENT_ID` and redeploy. The frontend reads it from
+  `GET /auth/config`, so no frontend rebuild is needed.
+- Keep `DEV_LOGIN` `"false"` in `wrangler.jsonc`; it is only for `.dev.vars`.
 - Allowed browser origins live in `worker/wrangler.jsonc` → `vars.ALLOWED_ORIGINS`. It already
   contains `https://aobermuhlner.github.io`; add your origin there if you host the page elsewhere,
   then redeploy.
@@ -83,6 +139,14 @@ Then every push to `main` that touches `frontend/` or `shared/` runs
 
 - Region assignment: [`shared/src/regions.ts`](shared/src/regions.ts) — one ISO list per region.
 - Country names and accepted aliases: [`shared/src/countries.ts`](shared/src/countries.ts).
+- Capitals and accepted aliases: [`shared/src/capitals.ts`](shared/src/capitals.ts).
 - Guess matching is case-, accent- and punctuation-insensitive (`shared/src/normalize.ts`).
 - The lobby map is generated at build time from `world-atlas` (`frontend/scripts/gen-map.mjs`);
   microstates too small for the 110m data are drawn as dots.
+
+## Adding a game
+
+Games are registered in [`shared/src/modes.ts`](shared/src/modes.ts): add an id to `MODE_IDS` and an entry to
+`MODES` (label, lobby description, answer check, displayed answer, autocomplete). The lobby picker, round flow,
+stage countdown, scoring and results table pick it up from there. Every round still shows the country's flag;
+a game that needs a different kind of prompt would also extend `RoomView.prompt` and the game screen.

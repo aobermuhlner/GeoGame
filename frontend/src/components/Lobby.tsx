@@ -1,9 +1,13 @@
 import { useEffect, useState } from 'preact/hooks';
 import {
   MIN_POOL_SIZE,
+  MODES,
+  MODE_IDS,
   REGION_IDS,
+  ROUNDS_PER_GAME,
   REGION_LABELS,
   countriesInRegions,
+  type ModeId,
   type RegionId,
   type RoomView,
   type Slot,
@@ -17,6 +21,7 @@ interface Props {
   onReady: (ready: boolean) => void;
   onStart: () => void;
   onRegions: (regions: RegionId[]) => void;
+  onModes: (modes: ModeId[]) => void;
   onLeave: () => void;
 }
 
@@ -24,7 +29,53 @@ export function inviteLink(code: string): string {
   return `${location.origin}${import.meta.env.BASE_URL}?room=${code}`;
 }
 
-export function Lobby({ room, you, onReady, onStart, onRegions, onLeave }: Props) {
+/** The "Regions" card: world map plus a checklist. Used by the lobby and by practice. */
+export function RegionPicker({
+  regions,
+  countryCount,
+  editable,
+  hint,
+  onToggle,
+}: {
+  regions: RegionId[];
+  countryCount: number;
+  editable: boolean;
+  hint: string;
+  onToggle: (r: RegionId) => void;
+}) {
+  const poolOk = countryCount >= MIN_POOL_SIZE;
+  return (
+    <section class="card regions-card">
+      <div class="regions-head">
+        <h2>Regions</h2>
+        <span class={`pool${poolOk ? '' : ' bad'}`}>{countryCount} countries</span>
+      </div>
+      <p class="muted small">{hint}</p>
+      <WorldMap selected={regions} editable={editable} onToggle={onToggle} />
+      <div class="region-list" role="group" aria-label="Regions">
+        {REGION_IDS.map((r) => {
+          const on = regions.includes(r);
+          return (
+            <label class={`region-opt${on ? ' on' : ''}${editable ? '' : ' locked'}`} key={r}>
+              <input
+                type="checkbox"
+                checked={on}
+                aria-label={`${REGION_LABELS[r]} (${countriesInRegions([r]).length} countries)`}
+                disabled={!editable || (on && regions.length === 1)}
+                onChange={() => onToggle(r)}
+              />
+              <span class="swatch" style={{ background: on ? REGION_COLORS[r] : undefined }} aria-hidden="true" />
+              <span class="r-name">{REGION_LABELS[r]}</span>
+              <span class="r-count">{countriesInRegions([r]).length}</span>
+            </label>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
+export function Lobby({ room, you, onReady, onStart, onRegions, onModes, onLeave }: Props) {
   const [copied, setCopied] = useState(false);
   // Optimistic selection so quick successive clicks build on each other, not on a stale snapshot.
   const [draft, setDraft] = useState<RegionId[] | null>(null);
@@ -32,6 +83,11 @@ export function Lobby({ room, you, onReady, onStart, onRegions, onLeave }: Props
   useEffect(() => {
     if (draft && draft.join() === room.regions.join()) setDraft(null);
   }, [room.regions]);
+  const [modesDraft, setModesDraft] = useState<ModeId[] | null>(null);
+  const modes = modesDraft ?? room.modes;
+  useEffect(() => {
+    if (modesDraft && modesDraft.join() === room.modes.join()) setModesDraft(null);
+  }, [room.modes]);
   const isHost = you === 0;
   const me = room.players[you];
   const full = room.players.length === 2;
@@ -55,6 +111,13 @@ export function Lobby({ room, you, onReady, onStart, onRegions, onLeave }: Props
     if (next.length === 0) return;
     setDraft(next);
     onRegions(next);
+  }
+
+  function toggleMode(m: ModeId) {
+    const next = MODE_IDS.filter((x) => (x === m ? !modes.includes(x) : modes.includes(x)));
+    if (next.length === 0) return;
+    setModesDraft(next);
+    onModes(next);
   }
 
   let startHint = '';
@@ -108,37 +171,54 @@ export function Lobby({ room, you, onReady, onStart, onRegions, onLeave }: Props
         </ul>
       </section>
 
-      <section class="card regions-card">
+      <section class="card modes-card">
         <div class="regions-head">
-          <h2>Regions</h2>
-          <span class={`pool${poolOk ? '' : ' bad'}`}>{countryCount} countries</span>
+          <h2>Games</h2>
+          <span class="pool">
+            {modes.length * ROUNDS_PER_GAME} rounds
+          </span>
         </div>
         <p class="muted small">
           {isHost
-            ? 'Click a region on the map (or in the list) to leave it out.'
-            : `${room.players[0]?.name ?? 'The host'} picks the regions.`}
+            ? `Pick one or more. Each game is ${ROUNDS_PER_GAME} rounds, played in this order; most points overall wins.`
+            : `${room.players[0]?.name ?? 'The host'} picks the games.`}
         </p>
-        <WorldMap selected={regions} editable={isHost} onToggle={toggle} />
-        <div class="region-list" role="group" aria-label="Regions">
-          {REGION_IDS.map((r) => {
-            const on = regions.includes(r);
+        <div class="mode-list" role="group" aria-label="Games">
+          {MODE_IDS.map((m) => {
+            const on = modes.includes(m);
+            const order = modes.indexOf(m) + 1;
             return (
-              <label class={`region-opt${on ? ' on' : ''}${isHost ? '' : ' locked'}`} key={r}>
+              <label class={`mode-opt${on ? ' on' : ''}${isHost ? '' : ' locked'}`} key={m}>
                 <input
                   type="checkbox"
                   checked={on}
-                  aria-label={`${REGION_LABELS[r]} (${countriesInRegions([r]).length} countries)`}
-                  disabled={!isHost || (on && regions.length === 1)}
-                  onChange={() => toggle(r)}
+                  disabled={!isHost || (on && modes.length === 1)}
+                  onChange={() => toggleMode(m)}
                 />
-                <span class="swatch" style={{ background: on ? REGION_COLORS[r] : undefined }} aria-hidden="true" />
-                <span class="r-name">{REGION_LABELS[r]}</span>
-                <span class="r-count">{countriesInRegions([r]).length}</span>
+                <span class="mode-order" aria-hidden="true">
+                  {on && modes.length > 1 ? order : ''}
+                </span>
+                <span class="mode-text">
+                  <span class="m-name">{MODES[m].label}</span>
+                  <span class="m-desc">{MODES[m].description}</span>
+                </span>
               </label>
             );
           })}
         </div>
       </section>
+
+      <RegionPicker
+        regions={regions}
+        countryCount={countryCount}
+        editable={isHost}
+        hint={
+          isHost
+            ? 'Click a region on the map (or in the list) to leave it out.'
+            : `${room.players[0]?.name ?? 'The host'} picks the regions.`
+        }
+        onToggle={toggle}
+      />
 
       <section class="card actions-card">
         <div class="btn-row">

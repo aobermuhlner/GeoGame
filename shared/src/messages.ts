@@ -1,5 +1,6 @@
 // WebSocket protocol between the browser and the Room Durable Object.
 import type { GuessOutcome, MatchResult, RoundEnd, Slot } from './game';
+import { MODE_IDS, type ModeId } from './modes';
 import { REGION_IDS, type RegionId } from './regions';
 
 export const ROOM_CODE_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // no 0/O/1/I
@@ -16,6 +17,8 @@ export type Phase = 'lobby' | 'countdown' | 'playing' | 'reveal' | 'finished';
 export type ClientMessage =
   | { t: 'hello'; name: string; sessionId: string }
   | { t: 'setRegions'; regions: RegionId[] }
+  /** Minigames to play, in order (host only, lobby only) */
+  | { t: 'setModes'; modes: ModeId[] }
   | { t: 'ready'; ready: boolean }
   | { t: 'start' }
   | { t: 'guess'; round: number; text: string }
@@ -47,9 +50,14 @@ export interface PlayerView {
 export type ForfeitReason = 'gaveUp' | 'left' | 'disconnected';
 
 export interface RoundView {
+  mode: ModeId;
   /** Flag image token, fetch from GET /flags/:token */
   flag: string;
+  /** ISO code of the answer (only sent once the round is over) */
+  code: string;
   countryName: string;
+  /** What had to be typed: the country (flags) or its capital (capitals) */
+  answer: string;
   winner: Slot | null;
   wrong: [number, number];
   end: RoundEnd;
@@ -62,7 +70,17 @@ export interface RoomView {
   players: PlayerView[];
   regions: RegionId[];
   countryCount: number;
-  /** 1-based current round (0 before the first round) */
+  /** Selected minigames (lobby) or the minigames of the running match, in play order */
+  modes: ModeId[];
+  /** 0-based index into `modes` of the minigame being played or about to start */
+  stage: number;
+  /** 1-based round within the current minigame (0 during its countdown) */
+  stageRound: number;
+  /** Rounds in the current minigame */
+  stageRounds: number;
+  /** Country name shown with the flag, for minigames that reveal it (null otherwise) */
+  prompt: string | null;
+  /** 1-based current round over the whole match (0 before the first round) */
   round: number;
   totalRounds: number;
   /** Token of the current flag; null in lobby/countdown */
@@ -93,6 +111,7 @@ export type ServerMessage =
 const isObj = (v: unknown): v is Record<string, unknown> => typeof v === 'object' && v !== null && !Array.isArray(v);
 const isInt = (v: unknown): v is number => typeof v === 'number' && Number.isInteger(v) && v >= 0 && v < 1000;
 const REGION_SET = new Set<string>(REGION_IDS);
+const MODE_SET = new Set<string>(MODE_IDS);
 
 export function cleanName(v: unknown): string | null {
   if (typeof v !== 'string') return null;
@@ -120,6 +139,11 @@ export function parseClientMessage(raw: unknown): ClientMessage | null {
       if (!Array.isArray(m.regions) || m.regions.length === 0 || m.regions.length > REGION_IDS.length) return null;
       if (!m.regions.every((r) => typeof r === 'string' && REGION_SET.has(r))) return null;
       return { t: 'setRegions', regions: REGION_IDS.filter((r) => (m.regions as string[]).includes(r)) };
+    }
+    case 'setModes': {
+      if (!Array.isArray(m.modes) || m.modes.length === 0 || m.modes.length > MODE_IDS.length) return null;
+      if (!m.modes.every((x) => typeof x === 'string' && MODE_SET.has(x))) return null;
+      return { t: 'setModes', modes: MODE_IDS.filter((x) => (m.modes as string[]).includes(x)) };
     }
     case 'ready':
       return typeof m.ready === 'boolean' ? { t: 'ready', ready: m.ready } : null;

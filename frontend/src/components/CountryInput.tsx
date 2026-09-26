@@ -7,15 +7,24 @@ interface Props {
   /** Changing this re-focuses the field (e.g. a new round). */
   focusKey: unknown;
   onSubmit: (text: string) => Promise<GuessOutcome> | GuessOutcome;
+  /** Autocomplete source (countries by default; capitals in the capitals game) */
+  suggest?: (query: string, limit?: number) => string[];
+  placeholder?: string;
 }
 
-export function CountryInput({ locked, focusKey, onSubmit }: Props) {
+export function CountryInput({
+  locked,
+  focusKey,
+  onSubmit,
+  suggest = suggestCountries,
+  placeholder = 'Type a country name…',
+}: Props) {
   const [value, setValue] = useState('');
   const [open, setOpen] = useState(true);
   const [hi, setHi] = useState(0);
   const [wrong, setWrong] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
-  const suggestions = useMemo(() => suggestCountries(value, 6), [value]);
+  const suggestions = useMemo(() => suggest(value, 6), [value, suggest]);
   const showList = open && !locked && suggestions.length > 0;
 
   useEffect(() => {
@@ -66,7 +75,7 @@ export function CountryInput({ locked, focusKey, onSubmit }: Props) {
         ref={inputRef}
         class={`guess-input${wrong ? ' is-wrong' : ''}`}
         type="text"
-        placeholder={locked ? '' : 'Type a country name…'}
+        placeholder={locked ? '' : placeholder}
         value={value}
         maxLength={60}
         readOnly={locked}

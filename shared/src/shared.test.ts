@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import {
+  CAPITALS,
   COUNTRIES,
+  MODES,
   REGION_IDS,
   REGION_OF,
   applyGuess,
@@ -11,8 +13,12 @@ import {
   isCorrectGuess,
   newRound,
   normalize,
+  parseClientMessage,
   pickFlags,
+  pickStages,
   resolveGuess,
+  stageAt,
+  suggestCapitals,
   suggestCountries,
   ROUND_TIME_MS,
   type RoundState,
@@ -177,5 +183,101 @@ describe('match decision', () => {
   it('forfeit gives the win to the opponent regardless of score', () => {
     const res = decideMatch([round(0, [0, 0])], 0);
     expect(res).toMatchObject({ winner: 1, decidedBy: 'forfeit' });
+  });
+});
+
+describe('capitals', () => {
+  it('every country has exactly one capital entry', () => {
+    expect(CAPITALS.map((c) => c.code).sort()).toEqual(COUNTRIES.map((c) => c.code).sort());
+  });
+  it('accepts the capital and its aliases, case/accent-insensitive', () => {
+    const ok = MODES.capitals.isCorrect;
+    expect(ok('paris', 'FR')).toBe(true);
+    expect(ok('Brasilia', 'BR')).toBe(true);
+    expect(ok('bogota', 'CO')).toBe(true);
+    expect(ok('Kiev', 'UA')).toBe(true);
+    expect(ok('St Georges', 'GD')).toBe(true);
+    expect(ok('Saint Johns', 'AG')).toBe(true);
+    expect(ok('Port-of-Spain', 'TT')).toBe(true);
+    expect(ok('ndjamena', 'TD')).toBe(true);
+    expect(ok('Washington DC', 'US')).toBe(true);
+    expect(ok('Cape Town', 'ZA')).toBe(true);
+    expect(ok('La Paz', 'BO')).toBe(true);
+  });
+  it('rejects other cities, country names and empty input', () => {
+    const ok = MODES.capitals.isCorrect;
+    expect(ok('Sydney', 'AU')).toBe(false);
+    expect(ok('France', 'FR')).toBe(false);
+    expect(ok('Paris', 'DE')).toBe(false);
+    expect(ok('', 'FR')).toBe(false);
+  });
+  it('autocompletes capitals', () => {
+    expect(suggestCapitals('ouag')).toEqual(['Ouagadougou']);
+    expect(suggestCapitals('kiev')[0]).toBe('Kyiv');
+  });
+});
+
+describe('multi-game matches', () => {
+  it('rounds follow the mode, and flag rounds still check country names', () => {
+    const cap = newRound('DE', 0, 'capitals');
+    expect(applyGuess(cap, 0, 'Germany', 10)).toBe('wrong');
+    expect(applyGuess(cap, 1, 'Berlin', 20)).toBe('correct');
+    const flag = newRound('DE', 0, 'flags');
+    expect(applyGuess(flag, 0, 'Berlin', 10)).toBe('wrong');
+  });
+  it('picks 10 rounds per mode in order, without repeats when the pool allows', () => {
+    const { codes, roundModes } = pickStages(['europe'], ['flags', 'capitals']);
+    expect(codes).toHaveLength(20);
+    expect(new Set(codes).size).toBe(20);
+    expect(roundModes).toEqual([...Array(10).fill('flags'), ...Array(10).fill('capitals')]);
+  });
+  it('reuses countries across stages only when the pool is too small', () => {
+    const { codes } = pickStages(['oceania'], ['flags', 'capitals']); // 14 countries
+    expect(codes).toHaveLength(20);
+    expect(new Set(codes.slice(0, 10)).size).toBe(10);
+    expect(new Set(codes.slice(10)).size).toBe(10);
+  });
+  it('stageAt locates a round within its minigame', () => {
+    const modes = [...Array(10).fill('flags'), ...Array(10).fill('capitals')];
+    expect(stageAt(modes, 0)).toEqual({ stage: 0, mode: 'flags', start: 0, rounds: 10 });
+    expect(stageAt(modes, 9)).toMatchObject({ stage: 0, mode: 'flags' });
+    expect(stageAt(modes, 10)).toEqual({ stage: 1, mode: 'capitals', start: 10, rounds: 10 });
+    expect(stageAt(modes, 19)).toMatchObject({ stage: 1, start: 10 });
+    expect(stageAt(modes, -1)).toMatchObject({ stage: 0 });
+  });
+  it('setModes is validated and put into canonical order', () => {
+    expect(parseClientMessage(JSON.stringify({ t: 'setModes', modes: ['capitals', 'flags'] }))).toEqual({
+      t: 'setModes',
+      modes: ['flags', 'capitals'],
+    });
+    expect(parseClientMessage(JSON.stringify({ t: 'setModes', modes: [] }))).toBeNull();
+    expect(parseClientMessage(JSON.stringify({ t: 'setModes', modes: ['trivia'] }))).toBeNull();
+  });
+});
+
+describe('GeoLocate mode', () => {
+  it('accepts only the clicked ISO code', () => {
+    expect(MODES.locate.isCorrect('KI', 'KI')).toBe(true);
+    expect(MODES.locate.isCorrect('Kiribati', 'KI')).toBe(false);
+    expect(MODES.locate.isCorrect('MH', 'KI')).toBe(false);
+  });
+
+  it('running out of tries counts as passing; both out ends the round', () => {
+    const r = newRound('KI', 0, 'locate');
+    const max = MODES.locate.maxWrong!;
+    for (let i = 0; i < max; i++) expect(applyGuess(r, 0, 'MH', 1)).toBe('wrong');
+    expect(r.passed).toEqual([true, false]);
+    expect(r.end).toBeNull();
+    expect(applyGuess(r, 0, 'KI', 2)).toBe('ignored');
+    for (let i = 0; i < max; i++) applyGuess(r, 1, 'FJ', 3);
+    expect(r.end).toBe('passed');
+    expect(r.winner).toBeNull();
+  });
+
+  it('text modes keep unlimited guesses', () => {
+    const r = newRound('FR', 0, 'flags');
+    for (let i = 0; i < 10; i++) applyGuess(r, 0, 'Spain', 1);
+    expect(r.passed).toEqual([false, false]);
+    expect(applyGuess(r, 0, 'France', 2)).toBe('correct');
   });
 });

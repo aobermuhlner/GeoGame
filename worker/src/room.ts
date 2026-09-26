@@ -3,9 +3,12 @@ import {
   COUNTDOWN_MS,
   COUNTRY_BY_CODE,
   MIN_POOL_SIZE,
+  MODES,
   RECONNECT_GRACE_MS,
   REGION_IDS,
   REVEAL_MS,
+  ROUNDS_PER_GAME,
+  STAGE_INTRO_MS,
   applyGuess,
   applyPass,
   applyTimeout,
@@ -13,12 +16,14 @@ import {
   decideMatch,
   newRound,
   parseClientMessage,
-  pickFlags,
+  pickStages,
   scoresOf,
+  stageAt,
   type ClientMessage,
   type ErrorCode,
   type ForfeitReason,
   type MatchResult,
+  type ModeId,
   type Phase,
   type RegionId,
   type RoomView,
@@ -46,11 +51,15 @@ interface Player {
 }
 
 interface GameState {
+  /** Minigames in play order (absent in games stored before modes existed → flags) */
+  stages?: ModeId[];
+  /** Minigame of each round (index = round) */
+  roundModes?: ModeId[];
   codes: string[];
   /** Random per-round flag tokens (index = round) */
   tokens: string[];
   rounds: RoundState[];
-  /** 0-based index of the current round, -1 during the countdown */
+  /** 0-based index of the current round; during a countdown, the round before the one about to start */
   current: number;
   countdownEndsAt: number | null;
   revealEndsAt: number | null;
@@ -66,6 +75,8 @@ export interface RoomState {
   /** Index = slot; slot 0 is the host */
   players: Player[];
   regions: RegionId[];
+  /** Minigames selected in the lobby (absent in rooms stored before modes existed → flags) */
+  modes?: ModeId[];
   game: GameState | null;
   /** When the last connected player left (for cleanup) */
   emptySince: number | null;
@@ -104,6 +115,7 @@ export class Room extends DurableObject<Env> {
       phase: 'lobby',
       players: [],
       regions: [...REGION_IDS],
+      modes: ['flags'],
       game: null,
       // Nobody has joined yet; an unused room is cleaned up like an empty one.
       emptySince: now,
@@ -213,6 +225,11 @@ export class Room extends DurableObject<Env> {
         s.regions = msg.regions;
         break;
 
+      case 'setModes':
+        if (slot !== 0 || s.phase !== 'lobby') return this.sendError(ws, 'not_allowed', 'Only the host can pick the games');
+        s.modes = msg.modes;
+        break;
+
       case 'ready':
         if (s.phase !== 'lobby') return;
         s.players[slot].ready = msg.ready;
@@ -239,7 +256,8 @@ export class Room extends DurableObject<Env> {
           else return;
         }
         if (outcome === 'wrong') this.sendToSlot(slot === 0 ? 1 : 0, { t: 'oppWrong', round: msg.round });
-        if (outcome === 'correct') this.endRound(now);
+        // Correct, or both players out of tries (map modes).
+        if (outcome === 'correct' || cur?.end === 'passed') this.endRound(now);
         break;
       }
 
@@ -310,8 +328,11 @@ export class Room extends DurableObject<Env> {
 
   private startCountdown(now: number) {
     const s = this.state!;
-    const codes = pickFlags(s.regions);
+    const stages = s.modes ?? ['flags'];
+    const { codes, roundModes } = pickStages(s.regions, stages);
     s.game = {
+      stages,
+      roundModes,
       codes,
       tokens: codes.map(() => s.code + randomHex(8)),
       rounds: [],
@@ -332,8 +353,12 @@ export class Room extends DurableObject<Env> {
     g.current = i;
     g.countdownEndsAt = null;
     g.revealEndsAt = null;
-    g.rounds[i] = newRound(g.codes[i], now);
+    g.rounds[i] = newRound(g.codes[i], now, this.modeOf(i));
     s.phase = 'playing';
+  }
+
+  private modeOf(i: number): ModeId {
+    return this.state!.game!.roundModes?.[i] ?? 'flags';
   }
 
   /** The round a client message refers to (1-based), if it is the current one. */
@@ -399,14 +424,20 @@ export class Room extends DurableObject<Env> {
 
     const g = s.game;
     if (s.phase === 'countdown' && g?.countdownEndsAt && now >= g.countdownEndsAt) {
-      this.startRound(0, now);
+      this.startRound(g.current + 1, now);
     }
     if (s.phase === 'playing' && g && applyTimeout(g.rounds[g.current], now)) {
       this.endRound(now);
     }
     if (s.phase === 'reveal' && g?.revealEndsAt && now >= g.revealEndsAt) {
-      if (g.current + 1 < g.codes.length) this.startRound(g.current + 1, now);
-      else this.finish();
+      const next = g.current + 1;
+      if (next >= g.codes.length) this.finish();
+      else if (this.modeOf(next) !== this.modeOf(g.current)) {
+        // Next minigame: short "Next up" countdown before its first round.
+        s.phase = 'countdown';
+        g.revealEndsAt = null;
+        g.countdownEndsAt = now + STAGE_INTRO_MS;
+      } else this.startRound(next, now);
     }
 
     // Players who stayed away past the grace period.
@@ -477,9 +508,13 @@ export class Room extends DurableObject<Env> {
     const cur = g && g.current >= 0 ? g.rounds[g.current] : undefined;
     const scores = g ? scoresOf(g.rounds) : [0, 0];
     const wrong = [0, 1].map((i) => g?.rounds.reduce((n, r) => n + r.wrong[i], 0) ?? 0);
+    const roundModes = g?.roundModes ?? g?.codes.map((): ModeId => 'flags') ?? [];
     const roundView = (r: RoundState, i: number): RoundView => ({
+      mode: r.mode ?? 'flags',
       flag: g!.tokens[i],
+      code: r.code,
       countryName: COUNTRY_BY_CODE[r.code].name,
+      answer: MODES[r.mode ?? 'flags'].answerOf(r.code),
       winner: r.winner,
       wrong: [r.wrong[0], r.wrong[1]],
       end: r.end!,
@@ -503,9 +538,10 @@ export class Room extends DurableObject<Env> {
       })),
       regions: s.regions,
       countryCount: countriesInRegions(s.regions).length,
+      ...this.stageView(roundModes),
       round: g ? g.current + 1 : 0,
-      totalRounds: g ? g.codes.length : 10,
-      flag: g && g.current >= 0 ? g.tokens[g.current] : null,
+      totalRounds: g ? g.codes.length : ROUNDS_PER_GAME * (s.modes ?? ['flags']).length,
+      flag: g && g.current >= 0 && s.phase !== 'countdown' ? g.tokens[g.current] : null,
       countdownEndsAt: g?.countdownEndsAt ?? null,
       deadline: cur && !cur.end ? cur.deadline : null,
       revealEndsAt: g?.revealEndsAt ?? null,
@@ -513,6 +549,22 @@ export class Room extends DurableObject<Env> {
       history: g ? g.rounds.flatMap((r, i) => (r.end ? [roundView(r, i)] : [])) : [],
       result: g?.result ?? null,
       forfeitReason: g?.forfeitReason ?? null,
+    };
+  }
+
+  private stageView(roundModes: ModeId[]): Pick<RoomView, 'modes' | 'stage' | 'stageRound' | 'stageRounds' | 'prompt'> {
+    const s = this.state!;
+    const g = s.game;
+    if (!g) return { modes: s.modes ?? ['flags'], stage: 0, stageRound: 0, stageRounds: ROUNDS_PER_GAME, prompt: null };
+    const counting = s.phase === 'countdown';
+    const info = stageAt(roundModes, counting ? g.current + 1 : g.current);
+    const cur = g.current >= 0 && !counting ? g.rounds[g.current] : undefined;
+    return {
+      modes: g.stages ?? ['flags'],
+      stage: info.stage,
+      stageRound: counting ? 0 : g.current - info.start + 1,
+      stageRounds: info.rounds,
+      prompt: cur && MODES[info.mode].showsCountry ? COUNTRY_BY_CODE[cur.code].name : null,
     };
   }
 

@@ -1,277 +1,111 @@
-import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
-import { REGION_IDS, ROOM_CODE_RE, type RoomView, type Slot } from '@flagduel/shared';
-import type { GameActions, GameVM } from './types';
-import { Home } from './components/Home';
-import { Lobby } from './components/Lobby';
-import { GameScreen } from './components/GameScreen';
-import { Results } from './components/Results';
-import { RoomConnection, createRoom, flagSrc, roomExists, type ConnStatus } from './net';
+import { useEffect, useMemo, useState } from 'preact/hooks';
+import { MODE_IDS, ROOM_CODE_RE, type ModeId, type UserView } from '@flagduel/shared';
+import { api, setSignedOutHandler } from './api';
+import { Login } from './components/Login';
+import { MainLobby } from './components/MainLobby';
+import { DailyHub, SoloGame, dailySource } from './components/Daily';
+import { NavBar, type Tab } from './components/NavBar';
+import { Practice } from './components/Practice';
+import { Multiplayer } from './multiplayer';
 
-const NAME_KEY = 'flagduel.name';
-const LAST_ROOM_KEY = 'flagduel.lastRoom';
+const hashPath = () => location.hash.replace(/^#\/?/, '').split('/');
 
-// The nickname is remembered per browser; the current room per tab.
-const storageFor = (key: string) => (key === LAST_ROOM_KEY ? sessionStorage : localStorage);
-
-function load(key: string): string {
-  try {
-    return storageFor(key).getItem(key) ?? '';
-  } catch {
-    return '';
-  }
-}
-function store(key: string, value: string | null) {
-  try {
-    if (value === null) storageFor(key).removeItem(key);
-    else storageFor(key).setItem(key, value);
-  } catch {
-    /* storage unavailable — ignore */
-  }
+function tabFromHash(): Tab {
+  const [h] = hashPath();
+  return h === 'daily' || h === 'multi' || h === 'practice' ? h : 'lobby';
 }
 
-function setRoomInUrl(code: string | null) {
-  const url = new URL(location.href);
-  if (code) url.searchParams.set('room', code);
-  else url.searchParams.delete('room');
-  history.replaceState(null, '', url);
+/** #/daily/<mode> or #/practice/<mode> → that game; #/daily, #/practice → null (the tab's overview) */
+function modeFromHash(t: Tab): ModeId | null {
+  const [h, m] = hashPath();
+  return h === t ? (MODE_IDS.find((x) => x === m) ?? null) : null;
 }
 
-interface Online {
-  conn: RoomConnection;
-  room: RoomView | null;
-  you: Slot;
-  status: ConnStatus;
-  oppWrongSeq: number;
-}
-
-/** Map a server snapshot to what the game/results screens render. */
-function toVM(o: Online): GameVM | null {
-  const { room, conn, you } = o;
-  if (!room || room.phase === 'lobby' || room.players.length < 2) return null;
-  const player = (i: 0 | 1) => {
-    const x = room.players[i];
-    return {
-      name: x.name,
-      score: x.score,
-      wrongTotal: x.wrongTotal,
-      passed: x.passed,
-      connected: x.connected,
-      rematch: x.rematch,
-      graceEndsAt: conn.toLocal(x.graceEndsAt),
-      left: x.left,
-    };
-  };
-  return {
-    phase: room.phase,
-    me: you,
-    players: [player(0), player(1)],
-    round: Math.max(1, room.round),
-    totalRounds: room.totalRounds,
-    flagUrl: room.flag ? flagSrc(room.flag) : null,
-    countdownEndsAt: conn.toLocal(room.countdownEndsAt),
-    deadline: conn.toLocal(room.deadline),
-    regions: room.regions,
-    reveal: room.reveal ? { countryName: room.reveal.countryName, winner: room.reveal.winner, end: room.reveal.end } : null,
-    oppWrongSeq: o.oppWrongSeq,
-    history: room.history.map((h) => ({ ...h, flagUrl: flagSrc(h.flag) })),
-    result: room.result,
-    forfeitReason: room.forfeitReason,
-  };
-}
+const urlRoom = () => (new URLSearchParams(location.search).get('room') ?? '').toUpperCase();
 
 export function App() {
-  const params = new URLSearchParams(location.search);
-  const urlRoom = (params.get('room') ?? '').toUpperCase();
-  const [online, setOnline] = useState<Online | null>(null);
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const onlineRef = useRef<Online | null>(null);
+  const [user, setUser] = useState<UserView | null>(null);
+  const [checking, setChecking] = useState(api.hasSession());
+  // An invite link (?room=CODE) opens the multiplayer tab.
+  const [tab, setTab] = useState<Tab>(() => (ROOM_CODE_RE.test(urlRoom()) ? 'multi' : tabFromHash()));
+  const [dailyMode, setDailyMode] = useState<ModeId | null>(() => modeFromHash('daily'));
+  const dailyRun = useMemo(() => (dailyMode ? dailySource(dailyMode) : null), [dailyMode]);
+  const [practiceMode, setPracticeMode] = useState<ModeId | null>(() => modeFromHash('practice'));
+  /** In a match or a daily round: hide the menu bar so a stray click can't leave the game. */
+  const [immersive, setImmersive] = useState(false);
 
-  // Local bot demo (dev only)
-  const [demoVm, setDemoVm] = useState<GameVM | null>(null);
-  const demoRef = useRef<(GameActions & { dispose(): void }) | null>(null);
-
-  const update = (f: (o: Online) => Online) => {
-    if (!onlineRef.current) return;
-    onlineRef.current = f(onlineRef.current);
-    setOnline(onlineRef.current);
-  };
-
-  function connect(code: string, name: string) {
-    onlineRef.current?.conn.stop();
-    setError(null);
-    store(NAME_KEY, name);
-    store(LAST_ROOM_KEY, code);
-    setRoomInUrl(code);
-    const conn: RoomConnection = new RoomConnection(code, name, {
-      onState: (room, you) => update((o) => ({ ...o, room, you })),
-      onStatus: (status) => update((o) => ({ ...o, status })),
-      onOppWrong: () => update((o) => ({ ...o, oppWrongSeq: o.oppWrongSeq + 1 })),
-      onError: (_code, message, fatal) => {
-        if (fatal) {
-          leave(message);
-        } else {
-          setError(message);
-          setTimeout(() => setError(null), 3000);
-        }
-      },
-    });
-    onlineRef.current = { conn, room: null, you: 0, status: 'connecting', oppWrongSeq: 0 };
-    setOnline(onlineRef.current);
-  }
-
-  function leave(message: string | null = null) {
-    const o = onlineRef.current;
-    onlineRef.current = null;
-    if (o) {
-      o.conn.send({ t: 'leave' });
-      o.conn.stop();
-    }
-    store(LAST_ROOM_KEY, null);
-    setRoomInUrl(null);
-    setOnline(null);
-    setError(message);
-  }
-
-  async function onCreate(name: string) {
-    setBusy(true);
-    setError(null);
-    try {
-      connect(await createRoom(), name);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'Could not reach the server.');
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  async function onJoin(name: string, code: string) {
-    setBusy(true);
-    setError(null);
-    try {
-      if (!(await roomExists(code))) setError(`No lobby with code ${code}.`);
-      else connect(code, name);
-    } catch {
-      setError('Could not reach the server.');
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  // Reload with ?room=CODE of the room we were in → rejoin automatically (same session id).
   useEffect(() => {
-    const name = load(NAME_KEY);
-    if (ROOM_CODE_RE.test(urlRoom) && urlRoom === load(LAST_ROOM_KEY) && name) connect(urlRoom, name);
-    return () => {
-      onlineRef.current?.conn.stop();
-      demoRef.current?.dispose();
+    setSignedOutHandler(() => setUser(null));
+    if (api.hasSession()) {
+      api
+        .me()
+        .then((r) => setUser(r.user))
+        .catch(() => {})
+        .finally(() => setChecking(false));
+    }
+    const onHash = () => {
+      setTab(tabFromHash());
+      setDailyMode(modeFromHash('daily'));
+      setPracticeMode(modeFromHash('practice'));
     };
+    window.addEventListener('hashchange', onHash);
+    return () => window.removeEventListener('hashchange', onHash);
   }, []);
 
-  async function startDemo(name: string) {
-    store(NAME_KEY, name);
-    if (!import.meta.env.DEV) return;
-    const { startMockGame } = await import('./mock');
-    demoRef.current?.dispose();
-    const game = startMockGame({
-      name,
-      botName: 'Anna',
-      regions: [...REGION_IDS],
-      bot: params.get('bot') === 'lazy' ? 'lazy' : 'normal',
-      onUpdate: setDemoVm,
-    });
-    demoRef.current = {
-      ...game,
-      leave() {
-        game.dispose();
-        setDemoVm(null);
-      },
-    };
+  /** `mode` opens that game directly (Daily Games and Practice). */
+  function navigate(t: Tab, mode: ModeId | null = null) {
+    const hash = t === 'lobby' ? '#/' : mode ? `#/${t}/${mode}` : `#/${t}`;
+    if (location.hash !== hash) history.pushState(null, '', hash);
+    setTab(t);
+    setDailyMode(t === 'daily' ? mode : null);
+    setPracticeMode(t === 'practice' ? mode : null);
   }
 
-  const vm = useMemo(() => (online ? toVM(online) : null), [online]);
-
-  const actions: GameActions | null = useMemo(() => {
-    if (!online) return null;
-    const { conn } = online;
-    return {
-      guess: (text) => conn.guess(onlineRef.current?.room?.round ?? 0, text),
-      pass: () => conn.send({ t: 'pass', round: onlineRef.current?.room?.round ?? 0 }),
-      giveUp: () => conn.send({ t: 'giveUp' }),
-      rematch: () => conn.send({ t: 'rematch' }),
-      leave: () => conn.send({ t: 'backToLobby' }),
-    };
-  }, [online?.conn]);
-
-  // ---------- render ----------
-  if (demoVm && demoRef.current) {
-    return demoVm.phase === 'finished' ? (
-      <Results vm={demoVm} actions={demoRef.current} />
-    ) : (
-      <GameScreen vm={demoVm} actions={demoRef.current} />
-    );
+  async function signOut() {
+    await api.logout();
+    setUser(null);
   }
 
-  if (online) {
-    const banner =
-      online.status === 'reconnecting' ? (
-        <div class="conn-banner" role="status">
-          Connection lost — reconnecting…
-        </div>
-      ) : null;
-    const toast = error ? (
-      <div class="toast" role="alert">
-        {error}
-      </div>
-    ) : null;
-
-    if (!online.room) {
-      return (
-        <main class="stack">
-          {banner}
-          <section class="card center-card">
-            <p class="muted">Joining lobby {online.conn.code}…</p>
-            <button class="link" onClick={() => leave()}>
-              Cancel
-            </button>
-          </section>
-        </main>
-      );
-    }
-    const c = online.conn;
+  if (checking) {
     return (
-      <>
-        {banner}
-        {toast}
-        {vm && actions ? (
-          vm.phase === 'finished' ? (
-            <Results vm={vm} actions={actions} />
-          ) : (
-            <GameScreen vm={vm} actions={actions} />
-          )
-        ) : (
-          <Lobby
-            room={online.room}
-            you={online.you}
-            onReady={(ready) => c.send({ t: 'ready', ready })}
-            onStart={() => c.send({ t: 'start' })}
-            onRegions={(regions) => c.send({ t: 'setRegions', regions })}
-            onLeave={() => leave()}
-          />
-        )}
-      </>
+      <main class="stack">
+        <section class="card center-card">
+          <p class="muted">Loading…</p>
+        </section>
+      </main>
     );
+  }
+
+  if (!user) {
+    const room = urlRoom();
+    return <Login onSignedIn={setUser} roomCode={ROOM_CODE_RE.test(room) ? room : null} />;
   }
 
   return (
-    <Home
-      initialName={load(NAME_KEY)}
-      initialCode={ROOM_CODE_RE.test(urlRoom) ? urlRoom : ''}
-      busy={busy}
-      error={error}
-      onCreate={onCreate}
-      onJoin={onJoin}
-      onDemo={startDemo}
-    />
+    <>
+      {!immersive && <NavBar tab={tab} user={user} onTab={navigate} />}
+      {tab === 'lobby' && <MainLobby user={user} onUser={setUser} onSignOut={signOut} onNavigate={navigate} />}
+      {tab === 'daily' &&
+        (dailyMode && dailyRun ? (
+          <SoloGame
+            key={dailyMode}
+            mode={dailyMode}
+            source={dailyRun}
+            onExit={() => navigate('daily')}
+            onImmersive={setImmersive}
+          />
+        ) : (
+          <DailyHub onPlay={(m) => navigate('daily', m)} />
+        ))}
+      {tab === 'practice' && (
+        <Practice
+          key={practiceMode ?? 'menu'}
+          mode={practiceMode}
+          onMode={(m) => navigate('practice', m)}
+          onImmersive={setImmersive}
+        />
+      )}
+      {tab === 'multi' && <Multiplayer name={user.displayName} onImmersive={setImmersive} />}
+    </>
   );
 }

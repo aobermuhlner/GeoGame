@@ -1,4 +1,4 @@
-import type { ForfeitReason, GuessOutcome, MatchResult, RegionId, RoundEnd, Slot } from '@flagduel/shared';
+import type { ForfeitReason, GuessOutcome, MatchResult, ModeId, RegionId, RoundEnd, Slot } from '@flagduel/shared';
 
 export interface PlayerVM {
   name: string;
@@ -15,8 +15,13 @@ export interface PlayerVM {
 }
 
 export interface RoundSummary {
+  mode: ModeId;
   flagUrl: string;
+  /** ISO code of the answer */
+  code: string;
   countryName: string;
+  /** What had to be typed (country or capital) */
+  answer: string;
   winner: Slot | null;
   wrong: [number, number];
   end: RoundEnd;
@@ -27,15 +32,24 @@ export interface GameVM {
   phase: 'countdown' | 'playing' | 'reveal' | 'finished';
   me: Slot;
   players: [PlayerVM, PlayerVM];
-  /** 1-based index of the current round */
+  /** 1-based index of the current round over the whole match */
   round: number;
   totalRounds: number;
+  /** Minigames of this match, in play order */
+  modes: ModeId[];
+  /** 0-based index into `modes` of the minigame being played or about to start */
+  stage: number;
+  /** 1-based round within the current minigame (0 during its countdown) */
+  stageRound: number;
+  stageRounds: number;
+  /** Country name shown with the flag (capitals), else null */
+  prompt: string | null;
   flagUrl: string | null;
   /** Local-clock ms timestamps */
   countdownEndsAt: number | null;
   deadline: number | null;
   regions: RegionId[];
-  reveal: { countryName: string; winner: Slot | null; end: RoundEnd } | null;
+  reveal: { mode: ModeId; code: string; countryName: string; answer: string; winner: Slot | null; end: RoundEnd } | null;
   /** Increments on every wrong guess by the opponent (drives the ✗ flash). */
   oppWrongSeq: number;
   history: RoundSummary[];

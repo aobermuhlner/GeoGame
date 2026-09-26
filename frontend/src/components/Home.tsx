@@ -3,22 +3,20 @@ import { ROOM_CODE_LENGTH } from '@flagduel/shared';
 import { Logo } from './common';
 
 interface Props {
-  initialName: string;
+  /** Account display name, used as the in-game name */
+  name: string;
   initialCode: string;
   busy: boolean;
   error: string | null;
-  onCreate: (name: string) => void;
-  onJoin: (name: string, code: string) => void;
-  onDemo: (name: string) => void;
+  onCreate: () => void;
+  onJoin: (code: string) => void;
+  onDemo: () => void;
 }
 
 const NOT_CODE_CHARS = /[^ABCDEFGHJKLMNPQRSTUVWXYZ23456789]/g;
 
-export function Home({ initialName, initialCode, busy, error, onCreate, onJoin, onDemo }: Props) {
-  const [name, setName] = useState(initialName);
+export function Home({ name, initialCode, busy, error, onCreate, onJoin, onDemo }: Props) {
   const [code, setCode] = useState(initialCode);
-  const trimmed = name.trim();
-  const nameOk = trimmed.length > 0;
   const codeOk = code.length === ROOM_CODE_LENGTH;
 
   return (
@@ -31,31 +29,22 @@ export function Home({ initialName, initialCode, busy, error, onCreate, onJoin, 
           </h1>
         </header>
         <p class="tagline">Same flag, same moment. Whoever names it first wins the point.</p>
-
-        <label class="field">
-          <span>Your nickname</span>
-          <input
-            class="text-input"
-            maxLength={16}
-            value={name}
-            placeholder="e.g. Adrian"
-            autoComplete="nickname"
-            onInput={(e) => setName((e.target as HTMLInputElement).value)}
-          />
-        </label>
+        <p class="muted small center playing-as">
+          Playing as <strong>{name}</strong>
+        </p>
 
         <form
           class="home-actions"
           onSubmit={(e) => {
             e.preventDefault();
-            if (nameOk && codeOk) onJoin(trimmed, code);
+            if (codeOk) onJoin(code);
           }}
         >
           <button
             type="button"
             class="btn btn-primary btn-lg"
-            disabled={!nameOk || busy}
-            onClick={() => onCreate(trimmed)}
+            disabled={busy}
+            onClick={onCreate}
           >
             Create lobby
           </button>
@@ -79,11 +68,10 @@ export function Home({ initialName, initialCode, busy, error, onCreate, onJoin, 
                 setCode(v);
               }}
             />
-            <button type="submit" class="btn btn-ghost" disabled={!nameOk || !codeOk || busy}>
+            <button type="submit" class="btn btn-ghost" disabled={!codeOk || busy}>
               Join lobby
             </button>
           </div>
-          {!nameOk && (code || initialCode) && <p class="muted small center">Enter a nickname first.</p>}
           {error && (
             <p class="form-error" role="alert">
               {error}
@@ -93,7 +81,7 @@ export function Home({ initialName, initialCode, busy, error, onCreate, onJoin, 
 
         {import.meta.env.DEV && (
           <div class="demo">
-            <button class="link" disabled={!nameOk} onClick={() => onDemo(trimmed)}>
+            <button class="link" onClick={onDemo}>
               Practice against a bot (local demo)
             </button>
           </div>

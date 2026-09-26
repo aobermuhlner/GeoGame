@@ -1,0 +1,549 @@
+import { useEffect, useRef, useState } from 'preact/hooks';
+import {
+  MODE_IDS,
+  MODES,
+  REVEAL_MS,
+  SOLO_BASE_POINTS,
+  SOLO_SPEED_POINTS,
+  SOLO_WRONG_PENALTY,
+  type DailyGuessResponse,
+  type DailyResponse,
+  type DailySummary,
+  type DailyView,
+  type GuessOutcome,
+  type ModeId,
+} from '@flagduel/shared';
+import { api, dailyFlagSrc } from '../api';
+import { CountryInput } from './CountryInput';
+import { FlagImage } from './GameScreen';
+import { LocateBoard } from './LocateBoard';
+import { Leaderboard } from './Leaderboard';
+import { Logo, formatClock, useNow } from './common';
+
+function formatHms(ms: number): string {
+  const s = Math.max(0, Math.floor(ms / 1000));
+  const h = Math.floor(s / 3600);
+  const m = Math.floor((s % 3600) / 60);
+  return `${h}h ${String(m).padStart(2, '0')}m ${String(s % 60).padStart(2, '0')}s`;
+}
+
+/** "Next daily in 5h 12m 03s" */
+export function NextDaily({ at }: { at: number }) {
+  const now = useNow(true, 1000);
+  return <span class="next-daily">Next daily in {formatHms(at - now)}</span>;
+}
+
+// ---------- Hub ----------
+
+function ModeCard({
+  mode,
+  info,
+  onPlay,
+}: {
+  mode: ModeId;
+  info: DailySummary['modes'][ModeId] | undefined;
+  onPlay: () => void;
+}) {
+  const m = MODES[mode];
+  const status = info?.status ?? 'new';
+  return (
+    <article class={`daily-mode ${status}`}>
+      <div class="dm-text">
+        <h3>Daily {m.label}</h3>
+        <p class="muted small">{m.description} 10 rounds, 20 s each.</p>
+      </div>
+      {status === 'finished' ? (
+        <div class="dm-done">
+          <span class="dm-score">{info!.score}</span>
+          <span class="muted small">{info!.rank ? `rank #${info!.rank}` : 'points'}</span>
+          <button class="link" onClick={onPlay}>
+            Results
+          </button>
+        </div>
+      ) : (
+        <button class="btn btn-primary" onClick={onPlay} disabled={!info}>
+          {status === 'playing' ? 'Continue' : 'Play'}
+        </button>
+      )}
+    </article>
+  );
+}
+
+export function DailyHub({ onPlay }: { onPlay: (mode: ModeId) => void }) {
+  const [s, setSummary] = useState<DailySummary | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    api
+      .dailySummary()
+      .then(setSummary)
+      .catch((e: Error) => setError(e.message));
+  }, []);
+
+  return (
+    <main class="stack">
+      <section class="card">
+        <div class="board-head">
+          <h2 class="page-title">Daily Games</h2>
+          {s && <NextDaily at={s.nextAt} />}
+        </div>
+        <p class="muted small rules">
+          Each game can be played <strong>once per day</strong> — everyone gets the same 10 countries. A correct answer
+          is worth {SOLO_BASE_POINTS} points plus up to {SOLO_SPEED_POINTS} for speed, minus {SOLO_WRONG_PENALTY} per
+          wrong guess. In GeoLocate every wrong click costs {SOLO_WRONG_PENALTY} points, even if you never find the
+          country. Your score goes on today's ranking.
+        </p>
+        {error && <p class="form-error">{error}</p>}
+        <div class="daily-modes">
+          {MODE_IDS.map((mode) => (
+            <ModeCard key={mode} mode={mode} info={s?.modes[mode]} onPlay={() => onPlay(mode)} />
+          ))}
+        </div>
+      </section>
+      <Leaderboard />
+    </main>
+  );
+}
+
+// ---------- Playing ----------
+
+/** Where a solo run lives: the server (daily, ranked) or the browser (practice, never stored). */
+export interface SoloSource {
+  kind: 'daily' | 'practice';
+  start(): Promise<DailyResponse>;
+  get(): Promise<DailyResponse>;
+  guess(round: number, text: string): Promise<DailyGuessResponse>;
+  pass(round: number): Promise<DailyResponse>;
+  next(round: number): Promise<DailyResponse>;
+  flagSrc(flag: string): string;
+}
+
+export function dailySource(mode: ModeId): SoloSource {
+  return {
+    kind: 'daily',
+    start: () => api.dailyStart(mode),
+    get: () => api.dailyGet(mode),
+    guess: (round, text) => api.dailyGuess(mode, round, text),
+    pass: (round) => api.dailyPass(mode, round),
+    next: (round) => api.dailyNext(mode, round),
+    flagSrc: dailyFlagSrc,
+  };
+}
+
+export function SoloGame({
+  mode,
+  source,
+  onExit,
+  onReplay,
+  onImmersive,
+}: {
+  mode: ModeId;
+  source: SoloSource;
+  onExit: () => void;
+  /** Practice: offer "Play again" on the results */
+  onReplay?: () => void;
+  /** True while a round is in progress (the app hides the menu bar) */
+  onImmersive: (on: boolean) => void;
+}) {
+  const [run, setRunState] = useState<DailyView | null>(null);
+  const runRef = useRef<DailyView | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const offset = useRef(0);
+  /** Rounds that ended while we watched (auto-advance); a resumed reveal waits for a click. */
+  const [liveReveal, setLiveReveal] = useState(false);
+  const [showResults, setShowResults] = useState(false);
+  const busy = useRef(false);
+
+  const local = (serverMs: number) => serverMs - offset.current;
+
+  function apply(r: DailyResponse, live: boolean) {
+    offset.current = r.now - Date.now();
+    const prev = runRef.current;
+    // A late guess can return the reveal we already show: keep its auto-advance as is.
+    const same = prev?.round === r.run.round && prev?.phase === r.run.phase;
+    if ((r.run.phase === 'reveal' || r.run.phase === 'finished') && !same) {
+      // Did the round end in front of us? Then auto-advance; otherwise (resumed) wait for a click.
+      const watched = live && (prev?.phase === 'playing' || prev?.phase === 'countdown');
+      setLiveReveal(watched);
+      if (r.run.phase === 'finished' && !watched) setShowResults(true);
+    }
+    runRef.current = r.run;
+    setRunState(r.run);
+  }
+
+  async function call(p: Promise<DailyResponse>, live = true) {
+    try {
+      const r = await p;
+      apply(r, live);
+      return r;
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Something went wrong');
+      return null;
+    }
+  }
+
+  useEffect(() => {
+    call(source.start(), false);
+  }, [source]);
+
+  const phase = run?.phase;
+  const inPlay =
+    phase === 'countdown' ||
+    phase === 'playing' ||
+    (phase === 'reveal' && liveReveal) ||
+    (phase === 'finished' && !showResults);
+  useEffect(() => {
+    onImmersive(!!inPlay);
+    return () => onImmersive(false);
+  }, [inPlay]);
+
+  // Server-driven transitions: countdown → playing, deadline → reveal, reveal → next round.
+  useEffect(() => {
+    if (!run) return;
+    let at: number | null = null;
+    let action: (() => void) | null = null;
+    if (run.phase === 'countdown') {
+      at = local(run.startsAt) + 30;
+      action = () => call(source.get());
+    } else if (run.phase === 'playing' && run.deadline) {
+      at = local(run.deadline) + 120;
+      action = () => call(source.get());
+    } else if (run.phase === 'reveal' && liveReveal) {
+      at = Date.now() + REVEAL_MS;
+      action = next;
+    } else if (run.phase === 'finished' && !showResults) {
+      at = Date.now() + REVEAL_MS;
+      action = () => setShowResults(true);
+    }
+    if (at === null || !action) return;
+    const id = setTimeout(action, Math.max(0, at - Date.now()));
+    return () => clearTimeout(id);
+  }, [run, liveReveal, showResults]);
+
+  async function next() {
+    if (!run || busy.current) return;
+    busy.current = true;
+    await call(source.next(run.round));
+    busy.current = false;
+  }
+
+  async function guess(text: string): Promise<GuessOutcome> {
+    if (!run || run.phase !== 'playing') return 'ignored';
+    try {
+      const r = await source.guess(run.round, text);
+      apply(r, true);
+      return r.outcome;
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Something went wrong');
+      return 'ignored';
+    }
+  }
+
+  if (error && !run) {
+    return (
+      <main class="stack">
+        <section class="card center-card">
+          <p class="form-error">{error}</p>
+          <button class="btn btn-ghost" onClick={onExit}>
+            Back
+          </button>
+        </section>
+      </main>
+    );
+  }
+  if (!run) {
+    return (
+      <main class="stack">
+        <section class="card center-card">
+          <p class="muted">
+            {source.kind === 'practice' ? 'Loading…' : `Loading today's ${MODES[mode].label.toLowerCase()}…`}
+          </p>
+        </section>
+      </main>
+    );
+  }
+  if (run.phase === 'finished' && showResults)
+    return <SoloResults run={run} source={source} onExit={onExit} onReplay={onReplay} />;
+  return (
+    <SoloScreen
+      run={run}
+      source={source}
+      local={local}
+      onGuess={guess}
+      onPass={() => call(source.pass(run.round))}
+      onQuit={source.kind === 'practice' ? onExit : undefined}
+      onNext={next}
+      manualNext={run.phase === 'reveal' && !liveReveal}
+      error={error}
+    />
+  );
+}
+
+function SoloScreen({
+  run,
+  source,
+  local,
+  onGuess,
+  onPass,
+  onQuit,
+  onNext,
+  manualNext,
+  error,
+}: {
+  run: DailyView;
+  source: SoloSource;
+  local: (serverMs: number) => number;
+  onGuess: (text: string) => Promise<GuessOutcome>;
+  onPass: () => void;
+  /** Practice only: leave mid-run (a daily run keeps going on the server) */
+  onQuit?: () => void;
+  onNext: () => void;
+  manualNext: boolean;
+  error: string | null;
+}) {
+  const mode = MODES[run.mode];
+  const now = useNow(run.phase === 'playing' || run.phase === 'countdown', 100);
+  const deadline = run.deadline !== null ? local(run.deadline) : null;
+  const left = run.phase === 'playing' && deadline !== null ? deadline - now : null;
+  const done = run.history.length;
+  const locked = run.phase !== 'playing';
+  const r = run.reveal;
+  const isMap = mode.input === 'map';
+  const count = Math.max(1, Math.ceil((local(run.startsAt) - now) / 1000));
+  // Map modes: show the miss penalty right away (it is settled when the round ends).
+  const liveScore = run.score - (isMap && run.phase === 'playing' ? run.wrong * SOLO_WRONG_PENALTY : 0);
+
+  const statusLine = r ? (
+    <div class={`status-line reveal ${r.end === 'correct' ? 'win' : 'none'}`}>
+      <strong class="reveal-country">{r.answer}</strong>
+      {run.mode === 'capitals' && <span class="reveal-of">capital of {r.countryName}</span>}
+      <span class="reveal-who">
+        {r.end === 'correct'
+          ? `+${r.points} points${r.timeMs !== null ? ` · ${(r.timeMs / 1000).toFixed(1)} s` : ''}`
+          : `${
+              r.end === 'timeout'
+                ? "Time's up"
+                : mode.maxWrong !== undefined && r.wrong >= mode.maxWrong
+                  ? 'Out of tries'
+                  : 'Skipped'
+            } — ${r.points < 0 ? `−${-r.points} points` : 'no points'}`}
+      </span>
+    </div>
+  ) : run.phase === 'countdown' ? (
+    <div class="status-line muted">Get ready…</div>
+  ) : (
+    <div class="status-line muted hint">
+      {run.wrong > 0 ? `${run.wrong} wrong (−${run.wrong * SOLO_WRONG_PENALTY})` : 'Faster answers score more'}
+    </div>
+  );
+
+  return (
+    <main class={`stack${isMap ? ' wide' : ''}`}>
+      <section class="card top-card">
+        <header class="brand">
+          <Logo />
+          <h1>
+            {source.kind === 'practice' ? (
+              <>
+                Practice <em>· {mode.label}</em>
+              </>
+            ) : (
+              <>
+                Daily {mode.label} <em>· {run.date}</em>
+              </>
+            )}
+          </h1>
+        </header>
+        <div class="status-row">
+          <span class="round-label">
+            Round {run.round}/{run.totalRounds}
+          </span>
+          <div class="scoreboard solo" aria-label={`Score ${liveScore}`}>
+            <span class="sb-score">{liveScore}</span>
+            <span class="sb-name">points</span>
+          </div>
+          <span class={`timer${left !== null && left <= 5000 ? ' urgent' : ''}`}>
+            <svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true">
+              <circle cx="8" cy="9" r="6" fill="none" stroke="currentColor" stroke-width="1.8" />
+              <path d="M8 9V6M6 1.5h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+            </svg>
+            {left !== null ? formatClock(left) : '–:––'}
+          </span>
+        </div>
+        <div class="progress" role="progressbar" aria-valuemin={0} aria-valuemax={run.totalRounds} aria-valuenow={done}>
+          <div class="progress-fill" style={{ width: `${(done / run.totalRounds) * 100}%` }} />
+        </div>
+      </section>
+
+      {isMap ? (
+        <section class="card game-card map-card">
+          <LocateBoard
+            prompt={run.prompt ?? r?.countryName ?? null}
+            flagUrl={run.flag ? source.flagSrc(run.flag) : r ? source.flagSrc(r.flag) : null}
+            roundKey={run.round}
+            locked={locked}
+            answerCode={r?.code ?? null}
+            serverWrong={run.wrong}
+            onGuess={onGuess}
+            onPass={onPass}
+            overlay={
+              run.phase === 'countdown' ? (
+                <div class="countdown" key={count}>
+                  {count}
+                </div>
+              ) : null
+            }
+            status={statusLine}
+          />
+          {manualNext && (
+            <div class="btn-row">
+              <button class="btn btn-primary" onClick={onNext}>
+                Next round
+              </button>
+            </div>
+          )}
+          {error && <p class="form-error">{error}</p>}
+          <SoloNote onQuit={onQuit} />
+        </section>
+      ) : (
+        <section class="card game-card">
+          <div class="round-badge">{run.round}</div>
+          <div class="flag-frame">
+            {run.phase === 'countdown' ? (
+              <div class="countdown" key={Math.ceil((local(run.startsAt) - now) / 1000)}>
+                {Math.max(1, Math.ceil((local(run.startsAt) - now) / 1000))}
+              </div>
+            ) : run.flag ? (
+              <FlagImage src={source.flagSrc(run.flag)} key={run.flag} />
+            ) : r ? (
+              <FlagImage src={source.flagSrc(r.flag)} key={r.flag} />
+            ) : null}
+          </div>
+          {run.prompt && run.phase === 'playing' && (
+            <p class="prompt">
+              Capital of <strong>{run.prompt}</strong>?
+            </p>
+          )}
+          {statusLine}
+          {manualNext ? (
+            <div class="btn-row">
+              <button class="btn btn-primary" onClick={onNext}>
+                Next round
+              </button>
+            </div>
+          ) : (
+            <div class="guess-row">
+              <CountryInput
+                locked={locked}
+                focusKey={run.round}
+                onSubmit={onGuess}
+                suggest={mode.suggest}
+                placeholder={mode.placeholder}
+              />
+              <button class="btn btn-primary" type="button" disabled={locked} onClick={onPass}>
+                Pass
+              </button>
+            </div>
+          )}
+          {error && <p class="form-error">{error}</p>}
+          <SoloNote onQuit={onQuit} />
+        </section>
+      )}
+    </main>
+  );
+}
+
+function SoloNote({ onQuit }: { onQuit?: () => void }) {
+  return onQuit ? (
+    <p class="muted small center solo-note">
+      Practice isn't scored or saved.{' '}
+      <button class="link" onClick={onQuit}>
+        Quit
+      </button>
+    </p>
+  ) : (
+    <p class="muted small center solo-note">The timer keeps running if you leave the page.</p>
+  );
+}
+
+function SoloResults({
+  run,
+  source,
+  onExit,
+  onReplay,
+}: {
+  run: DailyView;
+  source: SoloSource;
+  onExit: () => void;
+  onReplay?: () => void;
+}) {
+  const correct = run.history.filter((h) => h.end === 'correct').length;
+  const mode = MODES[run.mode];
+  const practice = source.kind === 'practice';
+  return (
+    <main class="stack">
+      <section class="card results-banner win">
+        <Logo size={52} />
+        <h1>{practice ? `Practice ${mode.label} done!` : `Daily ${mode.label} done!`}</h1>
+        <p class="banner-sub">
+          {correct} of {run.totalRounds} correct{practice ? ' · not saved' : ` · ${run.date}`}
+        </p>
+        <div class="final-score solo">
+          <div class="fs-player">
+            <span class="fs-points">{run.score}</span>
+            <span class="fs-name">of {run.maxScore} points</span>
+          </div>
+        </div>
+        <div class="btn-row">
+          {onReplay && (
+            <button class="btn btn-primary" onClick={onReplay}>
+              Play again
+            </button>
+          )}
+          <button class={`btn ${onReplay ? 'btn-ghost' : 'btn-primary'}`} onClick={onExit}>
+            {practice ? 'Change settings' : 'Back to Daily Games'}
+          </button>
+        </div>
+      </section>
+
+      {!practice && <Leaderboard initial={run.mode} refreshKey={run.score} />}
+
+      <section class="card rounds-card">
+        <h2>Your rounds</h2>
+        <table class="rounds">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Flag</th>
+              <th class="left">{run.mode === 'capitals' ? 'Capital' : 'Country'}</th>
+              <th>Time</th>
+              <th>Points</th>
+            </tr>
+          </thead>
+          <tbody>
+            {run.history.map((h, i) => (
+              <tr key={i}>
+                <td class="num">{i + 1}</td>
+                <td>
+                  <img class="thumb" src={source.flagSrc(h.flag)} alt="" />
+                </td>
+                <td class="left country">
+                  {h.answer}
+                  {run.mode === 'capitals' && <span class="of-country">{h.countryName}</span>}
+                </td>
+                <td class="num">
+                  {h.timeMs !== null ? `${(h.timeMs / 1000).toFixed(1)} s` : h.end === 'timeout' ? 'timeout' : 'passed'}
+                </td>
+                <td>
+                  <span class={`pill ${h.points > 0 ? 'me' : h.points < 0 ? 'minus' : 'none'}`}>
+                    {h.points > 0 ? `+${h.points}` : h.points < 0 ? `−${-h.points}` : '0'}
+                  </span>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </section>
+    </main>
+  );
+}

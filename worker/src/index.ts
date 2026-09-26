@@ -1,6 +1,24 @@
-import { FLAG_TOKEN_RE, ROOM_CODE_ALPHABET, ROOM_CODE_LENGTH, ROOM_CODE_RE } from '@flagduel/shared';
+import {
+  BOARD_IDS,
+  FLAG_TOKEN_RE,
+  MODE_IDS,
+  ROOM_CODE_ALPHABET,
+  ROOM_CODE_LENGTH,
+  ROOM_CODE_RE,
+  cleanName,
+  type AuthConfig,
+  type BoardId,
+  type ModeId,
+  type UserView,
+} from '@flagduel/shared';
+import { FLAGS } from './generated/flags';
+import { verifyGoogleIdToken } from './google';
 
 export { Room } from './room';
+export { Accounts } from './accounts';
+
+const DAILY_FLAG_RE = /^[0-9a-f]{32}$/;
+const SESSION_TOKEN_RE = /^[0-9a-f]{64}$/;
 
 function allowedOrigin(request: Request, env: Env): string | null {
   const origin = request.headers.get('Origin');
@@ -23,6 +41,118 @@ function randomCode(): string {
   return Array.from(bytes, (b) => ROOM_CODE_ALPHABET[b % ROOM_CODE_ALPHABET.length]).join('');
 }
 
+const svgResponse = (svg: string) =>
+  new Response(svg, {
+    headers: {
+      'Content-Type': 'image/svg+xml',
+      'Cache-Control': 'private, max-age=3600',
+      'X-Content-Type-Options': 'nosniff',
+      'Content-Security-Policy': "default-src 'none'; style-src 'unsafe-inline'",
+      'Cross-Origin-Resource-Policy': 'cross-origin',
+    },
+  });
+
+const isLocalOrigin = (origin: string) => /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin);
+
+async function readBody(request: Request): Promise<Record<string, unknown>> {
+  try {
+    const v: unknown = await request.json();
+    return typeof v === 'object' && v !== null && !Array.isArray(v) ? (v as Record<string, unknown>) : {};
+  } catch {
+    return {};
+  }
+}
+
+function bearer(request: Request): string | null {
+  const t = /^Bearer (\S+)$/.exec(request.headers.get('Authorization') ?? '')?.[1];
+  return t && SESSION_TOKEN_RE.test(t) ? t : null;
+}
+
+const isRound = (v: unknown): v is number => typeof v === 'number' && Number.isInteger(v) && v >= 1 && v < 1000;
+
+const json = (data: unknown, status = 200) => Response.json(data, { status });
+const fail = (status: number, message: string) => json({ error: message }, status);
+/** 200 with the result, or 404 when there is no daily run to act on. */
+const runOr404 = (r: unknown) => (r ? json(r) : fail(404, 'No daily game started'));
+
+/** Accounts, daily challenge and leaderboard routes (the caller has checked the origin). */
+async function accountRoutes(request: Request, env: Env, url: URL, origin: string): Promise<Response> {
+  const db = env.ACCOUNTS.getByName('main');
+  const path = url.pathname;
+  const method = request.method;
+
+  // ----- no session needed -----
+  if (path === '/auth/config' && method === 'GET') {
+    const config: AuthConfig = {
+      googleClientId: env.GOOGLE_CLIENT_ID || null,
+      devLogin: env.DEV_LOGIN === 'true' && isLocalOrigin(origin),
+    };
+    return json(config);
+  }
+  if (path === '/auth/google' && method === 'POST') {
+    if (!env.GOOGLE_CLIENT_ID) return fail(503, 'Google sign-in is not configured');
+    const { credential } = await readBody(request);
+    if (typeof credential !== 'string' || credential.length > 4096) return fail(400, 'Missing credential');
+    const claims = await verifyGoogleIdToken(credential, env.GOOGLE_CLIENT_ID).catch(() => null);
+    if (!claims) return fail(401, 'Invalid Google sign-in');
+    return json(await db.loginGoogle(claims));
+  }
+  if (path === '/auth/dev' && method === 'POST') {
+    // Two locks: the env flag (off in production) and a localhost page.
+    if (env.DEV_LOGIN !== 'true' || !isLocalOrigin(origin)) return fail(404, 'Not found');
+    const name = cleanName((await readBody(request)).name);
+    if (!name) return fail(400, 'Enter a name');
+    return json(await db.loginDev(name));
+  }
+
+  const token = bearer(request);
+  const user: UserView | null = token ? await db.authenticate(token) : null;
+
+  // GET /leaderboard?board=flags|capitals|overall — signed out too
+  if (path === '/leaderboard' && method === 'GET') {
+    const board = (url.searchParams.get('board') ?? 'overall') as BoardId;
+    if (!BOARD_IDS.includes(board)) return fail(400, 'Unknown board');
+    return json(await db.leaderboard(user?.id ?? null, board));
+  }
+
+  // ----- signed in -----
+  if (!token || !user) return fail(401, 'Not signed in');
+
+  if (path === '/auth/logout' && method === 'POST') {
+    await db.logout(token);
+    return json({ ok: true });
+  }
+  if (path === '/me' && method === 'GET') return json(await db.me(user.id));
+  if (path === '/me' && method === 'PATCH') {
+    const name = cleanName((await readBody(request)).displayName);
+    if (!name) return fail(400, 'Enter a name');
+    return json({ user: await db.setDisplayName(user.id, name) });
+  }
+  if (path === '/daily' && method === 'GET') return json(await db.dailySummary(user.id));
+
+  // /daily/:mode  (GET)   ·   /daily/:mode/start|guess|pass|next  (POST)
+  const m = /^\/daily\/([a-z]+)(?:\/(start|guess|pass|next))?$/.exec(path);
+  if (!m || !(MODE_IDS as readonly string[]).includes(m[1])) return fail(404, 'Not found');
+  const mode = m[1] as ModeId;
+  const action = m[2];
+
+  if (!action) return method === 'GET' ? runOr404(await db.dailyGet(user.id, mode)) : fail(405, 'Method not allowed');
+  if (method !== 'POST') return fail(405, 'Method not allowed');
+  if (action === 'start') return json(await db.dailyStart(user.id, mode));
+
+  const b = await readBody(request);
+  if (!isRound(b.round)) return fail(400, 'Missing round');
+  switch (action) {
+    case 'guess':
+      if (typeof b.text !== 'string' || b.text.length > 80) return fail(400, 'Missing guess');
+      return runOr404(await db.dailyGuess(user.id, mode, b.round, b.text));
+    case 'pass':
+      return runOr404(await db.dailyPass(user.id, mode, b.round));
+    default:
+      return runOr404(await db.dailyNext(user.id, mode, b.round));
+  }
+}
+
 export default {
   async fetch(request, env): Promise<Response> {
     const url = new URL(request.url);
@@ -34,12 +164,34 @@ export default {
         status: 204,
         headers: {
           'Access-Control-Allow-Origin': origin,
-          'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-          'Access-Control-Allow-Headers': 'Content-Type',
+          'Access-Control-Allow-Methods': 'GET, POST, PATCH, OPTIONS',
+          'Access-Control-Allow-Headers': 'Content-Type, Authorization',
           'Access-Control-Max-Age': '86400',
           Vary: 'Origin',
         },
       });
+    }
+
+    // GET /daily/flags/:token → SVG of a started daily round (loaded by <img>, so no Origin check)
+    const dailyFlag = /^\/daily\/flags\/([^/]+)$/.exec(url.pathname);
+    if (dailyFlag && request.method === 'GET') {
+      const token = dailyFlag[1];
+      const svg = DAILY_FLAG_RE.test(token) ? await env.ACCOUNTS.getByName('main').dailyFlag(token) : null;
+      return svg ? svgResponse(svg) : new Response('Not found', { status: 404 });
+    }
+
+    // GET /practice/flags/:code → SVG by ISO code. Practice runs in the browser and is never scored,
+    // so there is nothing to hide (flag-icons is public anyway).
+    const practiceFlag = /^\/practice\/flags\/([A-Za-z]{2})$/.exec(url.pathname);
+    if (practiceFlag && request.method === 'GET') {
+      const svg = FLAGS[practiceFlag[1].toUpperCase()];
+      return svg ? svgResponse(svg) : new Response('Not found', { status: 404 });
+    }
+
+    // Accounts, daily challenge, leaderboards
+    if (/^\/(auth|me|daily|leaderboard)(\/|$)/.test(url.pathname)) {
+      if (!origin) return new Response('Forbidden origin', { status: 403 });
+      return withCors(await accountRoutes(request, env, url, origin), origin);
     }
 
     // POST /rooms → { code }
@@ -77,15 +229,7 @@ export default {
       if (!FLAG_TOKEN_RE.test(token)) return new Response('Not found', { status: 404 });
       const svg = await env.ROOMS.getByName(token.slice(0, ROOM_CODE_LENGTH)).flag(token);
       if (!svg) return new Response('Not found', { status: 404 });
-      return new Response(svg, {
-        headers: {
-          'Content-Type': 'image/svg+xml',
-          'Cache-Control': 'private, max-age=3600',
-          'X-Content-Type-Options': 'nosniff',
-          'Content-Security-Policy': "default-src 'none'; style-src 'unsafe-inline'",
-          'Cross-Origin-Resource-Policy': 'cross-origin',
-        },
-      });
+      return svgResponse(svg);
     }
 
     if (url.pathname === '/') return new Response('Flag Duel API', { headers: { 'Content-Type': 'text/plain' } });

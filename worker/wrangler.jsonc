@@ -6,11 +6,21 @@
   "observability": { "enabled": true },
   "vars": {
     // Comma-separated list of origins allowed to create/join rooms.
-    "ALLOWED_ORIGINS": "https://aobermuhlner.github.io,http://localhost:5173,http://127.0.0.1:5173"
+    "ALLOWED_ORIGINS": "https://aobermuhlner.github.io,http://localhost:5173,http://127.0.0.1:5173",
+    // OAuth 2.0 Web client id from Google Cloud Console (public, not a secret). Empty = Google sign-in off.
+    "GOOGLE_CLIENT_ID": "",
+    // "true" enables name-only sign-in for local development. Keep "false" here; override in .dev.vars.
+    "DEV_LOGIN": "false"
   },
   "durable_objects": {
-    "bindings": [{ "name": "ROOMS", "class_name": "Room" }]
+    "bindings": [
+      { "name": "ROOMS", "class_name": "Room" },
+      { "name": "ACCOUNTS", "class_name": "Accounts" }
+    ]
   },
   // Free plan: Durable Objects must be SQLite-backed.
-  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["Room"] }]
+  "migrations": [
+    { "tag": "v1", "new_sqlite_classes": ["Room"] },
+    { "tag": "v2", "new_sqlite_classes": ["Accounts"] }
+  ]
 }

@@ -1,12 +1,14 @@
 // Pure game rules shared by the Durable Object (authoritative) and the local mock.
 import { COUNTRIES } from './countries';
-import { isCorrectGuess } from './normalize';
+import { MODES, type ModeId } from './modes';
 import type { RegionId } from './regions';
 
 export const ROUNDS_PER_GAME = 10;
 export const ROUND_TIME_MS = 20_000;
 export const REVEAL_MS = 2_500;
 export const COUNTDOWN_MS = 3_000;
+/** Countdown before each minigame after the first ("Next up: Capitals"). */
+export const STAGE_INTRO_MS = 4_000;
 export const RECONNECT_GRACE_MS = 20_000;
 
 /** Player seat: 0 = host, 1 = guest. */
@@ -15,6 +17,8 @@ export type Slot = 0 | 1;
 export type RoundEnd = 'correct' | 'passed' | 'timeout' | 'forfeit';
 
 export interface RoundState {
+  /** Minigame this round belongs to (absent in rounds stored before modes existed → flags) */
+  mode?: ModeId;
   /** ISO code of the answer — never sent to clients before the round ends. */
   code: string;
   startedAt: number;
@@ -38,16 +42,67 @@ export function pickFlags(
   count = ROUNDS_PER_GAME,
   rng: () => number = Math.random,
 ): string[] {
-  const pool = countriesInRegions(regions);
-  for (let i = pool.length - 1; i > 0; i--) {
-    const j = Math.floor(rng() * (i + 1));
-    [pool[i], pool[j]] = [pool[j], pool[i]];
-  }
-  return pool.slice(0, Math.min(count, pool.length));
+  return shuffleTake(countriesInRegions(regions), count, rng);
 }
 
-export function newRound(code: string, now: number): RoundState {
+/**
+ * Countries for a multi-game match: `count` per mode, played in the given order.
+ * Each stage avoids countries already used by earlier stages while the pool allows it.
+ */
+export function pickStages(
+  regions: readonly RegionId[],
+  modes: readonly ModeId[],
+  count = ROUNDS_PER_GAME,
+  rng: () => number = Math.random,
+): { codes: string[]; roundModes: ModeId[] } {
+  const pool = countriesInRegions(regions);
+  const codes: string[] = [];
+  const roundModes: ModeId[] = [];
+  for (const mode of modes) {
+    const used = new Set(codes);
+    const fresh = pool.filter((c) => !used.has(c));
+    const src = fresh.length >= Math.min(count, pool.length) ? fresh : pool;
+    const picked = shuffleTake(src, count, rng);
+    codes.push(...picked);
+    roundModes.push(...picked.map(() => mode));
+  }
+  return { codes, roundModes };
+}
+
+function shuffleTake(items: readonly string[], count: number, rng: () => number): string[] {
+  const a = [...items];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(rng() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a.slice(0, Math.min(count, a.length));
+}
+
+export interface StageInfo {
+  /** 0-based index into the match's list of modes */
+  stage: number;
+  mode: ModeId;
+  /** 0-based index of the stage's first round in the flat round list */
+  start: number;
+  rounds: number;
+}
+
+/** Which stage the (0-based) round `index` belongs to. */
+export function stageAt(roundModes: readonly ModeId[], index: number): StageInfo {
+  const i = Math.max(0, Math.min(index, roundModes.length - 1));
+  const mode = roundModes[i] ?? 'flags';
+  let start = i;
+  while (start > 0 && roundModes[start - 1] === mode) start--;
+  let end = i;
+  while (end + 1 < roundModes.length && roundModes[end + 1] === mode) end++;
+  let stage = 0;
+  for (let k = 1; k <= start; k++) if (roundModes[k] !== roundModes[k - 1]) stage++;
+  return { stage, mode, start, rounds: end - start + 1 };
+}
+
+export function newRound(code: string, now: number, mode: ModeId = 'flags'): RoundState {
   return {
+    mode,
     code,
     startedAt: now,
     deadline: now + ROUND_TIME_MS,
@@ -72,12 +127,15 @@ export function applyGuess(round: RoundState, slot: Slot, text: string, now: num
     endRound(round, 'timeout', now);
     return 'ignored';
   }
-  if (isCorrectGuess(text, round.code)) {
+  if (MODES[round.mode ?? 'flags'].isCorrect(text, round.code)) {
     round.winner = slot;
     endRound(round, 'correct', now);
     return 'correct';
   }
   round.wrong[slot]++;
+  // Out of tries (map modes): counts as passing.
+  const max = MODES[round.mode ?? 'flags'].maxWrong;
+  if (max !== undefined && round.wrong[slot] >= max) applyPass(round, slot, now);
   return 'wrong';
 }
 
@@ -126,7 +184,7 @@ export function wrongTotalsOf(rounds: readonly RoundState[]): [number, number] {
   return w;
 }
 
-/** Most points wins; tie → fewer total wrong guesses; still tied → draw. */
+/** Over all minigames: most points wins; tie → fewer total wrong guesses; still tied → draw. */
 export function decideMatch(rounds: readonly RoundState[], forfeitedBy: Slot | null = null): MatchResult {
   const scores = scoresOf(rounds);
   const wrongTotals = wrongTotalsOf(rounds);

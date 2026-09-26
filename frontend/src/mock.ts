@@ -3,15 +3,19 @@
 import {
   COUNTDOWN_MS,
   COUNTRY_BY_CODE,
+  MODES,
   REVEAL_MS,
   ROUND_TIME_MS,
+  STAGE_INTRO_MS,
   applyGuess,
   applyPass,
   applyTimeout,
   decideMatch,
   newRound,
-  pickFlags,
+  pickStages,
   scoresOf,
+  stageAt,
+  type ModeId,
   type RegionId,
   type RoundState,
   type Slot,
@@ -26,11 +30,13 @@ export function startMockGame(opts: {
   name: string;
   botName: string;
   regions: RegionId[];
+  modes: ModeId[];
   /** 'lazy': the bot never answers correctly and passes late (handy for testing). */
   bot?: 'normal' | 'lazy';
   onUpdate: (vm: GameVM) => void;
 }): GameActions & { dispose(): void } {
   let codes: string[] = [];
+  let roundModes: ModeId[] = [];
   let rounds: RoundState[] = [];
   let current = -1;
   let phase: GameVM['phase'] = 'countdown';
@@ -56,6 +62,9 @@ export function startMockGame(opts: {
     const scores = scoresOf(rounds);
     const wrong = rounds.reduce<[number, number]>((w, x) => [w[0] + x.wrong[0], w[1] + x.wrong[1]], [0, 0]);
     const ended = rounds.filter((x) => x.end);
+    const counting = phase === 'countdown';
+    const stage = stageAt(roundModes, counting ? current + 1 : current);
+    const mode = r?.mode ?? 'flags';
     const present = { connected: true, rematch: false, graceEndsAt: null, left: false };
     opts.onUpdate({
       phase,
@@ -66,18 +75,33 @@ export function startMockGame(opts: {
       ],
       round: Math.max(1, current + 1),
       totalRounds: codes.length,
-      flagUrl: r ? flagUrl(r.code) : null,
+      modes: opts.modes,
+      stage: stage.stage,
+      stageRound: counting ? 0 : current - stage.start + 1,
+      stageRounds: stage.rounds,
+      prompt: r && !counting && MODES[mode].showsCountry ? COUNTRY_BY_CODE[r.code].name : null,
+      flagUrl: r && !counting ? flagUrl(r.code) : null,
       countdownEndsAt,
       deadline: r && !r.end ? r.deadline : null,
       regions: opts.regions,
       reveal:
         r?.end && phase === 'reveal'
-          ? { countryName: COUNTRY_BY_CODE[r.code].name, winner: r.winner, end: r.end }
+          ? {
+              mode,
+              code: r.code,
+              countryName: COUNTRY_BY_CODE[r.code].name,
+              answer: MODES[mode].answerOf(r.code),
+              winner: r.winner,
+              end: r.end,
+            }
           : null,
       oppWrongSeq,
       history: ended.map((x) => ({
+        mode: x.mode ?? 'flags',
         flagUrl: flagUrl(x.code),
+        code: x.code,
         countryName: COUNTRY_BY_CODE[x.code].name,
+        answer: MODES[x.mode ?? 'flags'].answerOf(x.code),
         winner: x.winner,
         wrong: [...x.wrong],
         end: x.end!,
@@ -89,7 +113,7 @@ export function startMockGame(opts: {
 
   function start() {
     clearTimers();
-    codes = pickFlags(opts.regions);
+    ({ codes, roundModes } = pickStages(opts.regions, opts.modes));
     rounds = [];
     current = -1;
     forfeitedBy = null;
@@ -103,7 +127,7 @@ export function startMockGame(opts: {
   function startRound(i: number) {
     current = i;
     countdownEndsAt = null;
-    const r = newRound(codes[i], Date.now());
+    const r = newRound(codes[i], Date.now(), roundModes[i]);
     rounds[i] = r;
     phase = 'playing';
     later(ROUND_TIME_MS + 5, () => {
@@ -121,6 +145,7 @@ export function startMockGame(opts: {
       later(2000 + Math.random() * 7000, () => {
         if (r.end || r !== rounds[current]) return;
         if (applyGuess(r, 1, 'Atlantis', Date.now()) === 'wrong') oppWrongSeq++;
+        if (r.end) finishRound(); // both out of tries (map modes)
         emit();
       });
     }
@@ -128,7 +153,9 @@ export function startMockGame(opts: {
     later(decideAt, () => {
       if (r.end || r !== rounds[current]) return;
       if (knows) {
-        if (applyGuess(r, 1, COUNTRY_BY_CODE[r.code].name, Date.now()) === 'correct') finishRound();
+        const m = MODES[r.mode ?? 'flags'];
+        const answer = m.input === 'map' ? r.code : m.answerOf(r.code);
+        if (applyGuess(r, 1, answer, Date.now()) === 'correct' || r.end) finishRound();
       } else if (applyPass(r, 1, Date.now())) finishRound();
       emit();
     });
@@ -139,11 +166,15 @@ export function startMockGame(opts: {
     phase = 'reveal';
     emit();
     later(REVEAL_MS, () => {
-      if (current + 1 < codes.length) startRound(current + 1);
-      else {
+      if (current + 1 >= codes.length) {
         phase = 'finished';
         emit();
-      }
+      } else if (roundModes[current + 1] !== roundModes[current]) {
+        phase = 'countdown';
+        countdownEndsAt = Date.now() + STAGE_INTRO_MS;
+        later(STAGE_INTRO_MS, () => startRound(current + 1));
+        emit();
+      } else startRound(current + 1);
     });
   }
 
@@ -154,7 +185,7 @@ export function startMockGame(opts: {
       const r = rounds[current];
       if (!r || phase !== 'playing') return 'ignored';
       const outcome = applyGuess(r, 0, text, Date.now());
-      if (outcome === 'correct') finishRound();
+      if (outcome === 'correct' || r.end) finishRound();
       else emit();
       return outcome;
     },

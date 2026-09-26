@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'preact/hooks';
-import { REGION_IDS, REGION_LABELS, type RegionId } from '@flagduel/shared';
+import { MODES, REGION_IDS, REGION_LABELS, type ModeId, type RegionId } from '@flagduel/shared';
 
 /** Re-renders the caller every `ms` while `active`. Returns Date.now(). */
 export function useNow(active: boolean, ms = 200): number {
@@ -47,4 +47,22 @@ export function RegionChips({ regions }: { regions: RegionId[] }) {
 export function formatClock(ms: number): string {
   const s = Math.max(0, Math.ceil(ms / 1000));
   return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+}
+
+/** "① Flags → ② Capitals" progress through the minigames of a match. */
+export function StageSteps({ modes, current }: { modes: ModeId[]; current: number }) {
+  return (
+    <ol class="stage-steps" aria-label="Games in this match">
+      {modes.map((m, i) => (
+        <li
+          key={m}
+          class={i === current ? 'now' : i < current ? 'done' : ''}
+          aria-current={i === current ? 'step' : undefined}
+        >
+          <span class="step-num">{i < current ? '✓' : i + 1}</span>
+          {MODES[m].label}
+        </li>
+      ))}
+    </ol>
+  );
 }
