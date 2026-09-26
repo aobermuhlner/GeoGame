@@ -57,6 +57,10 @@ export class Matchmaker extends DurableObject<Env> {
       this.send(ws, { t: 'error', message: 'Please sign in again.' });
       return ws.close(4001, 'unauthorized');
     }
+    if (entry.rating.locked) {
+      this.send(ws, { t: 'error', message: 'Unlock ranked first: start as a beginner or take the placement test.' });
+      return ws.close(4003, 'locked');
+    }
     // One queue spot per account: a newer tab replaces the older one.
     for (const [other, w] of this.waiting()) {
       if (other !== ws && w.userId === entry.user.id) {

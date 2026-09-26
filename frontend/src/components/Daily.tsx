@@ -12,8 +12,10 @@ import {
   type DailyView,
   type GuessOutcome,
   type ModeId,
+  type PlacementResult,
 } from '@flagduel/shared';
 import { api, dailyFlagSrc } from '../api';
+import { DivisionBadge } from './Ranked';
 import { CountryInput } from './CountryInput';
 import { FlagImage } from './GameScreen';
 import { LocateBoard } from './LocateBoard';
@@ -107,9 +109,9 @@ export function DailyHub({ onPlay }: { onPlay: (mode: ModeId) => void }) {
 
 // ---------- Playing ----------
 
-/** Where a solo run lives: the server (daily, ranked) or the browser (practice, never stored). */
+/** Where a solo run lives: the server (daily, ranked placement) or the browser (practice, never stored). */
 export interface SoloSource {
-  kind: 'daily' | 'practice';
+  kind: 'daily' | 'practice' | 'placement';
   start(): Promise<DailyResponse>;
   get(): Promise<DailyResponse>;
   guess(round: number, text: string): Promise<DailyGuessResponse>;
@@ -126,6 +128,19 @@ export function dailySource(mode: ModeId): SoloSource {
     guess: (round, text) => api.dailyGuess(mode, round, text),
     pass: (round) => api.dailyPass(mode, round),
     next: (round) => api.dailyNext(mode, round),
+    flagSrc: dailyFlagSrc,
+  };
+}
+
+/** The one-time ranked placement test of `mode`. */
+export function placementSource(mode: ModeId): SoloSource {
+  return {
+    kind: 'placement',
+    start: () => api.placementStart(mode),
+    get: () => api.placementGet(mode),
+    guess: (round, text) => api.placementGuess(mode, round, text),
+    pass: (round) => api.placementPass(mode, round),
+    next: (round) => api.placementNext(mode, round),
     flagSrc: dailyFlagSrc,
   };
 }
@@ -152,6 +167,7 @@ export function SoloGame({
   /** Rounds that ended while we watched (auto-advance); a resumed reveal waits for a click. */
   const [liveReveal, setLiveReveal] = useState(false);
   const [showResults, setShowResults] = useState(false);
+  const [placement, setPlacement] = useState<PlacementResult | null>(null);
   const busy = useRef(false);
 
   const local = (serverMs: number) => serverMs - offset.current;
@@ -169,6 +185,7 @@ export function SoloGame({
     }
     runRef.current = r.run;
     setRunState(r.run);
+    if (r.placement) setPlacement(r.placement);
   }
 
   async function call(p: Promise<DailyResponse>, live = true) {
@@ -256,12 +273,18 @@ export function SoloGame({
       <main class="stack">
         <section class="card center-card">
           <p class="muted">
-            {source.kind === 'practice' ? 'Loading…' : `Loading today's ${MODES[mode].label.toLowerCase()}…`}
+            {source.kind === 'practice'
+              ? 'Loading…'
+              : source.kind === 'placement'
+                ? 'Loading your placement test…'
+                : `Loading today's ${MODES[mode].label.toLowerCase()}…`}
           </p>
         </section>
       </main>
     );
   }
+  if (run.phase === 'finished' && showResults && source.kind === 'placement')
+    return <PlacementResults run={run} result={placement} source={source} onExit={onExit} />;
   if (run.phase === 'finished' && showResults)
     return <SoloResults run={run} source={source} onExit={onExit} onReplay={onReplay} />;
   return (
@@ -310,30 +333,40 @@ function SoloScreen({
   const r = run.reveal;
   const isMap = mode.input === 'map';
   const count = Math.max(1, Math.ceil((local(run.startsAt) - now) / 1000));
+  const placement = source.kind === 'placement';
   // Map modes: show the miss penalty right away (it is settled when the round ends).
-  const liveScore = run.score - (isMap && run.phase === 'playing' ? run.wrong * SOLO_WRONG_PENALTY : 0);
+  // The placement test only counts correct answers.
+  const liveScore = placement
+    ? run.history.filter((h) => h.end === 'correct').length
+    : run.score - (isMap && run.phase === 'playing' ? run.wrong * SOLO_WRONG_PENALTY : 0);
+  const missed = (end: string, wrong: number) =>
+    end === 'timeout' ? "Time's up" : mode.maxWrong !== undefined && wrong >= mode.maxWrong ? 'Out of tries' : 'Skipped';
 
   const statusLine = r ? (
     <div class={`status-line reveal ${r.end === 'correct' ? 'win' : 'none'}`}>
       <strong class="reveal-country">{r.answer}</strong>
       {run.mode === 'capitals' && <span class="reveal-of">capital of {r.countryName}</span>}
       <span class="reveal-who">
-        {r.end === 'correct'
-          ? `+${r.points} points${r.timeMs !== null ? ` · ${(r.timeMs / 1000).toFixed(1)} s` : ''}`
-          : `${
-              r.end === 'timeout'
-                ? "Time's up"
-                : mode.maxWrong !== undefined && r.wrong >= mode.maxWrong
-                  ? 'Out of tries'
-                  : 'Skipped'
-            } — ${r.points < 0 ? `−${-r.points} points` : 'no points'}`}
+        {placement
+          ? r.end === 'correct'
+            ? 'Correct'
+            : missed(r.end, r.wrong)
+          : r.end === 'correct'
+            ? `+${r.points} points${r.timeMs !== null ? ` · ${(r.timeMs / 1000).toFixed(1)} s` : ''}`
+            : `${missed(r.end, r.wrong)} — ${r.points < 0 ? `−${-r.points} points` : 'no points'}`}
       </span>
     </div>
   ) : run.phase === 'countdown' ? (
     <div class="status-line muted">Get ready…</div>
   ) : (
     <div class="status-line muted hint">
-      {run.wrong > 0 ? `${run.wrong} wrong (−${run.wrong * SOLO_WRONG_PENALTY})` : 'Faster answers score more'}
+      {placement
+        ? run.wrong > 0
+          ? `${run.wrong} wrong`
+          : 'Speed doesn’t count, only correct answers'
+        : run.wrong > 0
+          ? `${run.wrong} wrong (−${run.wrong * SOLO_WRONG_PENALTY})`
+          : 'Faster answers score more'}
     </div>
   );
 
@@ -346,6 +379,10 @@ function SoloScreen({
             {source.kind === 'practice' ? (
               <>
                 Practice <em>· {mode.label}</em>
+              </>
+            ) : placement ? (
+              <>
+                Placement test <em>· {mode.label}</em>
               </>
             ) : (
               <>
@@ -360,7 +397,7 @@ function SoloScreen({
           </span>
           <div class="scoreboard solo" aria-label={`Score ${liveScore}`}>
             <span class="sb-score">{liveScore}</span>
-            <span class="sb-name">points</span>
+            <span class="sb-name">{placement ? 'correct' : 'points'}</span>
           </div>
           <span class={`timer${left !== null && left <= 5000 ? ' urgent' : ''}`}>
             <svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true">
@@ -463,6 +500,89 @@ function SoloNote({ onQuit }: { onQuit?: () => void }) {
     </p>
   ) : (
     <p class="muted small center solo-note">The timer keeps running if you leave the page.</p>
+  );
+}
+
+function PlacementResults({
+  run,
+  result,
+  source,
+  onExit,
+}: {
+  run: DailyView;
+  result: PlacementResult | null;
+  source: SoloSource;
+  onExit: () => void;
+}) {
+  const mode = MODES[run.mode];
+  const correct = result?.correct ?? run.history.filter((h) => h.end === 'correct').length;
+  return (
+    <main class="stack">
+      <section class="card results-banner win">
+        <Logo size={52} />
+        <h1>Placement done!</h1>
+        <p class="banner-sub">
+          {correct} of {run.totalRounds} correct · {Math.round((correct / run.totalRounds) * 100)}%
+        </p>
+        {result && (
+          <div class="placement-result">
+            <DivisionBadge division={result.division} />
+            <span class="rating-num">{result.rating}</span>
+            <span class="muted small">your starting {mode.label} rating</span>
+          </div>
+        )}
+        {result && (
+          <ul class="placement-groups" aria-label="Correct answers per division">
+            {result.groups.map((g) => (
+              <li key={g.division}>
+                <DivisionBadge division={g.division} small />
+                <span class="small">
+                  {g.correct}/{g.total}
+                </span>
+              </li>
+            ))}
+          </ul>
+        )}
+        <div class="btn-row">
+          <button class="btn btn-primary" onClick={onExit}>
+            Play ranked
+          </button>
+        </div>
+      </section>
+
+      <section class="card rounds-card">
+        <h2>Your answers</h2>
+        <table class="rounds">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Flag</th>
+              <th class="left">{run.mode === 'capitals' ? 'Capital' : 'Country'}</th>
+              <th>Result</th>
+            </tr>
+          </thead>
+          <tbody>
+            {run.history.map((h, i) => (
+              <tr key={i}>
+                <td class="num">{i + 1}</td>
+                <td>
+                  <img class="thumb" src={source.flagSrc(h.flag)} alt="" />
+                </td>
+                <td class="left country">
+                  {h.answer}
+                  {run.mode === 'capitals' && <span class="of-country">{h.countryName}</span>}
+                </td>
+                <td>
+                  <span class={`pill ${h.end === 'correct' ? 'me' : 'none'}`}>
+                    {h.end === 'correct' ? '✓' : h.end === 'timeout' ? 'timeout' : 'missed'}
+                  </span>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </section>
+    </main>
   );
 }
 

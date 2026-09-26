@@ -13,8 +13,12 @@ import {
   newDailyRun,
   newRating,
   nextDayAt,
+  pickPlacement,
   pickStages,
+  placementResult,
   ratingView,
+  START_RD,
+  START_VOLATILITY,
   settleRun,
   soloGuess,
   soloNext,
@@ -33,6 +37,7 @@ import {
   type LeaderboardEntry,
   type LeaderboardResponse,
   type LoginResponse,
+  type PlacementResult,
   type MeResponse,
   type ModeId,
   type ModeStats,
@@ -170,6 +175,13 @@ export class Accounts extends DurableObject<Env> {
         winner INTEGER,
         result TEXT NOT NULL,
         played_at INTEGER NOT NULL
+      );
+      CREATE TABLE IF NOT EXISTS placement_runs (
+        user_id TEXT NOT NULL,
+        mode TEXT NOT NULL,
+        state TEXT NOT NULL,
+        finished_at INTEGER,
+        PRIMARY KEY (user_id, mode)
       );
     `);
   }
@@ -415,12 +427,125 @@ export class Accounts extends DurableObject<Env> {
 
   private viewOf(userId: string, mode: ModeId, now: number): RatingView {
     const { r, row } = this.loadRating(userId, mode, now);
-    return ratingView(r, {
-      played: row?.played ?? 0,
-      wins: row?.wins ?? 0,
-      losses: row?.losses ?? 0,
-      draws: row?.draws ?? 0,
-    });
+    return ratingView(
+      r,
+      { played: row?.played ?? 0, wins: row?.wins ?? 0, losses: row?.losses ?? 0, draws: row?.draws ?? 0 },
+      { locked: !row, placing: !row && this.loadPlacement(userId, mode) !== null },
+    );
+  }
+
+  /** A first rating in `mode` (unlocks ranked); does nothing if there already is one. */
+  private unlock(userId: string, mode: ModeId, rating: number, now: number) {
+    this.sql.exec(
+      `INSERT INTO ratings (user_id, mode, rating, rd, vol, played, wins, losses, draws, updated_at)
+       VALUES (?, ?, ?, ?, ?, 0, 0, 0, 0, ?) ON CONFLICT (user_id, mode) DO NOTHING`,
+      userId,
+      mode,
+      rating,
+      START_RD,
+      START_VOLATILITY,
+      now,
+    );
+  }
+
+  private hasRating(userId: string, mode: ModeId): boolean {
+    return this.sql.exec('SELECT 1 FROM ratings WHERE user_id = ? AND mode = ?', userId, mode).toArray().length > 0;
+  }
+
+  /** Skip the placement test: start in Bronze at the default rating. Abandons an unfinished test. */
+  async rankedBeginner(userId: string, mode: ModeId, now = Date.now()): Promise<RankedProfile> {
+    if (!this.hasRating(userId, mode)) {
+      this.sql.exec('DELETE FROM placement_runs WHERE user_id = ? AND mode = ? AND finished_at IS NULL', userId, mode);
+      this.unlock(userId, mode, newRating().rating, now);
+    }
+    return this.rankedProfile(userId, now);
+  }
+
+  // ---------- Placement test ----------
+
+  private loadPlacement(userId: string, mode: ModeId): DailyRun | null {
+    const row = this.sql
+      .exec<{ state: string }>('SELECT state FROM placement_runs WHERE user_id = ? AND mode = ?', userId, mode)
+      .toArray()[0];
+    return row ? JSON.parse(row.state) : null;
+  }
+
+  /** Saves the run; once it is finished, the result becomes the player's first rating. */
+  private savePlacement(userId: string, run: DailyRun, now: number) {
+    this.sql.exec(
+      `INSERT INTO placement_runs (user_id, mode, state, finished_at) VALUES (?, ?, ?, ?)
+       ON CONFLICT (user_id, mode) DO UPDATE SET state = excluded.state, finished_at = excluded.finished_at`,
+      userId,
+      run.mode,
+      JSON.stringify(run),
+      run.finishedAt,
+    );
+    if (run.finishedAt !== null) this.unlock(userId, run.mode, this.placementOf(run)!.rating, now);
+  }
+
+  private placementOf(run: DailyRun): PlacementResult | null {
+    if (run.finishedAt === null) return null;
+    return placementResult(run.rounds.map((r) => ({ code: r.code, correct: r.end === 'correct' })));
+  }
+
+  private placementResponse(run: DailyRun, now: number): DailyResponse {
+    return { run: dailyView(run, now), now, placement: this.placementOf(run) };
+  }
+
+  /**
+   * The test run to act on, with a timed-out round settled (and saved). Null when there is none, or when
+   * ranked was unlocked some other way before the test finished.
+   */
+  private placementRun(userId: string, mode: ModeId, now: number): DailyRun | null {
+    const run = this.loadPlacement(userId, mode);
+    if (!run) return null;
+    if (run.finishedAt === null && this.hasRating(userId, mode)) return null;
+    if (settleRun(run, now)) this.savePlacement(userId, run, now);
+    return run;
+  }
+
+  /** Start the placement test for `mode`, or resume it. Null if ranked is already unlocked without one. */
+  async placementStart(userId: string, mode: ModeId, now = Date.now()): Promise<DailyResponse | null> {
+    let run = this.placementRun(userId, mode, now);
+    if (!run) {
+      if (this.hasRating(userId, mode)) return null;
+      const codes = pickPlacement();
+      const date = dayOf(now);
+      run = newDailyRun(date, mode, codes, now, this.flagToken(codes[0], now + COUNTDOWN_MS, date));
+      this.savePlacement(userId, run, now);
+    }
+    return this.placementResponse(run, now);
+  }
+
+  async placementGet(userId: string, mode: ModeId, now = Date.now()): Promise<DailyResponse | null> {
+    const run = this.placementRun(userId, mode, now);
+    return run ? this.placementResponse(run, now) : null;
+  }
+
+  async placementGuess(userId: string, mode: ModeId, round: number, text: string, now = Date.now()): Promise<DailyGuessResponse | null> {
+    const run = this.placementRun(userId, mode, now);
+    if (!run) return null;
+    const outcome = soloGuess(run, round, text, now);
+    this.savePlacement(userId, run, now);
+    return { outcome, ...this.placementResponse(run, now) };
+  }
+
+  async placementPass(userId: string, mode: ModeId, round: number, now = Date.now()): Promise<DailyResponse | null> {
+    const run = this.placementRun(userId, mode, now);
+    if (!run) return null;
+    soloPass(run, round, now);
+    this.savePlacement(userId, run, now);
+    return this.placementResponse(run, now);
+  }
+
+  async placementNext(userId: string, mode: ModeId, round: number, now = Date.now()): Promise<DailyResponse | null> {
+    const run = this.placementRun(userId, mode, now);
+    if (!run) return null;
+    const next = run.rounds.length;
+    if (round === next && run.rounds[next - 1].end && next < run.codes.length)
+      soloNext(run, round, now, this.flagToken(run.codes[next], now, dayOf(now)));
+    this.savePlacement(userId, run, now);
+    return this.placementResponse(run, now);
   }
 
   /** Who is queueing: the session's user and their rating in `mode` (null if the token is invalid). */
@@ -494,7 +619,7 @@ export class Accounts extends DurableObject<Env> {
       .exec<{ user_id: string; name: string; rating: number; played: number }>(
         `SELECT r.user_id, u.display_name AS name, r.rating, r.played FROM ratings r
          JOIN users u ON u.id = r.user_id
-         WHERE r.mode = ? ORDER BY r.rating DESC, r.updated_at ASC`,
+         WHERE r.mode = ? AND r.played > 0 ORDER BY r.rating DESC, r.updated_at ASC`,
         mode,
       )
       .toArray()

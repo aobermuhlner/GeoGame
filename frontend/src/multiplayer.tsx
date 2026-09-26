@@ -7,6 +7,7 @@ import { DivisionBadge, RankedBoard, RankedCard, type Searching } from './compon
 import { Lobby } from './components/Lobby';
 import { GameScreen } from './components/GameScreen';
 import { Results } from './components/Results';
+import { SoloGame, placementSource } from './components/Daily';
 import { RankedQueue, RoomConnection, createRoom, flagSrc, getSessionId, roomExists, type ConnStatus } from './net';
 
 // The current room is remembered per tab.
@@ -129,6 +130,9 @@ export function Multiplayer({ name, onImmersive }: { name: string; onImmersive: 
   const [searching, setSearching] = useState<Searching | null>(null);
   const [rankedError, setRankedError] = useState<string | null>(null);
   const queueRef = useRef<RankedQueue | null>(null);
+  /** Minigame whose placement test is open */
+  const [placement, setPlacement] = useState<ModeId | null>(null);
+  const placementRun = useMemo(() => (placement ? placementSource(placement) : null), [placement]);
 
   // Local bot demo (dev only)
   const [demoVm, setDemoVm] = useState<GameVM | null>(null);
@@ -362,6 +366,18 @@ export function Multiplayer({ name, onImmersive }: { name: string; onImmersive: 
     );
   }
 
+  if (placement && placementRun) {
+    return (
+      <SoloGame
+        key={placement}
+        mode={placement}
+        source={placementRun}
+        onExit={() => setPlacement(null)}
+        onImmersive={onImmersive}
+      />
+    );
+  }
+
   return (
     <Home
       name={name}
@@ -371,7 +387,7 @@ export function Multiplayer({ name, onImmersive }: { name: string; onImmersive: 
       onCreate={onCreate}
       onJoin={onJoin}
       onDemo={startDemo}
-      ranked={<RankedCard searching={searching} error={rankedError} onFind={findMatch} onCancel={cancelSearch} />}
+      ranked={<RankedCard searching={searching} error={rankedError} onFind={findMatch} onCancel={cancelSearch} onPlacement={setPlacement} />}
       below={<RankedBoard />}
     />
   );

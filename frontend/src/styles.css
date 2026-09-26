@@ -1175,3 +1175,19 @@ em {
 .rating-change .down { color: var(--red); }
 .rating-change .muted { font-weight: 500; }
 .stats-sub { margin: 16px 0 0; font-size: 0.9rem; font-weight: 800; color: #4b5048; }
+
+/* Ranked unlock + placement test */
+.unlock-lead { margin: 4px 0 12px; font-weight: 600; }
+.unlock-options { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.unlock-option {
+  display: flex; flex-direction: column; gap: 6px; padding: 12px;
+  border: 1px solid var(--line); border-radius: 12px; background: #fbf8ef;
+}
+.unlock-option h3 { margin: 0; font-size: 0.95rem; font-weight: 800; }
+.unlock-option p { margin: 0; flex: 1; }
+.unlock-option .btn { width: 100%; }
+.unlock .ladder li { grid-template-columns: 6.5em 5.5em 1fr; }
+@media (max-width: 420px) { .unlock-options { grid-template-columns: 1fr; } }
+.placement-result { display: flex; align-items: center; justify-content: center; gap: 10px; margin: 8px 0 4px; flex-wrap: wrap; }
+.placement-groups { list-style: none; display: flex; flex-wrap: wrap; justify-content: center; gap: 8px 14px; margin: 8px 0 16px; padding: 0; }
+.placement-groups li { display: flex; align-items: center; gap: 6px; font-variant-numeric: tabular-nums; }

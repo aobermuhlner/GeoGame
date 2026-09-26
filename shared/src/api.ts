@@ -1,6 +1,7 @@
 // HTTP API shapes for accounts, the daily challenge and leaderboards (Worker ↔ browser).
 import type { DailyView } from './daily';
 import type { GuessOutcome } from './game';
+import type { PlacementResult } from './placement';
 import { MODE_IDS, type ModeId } from './modes';
 
 export interface UserView {
@@ -58,6 +59,8 @@ export interface DailySummary {
 export interface DailyResponse {
   run: DailyView;
   now: number;
+  /** Ranked placement test: the result once the test is finished */
+  placement?: PlacementResult | null;
 }
 
 export interface DailyGuessResponse extends DailyResponse {

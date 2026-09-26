@@ -2,9 +2,15 @@ import { env, exports } from 'cloudflare:workers';
 import { runInDurableObject } from 'cloudflare:test';
 import { describe, expect, it } from 'vitest';
 import {
+  COUNTDOWN_MS,
+  COUNTRY_BY_CODE,
   DIVISIONS,
+  PLACEMENT_ROUNDS,
   RECONNECT_GRACE_MS,
+  ROUND_TIME_MS,
   countriesInRegions,
+  placementRating,
+  type DailyRun,
   type LoginResponse,
   type ModeId,
   type QueueServerMessage,
@@ -25,6 +31,15 @@ async function login(name: string): Promise<LoginResponse> {
   expect(res.status).toBe(200);
   return res.json();
 }
+
+const post = (path: string, token: string, body?: unknown) =>
+  exports.default.fetch(
+    new Request(`${BASE}${path}`, {
+      method: 'POST',
+      headers: { Origin: ORIGIN, Authorization: `Bearer ${token}`, ...(body ? { 'Content-Type': 'application/json' } : {}) },
+      body: body ? JSON.stringify(body) : undefined,
+    }),
+  );
 
 const get = <T>(path: string, token?: string) =>
   exports.default
@@ -87,6 +102,7 @@ async function seat(code: string, ticket: string, name: string) {
 async function matched(mode: ModeId = 'flags') {
   const tag = Math.random().toString(36).slice(2, 7);
   const [a, b] = await Promise.all([login(`A${tag}`), login(`B${tag}`)]);
+  await Promise.all([post(`/ranked/${mode}/beginner`, a.token), post(`/ranked/${mode}/beginner`, b.token)]);
   const qa = await Queue.open(a.token, mode);
   await qa.next('queued');
   const qb = await Queue.open(b.token, mode);
@@ -116,6 +132,7 @@ describe('ranked queue', () => {
   it('keeps different minigames apart', async () => {
     const tag = Math.random().toString(36).slice(2, 7);
     const [a, b] = await Promise.all([login(`F${tag}`), login(`G${tag}`)]);
+    await Promise.all([post('/ranked/flags/beginner', a.token), post('/ranked/locate/beginner', b.token)]);
     const qa = await Queue.open(a.token, 'flags');
     const qb = await Queue.open(b.token, 'locate');
     await Promise.all([qa.next('queued'), qb.next('queued')]);
@@ -123,6 +140,90 @@ describe('ranked queue', () => {
     expect(qa.messages.some((m) => m.t === 'matched')).toBe(false);
     qa.close();
     qb.close();
+  });
+});
+
+describe('ranked unlock', () => {
+  const db = () => env.ACCOUNTS.getByName('main');
+  const fresh = () => login(`U${Math.random().toString(36).slice(2, 8)}`);
+
+  /** The stored placement run (its codes are secret to the client until each round ends). */
+  const storedRun = (userId: string, mode: ModeId) =>
+    runInDurableObject(db(), (_: Accounts, state) => {
+      const row = state.storage.sql
+        .exec<{ state: string }>('SELECT state FROM placement_runs WHERE user_id = ? AND mode = ?', userId, mode)
+        .toArray()[0];
+      return row ? (JSON.parse(row.state) as DailyRun) : null;
+    });
+
+  it('a new player is locked out of the queue until they pick a start', async () => {
+    const a = await fresh();
+    const p = await get<RankedProfile>('/ranked', a.token);
+    expect(p.flags).toMatchObject({ locked: true, placing: false });
+    const q = await Queue.open(a.token, 'flags');
+    expect((await q.next('error')).message).toMatch(/unlock/i);
+  });
+
+  it('beginner starts at 1000 in Bronze, per minigame, and rules out the test', async () => {
+    const a = await fresh();
+    const res = await post('/ranked/flags/beginner', a.token);
+    expect(res.status).toBe(200);
+    const p = (await res.json()) as RankedProfile;
+    expect(p.flags).toMatchObject({ locked: false, rating: 1000, division: 'bronze', played: 0 });
+    expect(p.capitals.locked).toBe(true);
+    expect((await post('/ranked/flags/placement/start', a.token)).status).toBe(409);
+    // Not on the ladder before a first match.
+    const board = await get<RankedBoardResponse>('/ranked/leaderboard?mode=flags', a.token);
+    expect(board.you).toBeNull();
+  });
+
+  it('the placement test sets the first rating from the share of correct answers, once', async () => {
+    const a = await fresh();
+    let t = Date.now();
+    const start = await db().placementStart(a.user.id, 'flags', t);
+    expect(start!.run.totalRounds).toBe(PLACEMENT_ROUNDS);
+    expect((await get<RankedProfile>('/ranked', a.token)).flags).toMatchObject({ locked: true, placing: true });
+
+    const codes = (await storedRun(a.user.id, 'flags'))!.codes;
+    const right = 22; // 73% → 1350, Silver
+    t += COUNTDOWN_MS + 1000;
+    let last = start!;
+    for (let round = 1; round <= codes.length; round++) {
+      if (round <= right) {
+        const g = await db().placementGuess(a.user.id, 'flags', round, COUNTRY_BY_CODE[codes[round - 1]].name, t);
+        expect(g!.outcome).toBe('correct');
+        last = g!;
+      } else if (round % 2) {
+        last = (await db().placementPass(a.user.id, 'flags', round, t))!;
+      } else {
+        t += ROUND_TIME_MS + 1; // let this one time out
+        last = (await db().placementGet(a.user.id, 'flags', t))!;
+      }
+      t += 10;
+      if (round < codes.length) await db().placementNext(a.user.id, 'flags', round, t);
+      t += 10;
+    }
+    expect(last.run.phase).toBe('finished');
+    expect(last.placement).toMatchObject({ correct: right, total: PLACEMENT_ROUNDS, rating: placementRating(right, PLACEMENT_ROUNDS) });
+    expect(last.placement!.division).toBe('silver');
+
+    const p = await get<RankedProfile>('/ranked', a.token);
+    expect(p.flags).toMatchObject({ locked: false, rating: 1350, division: 'silver', played: 0, wins: 0, provisional: true });
+
+    // No retake: starting again shows the finished test, guesses do nothing, the rating stays.
+    const again = await post('/ranked/flags/placement/start', a.token);
+    expect(((await again.json()) as { run: { phase: string } }).run.phase).toBe('finished');
+    const late = await post('/ranked/flags/placement/guess', a.token, { round: PLACEMENT_ROUNDS, text: 'France' });
+    expect(((await late.json()) as { outcome: string }).outcome).toBe('ignored');
+    expect((await get<RankedProfile>('/ranked', a.token)).flags.rating).toBe(1350);
+  });
+
+  it('choosing beginner mid-test abandons the test', async () => {
+    const a = await fresh();
+    expect((await post('/ranked/capitals/placement/start', a.token)).status).toBe(200);
+    const p = (await (await post('/ranked/capitals/beginner', a.token)).json()) as RankedProfile;
+    expect(p.capitals).toMatchObject({ locked: false, rating: 1000, placing: false });
+    expect((await post('/ranked/capitals/placement/pass', a.token, { round: 1 })).status).toBe(404);
   });
 });
 

@@ -135,10 +135,18 @@ export interface RatingView {
   wins: number;
   losses: number;
   draws: number;
+  /** Never unlocked: start as a beginner or take the placement test before queueing */
+  locked: boolean;
+  /** Locked with a placement test in progress */
+  placing: boolean;
 }
 
-export function ratingView(r: Rating, record: { played: number; wins: number; losses: number; draws: number }): RatingView {
-  return { rating: Math.round(r.rating), division: divisionOf(r.rating), provisional: r.rd > PROVISIONAL_RD, ...record };
+export function ratingView(
+  r: Rating,
+  record: { played: number; wins: number; losses: number; draws: number },
+  status: { locked: boolean; placing: boolean } = { locked: false, placing: false },
+): RatingView {
+  return { rating: Math.round(r.rating), division: divisionOf(r.rating), provisional: r.rd > PROVISIONAL_RD, ...record, ...status };
 }
 
 export type RankedProfile = Record<ModeId, RatingView>;
