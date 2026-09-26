@@ -1,0 +1,45 @@
+import type { GuessOutcome, MatchResult, RegionId, RoundEnd, Slot } from '@flagduel/shared';
+
+export interface PlayerVM {
+  name: string;
+  score: number;
+  wrongTotal: number;
+  passed: boolean;
+  connected: boolean;
+}
+
+export interface RoundSummary {
+  flagUrl: string;
+  countryName: string;
+  winner: Slot | null;
+  wrong: [number, number];
+  end: RoundEnd;
+}
+
+/** Everything the game/results screens need. Built by the mock or from server messages. */
+export interface GameVM {
+  phase: 'countdown' | 'playing' | 'reveal' | 'finished';
+  me: Slot;
+  players: [PlayerVM, PlayerVM];
+  /** 1-based index of the current round */
+  round: number;
+  totalRounds: number;
+  flagUrl: string | null;
+  /** Local-clock ms timestamps */
+  countdownEndsAt: number | null;
+  deadline: number | null;
+  regions: RegionId[];
+  reveal: { countryName: string; winner: Slot | null; end: RoundEnd } | null;
+  /** Increments on every wrong guess by the opponent (drives the ✗ flash). */
+  oppWrongSeq: number;
+  history: RoundSummary[];
+  result: MatchResult | null;
+}
+
+export interface GameActions {
+  guess(text: string): Promise<GuessOutcome> | GuessOutcome;
+  pass(): void;
+  giveUp(): void;
+  rematch(): void;
+  leave(): void;
+}

@@ -1,0 +1,17 @@
+{
+  "name": "flag-duel",
+  "private": true,
+  "type": "module",
+  "workspaces": ["shared", "frontend", "worker"],
+  "scripts": {
+    "dev": "concurrently -k -n worker,web -c green,blue \"npm run dev -w worker\" \"npm run dev -w frontend\"",
+    "dev:web": "npm run dev -w frontend",
+    "test": "npm run test -w shared && npm run test -w worker --if-present",
+    "build": "npm run build -w frontend",
+    "typecheck": "tsc -p shared && tsc -p frontend --noEmit"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.0",
+    "typescript": "^5.6.3"
+  }
+}
