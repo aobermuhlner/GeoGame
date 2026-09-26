@@ -4,7 +4,11 @@ import {
   DIVISION_IDS,
   MODES,
   MODE_IDS,
+  PLACEMENT_BANDS,
+  PLACEMENT_PER_GROUP,
+  PLACEMENT_ROUNDS,
   REGION_LABELS,
+  divisionOf,
   type DivisionId,
   type ModeId,
   type RankedBoardResponse,
@@ -75,14 +79,19 @@ export function RankedCard({
   error,
   onFind,
   onCancel,
+  onPlacement,
 }: {
   searching: Searching | null;
   error: string | null;
   onFind: (mode: ModeId) => void;
   onCancel: () => void;
+  /** Open the placement test of `mode` */
+  onPlacement: (mode: ModeId) => void;
 }) {
   const [mode, setMode] = useState<ModeId>(searching?.mode ?? loadRankedMode());
   const [profile, setProfile] = useState<RankedProfile | null>(null);
+  const [unlockError, setUnlockError] = useState<string | null>(null);
+  const [unlocking, setUnlocking] = useState(false);
 
   useEffect(() => {
     api.ranked().then(setProfile).catch(() => {});
@@ -90,6 +99,18 @@ export function RankedCard({
 
   const r = profile?.[mode];
   const division = r?.division ?? 'bronze';
+
+  async function startAsBeginner() {
+    setUnlocking(true);
+    setUnlockError(null);
+    try {
+      setProfile(await api.rankedBeginner(mode));
+    } catch (e) {
+      setUnlockError(e instanceof Error ? e.message : 'Something went wrong');
+    } finally {
+      setUnlocking(false);
+    }
+  }
 
   return (
     <section class="card ranked-card">
@@ -115,39 +136,52 @@ export function RankedCard({
         ))}
       </div>
 
-      <div class="rating-row">
-        <DivisionBadge division={division} />
-        <div class="rating-main">
-          <span class="rating-num">{r ? r.rating : '–'}</span>
-          <span class="muted small">
-            {r?.provisional ? 'provisional rating · moves fast in your first games' : `${MODES[mode].label} rating`}
-          </span>
-        </div>
-        {r && r.played > 0 && (
-          <span class="record small">
-            {r.wins}W · {r.losses}L{r.draws ? ` · ${r.draws}D` : ''}
-          </span>
-        )}
-      </div>
-      <p class="muted small ranked-regions">
-        {DIVISIONS[division].label} plays <strong>{regionList(division)}</strong>. Against a player from a lower
-        division, the match uses theirs.
-      </p>
-
-      {searching ? (
-        <div class="searching" role="status">
-          <span class="spinner" aria-hidden="true" />
-          <span>
-            Looking for an opponent… <Elapsed since={searching.since} />
-          </span>
-          <button class="btn btn-ghost btn-sm" onClick={onCancel}>
-            Cancel
-          </button>
-        </div>
+      {r?.locked ? (
+        <Unlock
+          mode={mode}
+          placing={r.placing}
+          busy={unlocking}
+          error={unlockError}
+          onBeginner={startAsBeginner}
+          onPlacement={() => onPlacement(mode)}
+        />
       ) : (
-        <button class="btn btn-primary btn-lg" onClick={() => onFind(mode)}>
-          Find match
-        </button>
+        <>
+          <div class="rating-row">
+            <DivisionBadge division={division} />
+            <div class="rating-main">
+              <span class="rating-num">{r ? r.rating : '–'}</span>
+              <span class="muted small">
+                {r?.provisional ? 'provisional rating · moves fast in your first games' : `${MODES[mode].label} rating`}
+              </span>
+            </div>
+            {r && r.played > 0 && (
+              <span class="record small">
+                {r.wins}W · {r.losses}L{r.draws ? ` · ${r.draws}D` : ''}
+              </span>
+            )}
+          </div>
+          <p class="muted small ranked-regions">
+            {DIVISIONS[division].label} plays <strong>{regionList(division)}</strong>. Against a player from a lower
+            division, the match uses theirs.
+          </p>
+
+          {searching ? (
+            <div class="searching" role="status">
+              <span class="spinner" aria-hidden="true" />
+              <span>
+                Looking for an opponent… <Elapsed since={searching.since} />
+              </span>
+              <button class="btn btn-ghost btn-sm" onClick={onCancel}>
+                Cancel
+              </button>
+            </div>
+          ) : (
+            <button class="btn btn-primary btn-lg" onClick={() => onFind(mode)} disabled={!r}>
+              Find match
+            </button>
+          )}
+        </>
       )}
       {error && (
         <p class="form-error" role="alert">
@@ -167,6 +201,87 @@ export function RankedCard({
         </ul>
       </details>
     </section>
+  );
+}
+
+/** "1250 · Silver" rows of the placement table: share correct → starting rating. */
+function placementRows() {
+  return PLACEMENT_BANDS.map((b, i) => ({
+    range:
+      i === 0
+        ? `${Math.round(b.min * 100)}%+`
+        : b.min === 0
+          ? `under ${Math.round(PLACEMENT_BANDS[i - 1].min * 100)}%`
+          : `${Math.round(b.min * 100)}–${Math.round(PLACEMENT_BANDS[i - 1].min * 100) - 1}%`,
+    rating: b.rating,
+    division: divisionOf(b.rating),
+  }));
+}
+
+/** Ranked is locked until the player picks a start: Bronze beginner, or the placement test. */
+function Unlock({
+  mode,
+  placing,
+  busy,
+  error,
+  onBeginner,
+  onPlacement,
+}: {
+  mode: ModeId;
+  placing: boolean;
+  busy: boolean;
+  error: string | null;
+  onBeginner: () => void;
+  onPlacement: () => void;
+}) {
+  return (
+    <div class="unlock">
+      <p class="unlock-lead">
+        <span class="lock" aria-hidden="true">
+          🔒
+        </span>{' '}
+        Ranked {MODES[mode].label} is locked. Choose how you start:
+      </p>
+      <div class="unlock-options">
+        <div class="unlock-option">
+          <h3>Placement test</h3>
+          <p class="muted small">
+            {PLACEMENT_ROUNDS} countries from all regions ({PLACEMENT_PER_GROUP} per division). Your share of correct
+            answers sets your starting rating, up to Gold. One try only.
+          </p>
+          <button class="btn btn-primary" onClick={onPlacement} disabled={busy}>
+            {placing ? 'Continue test' : 'Take the test'}
+          </button>
+        </div>
+        <div class="unlock-option">
+          <h3>Beginner</h3>
+          <p class="muted small">
+            Start at {PLACEMENT_BANDS[PLACEMENT_BANDS.length - 1].rating} in <DivisionBadge division="bronze" small />{' '}
+            and climb from there.{placing ? ' Abandons your placement test.' : ''}
+          </p>
+          <button class="btn btn-ghost" onClick={onBeginner} disabled={busy}>
+            Start in Bronze
+          </button>
+        </div>
+      </div>
+      {error && (
+        <p class="form-error" role="alert">
+          {error}
+        </p>
+      )}
+      <details class="ladder">
+        <summary class="small">Placement results</summary>
+        <ul>
+          {placementRows().map((row) => (
+            <li key={row.range}>
+              <span class="small">{row.range}</span>
+              <DivisionBadge division={row.division} small />
+              <span class="muted small">{row.rating}</span>
+            </li>
+          ))}
+        </ul>
+      </details>
+    </div>
   );
 }
 

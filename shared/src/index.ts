@@ -9,3 +9,4 @@ export * from './messages';
 export * from './daily';
 export * from './api';
 export * from './ranked';
+export * from './placement';

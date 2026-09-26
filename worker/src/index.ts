@@ -140,6 +140,32 @@ async function accountRoutes(request: Request, env: Env, url: URL, origin: strin
     return linked ? json(linked) : fail(409, 'Only guest accounts can be linked');
   }
 
+  // /ranked/:mode/beginner (POST) · /ranked/:mode/placement (GET) · /ranked/:mode/placement/start|guess|pass|next (POST)
+  const rk = /^\/ranked\/([a-z]+)\/(beginner|placement)(?:\/(start|guess|pass|next))?$/.exec(path);
+  if (rk && (MODE_IDS as readonly string[]).includes(rk[1])) {
+    const mode = rk[1] as ModeId;
+    const action = rk[3];
+    const noTest = (r: unknown) => (r ? json(r) : fail(404, 'No placement test to play'));
+    if (rk[2] === 'beginner') return method === 'POST' && !action ? json(await db.rankedBeginner(user.id, mode)) : fail(404, 'Not found');
+    if (!action) return method === 'GET' ? noTest(await db.placementGet(user.id, mode)) : fail(405, 'Method not allowed');
+    if (method !== 'POST') return fail(405, 'Method not allowed');
+    if (action === 'start') {
+      const r = await db.placementStart(user.id, mode);
+      return r ? json(r) : fail(409, 'Ranked is already unlocked for this game');
+    }
+    const b = await readBody(request);
+    if (!isRound(b.round)) return fail(400, 'Missing round');
+    switch (action) {
+      case 'guess':
+        if (typeof b.text !== 'string' || b.text.length > 80) return fail(400, 'Missing guess');
+        return noTest(await db.placementGuess(user.id, mode, b.round, b.text));
+      case 'pass':
+        return noTest(await db.placementPass(user.id, mode, b.round));
+      default:
+        return noTest(await db.placementNext(user.id, mode, b.round));
+    }
+  }
+
   if (path === '/auth/logout' && method === 'POST') {
     await db.logout(token);
     return json({ ok: true });

@@ -233,10 +233,10 @@ export function MainLobby({
             const r = ranked?.[m];
             return (
               <div class="stat" key={`r${m}`}>
-                <span class="stat-value">{r ? r.rating : dash}</span>
-                {r && <DivisionBadge division={r.division} small />}
+                <span class="stat-value">{r && !r.locked ? r.rating : dash}</span>
+                {r && !r.locked && <DivisionBadge division={r.division} small />}
                 <span class="stat-label">
-                  {MODES[m].label.toLowerCase()} · {r && r.played ? `${r.wins}W ${r.losses}L` : 'unplayed'}
+                  {MODES[m].label.toLowerCase()} · {r?.locked ? 'locked' : r && r.played ? `${r.wins}W ${r.losses}L` : 'unplayed'}
                 </span>
               </div>
             );

@@ -117,6 +117,15 @@ export const api = {
   leaderboard: (board: BoardId) => request<LeaderboardResponse>(`/leaderboard?board=${board}`),
   ranked: () => request<RankedProfile>('/ranked'),
   rankedBoard: (mode: ModeId) => request<RankedBoardResponse>(`/ranked/leaderboard?mode=${mode}`),
+  rankedBeginner: (mode: ModeId) => request<RankedProfile>(`/ranked/${mode}/beginner`, { method: 'POST' }),
+  placementStart: (mode: ModeId) => request<DailyResponse>(`/ranked/${mode}/placement/start`, { method: 'POST' }),
+  placementGet: (mode: ModeId) => request<DailyResponse>(`/ranked/${mode}/placement`),
+  placementGuess: (mode: ModeId, round: number, text: string) =>
+    request<DailyGuessResponse>(`/ranked/${mode}/placement/guess`, { method: 'POST', body: { round, text } }),
+  placementPass: (mode: ModeId, round: number) =>
+    request<DailyResponse>(`/ranked/${mode}/placement/pass`, { method: 'POST', body: { round } }),
+  placementNext: (mode: ModeId, round: number) =>
+    request<DailyResponse>(`/ranked/${mode}/placement/next`, { method: 'POST', body: { round } }),
 };
 
 export const dailyFlagSrc = (flagToken: string) => `${WORKER_URL}/daily/flags/${flagToken}`;
