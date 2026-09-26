@@ -128,6 +128,18 @@ async function accountRoutes(request: Request, env: Env, url: URL, origin: strin
 
   if (path === '/ranked' && method === 'GET') return json(await db.rankedProfile(user.id));
 
+  // POST /auth/google/link { credential } — a guest keeps their progress by attaching a Google account
+  if (path === '/auth/google/link' && method === 'POST') {
+    if (!env.GOOGLE_CLIENT_ID) return fail(503, 'Google sign-in is not configured');
+    if (!user.guest) return fail(409, 'Only guest accounts can be linked');
+    const { credential } = await readBody(request);
+    if (typeof credential !== 'string' || credential.length > 4096) return fail(400, 'Missing credential');
+    const claims = await verifyGoogleIdToken(credential, env.GOOGLE_CLIENT_ID).catch(() => null);
+    if (!claims) return fail(400, 'Invalid Google sign-in');
+    const linked = await db.linkGoogle(user.id, claims);
+    return linked ? json(linked) : fail(409, 'Only guest accounts can be linked');
+  }
+
   if (path === '/auth/logout' && method === 'POST') {
     await db.logout(token);
     return json({ ok: true });

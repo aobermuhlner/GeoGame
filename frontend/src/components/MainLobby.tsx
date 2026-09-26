@@ -10,9 +10,44 @@ import {
 } from '@flagduel/shared';
 import { api } from '../api';
 import { NextDaily } from './Daily';
+import { GoogleButton } from './Login';
 import { Leaderboard } from './Leaderboard';
 import { DivisionBadge } from './Ranked';
 import { Avatar, type Tab } from './NavBar';
+
+/** Guests: attach a Google account so the scores and ratings survive sign-out and other devices. */
+function LinkGoogle({ onUser }: { onUser: (u: UserView) => void }) {
+  const [clientId, setClientId] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    api
+      .config()
+      .then((c) => setClientId(c.googleClientId))
+      .catch(() => {});
+  }, []);
+
+  if (!clientId) return null;
+  return (
+    <div class="link-google">
+      <p class="small">
+        <strong>Keep your progress.</strong> Guest scores live only in this browser. Link a Google account to sign
+        in anywhere. If you already have one, this guest's history is added to it.
+      </p>
+      <GoogleButton
+        clientId={clientId}
+        onCredential={(c) => {
+          setError(null);
+          api
+            .linkGoogle(c)
+            .then(onUser)
+            .catch((e: Error) => setError(e.message));
+        }}
+      />
+      {error && <p class="form-error">{error}</p>}
+    </div>
+  );
+}
 
 function AccountCard({
   user,
@@ -89,6 +124,7 @@ function AccountCard({
       <button class="btn btn-ghost btn-sm" onClick={onSignOut}>
         Sign out
       </button>
+      {user.guest && <LinkGoogle onUser={onUser} />}
     </section>
   );
 }
@@ -121,7 +157,7 @@ export function MainLobby({
     api.me().then(setMe).catch(() => {});
     api.ranked().then(setRanked).catch(() => {});
     api.dailySummary().then(setToday).catch(() => {});
-  }, []);
+  }, [user.id]); // linking a guest to an existing Google account switches accounts
 
   const stats = me?.stats;
   const dash = '–';

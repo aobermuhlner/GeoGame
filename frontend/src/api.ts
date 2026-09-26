@@ -91,6 +91,9 @@ export const api = {
   config: () => request<AuthConfig>('/auth/config'),
   loginGoogle: (credential: string) =>
     request<LoginResponse>('/auth/google', { method: 'POST', body: { credential } }).then(signedIn),
+  /** Guest → Google account; the guest session is replaced by the returned one. */
+  linkGoogle: (credential: string) =>
+    request<LoginResponse>('/auth/google/link', { method: 'POST', body: { credential } }).then(signedIn),
   loginGuest: (name: string) => request<LoginResponse>('/auth/guest', { method: 'POST', body: { name } }).then(signedIn),
   loginDev: (name: string) => request<LoginResponse>('/auth/dev', { method: 'POST', body: { name } }).then(signedIn),
   async logout() {

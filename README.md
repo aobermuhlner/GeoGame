@@ -4,6 +4,15 @@ Geography flag games with accounts (Google sign-in), a **daily single-player cha
 ranking, and a **real-time 1 vs 1 duel**. After signing in you land in the main lobby (account, stats,
 today's status); the menu bar switches between **Lobby**, **Daily Games**, **Practice** and **Multiplayer**.
 
+### Accounts
+
+Sign in with **Google**, or play as a **guest** by picking a name. There are no passwords: Google proves
+who you are, and the Worker only stores your Google id (`sub`), email, name and picture. A guest account
+lives in the browser that holds its session token. Its lobby card offers **Link Google**, which turns the
+guest into a Google account and keeps everything (daily runs, ratings, ranked matches). If that Google
+account already exists, the guest's history is merged into it, keeping the Google account's own
+row wherever both have one.
+
 ### Daily Games
 
 Every game (Flags, Capitals) can be played **once per day** (UTC). Everyone gets the same 10 countries,
@@ -105,6 +114,8 @@ without the backend. Append `?bot=lazy` for a bot that never answers correctly.
 | `GET /flags/:token` | SVG of a started round's flag. Tokens are random per round, so URLs never reveal the country |
 | `GET /auth/config` | `{ googleClientId, devLogin }` for the login page |
 | `POST /auth/google` | `{ credential }` (Google ID token) → `{ token, user }`; the Worker verifies the JWT against Google's keys |
+| `POST /auth/google/link` | Guest session + `{ credential }` → `{ token, user }`: the guest becomes (or merges into) that Google account |
+| `POST /auth/guest` | `{ name }` → `{ token, user }`: a new guest account |
 | `POST /auth/dev` | `{ name }` → `{ token, user }` (only with `DEV_LOGIN=true` and a localhost origin) |
 | `POST /auth/logout` | Ends the session |
 | `GET /me`, `PATCH /me` | Account + stats; `{ displayName }` to rename |

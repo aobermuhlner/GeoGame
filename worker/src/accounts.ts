@@ -191,6 +191,42 @@ export class Accounts extends DurableObject<Env> {
     return this.login(`guest:${crypto.randomUUID()}`, name, null, null, now, GUEST_SESSION_TTL_MS);
   }
 
+  /**
+   * Turn a guest account into a Google one, so it can be signed into from anywhere.
+   * If that Google account already exists, the guest's history is merged into it (the Google
+   * account wins where both have a row, e.g. the same daily game) and the guest is deleted.
+   * Ends all guest sessions and returns a fresh session. Null if `userId` is not a guest.
+   */
+  async linkGoogle(userId: string, claims: GoogleClaims, now = Date.now()): Promise<LoginResponse | null> {
+    const guest = this.sql.exec<UserRow>('SELECT * FROM users WHERE id = ?', userId).toArray()[0];
+    if (!guest?.provider_id.startsWith('guest:')) return null;
+    const providerId = `google:${claims.sub}`;
+    const target = this.sql.exec<UserRow>('SELECT * FROM users WHERE provider_id = ?', providerId).toArray()[0];
+
+    this.ctx.storage.transactionSync(() => {
+      this.sql.exec('DELETE FROM sessions WHERE user_id = ?', userId);
+      if (!target) {
+        this.sql.exec('UPDATE users SET provider_id = ? WHERE id = ?', providerId, userId);
+        return;
+      }
+      // Every table keyed by user_id (later ones included) moves over; rows the target already has win.
+      const tables = this.sql
+        .exec<{ name: string }>(
+          `SELECT m.name FROM sqlite_master m, pragma_table_info(m.name) c
+           WHERE m.type = 'table' AND c.name = 'user_id' AND m.name <> 'sessions'`,
+        )
+        .toArray();
+      for (const { name } of tables) {
+        this.sql.exec(`UPDATE OR IGNORE "${name}" SET user_id = ? WHERE user_id = ?`, target.id, userId);
+        this.sql.exec(`DELETE FROM "${name}" WHERE user_id = ?`, userId);
+      }
+      this.sql.exec('UPDATE ranked_matches SET player_a = ? WHERE player_a = ?', target.id, userId);
+      this.sql.exec('UPDATE ranked_matches SET player_b = ? WHERE player_b = ?', target.id, userId);
+      this.sql.exec('DELETE FROM users WHERE id = ?', userId);
+    });
+    return this.loginGoogle(claims, now);
+  }
+
   private async login(
     providerId: string,
     name: string,
