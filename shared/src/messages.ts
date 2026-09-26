@@ -38,7 +38,13 @@ export interface PlayerView {
   passed: boolean;
   /** Accepted a rematch on the results screen */
   rematch: boolean;
+  /** Server time by which a disconnected player must be back (null while connected) */
+  graceEndsAt: number | null;
+  /** Left for good */
+  left: boolean;
 }
+
+export type ForfeitReason = 'gaveUp' | 'left' | 'disconnected';
 
 export interface RoundView {
   /** Flag image token, fetch from GET /flags/:token */
@@ -69,6 +75,8 @@ export interface RoomView {
   reveal: RoundView | null;
   history: RoundView[];
   result: MatchResult | null;
+  /** Why the match ended early, if it did */
+  forfeitReason: ForfeitReason | null;
 }
 
 export type ErrorCode = 'room_full' | 'not_found' | 'bad_message' | 'not_allowed' | 'pool_too_small' | 'in_progress';

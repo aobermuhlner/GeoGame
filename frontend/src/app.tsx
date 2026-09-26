@@ -48,14 +48,23 @@ interface Online {
 function toVM(o: Online): GameVM | null {
   const { room, conn, you } = o;
   if (!room || room.phase === 'lobby' || room.players.length < 2) return null;
-  const p = room.players;
+  const player = (i: 0 | 1) => {
+    const x = room.players[i];
+    return {
+      name: x.name,
+      score: x.score,
+      wrongTotal: x.wrongTotal,
+      passed: x.passed,
+      connected: x.connected,
+      rematch: x.rematch,
+      graceEndsAt: conn.toLocal(x.graceEndsAt),
+      left: x.left,
+    };
+  };
   return {
     phase: room.phase,
     me: you,
-    players: [
-      { name: p[0].name, score: p[0].score, wrongTotal: p[0].wrongTotal, passed: p[0].passed, connected: p[0].connected },
-      { name: p[1].name, score: p[1].score, wrongTotal: p[1].wrongTotal, passed: p[1].passed, connected: p[1].connected },
-    ],
+    players: [player(0), player(1)],
     round: Math.max(1, room.round),
     totalRounds: room.totalRounds,
     flagUrl: room.flag ? flagSrc(room.flag) : null,
@@ -66,6 +75,7 @@ function toVM(o: Online): GameVM | null {
     oppWrongSeq: o.oppWrongSeq,
     history: room.history.map((h) => ({ ...h, flagUrl: flagSrc(h.flag) })),
     result: room.result,
+    forfeitReason: room.forfeitReason,
   };
 }
 

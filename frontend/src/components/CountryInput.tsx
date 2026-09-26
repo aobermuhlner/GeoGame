@@ -68,6 +68,7 @@ export function CountryInput({ locked, focusKey, onSubmit }: Props) {
         type="text"
         placeholder={locked ? '' : 'Type a country name…'}
         value={value}
+        maxLength={60}
         readOnly={locked}
         aria-disabled={locked}
         autoComplete="off"

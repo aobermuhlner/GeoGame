@@ -56,12 +56,13 @@ export function startMockGame(opts: {
     const scores = scoresOf(rounds);
     const wrong = rounds.reduce<[number, number]>((w, x) => [w[0] + x.wrong[0], w[1] + x.wrong[1]], [0, 0]);
     const ended = rounds.filter((x) => x.end);
+    const present = { connected: true, rematch: false, graceEndsAt: null, left: false };
     opts.onUpdate({
       phase,
       me: 0,
       players: [
-        { name: opts.name, score: scores[0], wrongTotal: wrong[0], passed: !!r?.passed[0], connected: true },
-        { name: opts.botName, score: scores[1], wrongTotal: wrong[1], passed: !!r?.passed[1], connected: true },
+        { name: opts.name, score: scores[0], wrongTotal: wrong[0], passed: !!r?.passed[0], ...present },
+        { name: opts.botName, score: scores[1], wrongTotal: wrong[1], passed: !!r?.passed[1], ...present },
       ],
       round: Math.max(1, current + 1),
       totalRounds: codes.length,
@@ -82,6 +83,7 @@ export function startMockGame(opts: {
         end: x.end!,
       })),
       result: phase === 'finished' ? decideMatch(rounds, forfeitedBy) : null,
+      forfeitReason: forfeitedBy === null ? null : 'gaveUp',
     });
   }
 

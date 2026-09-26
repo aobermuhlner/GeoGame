@@ -1,4 +1,4 @@
-import type { GuessOutcome, MatchResult, RegionId, RoundEnd, Slot } from '@flagduel/shared';
+import type { ForfeitReason, GuessOutcome, MatchResult, RegionId, RoundEnd, Slot } from '@flagduel/shared';
 
 export interface PlayerVM {
   name: string;
@@ -6,6 +6,12 @@ export interface PlayerVM {
   wrongTotal: number;
   passed: boolean;
   connected: boolean;
+  /** Accepted a rematch */
+  rematch: boolean;
+  /** Local-clock time by which a disconnected player must be back */
+  graceEndsAt: number | null;
+  /** Left for good */
+  left: boolean;
 }
 
 export interface RoundSummary {
@@ -34,6 +40,7 @@ export interface GameVM {
   oppWrongSeq: number;
   history: RoundSummary[];
   result: MatchResult | null;
+  forfeitReason: ForfeitReason | null;
 }
 
 export interface GameActions {

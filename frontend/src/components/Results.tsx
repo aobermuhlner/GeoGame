@@ -8,10 +8,19 @@ export function Results({ vm, actions }: { vm: GameVM; actions: GameActions }) {
   const me = vm.players[meSlot];
   const opp = vm.players[oppSlot];
   const iWon = res.winner === meSlot;
+  const oppGone = opp.left || !opp.connected;
 
   const title = res.winner === null ? "It's a draw!" : iWon ? 'You win!' : `${opp.name} wins!`;
   let sub = '';
-  if (res.decidedBy === 'forfeit') sub = iWon ? `${opp.name} gave up.` : 'You gave up.';
+  if (res.decidedBy === 'forfeit') {
+    const who = iWon ? opp.name : 'You';
+    sub =
+      vm.forfeitReason === 'disconnected'
+        ? `${who} lost connection and didn't come back.`
+        : vm.forfeitReason === 'left'
+          ? `${who} left the game.`
+          : `${who} gave up.`;
+  }
   if (res.decidedBy === 'tiebreaker') {
     const [a, b] = [res.wrongTotals[res.winner!], res.wrongTotals[res.winner === 0 ? 1 : 0]];
     sub = `Won on tie-breaker: ${a} vs ${b} wrong guesses`;
@@ -42,13 +51,20 @@ export function Results({ vm, actions }: { vm: GameVM; actions: GameActions }) {
           </div>
         </div>
         <div class="btn-row">
-          <button class="btn btn-primary" onClick={actions.rematch}>
-            Rematch
+          <button class="btn btn-primary" disabled={me.rematch || oppGone} onClick={actions.rematch}>
+            {me.rematch ? 'Waiting…' : opp.rematch ? 'Accept rematch' : 'Rematch'}
           </button>
           <button class="btn btn-ghost" onClick={actions.leave}>
             Back to lobby
           </button>
         </div>
+        {oppGone ? (
+          <p class="rematch-note off">{opp.name} has left.</p>
+        ) : me.rematch ? (
+          <p class="rematch-note">Waiting for {opp.name} to accept…</p>
+        ) : opp.rematch ? (
+          <p class="rematch-note">{opp.name} wants a rematch!</p>
+        ) : null}
       </section>
 
       {vm.history.length > 0 && (

@@ -251,6 +251,13 @@ em {
 .status-line.muted {
   color: var(--muted);
 }
+.status-line.warn {
+  color: #7a5a00;
+  font-weight: 600;
+  background: #fff4d6;
+  border-radius: 12px;
+  padding: 6px 14px;
+}
 .status-line.reveal {
   animation: pop 0.35s ease-out;
 }
@@ -526,6 +533,14 @@ em {
 .fs-colon {
   font-size: 2rem;
   font-weight: 800;
+  color: var(--muted);
+}
+.rematch-note {
+  margin: 12px 0 0;
+  font-weight: 600;
+  color: var(--green);
+}
+.rematch-note.off {
   color: var(--muted);
 }
 .btn-row {

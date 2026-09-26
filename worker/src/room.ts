@@ -5,13 +5,19 @@ import {
   MIN_POOL_SIZE,
   RECONNECT_GRACE_MS,
   REGION_IDS,
+  REVEAL_MS,
+  applyGuess,
+  applyPass,
+  applyTimeout,
   countriesInRegions,
+  decideMatch,
   newRound,
   parseClientMessage,
   pickFlags,
   scoresOf,
   type ClientMessage,
   type ErrorCode,
+  type ForfeitReason,
   type MatchResult,
   type Phase,
   type RegionId,
@@ -23,6 +29,8 @@ import {
 } from '@flagduel/shared';
 import { FLAGS } from './generated/flags';
 
+const IN_GAME: Phase[] = ['countdown', 'playing', 'reveal'];
+
 /** Delete a room's storage this long after the last player left. */
 export const EMPTY_ROOM_TTL_MS = 10 * 60_000;
 
@@ -33,6 +41,8 @@ interface Player {
   connected: boolean;
   disconnectedAt: number | null;
   rematch: boolean;
+  /** Left mid-game or from the results screen; never comes back. */
+  left?: boolean;
 }
 
 interface GameState {
@@ -45,6 +55,7 @@ interface GameState {
   countdownEndsAt: number | null;
   revealEndsAt: number | null;
   forfeitedBy: Slot | null;
+  forfeitReason: ForfeitReason | null;
   result: MatchResult | null;
 }
 
@@ -164,7 +175,10 @@ export class Room extends DurableObject<Env> {
     if (ws.deserializeAttachment()) return; // already identified
     let player = s.players.find((p) => p.sessionId === msg.sessionId);
 
-    if (player) {
+    if (player?.left) {
+      this.sendError(ws, 'in_progress', 'You left this game');
+      return ws.close(4003, 'left');
+    } else if (player) {
       // Reconnect: this socket replaces any older one for the same session.
       for (const other of this.ctx.getWebSockets()) {
         if (other !== ws && (other.deserializeAttachment() as Attachment | null)?.sessionId === msg.sessionId) {
@@ -192,6 +206,7 @@ export class Room extends DurableObject<Env> {
 
   private async onPlayerMessage(ws: WebSocket, slot: Slot, msg: ClientMessage) {
     const s = this.state!;
+    const now = Date.now();
     switch (msg.t) {
       case 'setRegions':
         if (slot !== 0 || s.phase !== 'lobby') return this.sendError(ws, 'not_allowed', 'Only the host can change regions');
@@ -209,20 +224,67 @@ export class Room extends DurableObject<Env> {
           return this.sendError(ws, 'not_allowed', 'Both players must be ready');
         if (countriesInRegions(s.regions).length < MIN_POOL_SIZE)
           return this.sendError(ws, 'pool_too_small', `Select regions with at least ${MIN_POOL_SIZE} countries`);
-        this.startCountdown(Date.now());
+        this.startCountdown(now);
         break;
       }
 
+      case 'guess': {
+        // Every guess gets exactly one guessResult so the client can match replies in order.
+        const cur = this.currentRound(msg.round);
+        const outcome = cur && s.phase === 'playing' ? applyGuess(cur, slot, msg.text, now) : 'ignored';
+        this.send(ws, { t: 'guessResult', round: msg.round, outcome });
+        if (outcome === 'ignored') {
+          // A guess arriving after the deadline ends the round (the alarm may not have fired yet).
+          if (cur?.end === 'timeout' && s.phase === 'playing') this.endRound(now);
+          else return;
+        }
+        if (outcome === 'wrong') this.sendToSlot(slot === 0 ? 1 : 0, { t: 'oppWrong', round: msg.round });
+        if (outcome === 'correct') this.endRound(now);
+        break;
+      }
+
+      case 'pass': {
+        const cur = this.currentRound(msg.round);
+        if (!cur || s.phase !== 'playing' || cur.passed[slot]) return;
+        if (applyPass(cur, slot, now)) this.endRound(now);
+        break;
+      }
+
+      case 'giveUp':
+        if (!IN_GAME.includes(s.phase)) return;
+        this.forfeit(slot, 'gaveUp', now);
+        break;
+
+      case 'rematch': {
+        if (s.phase !== 'finished') return;
+        if (s.players.length < 2 || !s.players.every((p) => p.connected))
+          return this.sendError(ws, 'not_allowed', 'Your opponent has left');
+        s.players[slot].rematch = true;
+        if (s.players.every((p) => p.rematch)) this.startCountdown(now);
+        break;
+      }
+
+      case 'backToLobby':
+        if (s.phase !== 'finished') return;
+        this.toLobby();
+        break;
+
       case 'leave':
+        ws.close(1000, 'left');
         if (s.phase === 'lobby') {
           this.removePlayer(slot);
-          ws.close(1000, 'left');
+        } else {
+          // Leaving mid-game counts as giving up; afterwards the seat is gone for good.
+          if (IN_GAME.includes(s.phase)) this.forfeit(slot, 'left', now);
+          const p = s.players[slot];
+          p.connected = false;
+          p.disconnectedAt = now;
+          p.left = true;
+          if (!s.players.some((q) => q.connected)) s.emptySince = now;
         }
-        // Leaving mid-game counts as giving up (milestone 3).
         break;
 
       default:
-        // Round play (guess/pass/giveUp/rematch/backToLobby) arrives in milestone 3.
         return;
     }
     await this.commit();
@@ -236,7 +298,7 @@ export class Room extends DurableObject<Env> {
       .getWebSockets()
       .some((o) => o !== ws && (o.deserializeAttachment() as Attachment | null)?.sessionId === att.sessionId);
     const player = s.players.find((p) => p.sessionId === att.sessionId);
-    if (!player || stillOpen) return;
+    if (!player || stillOpen || !player.connected) return;
     const now = Date.now();
     player.connected = false;
     player.disconnectedAt = now;
@@ -257,6 +319,7 @@ export class Room extends DurableObject<Env> {
       countdownEndsAt: now + COUNTDOWN_MS,
       revealEndsAt: null,
       forfeitedBy: null,
+      forfeitReason: null,
       result: null,
     };
     s.phase = 'countdown';
@@ -273,6 +336,57 @@ export class Room extends DurableObject<Env> {
     s.phase = 'playing';
   }
 
+  /** The round a client message refers to (1-based), if it is the current one. */
+  private currentRound(round: number): RoundState | null {
+    const g = this.state?.game;
+    if (!g || g.current < 0 || round !== g.current + 1) return null;
+    return g.rounds[g.current];
+  }
+
+  /** The current round has just ended: show the answer to both players. */
+  private endRound(now: number) {
+    const s = this.state!;
+    s.phase = 'reveal';
+    s.game!.revealEndsAt = now + REVEAL_MS;
+  }
+
+  private finish() {
+    const s = this.state!;
+    const g = s.game!;
+    g.result = decideMatch(g.rounds, g.forfeitedBy);
+    g.countdownEndsAt = null;
+    g.revealEndsAt = null;
+    s.phase = 'finished';
+    for (const p of s.players) {
+      p.ready = false;
+      p.rematch = false;
+    }
+  }
+
+  private forfeit(slot: Slot, reason: ForfeitReason, now: number) {
+    const g = this.state!.game!;
+    const cur = g.current >= 0 ? g.rounds[g.current] : undefined;
+    if (cur && !cur.end) {
+      cur.end = 'forfeit';
+      cur.endedAt = now;
+    }
+    g.forfeitedBy = slot;
+    g.forfeitReason = reason;
+    this.finish();
+  }
+
+  /** Results → lobby with the same settings; players who are gone lose their seat. */
+  private toLobby() {
+    const s = this.state!;
+    s.phase = 'lobby';
+    s.game = null;
+    for (let i = s.players.length - 1; i >= 0; i--) if (!s.players[i].connected) s.players.splice(i, 1);
+    for (const p of s.players) {
+      p.ready = false;
+      p.rematch = false;
+    }
+  }
+
   /** Process everything that is due at `now`. Called from the alarm. */
   async tick(now: number) {
     const s = this.state;
@@ -287,13 +401,20 @@ export class Room extends DurableObject<Env> {
     if (s.phase === 'countdown' && g?.countdownEndsAt && now >= g.countdownEndsAt) {
       this.startRound(0, now);
     }
+    if (s.phase === 'playing' && g && applyTimeout(g.rounds[g.current], now)) {
+      this.endRound(now);
+    }
+    if (s.phase === 'reveal' && g?.revealEndsAt && now >= g.revealEndsAt) {
+      if (g.current + 1 < g.codes.length) this.startRound(g.current + 1, now);
+      else this.finish();
+    }
 
     // Players who stayed away past the grace period.
     for (let slot = s.players.length - 1; slot >= 0; slot--) {
       const p = s.players[slot];
       if (p.connected || p.disconnectedAt === null || now < p.disconnectedAt + RECONNECT_GRACE_MS) continue;
       if (s.phase === 'lobby') this.removePlayer(slot as Slot);
-      // Mid-game forfeits and leaving the results screen arrive in milestone 3.
+      else if (IN_GAME.includes(s.phase)) this.forfeit(slot as Slot, 'disconnected', now);
     }
 
     await this.commit();
@@ -314,7 +435,9 @@ export class Room extends DurableObject<Env> {
     if (s.emptySince !== null) times.push(s.emptySince + EMPTY_ROOM_TTL_MS);
     const g = s.game;
     if (s.phase === 'countdown' && g?.countdownEndsAt) times.push(g.countdownEndsAt);
-    if (s.phase === 'lobby') {
+    if (s.phase === 'playing' && g) times.push(g.rounds[g.current].deadline);
+    if (s.phase === 'reveal' && g?.revealEndsAt) times.push(g.revealEndsAt);
+    if (s.phase === 'lobby' || IN_GAME.includes(s.phase)) {
       for (const p of s.players) if (!p.connected && p.disconnectedAt !== null) times.push(p.disconnectedAt + RECONNECT_GRACE_MS);
     }
     return times.length ? Math.min(...times) : null;
@@ -372,6 +495,11 @@ export class Room extends DurableObject<Env> {
         wrongTotal: wrong[i],
         passed: !!cur?.passed[i],
         rematch: p.rematch,
+        graceEndsAt:
+          !p.connected && !p.left && p.disconnectedAt !== null && s.phase !== 'finished'
+            ? p.disconnectedAt + RECONNECT_GRACE_MS
+            : null,
+        left: !!p.left,
       })),
       regions: s.regions,
       countryCount: countriesInRegions(s.regions).length,
@@ -384,7 +512,12 @@ export class Room extends DurableObject<Env> {
       reveal: s.phase === 'reveal' && cur ? roundView(cur, g!.current) : null,
       history: g ? g.rounds.flatMap((r, i) => (r.end ? [roundView(r, i)] : [])) : [],
       result: g?.result ?? null,
+      forfeitReason: g?.forfeitReason ?? null,
     };
+  }
+
+  private sendToSlot(slot: Slot, msg: ServerMessage) {
+    for (const ws of this.ctx.getWebSockets()) if (this.slotOf(ws) === slot) this.send(ws, msg);
   }
 
   private slotOf(ws: WebSocket): Slot | null {

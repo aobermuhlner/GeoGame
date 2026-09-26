@@ -74,6 +74,7 @@ function StatusLine({ vm }: { vm: GameVM }) {
   const oppSlot = vm.me === 0 ? 1 : 0;
   const me = vm.players[vm.me];
   const opp = vm.players[oppSlot];
+  const now = useNow(opp.graceEndsAt !== null, 500);
   if (vm.reveal) {
     const { winner, countryName, end } = vm.reveal;
     const who = winner === null ? null : winner === vm.me ? 'You' : opp.name;
@@ -83,6 +84,14 @@ function StatusLine({ vm }: { vm: GameVM }) {
         <span class="reveal-who">
           {who ? `${who} got the point!` : end === 'timeout' ? "Time's up — no point" : 'No point'}
         </span>
+      </div>
+    );
+  }
+  if (opp.graceEndsAt !== null) {
+    return (
+      <div class="status-line warn">
+        {opp.name} lost connection — you win in {Math.max(0, Math.ceil((opp.graceEndsAt - now) / 1000))} s unless they
+        come back
       </div>
     );
   }
