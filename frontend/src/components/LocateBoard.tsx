@@ -99,7 +99,7 @@ export function LocateBoard({
           <span class="muted small">{left === 1 ? '1 try left' : `${left} tries left`}</span>
         </span>
         <span class="muted small map-hint">Scroll or pinch to zoom · drag to pan</span>
-        <button class="btn btn-primary" type="button" disabled={locked || found || left === 0} onClick={onPass}>
+        <button class="btn btn-pass" type="button" disabled={locked || found || left === 0} onClick={onPass}>
           Pass
         </button>
       </div>

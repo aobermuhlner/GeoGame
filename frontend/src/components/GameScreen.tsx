@@ -148,8 +148,13 @@ export function GameScreen({ vm, actions }: { vm: GameVM; actions: GameActions }
   const mode = MODES[vm.modes[vm.stage] ?? 'flags'];
   const isMap = mode.input === 'map' && !(vm.phase === 'reveal' && vm.reveal?.mode !== 'locate');
 
-  const giveUp = (
+  const giveUp = (withPass: boolean) => (
     <div class="give-up">
+      {withPass && (
+        <button class="btn btn-sm btn-pass" type="button" disabled={locked} onClick={actions.pass}>
+          Pass
+        </button>
+      )}
       {confirmGiveUp ? (
         <span class="confirm">
           Forfeit the whole match?{' '}
@@ -187,7 +192,7 @@ export function GameScreen({ vm, actions }: { vm: GameVM; actions: GameActions }
             }
             status={<StatusLine vm={vm} />}
           />
-          {giveUp}
+          {giveUp(false)}
         </section>
       </main>
     );
@@ -221,11 +226,8 @@ export function GameScreen({ vm, actions }: { vm: GameVM; actions: GameActions }
             suggest={mode.suggest}
             placeholder={mode.placeholder}
           />
-          <button class="btn btn-primary" type="button" disabled={locked} onClick={actions.pass}>
-            Pass
-          </button>
         </div>
-        {giveUp}
+        {giveUp(true)}
       </section>
     </main>
   );

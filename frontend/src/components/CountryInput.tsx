@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
-import { suggestCountries, type GuessOutcome } from '@flagduel/shared';
+import { useEffect, useMemo, useRef, useState } from "preact/hooks";
+import { suggestCountries, type GuessOutcome } from "@flagduel/shared";
 
 interface Props {
   /** Read-only instead of disabled so focus (and the phone keyboard) survives between rounds. */
@@ -17,9 +17,9 @@ export function CountryInput({
   focusKey,
   onSubmit,
   suggest = suggestCountries,
-  placeholder = 'Type a country name…',
+  placeholder = "Type a country name…",
 }: Props) {
-  const [value, setValue] = useState('');
+  const [value, setValue] = useState("");
   const [open, setOpen] = useState(true);
   const [hi, setHi] = useState(0);
   const [wrong, setWrong] = useState(false);
@@ -32,17 +32,17 @@ export function CountryInput({
   }, [focusKey, locked]);
 
   useEffect(() => {
-    if (locked) setValue('');
+    if (locked) setValue("");
   }, [locked]);
 
   async function submit(text: string) {
     text = text.trim();
     if (!text || locked) return;
-    setValue('');
+    setValue("");
     setHi(0);
     inputRef.current?.focus({ preventScroll: true });
     const outcome = await onSubmit(text);
-    if (outcome === 'wrong') {
+    if (outcome === "wrong") {
       setWrong(false);
       requestAnimationFrame(() => setWrong(true));
     }
@@ -50,74 +50,88 @@ export function CountryInput({
 
   function onKeyDown(e: KeyboardEvent) {
     switch (e.key) {
-      case 'ArrowDown':
+      case "ArrowDown":
         e.preventDefault();
         setOpen(true);
         setHi((h) => Math.min(h + 1, suggestions.length - 1));
         break;
-      case 'ArrowUp':
+      case "ArrowUp":
         e.preventDefault();
         setHi((h) => Math.max(h - 1, 0));
         break;
-      case 'Enter':
+      case "Enter":
         e.preventDefault();
-        submit(showList ? suggestions[hi] ?? suggestions[0] : value);
+        submit(showList ? (suggestions[hi] ?? suggestions[0]) : value);
         break;
-      case 'Escape':
+      case "Escape":
         setOpen(false);
         break;
     }
   }
 
   return (
-    <div class="combo">
-      <input
-        ref={inputRef}
-        class={`guess-input${wrong ? ' is-wrong' : ''}`}
-        type="text"
-        placeholder={locked ? '' : placeholder}
-        value={value}
-        maxLength={60}
-        readOnly={locked}
-        aria-disabled={locked}
-        autoComplete="off"
-        autoCorrect="off"
-        autoCapitalize="off"
-        spellcheck={false}
-        enterKeyHint="send"
-        role="combobox"
-        aria-expanded={showList}
-        aria-controls="country-list"
-        aria-autocomplete="list"
-        aria-activedescendant={showList ? `opt-${hi}` : undefined}
-        onInput={(e) => {
-          setValue((e.target as HTMLInputElement).value);
-          setOpen(true);
-          setHi(0);
-        }}
-        onKeyDown={onKeyDown}
-        onAnimationEnd={() => setWrong(false)}
-      />
-      {showList && (
-        <ul class="suggestions" id="country-list" role="listbox">
-          {suggestions.map((s, i) => (
-            <li
-              key={s}
-              id={`opt-${i}`}
-              role="option"
-              aria-selected={i === hi}
-              class={i === hi ? 'active' : ''}
-              onMouseDown={(e) => {
-                e.preventDefault();
-                submit(s);
-              }}
-              onMouseEnter={() => setHi(i)}
-            >
-              {s}
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
+    <>
+      <div class="combo">
+        <input
+          ref={inputRef}
+          class={`guess-input${wrong ? " is-wrong" : ""}`}
+          type="text"
+          placeholder={locked ? "" : placeholder}
+          value={value}
+          maxLength={60}
+          readOnly={locked}
+          aria-disabled={locked}
+          autoComplete="off"
+          autoCorrect="off"
+          autoCapitalize="off"
+          spellcheck={false}
+          enterKeyHint="send"
+          role="combobox"
+          aria-expanded={showList}
+          aria-controls="country-list"
+          aria-autocomplete="list"
+          aria-activedescendant={showList ? `opt-${hi}` : undefined}
+          onInput={(e) => {
+            setValue((e.target as HTMLInputElement).value);
+            setOpen(true);
+            setHi(0);
+          }}
+          onKeyDown={onKeyDown}
+          onAnimationEnd={() => setWrong(false)}
+        />
+        {showList && (
+          <ul class="suggestions" id="country-list" role="listbox">
+            {suggestions.map((s, i) => (
+              <li
+                key={s}
+                id={`opt-${i}`}
+                role="option"
+                aria-selected={i === hi}
+                class={i === hi ? "active" : ""}
+                onMouseDown={(e) => {
+                  e.preventDefault();
+                  submit(s);
+                }}
+                onMouseEnter={() => setHi(i)}
+              >
+                {s}
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+      <button
+        class="btn btn-primary"
+        type="button"
+        disabled={locked}
+        // Keep focus (and the phone keyboard) on the field.
+        onMouseDown={(e) => e.preventDefault()}
+        onClick={() =>
+          submit(showList ? (suggestions[hi] ?? suggestions[0]) : value)
+        }
+      >
+        Submit
+      </button>
+    </>
   );
 }

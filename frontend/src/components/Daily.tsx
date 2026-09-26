@@ -477,7 +477,11 @@ function SoloScreen({
                 suggest={mode.suggest}
                 placeholder={mode.placeholder}
               />
-              <button class="btn btn-primary" type="button" disabled={locked} onClick={onPass}>
+            </div>
+          )}
+          {!manualNext && (
+            <div class="give-up">
+              <button class="btn btn-sm btn-pass" type="button" disabled={locked} onClick={onPass}>
                 Pass
               </button>
             </div>
