@@ -12,7 +12,9 @@ import {
   applyGuess,
   applyPass,
   applyTimeout,
+  DIVISIONS,
   countriesInRegions,
+  divisionOf,
   decideMatch,
   newRound,
   parseClientMessage,
@@ -20,18 +22,21 @@ import {
   scoresOf,
   stageAt,
   type ClientMessage,
+  type DivisionId,
   type ErrorCode,
   type ForfeitReason,
   type MatchResult,
   type ModeId,
   type Phase,
   type RegionId,
+  type RankedView,
   type RoomView,
   type RoundState,
   type RoundView,
   type ServerMessage,
   type Slot,
 } from '@flagduel/shared';
+import type { RankedOutcome } from './accounts';
 import { FLAGS } from './generated/flags';
 
 const IN_GAME: Phase[] = ['countdown', 'playing', 'reveal'];
@@ -78,13 +83,48 @@ export interface RoomState {
   /** Minigames selected in the lobby (absent in rooms stored before modes existed → flags) */
   modes?: ModeId[];
   game: GameState | null;
+  /** Set for rooms made by the matchmaker: fixed seats, one match, rated when it ends */
+  ranked?: RankedState;
   /** When the last connected player left (for cleanup) */
   emptySince: number | null;
+}
+
+interface RankedState {
+  mode: ModeId;
+  /** Division whose regions are played (the lower of the two players') */
+  division: DivisionId;
+  /** Idempotency key for rating the match */
+  matchId: string;
+  /** Index = slot */
+  players: { userId: string; rating: number; provisional: boolean }[];
+  /** Rating changes, once the match is rated */
+  outcome: RankedOutcome[] | null;
+}
+
+export interface RankedSeat {
+  /** Secret session id that claims this seat (handed to the player by the matchmaker) */
+  ticket: string;
+  userId: string;
+  name: string;
+  rating: number;
+  provisional: boolean;
 }
 
 interface Attachment {
   sessionId: string;
 }
+
+const rankedView = (r: RankedState): RankedView => ({
+  mode: r.mode,
+  division: r.division,
+  players: r.players.map((p, i) => ({
+    rating: p.rating,
+    division: divisionOf(p.rating),
+    provisional: p.provisional,
+    delta: r.outcome?.[i].delta ?? null,
+    after: r.outcome?.[i].after ?? null,
+  })),
+});
 
 function randomHex(bytes: number): string {
   const a = crypto.getRandomValues(new Uint8Array(bytes));
@@ -119,6 +159,43 @@ export class Room extends DurableObject<Env> {
       game: null,
       // Nobody has joined yet; an unused room is cleaned up like an empty one.
       emptySince: now,
+    };
+    await this.commit();
+    return true;
+  }
+
+  /**
+   * Initialise a ranked room for two matched players. Both seats are taken up front (claimed with
+   * their tickets); the match starts as soon as both are connected. Returns false if the code is taken.
+   */
+  async initRanked(code: string, mode: ModeId, seats: [RankedSeat, RankedSeat]): Promise<boolean> {
+    if (this.state) return false;
+    const now = Date.now();
+    const division = divisionOf(Math.min(seats[0].rating, seats[1].rating));
+    this.state = {
+      code,
+      createdAt: now,
+      phase: 'lobby',
+      // Not connected yet: whoever doesn't show up within the reconnect grace cancels the match.
+      players: seats.map((p) => ({
+        sessionId: p.ticket,
+        name: p.name,
+        ready: true,
+        connected: false,
+        disconnectedAt: now,
+        rematch: false,
+      })),
+      regions: [...DIVISIONS[division].regions],
+      modes: [mode],
+      game: null,
+      ranked: {
+        mode,
+        division,
+        matchId: `${code}:${now}`,
+        players: seats.map((p) => ({ userId: p.userId, rating: p.rating, provisional: p.provisional })),
+        outcome: null,
+      },
+      emptySince: null,
     };
     await this.commit();
     return true;
@@ -197,7 +274,8 @@ export class Room extends DurableObject<Env> {
           other.close(4000, 'replaced');
         }
       }
-      player.name = msg.name;
+      // Ranked seats keep the account name the matchmaker put there.
+      if (!s.ranked) player.name = msg.name;
       player.connected = true;
       player.disconnectedAt = null;
     } else if (s.phase !== 'lobby') {
@@ -213,12 +291,17 @@ export class Room extends DurableObject<Env> {
 
     ws.serializeAttachment({ sessionId: msg.sessionId } satisfies Attachment);
     s.emptySince = null;
+    // Ranked: both players are here → go.
+    if (s.ranked && s.phase === 'lobby' && s.players.every((p) => p.connected)) this.startCountdown(Date.now());
     await this.commit();
   }
 
   private async onPlayerMessage(ws: WebSocket, slot: Slot, msg: ClientMessage) {
     const s = this.state!;
     const now = Date.now();
+    // Ranked rooms are set up by the matchmaker and hold exactly one match.
+    const LOBBY_ONLY: ClientMessage['t'][] = ['setRegions', 'setModes', 'ready', 'start', 'rematch', 'backToLobby'];
+    if (s.ranked && LOBBY_ONLY.includes(msg.t)) return this.sendError(ws, 'not_allowed', 'Not in a ranked match');
     switch (msg.t) {
       case 'setRegions':
         if (slot !== 0 || s.phase !== 'lobby') return this.sendError(ws, 'not_allowed', 'Only the host can change regions');
@@ -289,7 +372,9 @@ export class Room extends DurableObject<Env> {
 
       case 'leave':
         ws.close(1000, 'left');
-        if (s.phase === 'lobby') {
+        if (s.ranked && s.phase === 'lobby') {
+          return this.cancelRanked('Your opponent left before the match started. Nothing was rated.');
+        } else if (s.phase === 'lobby') {
           this.removePlayer(slot);
         } else {
           // Leaving mid-game counts as giving up; afterwards the seat is gone for good.
@@ -444,6 +529,7 @@ export class Room extends DurableObject<Env> {
     for (let slot = s.players.length - 1; slot >= 0; slot--) {
       const p = s.players[slot];
       if (p.connected || p.disconnectedAt === null || now < p.disconnectedAt + RECONNECT_GRACE_MS) continue;
+      if (s.ranked && s.phase === 'lobby') return this.cancelRanked("Your opponent didn't join. Nothing was rated.");
       if (s.phase === 'lobby') this.removePlayer(slot as Slot);
       else if (IN_GAME.includes(s.phase)) this.forfeit(slot as Slot, 'disconnected', now);
     }
@@ -474,6 +560,29 @@ export class Room extends DurableObject<Env> {
     return times.length ? Math.min(...times) : null;
   }
 
+  /** A ranked match that never started: tell whoever is here, then close the room. */
+  private async cancelRanked(message: string) {
+    for (const ws of this.ctx.getWebSockets()) this.sendError(ws, 'not_found', message);
+    await this.destroy();
+  }
+
+  /** Rate a finished ranked match (once; Accounts ignores repeats of the same match id). */
+  private async rate() {
+    const r = this.state!.ranked!;
+    const result = this.state!.game?.result;
+    if (!result) return;
+    try {
+      r.outcome = await this.env.ACCOUNTS.getByName('main').rankedResult(
+        r.matchId,
+        r.mode,
+        [r.players[0].userId, r.players[1].userId],
+        result.winner,
+      );
+    } catch (e) {
+      console.error('rating failed', r.matchId, e);
+    }
+  }
+
   private async destroy() {
     for (const ws of this.ctx.getWebSockets()) ws.close(4004, 'room_closed');
     this.state = null;
@@ -486,6 +595,7 @@ export class Room extends DurableObject<Env> {
   /** Persist, reschedule the alarm, and push the new snapshot to everyone. */
   private async commit() {
     const s = this.state!;
+    if (s.ranked && s.phase === 'finished' && !s.ranked.outcome) await this.rate();
     await this.ctx.storage.put('state', s);
     const at = this.nextAlarmAt();
     if (at === null) await this.ctx.storage.deleteAlarm();
@@ -549,6 +659,7 @@ export class Room extends DurableObject<Env> {
       history: g ? g.rounds.flatMap((r, i) => (r.end ? [roundView(r, i)] : [])) : [],
       result: g?.result ?? null,
       forfeitReason: g?.forfeitReason ?? null,
+      ranked: s.ranked ? rankedView(s.ranked) : null,
     };
   }
 

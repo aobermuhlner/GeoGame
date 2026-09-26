@@ -7,14 +7,25 @@ import {
   cleanName,
   dailyView,
   dayOf,
+  divisionOf,
+  glicko2,
+  inflateRd,
   newDailyRun,
+  newRating,
   nextDayAt,
   pickStages,
+  ratingView,
   settleRun,
   soloGuess,
   soloNext,
   soloPass,
   type BoardId,
+  type RankedBoardEntry,
+  type RankedBoardResponse,
+  type RankedProfile,
+  type Rating,
+  type RatingView,
+  type Slot,
   type DailyGuessResponse,
   type DailyResponse,
   type DailyRun,
@@ -44,6 +55,27 @@ interface UserRow {
   created_at: number;
   provider_id: string;
   [k: string]: SqlStorageValue;
+}
+
+interface RatingRow {
+  user_id: string;
+  mode: string;
+  rating: number;
+  rd: number;
+  vol: number;
+  played: number;
+  wins: number;
+  losses: number;
+  draws: number;
+  updated_at: number;
+  [k: string]: SqlStorageValue;
+}
+
+/** One player's rating change from a ranked match. */
+export interface RankedOutcome {
+  before: number;
+  after: number;
+  delta: number;
 }
 
 const toView = (u: UserRow): UserView => ({
@@ -115,6 +147,29 @@ export class Accounts extends DurableObject<Env> {
         code TEXT NOT NULL,
         starts_at INTEGER NOT NULL,
         date TEXT NOT NULL
+      );
+      CREATE TABLE IF NOT EXISTS ratings (
+        user_id TEXT NOT NULL,
+        mode TEXT NOT NULL,
+        rating REAL NOT NULL,
+        rd REAL NOT NULL,
+        vol REAL NOT NULL,
+        played INTEGER NOT NULL DEFAULT 0,
+        wins INTEGER NOT NULL DEFAULT 0,
+        losses INTEGER NOT NULL DEFAULT 0,
+        draws INTEGER NOT NULL DEFAULT 0,
+        updated_at INTEGER NOT NULL,
+        PRIMARY KEY (user_id, mode)
+      );
+      CREATE INDEX IF NOT EXISTS ratings_board ON ratings (mode, rating DESC);
+      CREATE TABLE IF NOT EXISTS ranked_matches (
+        id TEXT PRIMARY KEY,
+        mode TEXT NOT NULL,
+        player_a TEXT NOT NULL,
+        player_b TEXT NOT NULL,
+        winner INTEGER,
+        result TEXT NOT NULL,
+        played_at INTEGER NOT NULL
       );
     `);
   }
@@ -345,6 +400,119 @@ export class Accounts extends DurableObject<Env> {
       .exec<{ code: string }>('SELECT code FROM daily_flags WHERE token = ? AND starts_at <= ?', token, now)
       .toArray()[0];
     return row ? (FLAGS[row.code] ?? null) : null;
+  }
+
+  // ---------- Ranked ----------
+
+  /** A player's rating in `mode`, with the deviation grown back for the days since their last game. */
+  private loadRating(userId: string, mode: ModeId, now: number): { r: Rating; row: RatingRow | undefined } {
+    const row = this.sql
+      .exec<RatingRow>('SELECT * FROM ratings WHERE user_id = ? AND mode = ?', userId, mode)
+      .toArray()[0];
+    if (!row) return { r: newRating(), row };
+    return { r: inflateRd({ rating: row.rating, rd: row.rd, vol: row.vol }, now - row.updated_at), row };
+  }
+
+  private viewOf(userId: string, mode: ModeId, now: number): RatingView {
+    const { r, row } = this.loadRating(userId, mode, now);
+    return ratingView(r, {
+      played: row?.played ?? 0,
+      wins: row?.wins ?? 0,
+      losses: row?.losses ?? 0,
+      draws: row?.draws ?? 0,
+    });
+  }
+
+  /** Who is queueing: the session's user and their rating in `mode` (null if the token is invalid). */
+  async rankedEntry(token: string, mode: ModeId, now = Date.now()): Promise<{ user: UserView; rating: RatingView } | null> {
+    const user = await this.authenticate(token, now);
+    return user ? { user, rating: this.viewOf(user.id, mode, now) } : null;
+  }
+
+  async rankedProfile(userId: string, now = Date.now()): Promise<RankedProfile> {
+    return Object.fromEntries(MODE_IDS.map((m) => [m, this.viewOf(userId, m, now)])) as RankedProfile;
+  }
+
+  /**
+   * Rate a finished ranked match (Glicko-2, both players from their pre-match ratings).
+   * `matchId` makes it idempotent: the same match is only ever rated once.
+   */
+  async rankedResult(
+    matchId: string,
+    mode: ModeId,
+    players: [string, string],
+    winner: Slot | null,
+    now = Date.now(),
+  ): Promise<RankedOutcome[]> {
+    const done = this.sql.exec<{ result: string }>('SELECT result FROM ranked_matches WHERE id = ?', matchId).toArray()[0];
+    if (done) return JSON.parse(done.result);
+
+    const [a, b] = players.map((id) => this.loadRating(id, mode, now));
+    const score = (slot: Slot) => (winner === null ? 0.5 : winner === slot ? 1 : 0);
+    const next = [glicko2(a.r, b.r, score(0)), glicko2(b.r, a.r, score(1))];
+    const out: RankedOutcome[] = [a, b].map(({ r }, i) => ({
+      before: Math.round(r.rating),
+      after: Math.round(next[i].rating),
+      delta: Math.round(next[i].rating) - Math.round(r.rating),
+    }));
+
+    players.forEach((id, i) => {
+      const n = next[i];
+      const s = score(i as Slot);
+      this.sql.exec(
+        `INSERT INTO ratings (user_id, mode, rating, rd, vol, played, wins, losses, draws, updated_at)
+         VALUES (?, ?, ?, ?, ?, 1, ?, ?, ?, ?)
+         ON CONFLICT (user_id, mode) DO UPDATE SET rating = excluded.rating, rd = excluded.rd, vol = excluded.vol,
+           played = played + 1, wins = wins + excluded.wins, losses = losses + excluded.losses,
+           draws = draws + excluded.draws, updated_at = excluded.updated_at`,
+        id,
+        mode,
+        n.rating,
+        n.rd,
+        n.vol,
+        s === 1 ? 1 : 0,
+        s === 0 ? 1 : 0,
+        s === 0.5 ? 1 : 0,
+        now,
+      );
+    });
+    this.sql.exec(
+      'INSERT INTO ranked_matches (id, mode, player_a, player_b, winner, result, played_at) VALUES (?, ?, ?, ?, ?, ?, ?)',
+      matchId,
+      mode,
+      players[0],
+      players[1],
+      winner,
+      JSON.stringify(out),
+      now,
+    );
+    return out;
+  }
+
+  async rankedBoard(userId: string | null, mode: ModeId): Promise<RankedBoardResponse> {
+    const rows = this.sql
+      .exec<{ user_id: string; name: string; rating: number; played: number }>(
+        `SELECT r.user_id, u.display_name AS name, r.rating, r.played FROM ratings r
+         JOIN users u ON u.id = r.user_id
+         WHERE r.mode = ? ORDER BY r.rating DESC, r.updated_at ASC`,
+        mode,
+      )
+      .toArray()
+      .map((r) => ({ ...r, score: Math.round(r.rating) }));
+    const ranked: RankedBoardEntry[] = rank(rows).map((r) => ({
+      rank: r.rank,
+      name: r.name,
+      rating: r.score,
+      division: divisionOf(r.score),
+      played: r.played,
+      you: r.user_id === userId,
+    }));
+    return {
+      mode,
+      entries: ranked.slice(0, LEADERBOARD_SIZE),
+      you: ranked.find((e) => e.you) ?? null,
+      players: ranked.length,
+    };
   }
 
   // ---------- Leaderboards ----------

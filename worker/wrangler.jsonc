@@ -15,12 +15,14 @@
   "durable_objects": {
     "bindings": [
       { "name": "ROOMS", "class_name": "Room" },
-      { "name": "ACCOUNTS", "class_name": "Accounts" }
+      { "name": "ACCOUNTS", "class_name": "Accounts" },
+      { "name": "MATCHMAKER", "class_name": "Matchmaker" }
     ]
   },
   // Free plan: Durable Objects must be SQLite-backed.
   "migrations": [
     { "tag": "v1", "new_sqlite_classes": ["Room"] },
-    { "tag": "v2", "new_sqlite_classes": ["Accounts"] }
+    { "tag": "v2", "new_sqlite_classes": ["Accounts"] },
+    { "tag": "v3", "new_sqlite_classes": ["Matchmaker"] }
   ]
 }

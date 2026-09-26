@@ -2,10 +2,10 @@ import {
   BOARD_IDS,
   FLAG_TOKEN_RE,
   MODE_IDS,
-  ROOM_CODE_ALPHABET,
   ROOM_CODE_LENGTH,
   ROOM_CODE_RE,
   cleanName,
+  randomRoomCode,
   type AuthConfig,
   type BoardId,
   type ModeId,
@@ -16,6 +16,7 @@ import { verifyGoogleIdToken } from './google';
 
 export { Room } from './room';
 export { Accounts } from './accounts';
+export { Matchmaker } from './matchmaker';
 
 const DAILY_FLAG_RE = /^[0-9a-f]{32}$/;
 const SESSION_TOKEN_RE = /^[0-9a-f]{64}$/;
@@ -33,12 +34,6 @@ function withCors(res: Response, origin: string | null): Response {
   out.headers.set('Access-Control-Allow-Origin', origin);
   out.headers.set('Vary', 'Origin');
   return out;
-}
-
-function randomCode(): string {
-  const bytes = crypto.getRandomValues(new Uint8Array(ROOM_CODE_LENGTH));
-  // 32-char alphabet → no modulo bias
-  return Array.from(bytes, (b) => ROOM_CODE_ALPHABET[b % ROOM_CODE_ALPHABET.length]).join('');
 }
 
 const svgResponse = (svg: string) =>
@@ -121,8 +116,17 @@ async function accountRoutes(request: Request, env: Env, url: URL, origin: strin
     return json(await db.leaderboard(user?.id ?? null, board));
   }
 
+  // GET /ranked/leaderboard?mode=flags — signed out too
+  if (path === '/ranked/leaderboard' && method === 'GET') {
+    const mode = (url.searchParams.get('mode') ?? 'flags') as ModeId;
+    if (!MODE_IDS.includes(mode)) return fail(400, 'Unknown mode');
+    return json(await db.rankedBoard(user?.id ?? null, mode));
+  }
+
   // ----- signed in -----
   if (!token || !user) return fail(401, 'Not signed in');
+
+  if (path === '/ranked' && method === 'GET') return json(await db.rankedProfile(user.id));
 
   if (path === '/auth/logout' && method === 'POST') {
     await db.logout(token);
@@ -194,8 +198,14 @@ export default {
       return svg ? svgResponse(svg) : new Response('Not found', { status: 404 });
     }
 
-    // Accounts, daily challenge, leaderboards
-    if (/^\/(auth|me|daily|leaderboard)(\/|$)/.test(url.pathname)) {
+    // GET /ranked/ws → WebSocket to the ranked queue (the session token is sent in the first message)
+    if (url.pathname === '/ranked/ws' && request.method === 'GET') {
+      if (!origin) return new Response('Forbidden origin', { status: 403 });
+      return env.MATCHMAKER.getByName('main').fetch(request);
+    }
+
+    // Accounts, daily challenge, leaderboards, ratings
+    if (/^\/(auth|me|daily|leaderboard|ranked)(\/|$)/.test(url.pathname)) {
       if (!origin) return new Response('Forbidden origin', { status: 403 });
       return withCors(await accountRoutes(request, env, url, origin), origin);
     }
@@ -204,7 +214,7 @@ export default {
     if (url.pathname === '/rooms' && request.method === 'POST') {
       if (!origin) return new Response('Forbidden origin', { status: 403 });
       for (let attempt = 0; attempt < 5; attempt++) {
-        const code = randomCode();
+        const code = randomRoomCode();
         if (await env.ROOMS.getByName(code).init(code)) return withCors(Response.json({ code }), origin);
       }
       return withCors(new Response('Could not allocate a room', { status: 503 }), origin);
