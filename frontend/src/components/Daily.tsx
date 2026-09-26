@@ -15,6 +15,7 @@ import {
   type PlacementResult,
 } from '@flagduel/shared';
 import { api, dailyFlagSrc } from '../api';
+import { Emblem, RankUp } from './Emblem';
 import { DivisionBadge } from './Ranked';
 import { CountryInput } from './CountryInput';
 import { FlagImage } from './GameScreen';
@@ -522,6 +523,7 @@ function PlacementResults({
   onExit: () => void;
 }) {
   const mode = MODES[run.mode];
+  const [celebrate, setCelebrate] = useState(true);
   const correct = result?.correct ?? run.history.filter((h) => h.end === 'correct').length;
   return (
     <main class="stack">
@@ -533,7 +535,8 @@ function PlacementResults({
         </p>
         {result && (
           <div class="placement-result">
-            <DivisionBadge division={result.division} />
+            <Emblem division={result.division} size={72} label />
+            <DivisionBadge division={result.division} icon={false} />
             <span class="rating-num">{result.rating}</span>
             <span class="muted small">your starting {mode.label} rating</span>
           </div>
@@ -549,6 +552,14 @@ function PlacementResults({
               </li>
             ))}
           </ul>
+        )}
+        {result && celebrate && (
+          <RankUp
+            division={result.division}
+            kicker="You placed in"
+            detail={`Starting ${mode.label} rating ${result.rating}`}
+            onClose={() => setCelebrate(false)}
+          />
         )}
         <div class="btn-row">
           <button class="btn btn-primary" onClick={onExit}>

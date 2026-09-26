@@ -15,6 +15,7 @@ import {
   type RankedProfile,
 } from '@flagduel/shared';
 import { api } from '../api';
+import { Emblem } from './Emblem';
 
 const MODE_KEY = 'flagduel.rankedMode';
 
@@ -35,8 +36,22 @@ function storeRankedMode(m: ModeId) {
   }
 }
 
-export function DivisionBadge({ division, small }: { division: DivisionId; small?: boolean }) {
-  return <span class={`division ${division}${small ? ' sm' : ''}`}>{DIVISIONS[division].label}</span>;
+export function DivisionBadge({
+  division,
+  small,
+  icon = true,
+}: {
+  division: DivisionId;
+  small?: boolean;
+  /** false when a large emblem is already shown next to it */
+  icon?: boolean;
+}) {
+  return (
+    <span class={`division ${division}${small ? ' sm' : ''}${icon ? ' has-emblem' : ''}`}>
+      {icon && <Emblem division={division} size={small ? 16 : 20} />}
+      {DIVISIONS[division].label}
+    </span>
+  );
 }
 
 /** "Europe, South America and North America" */
@@ -47,7 +62,7 @@ function regionList(division: DivisionId): string {
 }
 
 /** What a division adds to the one below: "+ Africa" */
-function added(division: DivisionId): string {
+export function added(division: DivisionId): string {
   const i = DIVISION_IDS.indexOf(division);
   if (i === 0) return DIVISIONS[division].regions.map((r) => REGION_LABELS[r]).join(', ');
   const below = new Set(DIVISIONS[DIVISION_IDS[i - 1]].regions);
@@ -148,9 +163,12 @@ export function RankedCard({
       ) : (
         <>
           <div class="rating-row">
-            <DivisionBadge division={division} />
+            <Emblem division={division} size={64} label />
             <div class="rating-main">
-              <span class="rating-num">{r ? r.rating : '–'}</span>
+              <span class="rating-line">
+                <span class="rating-num">{r ? r.rating : '–'}</span>
+                <DivisionBadge division={division} small icon={false} />
+              </span>
               <span class="muted small">
                 {r?.provisional ? 'provisional rating · moves fast in your first games' : `${MODES[mode].label} rating`}
               </span>

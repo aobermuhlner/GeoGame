@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128" role="img" aria-label="Gold division">
+  <defs>
+    <linearGradient id="em-gold-metal" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#fff6c2"/><stop offset=".45" stop-color="#f2c14e"/>
+      <stop offset=".7" stop-color="#b7860b"/><stop offset="1" stop-color="#f2c14e"/>
+    </linearGradient>
+    <linearGradient id="em-gold-cloth" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fff6c2"/><stop offset=".55" stop-color="#f2c14e"/><stop offset="1" stop-color="#b7860b"/>
+    </linearGradient>
+    <linearGradient id="em-gold-dark" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#b7860b"/><stop offset="1" stop-color="#5a3f00"/>
+    </linearGradient>
+    <linearGradient id="em-gold-pole" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#b7860b"/><stop offset=".4" stop-color="#fff6c2"/><stop offset="1" stop-color="#b7860b"/>
+    </linearGradient>
+    <linearGradient id="em-gold-edge" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#b7860b"/><stop offset="1" stop-color="#5a3f00"/>
+    </linearGradient>
+    <linearGradient id="em-gold-fold" x1="1" y1="0" x2="0" y2="0">
+      <stop offset="0" stop-color="#000" stop-opacity=".18"/><stop offset=".22" stop-color="#fff" stop-opacity=".28"/>
+      <stop offset=".5" stop-color="#000" stop-opacity=".16"/><stop offset=".78" stop-color="#fff" stop-opacity=".24"/>
+      <stop offset="1" stop-color="#000" stop-opacity=".14"/>
+    </linearGradient>
+    <radialGradient id="em-gold-knob" cx=".35" cy=".35" r=".7">
+      <stop offset="0" stop-color="#fff"/><stop offset=".35" stop-color="#fff6c2"/><stop offset="1" stop-color="#b7860b"/>
+    </radialGradient>
+    <radialGradient id="em-gold-plate" cx=".5" cy=".38" r=".65">
+      <stop offset="0" stop-color="#b7860b"/><stop offset="1" stop-color="#5a3f00"/>
+    </radialGradient>
+    <radialGradient id="em-gold-glow" gradientUnits="userSpaceOnUse" cx="64" cy="64" r="64">
+      <stop offset=".75" stop-color="#f2c14e" stop-opacity="1"/><stop offset="1" stop-color="#f2c14e" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <circle cx="64" cy="64" r="50" fill="url(#em-gold-plate)" stroke="url(#em-gold-metal)" stroke-width="6"/>
+  <circle cx="64" cy="64" r="45.5" fill="none" stroke="#fff6c2" stroke-opacity=".35" stroke-width="1"/>
+  <circle cx="64" cy="64" r="55" fill="none" stroke="url(#em-gold-metal)" stroke-width="2"/>
+  <g fill="none" stroke="url(#em-gold-edge)" stroke-width="1.4" stroke-linecap="round"><path d="M76,120.2 A57.5,57.5 0 0 0 114.8,37 M52,120.2 A57.5,57.5 0 0 1 13.2,37"/></g>
+  <g fill="url(#em-gold-metal)" stroke="url(#em-gold-edge)" stroke-width="0.7" stroke-linejoin="round"><path d="M0,0 C3.2,-2.5 3.2,-7.5 0,-11 C-3.2,-7.5 -3.2,-2.5 0,0 Z" transform="translate(79.8 119.3) rotate(36)"/><path d="M0,0 C3.2,-2.5 3.2,-7.5 0,-11 C-3.2,-7.5 -3.2,-2.5 0,0 Z" transform="translate(91 114.8) rotate(100)"/><path d="M0,0 C3.2,-2.5 3.2,-7.5 0,-11 C-3.2,-7.5 -3.2,-2.5 0,0 Z" transform="translate(101 108) rotate(12)"/><path d="M0,0 C3.2,-2.5 3.2,-7.5 0,-11 C-3.2,-7.5 -3.2,-2.5 0,0 Z" transform="translate(109.3 99.4) rotate(76)"/><path d="M0,0 C3.2,-2.5 3.2,-7.5 0,-11 C-3.2,-7.5 -3.2,-2.5 0,0 Z" transform="translate(115.7 89.2) rotate(-12)"/><path d="M0,0 C3.2,-2.5 3.2,-7.5 0,-11 C-3.2,-7.5 -3.2,-2.5 0,0 Z" transform="translate(119.8 77.9) rotate(52)"/><path d="M0,0 C3.2,-2.5 3.2,-7.5 0,-11 C-3.2,-7.5 -3.2,-2.5 0,0 Z" transform="translate(121.5 66) rotate(-36)"/><path d="M0,0 C3.2,-2.5 3.2,-7.5 0,-11 C-3.2,-7.5 -3.2,-2.5 0,0 Z" transform="translate(120.6 54) rotate(28)"/><path d="M0,0 C3.2,-2.5 3.2,-7.5 0,-11 C-3.2,-7.5 -3.2,-2.5 0,0 Z" transform="translate(117.3 42.5) rotate(-60)"/><path d="M0,0 C3.2,-2.5 3.2,-7.5 0,-11 C-3.2,-7.5 -3.2,-2.5 0,0 Z" transform="translate(48.2 119.3) rotate(324)"/><path d="M0,0 C3.2,-2.5 3.2,-7.5 0,-11 C-3.2,-7.5 -3.2,-2.5 0,0 Z" transform="translate(37 114.8) rotate(260)"/><path d="M0,0 C3.2,-2.5 3.2,-7.5 0,-11 C-3.2,-7.5 -3.2,-2.5 0,0 Z" transform="translate(27 108) rotate(348)"/><path d="M0,0 C3.2,-2.5 3.2,-7.5 0,-11 C-3.2,-7.5 -3.2,-2.5 0,0 Z" transform="translate(18.7 99.4) rotate(284)"/><path d="M0,0 C3.2,-2.5 3.2,-7.5 0,-11 C-3.2,-7.5 -3.2,-2.5 0,0 Z" transform="translate(12.3 89.2) rotate(372)"/><path d="M0,0 C3.2,-2.5 3.2,-7.5 0,-11 C-3.2,-7.5 -3.2,-2.5 0,0 Z" transform="translate(8.2 77.9) rotate(308)"/><path d="M0,0 C3.2,-2.5 3.2,-7.5 0,-11 C-3.2,-7.5 -3.2,-2.5 0,0 Z" transform="translate(6.5 66) rotate(396)"/><path d="M0,0 C3.2,-2.5 3.2,-7.5 0,-11 C-3.2,-7.5 -3.2,-2.5 0,0 Z" transform="translate(7.4 54) rotate(332)"/><path d="M0,0 C3.2,-2.5 3.2,-7.5 0,-11 C-3.2,-7.5 -3.2,-2.5 0,0 Z" transform="translate(10.7 42.5) rotate(420)"/></g>
+  <g transform="translate(88 110) rotate(-26) scale(1.14)">
+    <rect x="-2.3" y="-86" width="4.6" height="88" rx="2" fill="url(#em-gold-pole)" stroke="url(#em-gold-edge)" stroke-width="0.8"/>
+    <path d="M0,-80 C-10,-86 -22,-73 -40,-80 L-40,-52 C-22,-45 -10,-58 0,-52 Z" fill="url(#em-gold-cloth)" stroke="url(#em-gold-edge)" stroke-width="1.4" stroke-linejoin="round"/>
+    <path d="M0,-70 C-10,-76 -22,-63 -40,-70 L-40,-62 C-22,-55 -10,-68 0,-62 Z" fill="url(#em-gold-dark)"/>
+    <path d="M0,-80 C-10,-86 -22,-73 -40,-80 L-40,-52 C-22,-45 -10,-58 0,-52 Z" fill="url(#em-gold-fold)"/>
+    <circle cy="-89" r="4.2" fill="url(#em-gold-knob)" stroke="url(#em-gold-edge)" stroke-width="0.8"/>
+  </g>
+  <g transform="translate(128 0) scale(-1 1)"><g transform="translate(88 110) rotate(-26) scale(1.14)">
+    <rect x="-2.3" y="-86" width="4.6" height="88" rx="2" fill="url(#em-gold-pole)" stroke="url(#em-gold-edge)" stroke-width="0.8"/>
+    <path d="M0,-80 C-10,-86 -22,-73 -40,-80 L-40,-52 C-22,-45 -10,-58 0,-52 Z" fill="url(#em-gold-cloth)" stroke="url(#em-gold-edge)" stroke-width="1.4" stroke-linejoin="round"/>
+    <polygon points="-20,-73.5 -18.2,-68.9 -13.3,-68.7 -17.1,-65.6 -15.9,-60.8 -20,-63.5 -24.1,-60.8 -22.9,-65.6 -26.7,-68.7 -21.8,-68.9" fill="url(#em-gold-dark)"/>
+    <path d="M0,-80 C-10,-86 -22,-73 -40,-80 L-40,-52 C-22,-45 -10,-58 0,-52 Z" fill="url(#em-gold-fold)"/>
+    <circle cy="-89" r="4.2" fill="url(#em-gold-knob)" stroke="url(#em-gold-edge)" stroke-width="0.8"/>
+  </g></g>
+</svg>

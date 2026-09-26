@@ -1,10 +1,13 @@
+import { useState } from 'preact/hooks';
 import { DIVISIONS, DIVISION_IDS, MODES, divisionOf, type ModeId, type RankedView, type Slot } from '@flagduel/shared';
 import type { GameActions, GameVM, RoundSummary } from '../types';
 import { Logo } from './common';
-import { DivisionBadge } from './Ranked';
+import { RankUp } from './Emblem';
+import { DivisionBadge, added } from './Ranked';
 
 /** "1000 → 1078 (+78)", plus a promotion/demotion note. */
 function RatingChange({ ranked, me }: { ranked: RankedView; me: Slot }) {
+  const [celebrate, setCelebrate] = useState(true);
   const p = ranked.players[me];
   if (p.delta === null || p.after === null) return <p class="rating-change muted">Updating rating…</p>;
   const before = divisionOf(p.rating);
@@ -26,6 +29,14 @@ function RatingChange({ ranked, me }: { ranked: RankedView; me: Slot }) {
             ? `Promoted to ${DIVISIONS[after].label}! New regions are in play now.`
             : `Dropped to ${DIVISIONS[after].label}.`}
         </p>
+      )}
+      {moved > 0 && celebrate && (
+        <RankUp
+          division={after}
+          kicker="Promoted!"
+          detail={`${MODES[ranked.mode].label} rating ${p.after} · new regions ${added(after)}`}
+          onClose={() => setCelebrate(false)}
+        />
       )}
     </>
   );
