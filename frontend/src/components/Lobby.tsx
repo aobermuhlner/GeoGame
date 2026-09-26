@@ -9,6 +9,7 @@ import {
   type Slot,
 } from '@flagduel/shared';
 import { Logo } from './common';
+import { REGION_COLORS, WorldMap } from './WorldMap';
 
 interface Props {
   room: RoomView;
@@ -113,8 +114,11 @@ export function Lobby({ room, you, onReady, onStart, onRegions, onLeave }: Props
           <span class={`pool${poolOk ? '' : ' bad'}`}>{countryCount} countries</span>
         </div>
         <p class="muted small">
-          {isHost ? 'Leave out regions you don’t want to play.' : `${room.players[0]?.name ?? 'The host'} picks the regions.`}
+          {isHost
+            ? 'Click a region on the map (or in the list) to leave it out.'
+            : `${room.players[0]?.name ?? 'The host'} picks the regions.`}
         </p>
+        <WorldMap selected={regions} editable={isHost} onToggle={toggle} />
         <div class="region-list" role="group" aria-label="Regions">
           {REGION_IDS.map((r) => {
             const on = regions.includes(r);
@@ -127,6 +131,7 @@ export function Lobby({ room, you, onReady, onStart, onRegions, onLeave }: Props
                   disabled={!isHost || (on && regions.length === 1)}
                   onChange={() => toggle(r)}
                 />
+                <span class="swatch" style={{ background: on ? REGION_COLORS[r] : undefined }} aria-hidden="true" />
                 <span class="r-name">{REGION_LABELS[r]}</span>
                 <span class="r-count">{countriesInRegions([r]).length}</span>
               </label>

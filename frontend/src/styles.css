@@ -699,6 +699,40 @@ em {
 .actions-card .btn-row .btn { flex: 1; min-width: 150px; }
 .actions-card p { margin: 0; }
 
+
+/* ---------- World map ---------- */
+.world-map {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1000 / 444;
+  margin: 4px 0 14px;
+  border-radius: 12px;
+  background: radial-gradient(ellipse at 50% 40%, #f3efe4, #ece6d6);
+}
+.world-map.loading { background: #f1ece0; }
+.map-other { fill: #e2dccb; stroke: #f7f3ea; stroke-width: 0.5; }
+.map-region .shape, .map-region .dot {
+  fill: #cfc8b6;
+  stroke: #f7f3ea;
+  stroke-width: 0.6;
+  transition: fill .18s, opacity .18s;
+}
+.map-region.on .shape, .map-region.on .dot { fill: var(--c); }
+.map-region .dot { stroke-width: 1; }
+.map-region .hit { fill: transparent; stroke: transparent; stroke-width: 10; }
+.map-region circle.hit { stroke-width: 0; }
+.world-map.editable .map-region { cursor: pointer; outline: none; }
+.world-map.editable .map-region:hover .shape,
+.world-map.editable .map-region:hover .dot { opacity: 0.78; }
+.world-map.editable .map-region:not(.on):hover .shape,
+.world-map.editable .map-region:not(.on):hover .dot { fill: #b9b19b; opacity: 1; }
+.map-region:focus-visible .shape, .map-region:focus-visible .dot { stroke: var(--ink); stroke-width: 1.4; }
+.swatch {
+  width: 12px; height: 12px; border-radius: 4px; flex: none;
+  background: #d6d0c0; margin-left: -2px;
+}
+
 /* ---------- Animations ---------- */
 @keyframes shake {
   0%, 100% { transform: translateX(0); }
