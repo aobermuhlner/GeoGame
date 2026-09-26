@@ -7,6 +7,8 @@ export const ROUNDS_PER_GAME = 10;
 export const ROUND_TIME_MS = 20_000;
 export const REVEAL_MS = 2_500;
 export const COUNTDOWN_MS = 3_000;
+/** "Name vs Name" intro shown before the first countdown of a match. */
+export const MATCH_INTRO_MS = 3_000;
 /** Countdown before each minigame after the first ("Next up: Capitals"). */
 export const STAGE_INTRO_MS = 4_000;
 export const RECONNECT_GRACE_MS = 20_000;

@@ -1,9 +1,10 @@
 import { useState } from 'preact/hooks';
-import { MODES } from '@flagduel/shared';
+import { COUNTDOWN_MS, MODES } from '@flagduel/shared';
 import type { GameActions, GameVM } from '../types';
 import { CountryInput } from './CountryInput';
 import { LocateBoard } from './LocateBoard';
 import { Logo, RegionChips, StageSteps, formatClock, useNow } from './common';
+import { VsIntro } from './VsIntro';
 
 export function TopCard({ vm }: { vm: GameVM }) {
   const now = useNow(vm.deadline !== null);
@@ -78,7 +79,9 @@ export function FlagImage({ src }: { src: string }) {
 
 function Countdown({ endsAt, vm }: { endsAt: number; vm: GameVM }) {
   const now = useNow(true, 100);
-  const n = Math.max(1, Math.ceil((endsAt - now) / 1000));
+  // The match's first countdown also covers the VsIntro; count only the part after it.
+  const cap = vm.history.length === 0 ? COUNTDOWN_MS / 1000 : Infinity;
+  const n = Math.min(cap, Math.max(1, Math.ceil((endsAt - now) / 1000)));
   if (vm.modes.length < 2) {
     return (
       <div class="countdown" key={n}>
@@ -176,6 +179,7 @@ export function GameScreen({ vm, actions }: { vm: GameVM; actions: GameActions }
   if (isMap) {
     return (
       <main class="stack wide">
+        <VsIntro vm={vm} />
         <TopCard vm={vm} />
         <section class="card game-card map-card">
           <LocateBoard
@@ -200,6 +204,7 @@ export function GameScreen({ vm, actions }: { vm: GameVM; actions: GameActions }
 
   return (
     <main class="stack">
+      <VsIntro vm={vm} />
       <TopCard vm={vm} />
       <section class="card game-card">
         <div class="round-badge" aria-label={`Round ${Math.max(1, vm.stageRound)}`}>

@@ -1307,3 +1307,115 @@ em {
 .placement-result { display: flex; align-items: center; justify-content: center; gap: 10px; margin: 8px 0 4px; flex-wrap: wrap; }
 .placement-groups { list-style: none; display: flex; flex-wrap: wrap; justify-content: center; gap: 8px 14px; margin: 8px 0 16px; padding: 0; }
 .placement-groups li { display: flex; align-items: center; gap: 6px; font-variant-numeric: tabular-nums; }
+
+/* "You vs Opponent" match intro */
+.vsi {
+  position: fixed; inset: 0; z-index: 90; overflow: hidden; background: #141a16;
+  transition: opacity 0.35s ease-in;
+}
+.vsi.leaving { opacity: 0; }
+.vsi-shake { position: absolute; inset: 0; animation: vsi-shake 0.35s 1.12s; }
+.vsi-side {
+  --hi: #f7d2ae; --mid: #c9804a; --lo: #8a4b1c;
+  position: absolute; top: 0; bottom: 0; width: 56%;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;
+  padding: 24px 16px;
+  background: radial-gradient(circle at 50% 45%, color-mix(in srgb, var(--mid) 70%, transparent), transparent 65%),
+    linear-gradient(160deg, var(--lo), #141a16 85%);
+  animation: vsi-in-left 0.55s cubic-bezier(0.2, 0.9, 0.3, 1.1) both;
+}
+.vsi-side::after {
+  content: ''; position: absolute; inset: 0; pointer-events: none;
+  background: repeating-linear-gradient(115deg, rgba(255, 255, 255, 0.04) 0 2px, transparent 2px 14px);
+}
+.vsi-side.left { left: 0; padding-right: 9%; clip-path: polygon(0 0, 100% 0, 86% 100%, 0 100%); }
+.vsi-side.right {
+  right: 0; padding-left: 9%; clip-path: polygon(14% 0, 100% 0, 100% 100%, 0 100%);
+  animation-name: vsi-in-right;
+}
+.vsi-side.silver { --hi: #ffffff; --mid: #c3ccd5; --lo: #76818c; }
+.vsi-side.gold { --hi: #fff6c2; --mid: #f2c14e; --lo: #b7860b; }
+.vsi-side.platinum { --hi: #ecfffb; --mid: #9fe0d6; --lo: #3a9d8f; }
+.vsi-side.diamond { --hi: #f2f7ff; --mid: #a4bcff; --lo: #3d5fd6; }
+.vsi-side.me { --hi: #bdf0cc; --mid: #2fb35f; --lo: #1f4d2e; }
+.vsi-side.opp { --hi: #ffd9b8; --mid: #d2641a; --lo: #7a3a0e; }
+.vsi-you {
+  position: absolute; top: 18px; font-size: 11px; font-weight: 700; letter-spacing: 0.14em;
+  color: rgba(255, 255, 255, 0.7); animation: vsi-rise 0.4s 0.7s both;
+}
+.vsi-emblem {
+  position: relative; width: clamp(110px, 22vw, 190px); aspect-ratio: 1;
+  animation: vsi-drop 0.5s 0.45s cubic-bezier(0.2, 0.9, 0.3, 1.4) both;
+}
+.vsi-emblem::before {
+  content: ''; position: absolute; inset: -25%; border-radius: 50%;
+  background: radial-gradient(circle, color-mix(in srgb, var(--hi) 60%, transparent), transparent 65%);
+  animation: vsi-pulse 2.2s 0.9s ease-in-out infinite;
+}
+.vsi-emblem .emblem {
+  position: relative; width: 100%; height: 100%; filter: drop-shadow(0 8px 18px rgba(0, 0, 0, 0.45));
+}
+.vsi-initial {
+  position: relative; display: grid; place-items: center; width: 100%; height: 100%; border-radius: 50%;
+  font-size: clamp(48px, 10vw, 88px); font-weight: 800; color: var(--lo);
+  background: radial-gradient(circle at 35% 30%, var(--hi), var(--mid));
+  border: 4px solid rgba(255, 255, 255, 0.7); box-shadow: 0 8px 18px rgba(0, 0, 0, 0.45);
+}
+.vsi-name {
+  position: relative; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  color: #fff; font-weight: 800; font-size: clamp(20px, 4vw, 38px); text-align: center;
+  text-shadow: 0 3px 12px rgba(0, 0, 0, 0.5); animation: vsi-rise 0.4s 0.7s ease-out both;
+}
+.vsi-meta { position: relative; display: flex; align-items: center; gap: 8px; animation: vsi-rise 0.4s 0.85s ease-out both; }
+.vsi-pill {
+  font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em;
+  padding: 3px 10px; border-radius: 999px; color: var(--ink);
+  background: linear-gradient(180deg, var(--hi), var(--mid));
+}
+.vsi-elo { color: var(--hi); font-weight: 700; font-size: clamp(18px, 3vw, 26px); font-variant-numeric: tabular-nums; }
+.vsi-elo small { font-size: 0.55em; opacity: 0.8; margin-left: 3px; }
+.vsi-prov { color: var(--hi); opacity: 0.8; font-weight: 700; margin-left: -4px; }
+.vsi-vs {
+  position: absolute; left: 50%; top: 50%; z-index: 1; transform: translate(-50%, -50%);
+  font-weight: 800; font-style: italic; font-size: clamp(56px, 11vw, 110px); color: #fff;
+  text-shadow: 4px 4px 0 var(--orange), 0 0 30px rgba(242, 193, 78, 0.8);
+  animation: vsi-slam 0.45s 1s cubic-bezier(0.3, 1.6, 0.5, 1) both;
+}
+.vsi-flash { position: absolute; inset: 0; background: #fff; pointer-events: none; opacity: 0; animation: vsi-flash 0.35s 1.12s ease-out; }
+.vsi-foot {
+  position: absolute; bottom: 22px; left: 16px; right: 16px; z-index: 1; margin: 0; text-align: center;
+  color: rgba(255, 255, 255, 0.8); font-size: 14px; font-weight: 600; animation: vsi-rise 0.4s 1.5s both;
+}
+.vsi-foot b { color: var(--gold); }
+@keyframes vsi-in-left { from { transform: translateX(-100%); } }
+@keyframes vsi-in-right { from { transform: translateX(100%); } }
+@keyframes vsi-in-top { from { transform: translateY(-100%); } }
+@keyframes vsi-in-bottom { from { transform: translateY(100%); } }
+@keyframes vsi-drop { from { opacity: 0; transform: scale(2.2) rotate(-12deg); } }
+@keyframes vsi-pulse { 50% { opacity: 0.45; transform: scale(1.1); } }
+@keyframes vsi-rise { from { opacity: 0; transform: translateY(14px); } }
+@keyframes vsi-slam { from { opacity: 0; transform: translate(-50%, -50%) scale(3.5); } }
+@keyframes vsi-flash { 30% { opacity: 0.55; } }
+@keyframes vsi-shake {
+  25% { transform: translate(6px, -4px); }
+  50% { transform: translate(-5px, 3px); }
+  75% { transform: translate(3px, 2px); }
+}
+@media (max-width: 600px) {
+  .vsi-side { left: 0; right: 0; width: auto; height: 56%; padding: 16px; }
+  .vsi-side.left {
+    top: 0; bottom: auto; padding: 16px 16px 12%; clip-path: polygon(0 0, 100% 0, 100% 86%, 0 100%);
+    animation-name: vsi-in-top;
+  }
+  .vsi-side.right {
+    top: auto; bottom: 0; padding: 12% 16px 16px; clip-path: polygon(0 14%, 100% 0, 100% 100%, 0 100%);
+    animation-name: vsi-in-bottom;
+  }
+  .vsi-you { position: static; }
+  .vsi-emblem { width: 110px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .vsi-shake, .vsi-side, .vsi-you, .vsi-emblem, .vsi-emblem::before, .vsi-name, .vsi-meta, .vsi-vs, .vsi-flash, .vsi-foot {
+    animation: none;
+  }
+}

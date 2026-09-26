@@ -1,6 +1,7 @@
 import { DurableObject } from 'cloudflare:workers';
 import {
   COUNTDOWN_MS,
+  MATCH_INTRO_MS,
   COUNTRY_BY_CODE,
   MIN_POOL_SIZE,
   MODES,
@@ -422,7 +423,7 @@ export class Room extends DurableObject<Env> {
       tokens: codes.map(() => s.code + randomHex(8)),
       rounds: [],
       current: -1,
-      countdownEndsAt: now + COUNTDOWN_MS,
+      countdownEndsAt: now + MATCH_INTRO_MS + COUNTDOWN_MS,
       revealEndsAt: null,
       forfeitedBy: null,
       forfeitReason: null,

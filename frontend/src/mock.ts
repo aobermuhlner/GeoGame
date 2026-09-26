@@ -2,6 +2,7 @@
 // here are named by ISO code, which is exactly what the real server avoids.
 import {
   COUNTDOWN_MS,
+  MATCH_INTRO_MS,
   COUNTRY_BY_CODE,
   MODES,
   REVEAL_MS,
@@ -119,8 +120,8 @@ export function startMockGame(opts: {
     forfeitedBy = null;
     oppWrongSeq = 0;
     phase = 'countdown';
-    countdownEndsAt = Date.now() + COUNTDOWN_MS;
-    later(COUNTDOWN_MS, () => startRound(0));
+    countdownEndsAt = Date.now() + MATCH_INTRO_MS + COUNTDOWN_MS;
+    later(MATCH_INTRO_MS + COUNTDOWN_MS, () => startRound(0));
     emit();
   }
 
