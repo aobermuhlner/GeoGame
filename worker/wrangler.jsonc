@@ -1,0 +1,16 @@
+{
+  "$schema": "../node_modules/wrangler/config-schema.json",
+  "name": "flag-duel",
+  "main": "src/index.ts",
+  "compatibility_date": "2025-10-01",
+  "observability": { "enabled": true },
+  "vars": {
+    // Comma-separated list of origins allowed to create/join rooms.
+    "ALLOWED_ORIGINS": "https://aobermuhlner.github.io,http://localhost:5173,http://127.0.0.1:5173"
+  },
+  "durable_objects": {
+    "bindings": [{ "name": "ROOMS", "class_name": "Room" }]
+  },
+  // Free plan: Durable Objects must be SQLite-backed.
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["Room"] }]
+}

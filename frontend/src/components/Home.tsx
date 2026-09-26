@@ -1,18 +1,25 @@
 import { useState } from 'preact/hooks';
+import { ROOM_CODE_LENGTH } from '@flagduel/shared';
 import { Logo } from './common';
 
 interface Props {
   initialName: string;
   initialCode: string;
+  busy: boolean;
+  error: string | null;
+  onCreate: (name: string) => void;
+  onJoin: (name: string, code: string) => void;
   onDemo: (name: string) => void;
 }
 
-const CODE_CHARS = /[^ABCDEFGHJKLMNPQRSTUVWXYZ23456789]/g;
+const NOT_CODE_CHARS = /[^ABCDEFGHJKLMNPQRSTUVWXYZ23456789]/g;
 
-export function Home({ initialName, initialCode, onDemo }: Props) {
+export function Home({ initialName, initialCode, busy, error, onCreate, onJoin, onDemo }: Props) {
   const [name, setName] = useState(initialName);
   const [code, setCode] = useState(initialCode);
-  const nameOk = name.trim().length > 0;
+  const trimmed = name.trim();
+  const nameOk = trimmed.length > 0;
+  const codeOk = code.length === ROOM_CODE_LENGTH;
 
   return (
     <main class="stack">
@@ -37,31 +44,56 @@ export function Home({ initialName, initialCode, onDemo }: Props) {
           />
         </label>
 
-        <div class="home-actions">
-          <button class="btn btn-primary btn-lg" disabled title="Multiplayer arrives in milestone 2">
+        <form
+          class="home-actions"
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (nameOk && codeOk) onJoin(trimmed, code);
+          }}
+        >
+          <button
+            type="button"
+            class="btn btn-primary btn-lg"
+            disabled={!nameOk || busy}
+            onClick={() => onCreate(trimmed)}
+          >
             Create lobby
           </button>
+          <div class="or">
+            <span>or join a friend</span>
+          </div>
           <div class="join-row">
             <input
               class="text-input code-input"
               value={code}
-              maxLength={5}
+              maxLength={ROOM_CODE_LENGTH}
               placeholder="CODE"
               aria-label="Lobby code"
               autoCapitalize="characters"
               autoComplete="off"
+              autoCorrect="off"
               spellcheck={false}
-              onInput={(e) => setCode((e.target as HTMLInputElement).value.toUpperCase().replace(CODE_CHARS, ''))}
+              onInput={(e) => {
+                const v = (e.target as HTMLInputElement).value.toUpperCase().replace(NOT_CODE_CHARS, '');
+                (e.target as HTMLInputElement).value = v;
+                setCode(v);
+              }}
             />
-            <button class="btn btn-ghost" disabled title="Multiplayer arrives in milestone 2">
+            <button type="submit" class="btn btn-ghost" disabled={!nameOk || !codeOk || busy}>
               Join lobby
             </button>
           </div>
-        </div>
+          {!nameOk && (code || initialCode) && <p class="muted small center">Enter a nickname first.</p>}
+          {error && (
+            <p class="form-error" role="alert">
+              {error}
+            </p>
+          )}
+        </form>
 
         {import.meta.env.DEV && (
           <div class="demo">
-            <button class="link" disabled={!nameOk} onClick={() => onDemo(name.trim())}>
+            <button class="link" disabled={!nameOk} onClick={() => onDemo(trimmed)}>
               Practice against a bot (local demo)
             </button>
           </div>

@@ -1,0 +1,25 @@
+{
+  "name": "@flagduel/worker",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "gen:flags": "node scripts/gen-flags.mjs",
+    "predev": "npm run gen:flags",
+    "dev": "wrangler dev --port 8787",
+    "pretest": "npm run gen:flags",
+    "test": "vitest run",
+    "predeploy": "npm run gen:flags",
+    "deploy": "wrangler deploy",
+    "types": "wrangler types"
+  },
+  "dependencies": {
+    "@flagduel/shared": "*"
+  },
+  "devDependencies": {
+    "@cloudflare/vitest-plugin": "^1.2.8",
+    "flag-icons": "^7.5.0",
+    "vitest": "^4.1.11",
+    "wrangler": "^4.141.0"
+  }
+}
