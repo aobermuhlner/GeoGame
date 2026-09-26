@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'preact/hooks';
 import { BOARD_IDS, MODES, type BoardId, type LeaderboardResponse } from '@flagduel/shared';
 import { api } from '../api';
+import { formatDuration } from './common';
 
 const boardLabel = (b: BoardId) => (b === 'overall' ? 'Overall' : MODES[b].label);
 
@@ -61,13 +62,14 @@ export function Leaderboard({
                   {e.name}
                   {e.you && <span class="you-tag">you</span>}
                 </td>
+                <td class="time">{formatDuration(e.timeMs)}</td>
                 <td class="score">{e.score}</td>
               </tr>
             ))}
             {youOutside && (
               <>
                 <tr class="gap">
-                  <td colSpan={3}>⋯</td>
+                  <td colSpan={4}>⋯</td>
                 </tr>
                 <tr class="you">
                   <td class="rank">{youOutside.rank}</td>
@@ -75,6 +77,7 @@ export function Leaderboard({
                     {youOutside.name}
                     <span class="you-tag">you</span>
                   </td>
+                  <td class="time">{formatDuration(youOutside.timeMs)}</td>
                   <td class="score">{youOutside.score}</td>
                 </tr>
               </>

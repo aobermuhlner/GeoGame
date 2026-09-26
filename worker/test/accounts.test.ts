@@ -235,12 +235,36 @@ describe('daily challenge', () => {
       ['Lb1', 300],
     ]);
     expect(mine[0].rank).toBe(mine[1].rank);
+    expect(mine.every((e) => e.timeMs === 0)).toBe(true); // everyone answered the moment each round started
     expect(lb.you).toMatchObject({ name: 'Lb1', score: 300, you: true });
 
     const overall = (await (await call('/leaderboard?board=overall')).json()) as LeaderboardResponse;
     expect(overall.you).toBeNull();
     expect(overall.entries.find((e) => e.name === 'Lb2')!.score).toBe(500);
     expect((await call('/leaderboard?board=bogus')).status).toBe(400);
+  });
+
+  it('leaderboard shows run time and ranks equal scores by it', async () => {
+    const t = Date.now();
+    for (const [name, delay] of [['Tm1', 3000], ['Tm2', 1000]] as const) {
+      const { user } = await devLogin(name);
+      await db().dailyStart(user.id, 'capitals', t);
+      let now = t + COUNTDOWN_MS;
+      for (let round = 1; round <= 10; round++) {
+        if (round > 1) await db().dailyNext(user.id, 'capitals', round - 1, now);
+        now += delay;
+        await db().dailyPass(user.id, 'capitals', round, now);
+      }
+      const done = await db().dailyGet(user.id, 'capitals', now);
+      expect(done!.run).toMatchObject({ phase: 'finished', score: 0, timeMs: 10 * delay });
+    }
+    const lb = (await (await call('/leaderboard?board=capitals')).json()) as LeaderboardResponse;
+    const mine = lb.entries.filter((e) => e.name.startsWith('Tm'));
+    expect(mine.map((e) => [e.name, e.timeMs])).toEqual([
+      ['Tm2', 10_000],
+      ['Tm1', 30_000],
+    ]);
+    expect(mine[0].rank).toBeLessThan(mine[1].rank);
   });
 });
 

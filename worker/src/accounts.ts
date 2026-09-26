@@ -19,6 +19,7 @@ import {
   ratingView,
   START_RD,
   START_VOLATILITY,
+  runTimeMs,
   settleRun,
   soloGuess,
   soloNext,
@@ -102,10 +103,11 @@ async function sha256(s: string): Promise<string> {
   return Array.from(new Uint8Array(d), (b) => b.toString(16).padStart(2, '0')).join('');
 }
 
-/** Competition ranking ("1, 2, 2, 4") over rows already sorted best-first. */
-function rank<T extends { score: number }>(rows: T[]): (T & { rank: number })[] {
+/** Competition ranking ("1, 2, 2, 4") over rows already sorted best-first; equal score and time share a rank. */
+function rank<T extends { score: number; timeMs?: number }>(rows: T[]): (T & { rank: number })[] {
   const out: (T & { rank: number })[] = [];
-  rows.forEach((r, i) => out.push({ ...r, rank: i > 0 && rows[i - 1].score === r.score ? out[i - 1].rank : i + 1 }));
+  const tie = (a: T, b: T) => a.score === b.score && a.timeMs === b.timeMs;
+  rows.forEach((r, i) => out.push({ ...r, rank: i > 0 && tie(rows[i - 1], r) ? out[i - 1].rank : i + 1 }));
   return out;
 }
 
@@ -143,6 +145,7 @@ export class Accounts extends DurableObject<Env> {
         mode TEXT NOT NULL,
         state TEXT NOT NULL,
         score INTEGER NOT NULL DEFAULT 0,
+        time_ms INTEGER NOT NULL DEFAULT 0,
         finished_at INTEGER,
         PRIMARY KEY (user_id, date, mode)
       );
@@ -184,6 +187,17 @@ export class Accounts extends DurableObject<Env> {
         PRIMARY KEY (user_id, mode)
       );
     `);
+    this.migrate();
+  }
+
+  /** Columns added after launch (CREATE TABLE IF NOT EXISTS leaves older tables as they were). */
+  private migrate() {
+    const cols = this.sql.exec<{ name: string }>('PRAGMA table_info(daily_runs)').toArray();
+    if (!cols.some((c) => c.name === 'time_ms')) {
+      this.sql.exec('ALTER TABLE daily_runs ADD COLUMN time_ms INTEGER NOT NULL DEFAULT 0');
+      const rows = this.sql.exec<{ user_id: string; state: string }>('SELECT user_id, state FROM daily_runs').toArray();
+      for (const r of rows) this.saveRun(r.user_id, JSON.parse(r.state));
+    }
   }
 
   // ---------- Accounts & sessions ----------
@@ -320,13 +334,15 @@ export class Accounts extends DurableObject<Env> {
 
   private saveRun(userId: string, run: DailyRun) {
     this.sql.exec(
-      `INSERT INTO daily_runs (user_id, date, mode, state, score, finished_at) VALUES (?, ?, ?, ?, ?, ?)
-       ON CONFLICT (user_id, date, mode) DO UPDATE SET state = excluded.state, score = excluded.score, finished_at = excluded.finished_at`,
+      `INSERT INTO daily_runs (user_id, date, mode, state, score, time_ms, finished_at) VALUES (?, ?, ?, ?, ?, ?, ?)
+       ON CONFLICT (user_id, date, mode) DO UPDATE SET state = excluded.state, score = excluded.score,
+         time_ms = excluded.time_ms, finished_at = excluded.finished_at`,
       userId,
       run.date,
       run.mode,
       JSON.stringify(run),
       run.score,
+      runTimeMs(run),
       run.finishedAt,
     );
   }
@@ -353,6 +369,7 @@ export class Accounts extends DurableObject<Env> {
       modes[mode] = {
         status: !run ? 'new' : run.finishedAt === null ? 'playing' : 'finished',
         score: run?.finishedAt != null ? run.score : null,
+        timeMs: run?.finishedAt != null ? runTimeMs(run) : null,
         rank: run?.finishedAt != null ? (this.board(date, mode, userId).you?.rank ?? null) : null,
       };
     }
@@ -650,20 +667,20 @@ export class Accounts extends DurableObject<Env> {
     const rows =
       board === 'overall'
         ? this.sql
-            .exec<{ user_id: string; name: string; score: number }>(
-              `SELECT r.user_id, u.display_name AS name, SUM(r.score) AS score FROM daily_runs r
+            .exec<{ user_id: string; name: string; score: number; timeMs: number }>(
+              `SELECT r.user_id, u.display_name AS name, SUM(r.score) AS score, SUM(r.time_ms) AS timeMs FROM daily_runs r
                JOIN users u ON u.id = r.user_id
                WHERE r.date = ? AND r.finished_at IS NOT NULL
-               GROUP BY r.user_id ORDER BY score DESC, MAX(r.finished_at) ASC`,
+               GROUP BY r.user_id ORDER BY score DESC, timeMs ASC, MAX(r.finished_at) ASC`,
               date,
             )
             .toArray()
         : this.sql
-            .exec<{ user_id: string; name: string; score: number }>(
-              `SELECT r.user_id, u.display_name AS name, r.score FROM daily_runs r
+            .exec<{ user_id: string; name: string; score: number; timeMs: number }>(
+              `SELECT r.user_id, u.display_name AS name, r.score, r.time_ms AS timeMs FROM daily_runs r
                JOIN users u ON u.id = r.user_id
                WHERE r.date = ? AND r.mode = ? AND r.finished_at IS NOT NULL
-               ORDER BY r.score DESC, r.finished_at ASC`,
+               ORDER BY r.score DESC, r.time_ms ASC, r.finished_at ASC`,
               date,
               board,
             )
@@ -672,6 +689,7 @@ export class Accounts extends DurableObject<Env> {
       rank: r.rank,
       name: r.name,
       score: r.score,
+      timeMs: r.timeMs,
       you: r.user_id === userId,
     }));
     return {

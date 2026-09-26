@@ -9,6 +9,7 @@ import {
   type UserView,
 } from '@flagduel/shared';
 import { api } from '../api';
+import { formatDuration } from './common';
 import { NextDaily } from './Daily';
 import { Leaderboard } from './Leaderboard';
 import { DivisionBadge } from './Ranked';
@@ -148,7 +149,7 @@ export function MainLobby({
                 <li key={m}>
                   <span>{MODES[m].label}</span>
                   <span class={`today-status ${info?.status ?? ''}`}>
-                    {!info ? dash : info.status === 'finished' ? `${info.score} pts` : info.status === 'playing' ? 'in progress' : 'not played'}
+                    {!info ? dash : info.status === 'finished' ? `${info.score} pts${info.timeMs !== null ? ` · ${formatDuration(info.timeMs)}` : ''}` : info.status === 'playing' ? 'in progress' : 'not played'}
                   </span>
                 </li>
               );

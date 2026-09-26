@@ -20,7 +20,7 @@ import { CountryInput } from './CountryInput';
 import { FlagImage } from './GameScreen';
 import { LocateBoard } from './LocateBoard';
 import { Leaderboard } from './Leaderboard';
-import { Logo, formatClock, useNow } from './common';
+import { Logo, formatClock, formatDuration, useNow } from './common';
 
 function formatHms(ms: number): string {
   const s = Math.max(0, Math.floor(ms / 1000));
@@ -57,7 +57,10 @@ function ModeCard({
       {status === 'finished' ? (
         <div class="dm-done">
           <span class="dm-score">{info!.score}</span>
-          <span class="muted small">{info!.rank ? `rank #${info!.rank}` : 'points'}</span>
+          <span class="muted small">
+            {info!.rank ? `rank #${info!.rank}` : 'points'}
+            {info!.timeMs !== null && ` · ${formatDuration(info!.timeMs)}`}
+          </span>
           <button class="link" onClick={onPlay}>
             Results
           </button>
@@ -93,7 +96,7 @@ export function DailyHub({ onPlay }: { onPlay: (mode: ModeId) => void }) {
           Each game can be played <strong>once per day</strong> — everyone gets the same 10 countries. A correct answer
           is worth {SOLO_BASE_POINTS} points plus up to {SOLO_SPEED_POINTS} for speed, minus {SOLO_WRONG_PENALTY} per
           wrong guess. In GeoLocate every wrong click costs {SOLO_WRONG_PENALTY} points, even if you never find the
-          country. Your score goes on today's ranking.
+          country. Your score and total time go on today's ranking — on equal points the faster run ranks higher.
         </p>
         {error && <p class="form-error">{error}</p>}
         <div class="daily-modes">
@@ -616,6 +619,10 @@ function SoloResults({
           <div class="fs-player">
             <span class="fs-points">{run.score}</span>
             <span class="fs-name">of {run.maxScore} points</span>
+          </div>
+          <div class="fs-player">
+            <span class="fs-points">{formatDuration(run.timeMs)}</span>
+            <span class="fs-name">total time</span>
           </div>
         </div>
         <div class="btn-row">

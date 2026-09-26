@@ -72,6 +72,11 @@ export function newDailyRun(date: string, mode: ModeId, codes: string[], now: nu
 
 const currentOf = (run: DailyRun) => run.rounds[run.rounds.length - 1];
 
+/** Total time spent on the run: each ended round from its start to its answer, pass or timeout. */
+export function runTimeMs(run: DailyRun): number {
+  return run.rounds.reduce((n, r) => n + (r.endedAt !== null ? Math.max(0, r.endedAt - r.startsAt) : 0), 0);
+}
+
 function endSoloRound(run: DailyRun, end: SoloEnd, now: number) {
   const r = currentOf(run);
   r.end = end;
@@ -165,6 +170,8 @@ export interface DailyView {
   history: SoloRoundView[];
   score: number;
   maxScore: number;
+  /** Total time spent on the ended rounds (the leaderboard tiebreaker) */
+  timeMs: number;
 }
 
 function roundView(mode: ModeId, r: SoloRound): SoloRoundView {
@@ -200,5 +207,6 @@ export function dailyView(run: DailyRun, now: number): DailyView {
     history: run.rounds.filter((x) => x.end).map((x) => roundView(run.mode, x)),
     score: run.score,
     maxScore: run.codes.length * (SOLO_BASE_POINTS + SOLO_SPEED_POINTS),
+    timeMs: runTimeMs(run),
   };
 }

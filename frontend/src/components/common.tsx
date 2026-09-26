@@ -49,6 +49,14 @@ export function formatClock(ms: number): string {
   return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
 }
 
+/** Total play time: "42.3 s", or "2:05.4" from a minute up. */
+export function formatDuration(ms: number): string {
+  const t = Math.max(0, Math.round(ms / 100)) / 10;
+  if (t < 60) return `${t.toFixed(1)} s`;
+  const m = Math.floor(t / 60);
+  return `${m}:${(t - m * 60).toFixed(1).padStart(4, '0')}`;
+}
+
 /** "① Flags → ② Capitals" progress through the minigames of a match. */
 export function StageSteps({ modes, current }: { modes: ModeId[]; current: number }) {
   return (

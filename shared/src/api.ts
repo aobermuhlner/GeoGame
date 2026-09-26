@@ -53,7 +53,7 @@ export interface DailySummary {
   date: string;
   /** Server-clock ms when the next daily unlocks */
   nextAt: number;
-  modes: Record<ModeId, { status: DailyStatus; score: number | null; rank: number | null }>;
+  modes: Record<ModeId, { status: DailyStatus; score: number | null; timeMs: number | null; rank: number | null }>;
 }
 
 export interface DailyResponse {
@@ -74,6 +74,8 @@ export interface LeaderboardEntry {
   rank: number;
   name: string;
   score: number;
+  /** Total time of the run(s); equal scores are ranked by it */
+  timeMs: number;
   you: boolean;
 }
 
