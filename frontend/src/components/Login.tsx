@@ -33,7 +33,7 @@ function loadGsi(): Promise<Gsi> {
   }));
 }
 
-function GoogleButton({ clientId, onCredential }: { clientId: string; onCredential: (c: string) => void }) {
+export function GoogleButton({ clientId, onCredential }: { clientId: string; onCredential: (c: string) => void }) {
   const ref = useRef<HTMLDivElement>(null);
   const [error, setError] = useState<string | null>(null);
   useEffect(() => {
@@ -103,7 +103,7 @@ export function Login({ onSignedIn, roomCode }: { onSignedIn: (u: UserView) => v
         <p class="tagline">
           {roomCode
             ? `Sign in to join lobby ${roomCode}.`
-            : 'Daily flag challenges and real-time duels. Pick a name to start playing.'}
+            : 'Daily flag challenges and real-time duels. Sign in or pick a name to start playing.'}
         </p>
 
         <ul class="login-points">
@@ -119,6 +119,10 @@ export function Login({ onSignedIn, roomCode }: { onSignedIn: (u: UserView) => v
         </ul>
 
         {!config && !error && <p class="muted center">Loading…</p>}
+        {config?.googleClientId && (
+          <GoogleButton clientId={config.googleClientId} onCredential={(c) => run(api.loginGoogle(c))} />
+        )}
+
         {config?.guestLogin && (
           <form
             class="dev-login"
@@ -127,6 +131,11 @@ export function Login({ onSignedIn, roomCode }: { onSignedIn: (u: UserView) => v
               if (guestName.trim()) run(api.loginGuest(guestName.trim()));
             }}
           >
+            {config.googleClientId && (
+              <div class="or">
+                <span>or play as a guest</span>
+              </div>
+            )}
             <div class="join-row">
               <input
                 class="text-input"
@@ -140,12 +149,12 @@ export function Login({ onSignedIn, roomCode }: { onSignedIn: (u: UserView) => v
                 Play
               </button>
             </div>
-            <p class="muted center">Your scores are saved in this browser.</p>
+            <p class="muted center">
+              {config.googleClientId
+                ? 'Guest scores stay in this browser. You can link Google later to keep them.'
+                : 'Your scores are saved in this browser.'}
+            </p>
           </form>
-        )}
-
-        {config?.googleClientId && (
-          <GoogleButton clientId={config.googleClientId} onCredential={(c) => run(api.loginGoogle(c))} />
         )}
 
         {config?.devLogin && (

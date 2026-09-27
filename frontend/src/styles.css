@@ -970,6 +970,14 @@ em {
 .dev-login { display: grid; gap: 12px; margin-top: 18px; }
 .dev-login .text-input { flex: 1; }
 .login-card .form-error { margin-top: 14px; }
+.account-card { flex-wrap: wrap; }
+.link-google {
+  flex: 1 1 100%; min-width: 0;
+  display: grid; gap: 10px; padding: 12px 14px;
+  border: 1px dashed var(--line); border-radius: 12px;
+}
+.link-google p { margin: 0; }
+.link-google .google-btn { justify-content: flex-start; }
 
 /* ---------- Main lobby ---------- */
 .account-card { display: flex; align-items: center; gap: 18px; }

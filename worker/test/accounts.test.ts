@@ -105,6 +105,64 @@ describe('auth', () => {
   });
 });
 
+describe('linking a guest to Google', () => {
+  const guest = async (name: string) => {
+    const res = await call('/auth/guest', { method: 'POST', body: { name } });
+    return (await res.json()) as LoginResponse;
+  };
+  const claims = (sub: string) => ({ sub, email: `${sub}@example.com`, given_name: 'Googler' });
+  const scalar = (query: string, ...params: string[]) =>
+    runInDurableObject(db(), (_: Accounts, state) => state.storage.sql.exec(query, ...params).one().v);
+  const count = (table: string, userId: string) => scalar(`SELECT COUNT(*) AS v FROM ${table} WHERE user_id = ?`, userId);
+
+  it('a new Google account keeps the guest id, name and progress, and swaps the session', async () => {
+    const g = await guest('Wanderer');
+    await db().dailyStart(g.user.id, 'flags');
+    const linked = await db().linkGoogle(g.user.id, claims('link-new'));
+    expect(linked!.user).toMatchObject({ id: g.user.id, displayName: 'Wanderer', email: 'link-new@example.com', guest: false });
+    expect(await db().authenticate(g.token)).toBeNull();
+    expect(await db().authenticate(linked!.token)).toMatchObject({ id: g.user.id });
+    expect(await count('daily_runs', g.user.id)).toBe(1);
+
+    // From now on it is a normal Google account: signing in finds it, linking again is refused.
+    expect((await db().loginGoogle(claims('link-new'))).user.id).toBe(g.user.id);
+    expect(await db().linkGoogle(g.user.id, claims('link-other'))).toBeNull();
+  });
+
+  it('an existing Google account absorbs the guest; its own rows win on conflicts', async () => {
+    const acc = await db().loginGoogle(claims('link-existing'));
+    const g = await guest('Temp');
+    const rival = await guest('Rival');
+    await db().dailyStart(acc.user.id, 'flags');
+    await db().dailyStart(g.user.id, 'flags'); // same game as the account's run → dropped
+    await db().dailyStart(g.user.id, 'capitals'); // moves over
+    await db().rankedResult('link-m1', 'flags', [g.user.id, rival.user.id], 0);
+
+    const linked = await db().linkGoogle(g.user.id, claims('link-existing'));
+    expect(linked!.user).toMatchObject({ id: acc.user.id, displayName: 'Googler', guest: false });
+    expect(await db().authenticate(g.token)).toBeNull();
+    expect(await count('daily_runs', acc.user.id)).toBe(2);
+    expect(await count('daily_runs', g.user.id)).toBe(0);
+    expect(await count('ratings', g.user.id)).toBe(0);
+    expect((await db().rankedProfile(acc.user.id)).flags).toMatchObject({ played: 1, wins: 1 });
+    expect((await db().rankedBoard(acc.user.id, 'flags')).you).toMatchObject({ name: 'Googler', played: 1 });
+    expect(await scalar("SELECT player_a AS v FROM ranked_matches WHERE id = 'link-m1'")).toBe(acc.user.id);
+    expect(await scalar('SELECT COUNT(*) AS v FROM users WHERE id = ?', g.user.id)).toBe(0);
+  });
+
+  it('HTTP: needs a guest session and a valid credential', async () => {
+    const g = await guest('Nobody');
+    const res = await call('/auth/google/link', { method: 'POST', token: g.token, body: { credential: 'a.b.c' } });
+    expect(res.status).toBe(400);
+    // A bad credential must not end the guest's session.
+    expect((await call('/me', { token: g.token })).status).toBe(200);
+    expect((await call('/auth/google/link', { method: 'POST', body: { credential: 'a.b.c' } })).status).toBe(401);
+    const dev = await devLogin('NotAGuest');
+    const r2 = await call('/auth/google/link', { method: 'POST', token: dev.token, body: { credential: 'a.b.c' } });
+    expect(r2.status).toBe(409);
+  });
+});
+
 describe('Google ID tokens', () => {
   const CLIENT = 'client-123';
   const b64url = (b: ArrayBuffer | Uint8Array) =>
