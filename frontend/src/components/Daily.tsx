@@ -13,6 +13,7 @@ import {
   type GuessOutcome,
   type ModeId,
   type PlacementResult,
+  type SoloRoundView,
 } from '@flagduel/shared';
 import { api, dailyFlagSrc } from '../api';
 import { Emblem, RankUp } from './Emblem';
@@ -411,9 +412,13 @@ function SoloScreen({
             {left !== null ? formatClock(left) : '–:––'}
           </span>
         </div>
-        <div class="progress" role="progressbar" aria-valuemin={0} aria-valuemax={run.totalRounds} aria-valuenow={done}>
-          <div class="progress-fill" style={{ width: `${(done / run.totalRounds) * 100}%` }} />
-        </div>
+        {placement ? (
+          <StreakStrip history={run.history} total={run.totalRounds} current={run.phase === 'reveal' ? null : done} />
+        ) : (
+          <div class="progress" role="progressbar" aria-valuemin={0} aria-valuemax={run.totalRounds} aria-valuenow={done}>
+            <div class="progress-fill" style={{ width: `${(done / run.totalRounds) * 100}%` }} />
+          </div>
+        )}
       </section>
 
       {isMap ? (
@@ -498,6 +503,65 @@ function SoloScreen({
   );
 }
 
+/** Correct answers in a row at the end of `history`. */
+function currentStreak(history: readonly SoloRoundView[]): number {
+  let n = 0;
+  for (let i = history.length - 1; i >= 0 && history[i].end === 'correct'; i--) n++;
+  return n;
+}
+
+function bestStreak(history: readonly SoloRoundView[]): number {
+  let best = 0;
+  let n = 0;
+  for (const h of history) {
+    n = h.end === 'correct' ? n + 1 : 0;
+    best = Math.max(best, n);
+  }
+  return best;
+}
+
+/** Answers so far as green ✓ / red ✗ boxes, the current round outlined and the rest still empty. */
+function StreakStrip({
+  history,
+  total,
+  current,
+  animate = true,
+}: {
+  history: readonly SoloRoundView[];
+  total: number;
+  /** Index of the round being played (null while revealing / finished) */
+  current: number | null;
+  /** Pop in the newest answer (off on the results) */
+  animate?: boolean;
+}) {
+  const streak = currentStreak(history);
+  const last = history.length - 1;
+  return (
+    <div class="streak" aria-label={`${history.filter((h) => h.end === 'correct').length} of ${history.length} correct`}>
+      <ol class="streak-tiles">
+        {Array.from({ length: total }, (_, i) => {
+          const h = history[i];
+          const state = h ? (h.end === 'correct' ? 'ok' : 'miss') : i === current ? 'now' : 'todo';
+          return (
+            <li
+              key={i}
+              class={`st ${state}${animate && i === last && current === null ? ' fresh' : ''}`}
+              title={h ? `${i + 1}. ${h.answer}` : undefined}
+            >
+              {state === 'ok' ? '✓' : state === 'miss' ? '✗' : ''}
+            </li>
+          );
+        })}
+      </ol>
+      {animate && streak >= 2 && (
+        <p class="streak-fire" key={streak}>
+          🔥 {streak} in a row
+        </p>
+      )}
+    </div>
+  );
+}
+
 function SoloNote({ onQuit }: { onQuit?: () => void }) {
   return onQuit ? (
     <p class="muted small center solo-note">
@@ -541,18 +605,8 @@ function PlacementResults({
             <span class="muted small">your starting {mode.label} rating</span>
           </div>
         )}
-        {result && (
-          <ul class="placement-groups" aria-label="Correct answers per division">
-            {result.groups.map((g) => (
-              <li key={g.division}>
-                <DivisionBadge division={g.division} small />
-                <span class="small">
-                  {g.correct}/{g.total}
-                </span>
-              </li>
-            ))}
-          </ul>
-        )}
+        <StreakStrip history={run.history} total={run.totalRounds} current={null} animate={false} />
+        {bestStreak(run.history) >= 2 && <p class="muted small">Best streak: {bestStreak(run.history)} in a row</p>}
         {result && celebrate && (
           <RankUp
             division={result.division}

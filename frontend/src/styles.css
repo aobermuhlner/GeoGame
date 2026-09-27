@@ -1305,8 +1305,21 @@ em {
 .unlock .ladder li { grid-template-columns: 6.5em 5.5em 1fr; }
 @media (max-width: 420px) { .unlock-options { grid-template-columns: 1fr; } }
 .placement-result { display: flex; align-items: center; justify-content: center; gap: 10px; margin: 8px 0 4px; flex-wrap: wrap; }
-.placement-groups { list-style: none; display: flex; flex-wrap: wrap; justify-content: center; gap: 8px 14px; margin: 8px 0 16px; padding: 0; }
-.placement-groups li { display: flex; align-items: center; gap: 6px; font-variant-numeric: tabular-nums; }
+
+/* Placement streak: a ✓/✗ box per answer */
+.streak { margin-top: 2px; }
+.results-banner .streak { margin: 10px 0 6px; }
+.streak-tiles { list-style: none; display: flex; flex-wrap: wrap; justify-content: center; gap: 4px; margin: 0; padding: 0; }
+.st {
+  width: 18px; height: 18px; border-radius: 5px; display: grid; place-items: center;
+  font-size: 0.7rem; font-weight: 800; line-height: 1; color: #fff; background: var(--track);
+}
+.st.ok { background: #3f9a52; }
+.st.miss { background: var(--red); }
+.st.now { background: transparent; box-shadow: inset 0 0 0 2px var(--green-600); animation: pulse 1.2s ease-in-out infinite; }
+.st.fresh { animation: st-pop 0.35s ease-out; }
+.streak-fire { margin: 6px 0 0; text-align: center; font-size: 0.8rem; font-weight: 800; color: var(--orange); animation: st-pop 0.35s ease-out; }
+@keyframes st-pop { 0% { transform: scale(0.3); } 70% { transform: scale(1.2); } 100% { transform: none; } }
 
 /* "You vs Opponent" match intro */
 .vsi {
