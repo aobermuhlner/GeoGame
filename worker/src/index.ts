@@ -116,6 +116,9 @@ async function accountRoutes(request: Request, env: Env, url: URL, origin: strin
     return json(await db.leaderboard(user?.id ?? null, board));
   }
 
+  // GET /higher/leaderboard — today's Higher or Lower ranking, signed out too
+  if (path === '/higher/leaderboard' && method === 'GET') return json(await db.higherBoard(user?.id ?? null));
+
   // GET /ranked/leaderboard?mode=flags — signed out too
   if (path === '/ranked/leaderboard' && method === 'GET') {
     const mode = (url.searchParams.get('mode') ?? 'flags') as ModeId;
@@ -177,6 +180,20 @@ async function accountRoutes(request: Request, env: Env, url: URL, origin: strin
     return json({ user: await db.setDisplayName(user.id, name) });
   }
   if (path === '/daily' && method === 'GET') return json(await db.dailySummary(user.id));
+
+  // /higher/daily (GET) · /higher/daily/start|pick|next (POST)
+  const hl = /^\/higher\/daily(?:\/(start|pick|next))?$/.exec(path);
+  if (hl) {
+    const noRun = (r: unknown) => (r ? json(r) : fail(404, 'No Higher or Lower game started'));
+    if (!hl[1]) return method === 'GET' ? noRun(await db.higherGet(user.id)) : fail(405, 'Method not allowed');
+    if (method !== 'POST') return fail(405, 'Method not allowed');
+    if (hl[1] === 'start') return json(await db.higherStart(user.id));
+    const b = await readBody(request);
+    if (!isRound(b.round)) return fail(400, 'Missing round');
+    if (hl[1] === 'next') return noRun(await db.higherNext(user.id, b.round));
+    if (typeof b.code !== 'string' || !/^[A-Z]{2}$/.test(b.code)) return fail(400, 'Missing country');
+    return noRun(await db.higherPick(user.id, b.round, b.code));
+  }
 
   // /daily/:mode  (GET)   ·   /daily/:mode/start|guess|pass|next  (POST)
   const m = /^\/daily\/([a-z]+)(?:\/(start|guess|pass|next))?$/.exec(path);
@@ -243,7 +260,7 @@ export default {
     }
 
     // Accounts, daily challenge, leaderboards, ratings
-    if (/^\/(auth|me|daily|leaderboard|ranked)(\/|$)/.test(url.pathname)) {
+    if (/^\/(auth|me|daily|leaderboard|ranked|higher)(\/|$)/.test(url.pathname)) {
       if (!origin) return new Response('Forbidden origin', { status: 403 });
       return withCors(await accountRoutes(request, env, url, origin), origin);
     }

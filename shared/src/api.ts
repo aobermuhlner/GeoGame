@@ -1,6 +1,7 @@
 // HTTP API shapes for accounts, the daily challenge and leaderboards (Worker ↔ browser).
 import type { DailyView } from './daily';
 import type { GuessOutcome } from './game';
+import type { HigherRunView, PickOutcome, StatId } from './higher';
 import type { PlacementResult } from './placement';
 import { MODE_IDS, type ModeId } from './modes';
 
@@ -26,6 +27,8 @@ export interface UserStats {
   /** Consecutive days up to today (or yesterday, if today isn't played yet) */
   streak: number;
   daily: Record<ModeId, ModeStats>;
+  /** Daily Higher or Lower */
+  higher: { played: number; bestFlawless: number | null; perfect: number };
 }
 
 export interface MeResponse {
@@ -54,6 +57,49 @@ export interface DailySummary {
   /** Server-clock ms when the next daily unlocks */
   nextAt: number;
   modes: Record<ModeId, { status: DailyStatus; score: number | null; timeMs: number | null; rank: number | null }>;
+  higher: HigherSummary;
+}
+
+/** Today's Higher or Lower for one player. Scores are null until the run is finished. */
+export interface HigherSummary {
+  status: DailyStatus;
+  /** Today's category */
+  stat: StatId;
+  rounds: number;
+  flawless: number | null;
+  correct: number | null;
+  timeMs: number | null;
+  rank: number | null;
+}
+
+export interface HigherResponse {
+  run: HigherRunView;
+  now: number;
+}
+
+export interface HigherPickResponse extends HigherResponse {
+  outcome: PickOutcome;
+}
+
+export interface HigherBoardEntry {
+  rank: number;
+  name: string;
+  /** Correct answers in a row from the first question (ranks first) */
+  flawless: number;
+  /** All correct answers (tiebreaker) */
+  correct: number;
+  /** Answer time (second tiebreaker) */
+  timeMs: number;
+  you: boolean;
+}
+
+export interface HigherBoardResponse {
+  date: string;
+  stat: StatId;
+  rounds: number;
+  entries: HigherBoardEntry[];
+  you: HigherBoardEntry | null;
+  players: number;
 }
 
 export interface DailyResponse {

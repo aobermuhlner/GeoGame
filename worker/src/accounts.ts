@@ -5,8 +5,17 @@ import {
   MODE_IDS,
   REGION_IDS,
   cleanName,
+  compareHigher,
+  dailyStat,
   dailyView,
   dayOf,
+  higherNext,
+  higherPick,
+  higherRunView,
+  higherScore,
+  newHigherRun,
+  pickDailyHigher,
+  settleHigher,
   divisionOf,
   glicko2,
   inflateRd,
@@ -35,6 +44,14 @@ import {
   type DailyResponse,
   type DailyRun,
   type DailySummary,
+  type HigherBoardEntry,
+  type HigherBoardResponse,
+  type HigherPair,
+  type HigherPickResponse,
+  type HigherResponse,
+  type HigherRun,
+  type HigherSummary,
+  type StatId,
   type LeaderboardEntry,
   type LeaderboardResponse,
   type LoginResponse,
@@ -179,6 +196,22 @@ export class Accounts extends DurableObject<Env> {
         result TEXT NOT NULL,
         played_at INTEGER NOT NULL
       );
+      CREATE TABLE IF NOT EXISTS higher_puzzles (
+        date TEXT PRIMARY KEY,
+        stat TEXT NOT NULL,
+        pairs TEXT NOT NULL
+      );
+      CREATE TABLE IF NOT EXISTS higher_runs (
+        user_id TEXT NOT NULL,
+        date TEXT NOT NULL,
+        state TEXT NOT NULL,
+        flawless INTEGER NOT NULL DEFAULT 0,
+        correct INTEGER NOT NULL DEFAULT 0,
+        time_ms INTEGER NOT NULL DEFAULT 0,
+        finished_at INTEGER,
+        PRIMARY KEY (user_id, date)
+      );
+      CREATE INDEX IF NOT EXISTS higher_runs_board ON higher_runs (date, flawless DESC, correct DESC, time_ms ASC);
       CREATE TABLE IF NOT EXISTS placement_runs (
         user_id TEXT NOT NULL,
         mode TEXT NOT NULL,
@@ -328,10 +361,23 @@ export class Accounts extends DurableObject<Env> {
 
     const days = new Set(
       this.sql
-        .exec<{ date: string }>('SELECT DISTINCT date FROM daily_runs WHERE user_id = ? AND finished_at IS NOT NULL', userId)
+        .exec<{ date: string }>(
+          `SELECT date FROM daily_runs WHERE user_id = ? AND finished_at IS NOT NULL
+           UNION SELECT date FROM higher_runs WHERE user_id = ? AND finished_at IS NOT NULL`,
+          userId,
+          userId,
+        )
         .toArray()
         .map((r) => r.date),
     );
+    const h = this.sql
+      .exec<{ played: number; best: number | null; perfect: number | null }>(
+        `SELECT COUNT(*) AS played, MAX(flawless) AS best, SUM(flawless = json_array_length(state, '$.pairs')) AS perfect
+         FROM higher_runs WHERE user_id = ? AND finished_at IS NOT NULL`,
+        userId,
+      )
+      .toArray()[0];
+    const higher = { played: h?.played ?? 0, bestFlawless: h?.best ?? null, perfect: h?.perfect ?? 0 };
     let streak = 0;
     let day = now;
     if (!days.has(dayOf(day))) day -= 86_400_000; // today not played yet: the streak is still alive
@@ -339,7 +385,7 @@ export class Accounts extends DurableObject<Env> {
       streak++;
       day -= 86_400_000;
     }
-    return { user: toView(row), stats: { daysPlayed: days.size, streak, daily } };
+    return { user: toView(row), stats: { daysPlayed: days.size, streak, daily, higher } };
   }
 
   // ---------- Daily challenge ----------
@@ -409,7 +455,7 @@ export class Accounts extends DurableObject<Env> {
         rank: run?.finishedAt != null ? (this.board(date, mode, userId).you?.rank ?? null) : null,
       };
     }
-    return { date, nextAt: nextDayAt(now), modes };
+    return { date, nextAt: nextDayAt(now), modes, higher: this.higherSummary(userId, now) };
   }
 
   /** Start today's run for `mode`, or resume it. */
@@ -465,6 +511,137 @@ export class Accounts extends DurableObject<Env> {
       .exec<{ code: string }>('SELECT code FROM daily_flags WHERE token = ? AND starts_at <= ?', token, now)
       .toArray()[0];
     return row ? (FLAGS[row.code] ?? null) : null;
+  }
+
+  // ---------- Daily Higher or Lower ----------
+
+  /** Today's category and pairs, chosen on the first request of the day. */
+  private higherPuzzle(date: string): { stat: StatId; pairs: HigherPair[] } {
+    const row = this.sql
+      .exec<{ stat: string; pairs: string }>('SELECT stat, pairs FROM higher_puzzles WHERE date = ?', date)
+      .toArray()[0];
+    if (row) return { stat: row.stat as StatId, pairs: JSON.parse(row.pairs) };
+    const stat = dailyStat(date);
+    const pairs = pickDailyHigher(stat);
+    this.sql.exec('INSERT INTO higher_puzzles (date, stat, pairs) VALUES (?, ?, ?)', date, stat, JSON.stringify(pairs));
+    return { stat, pairs };
+  }
+
+  private loadHigher(userId: string, date: string): HigherRun | null {
+    const row = this.sql
+      .exec<{ state: string }>('SELECT state FROM higher_runs WHERE user_id = ? AND date = ?', userId, date)
+      .toArray()[0];
+    return row ? JSON.parse(row.state) : null;
+  }
+
+  private saveHigher(userId: string, run: HigherRun) {
+    const s = higherScore(run);
+    this.sql.exec(
+      `INSERT INTO higher_runs (user_id, date, state, flawless, correct, time_ms, finished_at) VALUES (?, ?, ?, ?, ?, ?, ?)
+       ON CONFLICT (user_id, date) DO UPDATE SET state = excluded.state, flawless = excluded.flawless,
+         correct = excluded.correct, time_ms = excluded.time_ms, finished_at = excluded.finished_at`,
+      userId,
+      run.date,
+      JSON.stringify(run),
+      s.flawless,
+      s.correct,
+      s.timeMs,
+      run.finishedAt,
+    );
+  }
+
+  /** Today's run with a timed-out round settled (and saved). */
+  private currentHigher(userId: string, now: number): HigherRun | null {
+    const run = this.loadHigher(userId, dayOf(now));
+    if (run && settleHigher(run, now)) this.saveHigher(userId, run);
+    return run;
+  }
+
+  private higherSummary(userId: string, now: number): HigherSummary {
+    const date = dayOf(now);
+    const { stat, pairs } = this.higherPuzzle(date);
+    const run = this.currentHigher(userId, now);
+    const done = run?.finishedAt != null ? higherScore(run) : null;
+    return {
+      status: !run ? 'new' : run.finishedAt === null ? 'playing' : 'finished',
+      stat,
+      rounds: pairs.length,
+      flawless: done?.flawless ?? null,
+      correct: done?.correct ?? null,
+      timeMs: done?.timeMs ?? null,
+      rank: done ? (this.higherBoardOf(date, userId).you?.rank ?? null) : null,
+    };
+  }
+
+  /** Start today's Higher or Lower, or resume it. */
+  async higherStart(userId: string, now = Date.now()): Promise<HigherResponse> {
+    const date = dayOf(now);
+    let run = this.currentHigher(userId, now);
+    if (!run) {
+      const { stat, pairs } = this.higherPuzzle(date);
+      run = newHigherRun(date, stat, pairs, now);
+      this.saveHigher(userId, run);
+    }
+    return { run: higherRunView(run, now), now };
+  }
+
+  async higherGet(userId: string, now = Date.now()): Promise<HigherResponse | null> {
+    const run = this.currentHigher(userId, now);
+    return run ? { run: higherRunView(run, now), now } : null;
+  }
+
+  async higherPick(userId: string, round: number, code: string, now = Date.now()): Promise<HigherPickResponse | null> {
+    const run = this.loadHigher(userId, dayOf(now));
+    if (!run) return null;
+    const outcome = higherPick(run, round, code, now);
+    this.saveHigher(userId, run);
+    return { outcome, run: higherRunView(run, now), now };
+  }
+
+  async higherNext(userId: string, round: number, now = Date.now()): Promise<HigherResponse | null> {
+    const run = this.loadHigher(userId, dayOf(now));
+    if (!run) return null;
+    higherNext(run, round, now);
+    this.saveHigher(userId, run);
+    return { run: higherRunView(run, now), now };
+  }
+
+  async higherBoard(userId: string | null, now = Date.now(), date = dayOf(now)): Promise<HigherBoardResponse> {
+    return this.higherBoardOf(date, userId);
+  }
+
+  /** Ranking: longest flawless start, then most correct, then least time (equal on all three share a rank). */
+  private higherBoardOf(date: string, userId: string | null): HigherBoardResponse {
+    const { stat, pairs } = this.higherPuzzle(date);
+    const rows = this.sql
+      .exec<{ user_id: string; name: string; flawless: number; correct: number; timeMs: number }>(
+        `SELECT r.user_id, u.display_name AS name, r.flawless, r.correct, r.time_ms AS timeMs FROM higher_runs r
+         JOIN users u ON u.id = r.user_id
+         WHERE r.date = ? AND r.finished_at IS NOT NULL
+         ORDER BY r.flawless DESC, r.correct DESC, r.time_ms ASC, r.finished_at ASC`,
+        date,
+      )
+      .toArray();
+    const ranked: HigherBoardEntry[] = [];
+    rows.forEach((r, i) => {
+      const tie = i > 0 && compareHigher(rows[i - 1], r) === 0;
+      ranked.push({
+        rank: tie ? ranked[i - 1].rank : i + 1,
+        name: r.name,
+        flawless: r.flawless,
+        correct: r.correct,
+        timeMs: r.timeMs,
+        you: r.user_id === userId,
+      });
+    });
+    return {
+      date,
+      stat,
+      rounds: pairs.length,
+      entries: ranked.slice(0, LEADERBOARD_SIZE),
+      you: ranked.find((e) => e.you) ?? null,
+      players: ranked.length,
+    };
   }
 
   // ---------- Ranked ----------

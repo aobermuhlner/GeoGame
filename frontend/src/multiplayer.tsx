@@ -8,6 +8,7 @@ import { Lobby } from './components/Lobby';
 import { GameScreen } from './components/GameScreen';
 import { Results } from './components/Results';
 import { SoloGame, placementSource } from './components/Daily';
+import { HigherDuelResults, HigherDuelScreen, type DuelActions } from './components/HigherDuel';
 import { RankedQueue, RoomConnection, createRoom, flagSrc, getSessionId, roomExists, type ConnStatus } from './net';
 
 // The current room is remembered per tab.
@@ -303,6 +304,17 @@ export function Multiplayer({ name, onImmersive }: { name: string; onImmersive: 
     };
   }, [online?.conn]);
 
+  const duelActions: DuelActions | null = useMemo(() => {
+    if (!online) return null;
+    const { conn } = online;
+    return {
+      pick: (code) => conn.send({ t: 'pick', round: onlineRef.current?.room?.round ?? 0, code }),
+      giveUp: () => conn.send({ t: 'giveUp' }),
+      rematch: () => conn.send({ t: 'rematch' }),
+      leave: () => conn.send({ t: 'backToLobby' }),
+    };
+  }, [online?.conn]);
+
   // ---------- render ----------
   if (demoVm && demoRef.current) {
     return demoVm.phase === 'finished' ? (
@@ -339,11 +351,19 @@ export function Multiplayer({ name, onImmersive }: { name: string; onImmersive: 
       );
     }
     const c = online.conn;
+    const room = online.room;
+    const duel = room.kind === 'higher' && room.phase !== 'lobby' && room.higher && room.players.length === 2;
     return (
       <>
         {banner}
         {toast}
-        {!vm && online.room.ranked ? (
+        {duel && duelActions ? (
+          room.phase === 'finished' ? (
+            <HigherDuelResults room={room} you={online.you} actions={duelActions} />
+          ) : (
+            <HigherDuelScreen room={room} you={online.you} toLocal={(ms) => c.toLocal(ms)} actions={duelActions} />
+          )
+        ) : !vm && online.room.ranked ? (
           <MatchFound room={online.room} you={online.you} onCancel={() => leave()} />
         ) : vm && actions ? (
           vm.phase === 'finished' ? (
@@ -359,6 +379,7 @@ export function Multiplayer({ name, onImmersive }: { name: string; onImmersive: 
             onStart={() => c.send({ t: 'start' })}
             onRegions={(regions) => c.send({ t: 'setRegions', regions })}
             onModes={(modes) => c.send({ t: 'setModes', modes })}
+            onKind={(kind) => c.send({ t: 'setKind', kind })}
             onLeave={() => leave()}
           />
         )}

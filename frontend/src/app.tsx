@@ -4,7 +4,8 @@ import { api, setSignedOutHandler } from './api';
 import { Login } from './components/Login';
 import { MainLobby } from './components/MainLobby';
 import { DailyHub, SoloGame, dailySource } from './components/Daily';
-import { NavBar, type Tab } from './components/NavBar';
+import { HigherGame } from './components/Higher';
+import { NavBar, type GameId, type Tab } from './components/NavBar';
 import { Practice } from './components/Practice';
 import { Multiplayer } from './multiplayer';
 
@@ -21,6 +22,12 @@ function modeFromHash(t: Tab): ModeId | null {
   return h === t ? (MODE_IDS.find((x) => x === m) ?? null) : null;
 }
 
+/** Daily games also include Higher or Lower (#/daily/higher). */
+function dailyFromHash(): GameId | null {
+  const [h, m] = hashPath();
+  return h === 'daily' && m === 'higher' ? 'higher' : modeFromHash('daily');
+}
+
 const urlRoom = () => (new URLSearchParams(location.search).get('room') ?? '').toUpperCase();
 
 export function App() {
@@ -28,8 +35,8 @@ export function App() {
   const [checking, setChecking] = useState(api.hasSession());
   // An invite link (?room=CODE) opens the multiplayer tab.
   const [tab, setTab] = useState<Tab>(() => (ROOM_CODE_RE.test(urlRoom()) ? 'multi' : tabFromHash()));
-  const [dailyMode, setDailyMode] = useState<ModeId | null>(() => modeFromHash('daily'));
-  const dailyRun = useMemo(() => (dailyMode ? dailySource(dailyMode) : null), [dailyMode]);
+  const [dailyMode, setDailyMode] = useState<GameId | null>(dailyFromHash);
+  const dailyRun = useMemo(() => (dailyMode && dailyMode !== 'higher' ? dailySource(dailyMode) : null), [dailyMode]);
   const [practiceMode, setPracticeMode] = useState<ModeId | null>(() => modeFromHash('practice'));
   /** In a match or a daily round: hide the menu bar so a stray click can't leave the game. */
   const [immersive, setImmersive] = useState(false);
@@ -45,7 +52,7 @@ export function App() {
     }
     const onHash = () => {
       setTab(tabFromHash());
-      setDailyMode(modeFromHash('daily'));
+      setDailyMode(dailyFromHash());
       setPracticeMode(modeFromHash('practice'));
     };
     window.addEventListener('hashchange', onHash);
@@ -53,12 +60,12 @@ export function App() {
   }, []);
 
   /** `mode` opens that game directly (Daily Games and Practice). */
-  function navigate(t: Tab, mode: ModeId | null = null) {
+  function navigate(t: Tab, mode: GameId | null = null) {
     const hash = t === 'lobby' ? '#/' : mode ? `#/${t}/${mode}` : `#/${t}`;
     if (location.hash !== hash) history.pushState(null, '', hash);
     setTab(t);
     setDailyMode(t === 'daily' ? mode : null);
-    setPracticeMode(t === 'practice' ? mode : null);
+    setPracticeMode(t === 'practice' && mode !== 'higher' ? mode : null);
   }
 
   async function signOut() {
@@ -87,7 +94,9 @@ export function App() {
       {!immersive && <NavBar tab={tab} user={user} onTab={navigate} />}
       {tab === 'lobby' && <MainLobby user={user} onUser={setUser} onSignOut={signOut} onNavigate={navigate} />}
       {tab === 'daily' &&
-        (dailyMode && dailyRun ? (
+        (dailyMode === 'higher' ? (
+          <HigherGame onExit={() => navigate('daily')} onImmersive={setImmersive} />
+        ) : dailyMode && dailyRun ? (
           <SoloGame
             key={dailyMode}
             mode={dailyMode}

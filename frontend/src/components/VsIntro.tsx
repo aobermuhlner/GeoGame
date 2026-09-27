@@ -7,11 +7,18 @@ import { useNow } from './common';
 /** How long before the intro ends it starts fading into the countdown */
 const FADE_MS = 400;
 
+/** What the intro needs from a match (flag games pass their GameVM). */
+type IntroVM = Pick<GameVM, 'countdownEndsAt' | 'me' | 'modes' | 'ranked'> & {
+  phase: string;
+  history: readonly unknown[];
+  players: readonly { name: string }[];
+};
+
 /**
  * Full-screen "You vs Opponent" intro at the start of a match, shown while the server's first
  * countdown still has more than COUNTDOWN_MS left. Ranked matches show both emblems and ratings.
  */
-export function VsIntro({ vm }: { vm: GameVM }) {
+export function VsIntro({ vm, label }: { vm: IntroVM; label?: string }) {
   const active = vm.phase === 'countdown' && vm.history.length === 0 && vm.countdownEndsAt !== null;
   const now = useNow(active, 100);
   if (!active) return null;
@@ -44,7 +51,7 @@ export function VsIntro({ vm }: { vm: GameVM }) {
               Ranked {MODES[ranked.mode].label} · <b>{DIVISIONS[ranked.division].label}</b> countries
             </>
           ) : (
-            <>Friendly match · {modes}</>
+            <>Friendly match · {label ?? modes}</>
           )}
         </p>
       </div>

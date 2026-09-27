@@ -5,6 +5,9 @@ import type {
   DailyGuessResponse,
   DailyResponse,
   DailySummary,
+  HigherBoardResponse,
+  HigherPickResponse,
+  HigherResponse,
   LeaderboardResponse,
   LoginResponse,
   MeResponse,
@@ -114,6 +117,12 @@ export const api = {
     request<DailyResponse>(`/daily/${mode}/pass`, { method: 'POST', body: { round } }),
   dailyNext: (mode: ModeId, round: number) =>
     request<DailyResponse>(`/daily/${mode}/next`, { method: 'POST', body: { round } }),
+  higherStart: () => request<HigherResponse>('/higher/daily/start', { method: 'POST' }),
+  higherGet: () => request<HigherResponse>('/higher/daily'),
+  higherPick: (round: number, code: string) =>
+    request<HigherPickResponse>('/higher/daily/pick', { method: 'POST', body: { round, code } }),
+  higherNext: (round: number) => request<HigherResponse>('/higher/daily/next', { method: 'POST', body: { round } }),
+  higherBoard: () => request<HigherBoardResponse>('/higher/leaderboard'),
   leaderboard: (board: BoardId) => request<LeaderboardResponse>(`/leaderboard?board=${board}`),
   ranked: () => request<RankedProfile>('/ranked'),
   rankedBoard: (mode: ModeId) => request<RankedBoardResponse>(`/ranked/leaderboard?mode=${mode}`),
@@ -129,3 +138,5 @@ export const api = {
 };
 
 export const dailyFlagSrc = (flagToken: string) => `${WORKER_URL}/daily/flags/${flagToken}`;
+/** Any flag by ISO code (public: for games that name the country anyway). */
+export const codeFlagSrc = (code: string) => `${WORKER_URL}/practice/flags/${code}`;

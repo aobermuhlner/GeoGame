@@ -1,8 +1,11 @@
 import { useState } from 'preact/hooks';
 import { MODES, MODE_IDS, type ModeId, type UserView } from '@flagduel/shared';
 import { Logo } from './common';
+import { HIGHER_DESC, HIGHER_LABEL } from './Higher';
 
 export type Tab = 'lobby' | 'daily' | 'practice' | 'multi';
+/** A flag game, or Higher or Lower (daily only) */
+export type GameId = ModeId | 'higher';
 
 /** `menu`: hovering lists the games, each linking straight to that game. */
 const TABS: { id: Tab; label: string; menu?: true }[] = [
@@ -29,7 +32,7 @@ export function NavBar({
 }: {
   tab: Tab;
   user: UserView;
-  onTab: (t: Tab, mode?: ModeId | null) => void;
+  onTab: (t: Tab, mode?: GameId | null) => void;
 }) {
   // Picking a game closes its hover menu until the pointer leaves it.
   const [shut, setShut] = useState<Tab | null>(null);
@@ -73,7 +76,7 @@ export function NavBar({
             </a>
             {t.menu && (
               <ul class="nav-sub" aria-label={`${t.label}: pick a game`}>
-                {MODE_IDS.map((m) => (
+                {[...MODE_IDS, ...(t.id === 'daily' ? (['higher'] as const) : [])].map((m) => (
                   <li key={m}>
                     <a
                       href={`#/${t.id}/${m}`}
@@ -84,8 +87,11 @@ export function NavBar({
                         onTab(t.id, m);
                       }}
                     >
-                      <span class="m-name">{t.id === 'daily' ? `Daily ${MODES[m].label}` : MODES[m].label}</span>
-                      <span class="m-desc">{MODES[m].description}</span>
+                      <span class="m-name">
+                        {t.id === 'daily' ? 'Daily ' : ''}
+                        {m === 'higher' ? HIGHER_LABEL : MODES[m].label}
+                      </span>
+                      <span class="m-desc">{m === 'higher' ? HIGHER_DESC : MODES[m].description}</span>
                     </a>
                   </li>
                 ))}

@@ -21,6 +21,16 @@ speed, minus 5 per wrong guess (minimum 10); passes and timeouts score 0. Finish
 ranking (per game, plus an overall board summing both). The run is server-side: the timer keeps
 running if you close the tab, and answers are only revealed after each round.
 
+### Daily Higher or Lower
+
+Two countries, one statistic: pick the one with the higher value. Everyone gets the same category and the same
+chain of 16 countries that day: each question brings in a new country against the previous question's new one,
+whose value is already shown (like the classic higher-or-lower game), so every country but the first and last is
+asked twice. The links get closer calls as the run goes on. 10 seconds per question; a timeout counts as a mistake. You always play all 15, but the ranking is about **how far you get
+without a mistake**: correct answers in a row from the first question rank first, then total correct answers, then
+total time. So mistakes at questions 10 and 11 (9 flawless) beat a single mistake at question 3 (2 flawless).
+The category rotates daily through all of them (`dailyStat`), each used once before any repeats.
+
 ### Practice
 
 Hovering **Practice** in the menu bar lists the games; picking one opens its settings (game + regions,
@@ -41,6 +51,12 @@ In the lobby the host picks one or more **games** (played in order, 10 rounds ea
 
 A match with several games has a short "Next up" countdown between them; the overall winner has the most
 points across all games (tie → fewer wrong guesses in total).
+
+The lobby's Games card has two match types: **Geo Speed** (the flag games above) and **Geo Knowledge** (higher or
+lower): two countries from the selected regions and a new category every round. It is not about speed: both
+players have 20 seconds to lock in one country, the pick is final and the opponent only sees *that* you picked,
+not what. Every correct pick is a point. All 10 rounds are always played; tied after them, a "Sudden death"
+announcement is followed by extra rounds until exactly one player is right.
 
 ### Ranked
 
@@ -125,6 +141,9 @@ without the backend. Append `?bot=lazy` for a bot that never answers correctly.
 | `POST /daily/:mode/guess` · `/pass` · `/next` | `{ round, text? }` → updated run (guess also returns `outcome`) |
 | `GET /daily/flags/:token` | SVG of a started daily round's flag |
 | `GET /leaderboard?board=flags\|capitals\|overall` | Today's ranking (top 50 + your own placing) |
+| `POST /higher/daily/start` · `GET /higher/daily` | Start (or resume) / get today's Higher or Lower → `{ run, now }` |
+| `POST /higher/daily/pick` · `/next` | `{ round, code? }` → updated run (pick also returns `outcome`) |
+| `GET /higher/leaderboard` | Today's Higher or Lower ranking (flawless, then correct, then time) |
 | `GET /ranked` | Your rating, division and record per game |
 | `GET /ranked/leaderboard?mode=flags\|capitals\|locate` | Ranked ladder (top 50 + your own placing) |
 | `GET /ranked/ws` | WebSocket to the ranked queue: send `{ t: 'queue', token, mode }`, get `matched` with a room code + seat ticket |
@@ -180,6 +199,11 @@ Then every push to `main` that touches `frontend/` or `shared/` runs
 - Region assignment: [`shared/src/regions.ts`](shared/src/regions.ts) — one ISO list per region.
 - Country names and accepted aliases: [`shared/src/countries.ts`](shared/src/countries.ts).
 - Capitals and accepted aliases: [`shared/src/capitals.ts`](shared/src/capitals.ts).
+- Higher or Lower categories (label, question, number format): [`shared/src/higher.ts`](shared/src/higher.ts) → `STATS`.
+  The numbers live in the generated [`shared/src/statsData.ts`](shared/src/statsData.ts) (World Bank indicators,
+  Wikipedia for highest points); refresh them with `node shared/scripts/fetch-stats.mjs`, and put gaps or
+  corrections into `MANUAL` in that script. Two countries are only paired when their values clearly differ
+  (not equal, not the same once formatted, at least 2 % apart), so there are no ties.
 - Guess matching is case-, accent- and punctuation-insensitive (`shared/src/normalize.ts`).
 - The lobby map is generated at build time from `world-atlas` (`frontend/scripts/gen-map.mjs`);
   microstates too small for the 110m data are drawn as dots.

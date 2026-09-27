@@ -22,6 +22,8 @@ import { CountryInput } from './CountryInput';
 import { FlagImage } from './GameScreen';
 import { LocateBoard } from './LocateBoard';
 import { Leaderboard } from './Leaderboard';
+import { HigherBoard, HigherCard, HigherRules } from './Higher';
+import type { GameId } from './NavBar';
 import { Logo, formatClock, formatDuration, useNow } from './common';
 
 function formatHms(ms: number): string {
@@ -76,7 +78,7 @@ function ModeCard({
   );
 }
 
-export function DailyHub({ onPlay }: { onPlay: (mode: ModeId) => void }) {
+export function DailyHub({ onPlay }: { onPlay: (game: GameId) => void }) {
   const [s, setSummary] = useState<DailySummary | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -105,9 +107,12 @@ export function DailyHub({ onPlay }: { onPlay: (mode: ModeId) => void }) {
           {MODE_IDS.map((mode) => (
             <ModeCard key={mode} mode={mode} info={s?.modes[mode]} onPlay={() => onPlay(mode)} />
           ))}
+          <HigherCard info={s?.higher} onPlay={() => onPlay('higher')} />
         </div>
+        <HigherRules />
       </section>
       <Leaderboard />
+      <HigherBoard limit={10} />
     </main>
   );
 }

@@ -1,5 +1,6 @@
 // WebSocket protocol between the browser and the Room Durable Object.
 import type { GuessOutcome, MatchResult, RoundEnd, Slot } from './game';
+import type { DuelView } from './higher';
 import { MODE_IDS, type ModeId } from './modes';
 import type { RankedView } from './ranked';
 import { REGION_IDS, type RegionId } from './regions';
@@ -18,6 +19,10 @@ export const FLAG_TOKEN_RE = /^[ABCDEFGHJKLMNPQRSTUVWXYZ23456789]{5}[0-9a-f]{16}
 export const MIN_POOL_SIZE = 10;
 export const MAX_NAME_LENGTH = 16;
 
+/** What a friend lobby plays: the flag games (one or more, in order) or a Higher or Lower duel. */
+export const GAME_KINDS = ['classic', 'higher'] as const;
+export type GameKind = (typeof GAME_KINDS)[number];
+
 export type Phase = 'lobby' | 'countdown' | 'playing' | 'reveal' | 'finished';
 
 // ---------- Client → Server ----------
@@ -26,10 +31,14 @@ export type ClientMessage =
   | { t: 'setRegions'; regions: RegionId[] }
   /** Minigames to play, in order (host only, lobby only) */
   | { t: 'setModes'; modes: ModeId[] }
+  /** Flag games or Higher or Lower (host only, lobby only) */
+  | { t: 'setKind'; kind: GameKind }
   | { t: 'ready'; ready: boolean }
   | { t: 'start' }
   | { t: 'guess'; round: number; text: string }
   | { t: 'pass'; round: number }
+  /** Higher or Lower: lock in the country you think is higher (ISO code) */
+  | { t: 'pick'; round: number; code: string }
   | { t: 'giveUp' }
   | { t: 'rematch' }
   | { t: 'backToLobby' }
@@ -104,6 +113,10 @@ export interface RoomView {
   forfeitReason: ForfeitReason | null;
   /** Ranked match info; null in friend lobbies */
   ranked: RankedView | null;
+  /** Flag games or Higher or Lower */
+  kind: GameKind;
+  /** Higher or Lower duel state (kind 'higher', once the match has started) */
+  higher: DuelView | null;
 }
 
 export type ErrorCode = 'room_full' | 'not_found' | 'bad_message' | 'not_allowed' | 'pool_too_small' | 'in_progress';
@@ -161,6 +174,11 @@ export function parseClientMessage(raw: unknown): ClientMessage | null {
       return { t: 'guess', round: m.round, text: m.text };
     case 'pass':
       return isInt(m.round) ? { t: 'pass', round: m.round } : null;
+    case 'setKind':
+      return (GAME_KINDS as readonly unknown[]).includes(m.kind) ? { t: 'setKind', kind: m.kind as GameKind } : null;
+    case 'pick':
+      if (!isInt(m.round) || typeof m.code !== 'string' || !/^[A-Z]{2}$/.test(m.code)) return null;
+      return { t: 'pick', round: m.round, code: m.code };
     case 'start':
     case 'giveUp':
     case 'rematch':

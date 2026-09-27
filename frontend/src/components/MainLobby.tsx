@@ -14,6 +14,7 @@ import { NextDaily } from './Daily';
 import { GoogleButton } from './Login';
 import { Leaderboard } from './Leaderboard';
 import { DivisionBadge } from './Ranked';
+import { HIGHER_LABEL } from './Higher';
 import { Avatar, type Tab } from './NavBar';
 
 /** Guests: attach a Google account so the scores and ratings survive sign-out and other devices. */
@@ -162,7 +163,10 @@ export function MainLobby({
 
   const stats = me?.stats;
   const dash = '–';
-  const doneToday = today ? MODE_IDS.filter((m) => today.modes[m].status === 'finished').length : 0;
+  const games = MODE_IDS.length + 1; // + Higher or Lower
+  const doneToday = today
+    ? MODE_IDS.filter((m) => today.modes[m].status === 'finished').length + (today.higher.status === 'finished' ? 1 : 0)
+    : 0;
 
   return (
     <main class="stack">
@@ -173,9 +177,9 @@ export function MainLobby({
           <h2>Daily Games</h2>
           <p class="muted small">
             {today
-              ? doneToday === MODE_IDS.length
+              ? doneToday === games
                 ? 'All done for today — see you tomorrow!'
-                : `${doneToday} of ${MODE_IDS.length} games played today.`
+                : `${doneToday} of ${games} games played today.`
               : 'Loading…'}
           </p>
           <ul class="today-list">
@@ -190,10 +194,22 @@ export function MainLobby({
                 </li>
               );
             })}
+            <li>
+              <span>{HIGHER_LABEL}</span>
+              <span class={`today-status ${today?.higher.status ?? ''}`}>
+                {!today
+                  ? dash
+                  : today.higher.status === 'finished'
+                    ? `${today.higher.flawless} flawless`
+                    : today.higher.status === 'playing'
+                      ? 'in progress'
+                      : 'not played'}
+              </span>
+            </li>
           </ul>
           {today && <NextDaily at={today.nextAt} />}
           <button class="btn btn-primary" onClick={() => onNavigate('daily')}>
-            {doneToday === MODE_IDS.length ? 'See ranking' : 'Play daily'}
+            {doneToday === games ? 'See ranking' : 'Play daily'}
           </button>
         </section>
 
@@ -227,6 +243,7 @@ export function MainLobby({
           {MODE_IDS.map((m) => (
             <Stat key={`a${m}`} value={stats?.daily[m].average ?? dash} label={`avg ${MODES[m].label.toLowerCase()}`} />
           ))}
+          <Stat value={stats?.higher.bestFlawless ?? dash} label="best flawless (higher or lower)" />
         </div>
         <h3 class="stats-sub">Ranked</h3>
         <div class="stats-row">
