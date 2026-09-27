@@ -2,7 +2,10 @@ import { useEffect, useMemo, useRef, useState } from "preact/hooks";
 import { suggestCountries, type GuessOutcome } from "@flagduel/shared";
 
 interface Props {
-  /** Read-only instead of disabled so focus (and the phone keyboard) survives between rounds. */
+  /**
+   * Between rounds. The field stays editable (not disabled, not even read-only: many phones close the
+   * keyboard when the focused field turns read-only) and just ignores what is typed.
+   */
   locked: boolean;
   /** Changing this re-focuses the field (e.g. a new round). */
   focusKey: unknown;
@@ -79,7 +82,6 @@ export function CountryInput({
           placeholder={locked ? "" : placeholder}
           value={value}
           maxLength={60}
-          readOnly={locked}
           aria-disabled={locked}
           autoComplete="off"
           autoCorrect="off"
@@ -92,7 +94,12 @@ export function CountryInput({
           aria-autocomplete="list"
           aria-activedescendant={showList ? `opt-${hi}` : undefined}
           onInput={(e) => {
-            setValue((e.target as HTMLInputElement).value);
+            const el = e.target as HTMLInputElement;
+            if (locked) {
+              el.value = "";
+              return;
+            }
+            setValue(el.value);
             setOpen(true);
             setHi(0);
           }}

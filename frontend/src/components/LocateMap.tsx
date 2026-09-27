@@ -1,3 +1,4 @@
+import type { ComponentChildren } from 'preact';
 import { useEffect, useLayoutEffect, useRef, useState } from 'preact/hooks';
 import type { RegionId } from '@flagduel/shared';
 import type { LOCATE_MAP, LocateCountry } from '../generated/locatemap';
@@ -19,6 +20,10 @@ interface Props {
   showNames?: boolean;
   nameOf?: (code: string) => string;
   disabled?: boolean;
+  /** The map is shown turned 90° clockwise by CSS (full screen on an upright phone). */
+  rotated?: boolean;
+  /** Another control over the map (e.g. a full-screen button). */
+  extraControl?: ComponentChildren;
 }
 
 type MapData = typeof LOCATE_MAP;
@@ -33,7 +38,18 @@ const MARKER_R = 5; // on-screen px
 const MARKER_HIT = 12; // on-screen px
 const DRAG_PX = 5;
 
-export function LocateMap({ onPick, marks = {}, focus, resetKey, region, showNames, nameOf, disabled }: Props) {
+export function LocateMap({
+  onPick,
+  marks = {},
+  focus,
+  resetKey,
+  region,
+  showNames,
+  nameOf,
+  disabled,
+  rotated = false,
+  extraControl,
+}: Props) {
   const [map, setMap] = useState<MapData | null>(null);
   const [view, setView] = useState<View>({ k: 1, x: 0, y: 0 });
   const [hover, setHover] = useState<{ code: string; x: number; y: number } | null>(null);
@@ -41,6 +57,8 @@ export function LocateMap({ onPick, marks = {}, focus, resetKey, region, showNam
   const svgRef = useRef<SVGSVGElement>(null);
   const viewRef = useRef(view);
   viewRef.current = view;
+  const rotatedRef = useRef(rotated);
+  rotatedRef.current = rotated;
   const anim = useRef(0);
 
   useEffect(() => {
@@ -68,7 +86,17 @@ export function LocateMap({ onPick, marks = {}, focus, resetKey, region, showNam
   /** Client coordinates → map units (of the untransformed viewBox). */
   function toMap(cx: number, cy: number): [number, number] {
     const r = svgRef.current!.getBoundingClientRect();
+    // Turned clockwise: the map's top edge is on the right of the screen, its left edge at the top.
+    if (rotatedRef.current) return [((cy - r.top) / r.height) * W, ((r.right - cx) / r.width) * H];
     return [((cx - r.left) / r.width) * W, ((cy - r.top) / r.height) * H];
+  }
+
+  /** Pan by a pointer's movement from (ax, ay) to (bx, by), scaled by `f`. */
+  function panBy(ax: number, ay: number, bx: number, by: number, f = 1) {
+    const [x0, y0] = toMap(ax, ay);
+    const [x1, y1] = toMap(bx, by);
+    const v = viewRef.current;
+    set({ ...v, x: v.x + (x1 - x0) * f, y: v.y + (y1 - y0) * f });
   }
 
   function zoomAt(px: number, py: number, factor: number, from = viewRef.current) {
@@ -99,7 +127,8 @@ export function LocateMap({ onPick, marks = {}, focus, resetKey, region, showNam
   useLayoutEffect(() => {
     const el = svgRef.current;
     if (!el) return;
-    const ro = new ResizeObserver(() => setUnit(el.getBoundingClientRect().width / W));
+    // The layout size, which (unlike the bounding box) ignores the CSS rotation.
+    const ro = new ResizeObserver(([e]) => setUnit(e.contentRect.width / W));
     ro.observe(el);
     return () => ro.disconnect();
   }, [map]);
@@ -146,7 +175,7 @@ export function LocateMap({ onPick, marks = {}, focus, resetKey, region, showNam
       if (showNames && e.pointerType === 'mouse') {
         const code = (e.target as Element).closest?.('[data-c]')?.getAttribute('data-c');
         const r = svgRef.current!.getBoundingClientRect();
-        setHover(code ? { code, x: e.clientX - r.left, y: e.clientY - r.top } : null);
+        setHover(code && !rotatedRef.current ? { code, x: e.clientX - r.left, y: e.clientY - r.top } : null);
       }
       return;
     }
@@ -159,17 +188,12 @@ export function LocateMap({ onPick, marks = {}, focus, resetKey, region, showNam
       const [px, py] = toMap((a.x + b.x) / 2, (a.y + b.y) / 2);
       if (g.pinch) zoomAt(px, py, d / g.pinch);
       g.pinch = d;
-      // Pan by the midpoint's movement.
-      const mid = { x: (prev.x + e.clientX) / 2 - prev.x, y: (prev.y + e.clientY) / 2 - prev.y };
-      const v = viewRef.current;
-      set({ ...v, x: v.x + mid.x / unit, y: v.y + mid.y / unit });
+      // Pan by the midpoint's movement (half of this finger's).
+      panBy(prev.x, prev.y, e.clientX, e.clientY, 0.5);
       return;
     }
     if (!g.moved && Math.hypot(e.clientX - g.sx, e.clientY - g.sy) > DRAG_PX) g.moved = true;
-    if (g.moved) {
-      const v = viewRef.current;
-      set({ ...v, x: v.x + (e.clientX - prev.x) / unit, y: v.y + (e.clientY - prev.y) / unit });
-    }
+    if (g.moved) panBy(prev.x, prev.y, e.clientX, e.clientY);
     pointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
   }
 
@@ -233,7 +257,7 @@ export function LocateMap({ onPick, marks = {}, focus, resetKey, region, showNam
   };
 
   return (
-    <div class="locate-wrap" style={{ aspectRatio: `${W} / ${H}` }}>
+    <div class="locate-wrap" style={{ aspectRatio: `${W} / ${H}`, '--ar': W / H }}>
       <svg
         ref={svgRef}
         class={`locate-map${disabled ? ' disabled' : ''}`}
@@ -291,6 +315,7 @@ export function LocateMap({ onPick, marks = {}, focus, resetKey, region, showNam
           ⤢
         </button>
       </div>
+      {extraControl}
 
       {showNames && hover && hover.x > 0 && (
         <div class="lm-tip" style={{ left: `${hover.x}px`, top: `${hover.y}px` }}>

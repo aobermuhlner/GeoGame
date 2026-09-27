@@ -59,6 +59,25 @@ export function TopCard({ vm }: { vm: GameVM }) {
   );
 }
 
+/** Round, score and clock in one line, for the full-screen map (where the top card is hidden). */
+function MapHud({ vm }: { vm: GameVM }) {
+  const now = useNow(vm.deadline !== null);
+  const me = vm.players[vm.me];
+  const opp = vm.players[vm.me === 0 ? 1 : 0];
+  const left = vm.deadline ? vm.deadline - now : null;
+  return (
+    <>
+      <span>
+        {Math.max(1, vm.stageRound)}/{vm.stageRounds}
+      </span>
+      <span>
+        You {me.score}:{opp.score} {opp.name}
+      </span>
+      <span class={left !== null && left <= 5000 ? 'urgent' : ''}>{left !== null ? formatClock(left) : '–:––'}</span>
+    </>
+  );
+}
+
 /** Shows a placeholder until the SVG has arrived, so a slow download never flashes half a flag. */
 export function FlagImage({ src }: { src: string }) {
   const [loaded, setLoaded] = useState(false);
@@ -195,6 +214,7 @@ export function GameScreen({ vm, actions }: { vm: GameVM; actions: GameActions }
               vm.phase === 'countdown' && vm.countdownEndsAt ? <Countdown endsAt={vm.countdownEndsAt} vm={vm} /> : null
             }
             status={<StatusLine vm={vm} />}
+            hud={<MapHud vm={vm} />}
           />
           {giveUp(false)}
         </section>

@@ -440,6 +440,17 @@ function SoloScreen({
               ) : null
             }
             status={statusLine}
+            hud={
+              <>
+                <span>
+                  {run.round}/{run.totalRounds}
+                </span>
+                <span>{liveScore}</span>
+                <span class={left !== null && left <= 5000 ? 'urgent' : ''}>
+                  {left !== null ? formatClock(left) : '–:––'}
+                </span>
+              </>
+            }
           />
           {manualNext && (
             <div class="btn-row">

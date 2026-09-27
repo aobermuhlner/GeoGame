@@ -297,6 +297,7 @@ em {
 }
 
 .guess-row {
+  position: relative;
   width: min(460px, 100%);
   display: flex;
   gap: 10px;
@@ -326,7 +327,7 @@ em {
 .guess-input:focus {
   box-shadow: 0 0 0 4px rgba(47, 179, 95, 0.18);
 }
-.guess-input[readonly] {
+.guess-input[aria-disabled="true"] {
   border-color: var(--line);
   background: #f7f4ec;
   box-shadow: none;
@@ -360,6 +361,22 @@ em {
 }
 .suggestions li.active {
   background: #e7f2ea;
+}
+/* Touch screens: the keyboard covers whatever is below the field, so the suggestions sit above it
+   as one row of chips (best match first, the one Enter picks) */
+@media (hover: none) and (pointer: coarse) {
+  .guess-row .combo { position: static; }
+  .suggestions {
+    top: auto; bottom: calc(100% + 8px); left: 0; right: 0;
+    display: flex; gap: 6px; padding: 6px; overflow-x: auto; scrollbar-width: none;
+    border-radius: 999px; box-shadow: 0 8px 24px rgba(30, 25, 10, 0.18);
+  }
+  .suggestions::-webkit-scrollbar { display: none; }
+  .suggestions li {
+    flex: none; white-space: nowrap; padding: 8px 14px; border-radius: 999px;
+    background: #f4f1e8; font-size: 0.95rem;
+  }
+  .suggestions li.active { background: var(--green); color: #fff; }
 }
 
 .btn {
@@ -1106,12 +1123,12 @@ em {
 .lm-controls {
   position: absolute; right: 10px; top: 10px; display: flex; flex-direction: column; gap: 6px;
 }
-.lm-controls button {
+.lm-controls button, .lm-fs {
   width: 34px; height: 34px; border: 0; border-radius: 10px; cursor: pointer;
   background: var(--card); color: var(--green); font-size: 1.15rem; font-weight: 700; line-height: 1;
   box-shadow: var(--shadow);
 }
-.lm-controls button:hover { background: #f1ede1; }
+.lm-controls button:hover, .lm-fs:hover { background: #f1ede1; }
 .lm-tip {
   position: absolute; transform: translate(12px, -130%); pointer-events: none; white-space: nowrap;
   background: var(--ink); color: #fffdf7; font-size: 0.8rem; font-weight: 600; padding: 4px 8px; border-radius: 8px;
@@ -1146,6 +1163,57 @@ em {
 }
 .locate-overlay .countdown { width: auto; height: auto; }
 .map-card .locate-board { align-self: stretch; width: 100%; }
+.locate-top, .locate-bottom { display: contents; }
+.lm-fs { position: absolute; left: 10px; top: 10px; display: grid; place-items: center; }
+
+/* Full-screen map (phones): the map fills the screen, prompt and controls float over it */
+html.map-fs-open, html.map-fs-open body { overflow: hidden; overscroll-behavior: none; }
+.locate-board.fs {
+  position: fixed; inset: 0; z-index: 80; background: var(--bg);
+  padding: max(6px, env(safe-area-inset-top)) max(6px, env(safe-area-inset-right))
+    max(6px, env(safe-area-inset-bottom)) max(6px, env(safe-area-inset-left));
+  gap: 0;
+}
+/* Upright phone that can't lock the orientation: turn the board clockwise instead */
+.locate-board.fs.rotated {
+  inset: auto; top: 0; left: 100%; width: 100vh; width: 100dvh; height: 100vw;
+  transform-origin: top left; transform: rotate(90deg);
+  padding: 6px;
+}
+.fs .locate-stage {
+  position: absolute; inset: 0;
+  padding: inherit; container-type: size; display: grid; place-items: center;
+}
+.fs .locate-wrap { width: min(100cqw, calc(100cqh * var(--ar))); border-radius: 10px; }
+.fs .locate-overlay { border-radius: 10px; }
+.fs .locate-top, .fs .locate-bottom {
+  display: flex; position: absolute; z-index: 2; left: 50%; transform: translateX(-50%);
+  align-items: center; gap: 8px; pointer-events: none; max-width: calc(100% - 110px);
+}
+.fs .locate-top { top: 12px; }
+.fs .locate-bottom { bottom: 12px; width: calc(100% - 24px); max-width: none; justify-content: space-between; }
+.fs .locate-top > *, .fs .locate-bottom > * { pointer-events: auto; }
+.fs .locate-prompt, .fs .locate-hud, .fs .locate-bottom .status-line, .fs .tries {
+  background: rgba(255, 253, 247, 0.92); box-shadow: var(--shadow); border-radius: 999px;
+}
+.locate-board.fs .locate-prompt {
+  min-height: 0; padding: 4px 14px; font-size: 1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.fs .locate-flag { height: 18px; width: 24px; }
+.fs .locate-hud {
+  display: flex; align-items: center; gap: 10px; padding: 4px 12px;
+  font-size: 0.85rem; font-weight: 700; white-space: nowrap; font-variant-numeric: tabular-nums;
+}
+.fs .locate-hud .urgent { color: var(--red); }
+.fs .locate-bottom .status-line {
+  min-height: 0; padding: 5px 14px; font-size: 0.85rem; order: 2; margin: 0 auto;
+  flex-direction: row; flex-wrap: wrap; justify-content: center; column-gap: 8px; max-width: 60%;
+}
+.fs .locate-foot { display: contents; }
+.fs .tries { padding: 6px 10px; order: 1; }
+.fs .locate-foot .btn { order: 3; margin-left: 0; min-height: 36px; padding: 0 16px; box-shadow: var(--shadow); }
+.fs .map-hint { display: none; }
+.fs .lm-controls { top: 50%; transform: translateY(-50%); }
 
 /* ---------- Ranked ---------- */
 .friend-card { margin-top: 0; padding-top: 22px; }
