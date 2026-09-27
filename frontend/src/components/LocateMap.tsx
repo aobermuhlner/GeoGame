@@ -1,5 +1,5 @@
 import type { ComponentChildren } from 'preact';
-import { useEffect, useLayoutEffect, useRef, useState } from 'preact/hooks';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'preact/hooks';
 import type { RegionId } from '@flagduel/shared';
 import type { LOCATE_MAP, LocateCountry } from '../generated/locatemap';
 
@@ -33,6 +33,7 @@ interface View {
   y: number;
 }
 
+const NO_MARKS: Record<string, Mark> = {};
 const MAX_ZOOM = 40;
 const MARKER_R = 5; // on-screen px
 const MARKER_HIT = 12; // on-screen px
@@ -40,7 +41,7 @@ const DRAG_PX = 5;
 
 export function LocateMap({
   onPick,
-  marks = {},
+  marks = NO_MARKS,
   focus,
   resetKey,
   region,
@@ -60,6 +61,9 @@ export function LocateMap({
   const rotatedRef = useRef(rotated);
   rotatedRef.current = rotated;
   const anim = useRef(0);
+  const frame = useRef(0);
+
+  useEffect(() => () => cancelAnimationFrame(frame.current), []);
 
   useEffect(() => {
     let alive = true;
@@ -77,10 +81,16 @@ export function LocateMap({
     return { k, x: Math.min(0, Math.max(W - W * k, v.x)), y: Math.min(0, Math.max(H - H * k, v.y)) };
   }
 
+  /** Touch screens fire several moves per frame: re-render at most once a frame. */
   function set(v: View) {
     cancelAnimationFrame(anim.current);
     viewRef.current = clamp(v);
-    setView(viewRef.current);
+    if (!frame.current) {
+      frame.current = requestAnimationFrame(() => {
+        frame.current = 0;
+        setView(viewRef.current);
+      });
+    }
   }
 
   /** Client coordinates → map units (of the untransformed viewBox). */
@@ -225,7 +235,7 @@ export function LocateMap({
 
   // Start on the region as soon as the map has loaded (no animation).
   useLayoutEffect(() => {
-    if (map) set(home());
+    if (map) setView((viewRef.current = home()));
   }, [map]);
 
   // Region changed (e.g. a rematch with other settings): glide there.
@@ -247,14 +257,38 @@ export function LocateMap({
     if (map && !atHome()) animateTo(home(), 450);
   }, [resetKey]);
 
+  const hoverCode = hover?.code ?? null;
+  const cls = (c: LocateCountry) => {
+    const m = marks[c.c];
+    return `${m ? ` ${m}` : ''}${hoverCode === c.c ? ' hover' : ''}`;
+  };
+
+  // The ~250 country shapes only change with the marks or the hover, not while panning or zooming:
+  // reusing the same elements lets Preact skip them on those re-renders.
+  const land = useMemo(
+    () =>
+      map && (
+        <>
+          <g class="lm-zones">
+            {map.countries.flatMap((c) =>
+              (c.z ?? []).map((d, i) => <path key={`${c.c}${i}`} data-c={c.c} class={`lm-zone${cls(c)}`} d={d} />),
+            )}
+          </g>
+          <path class="lm-other" d={map.other} />
+          <g class="lm-land">
+            {map.countries.map((c) => (
+              <path key={c.c} data-c={c.c} class={`lm-country${cls(c)}`} d={c.d} />
+            ))}
+          </g>
+        </>
+      ),
+    [map, marks, hoverCode],
+  );
+
   if (!map) return <div class="locate-map loading" aria-hidden="true" />;
 
   const { k, x, y } = view;
   const u = unit * k; // screen px per map unit
-  const cls = (c: LocateCountry) => {
-    const m = marks[c.c];
-    return `${m ? ` ${m}` : ''}${hover?.code === c.c ? ' hover' : ''}`;
-  };
 
   return (
     <div class="locate-wrap" style={{ aspectRatio: `${W} / ${H}`, '--ar': W / H }}>
@@ -280,17 +314,7 @@ export function LocateMap({
       >
         <rect class="lm-ocean" width={W} height={H} />
         <g transform={`translate(${x} ${y}) scale(${k})`}>
-          <g class="lm-zones">
-            {map.countries.flatMap((c) =>
-              (c.z ?? []).map((d, i) => <path key={`${c.c}${i}`} data-c={c.c} class={`lm-zone${cls(c)}`} d={d} />),
-            )}
-          </g>
-          <path class="lm-other" d={map.other} />
-          <g class="lm-land">
-            {map.countries.map((c) => (
-              <path key={c.c} data-c={c.c} class={`lm-country${cls(c)}`} d={c.d} />
-            ))}
-          </g>
+          {land}
           <g class="lm-markers">
             {map.countries.flatMap((c) =>
               (c.m ?? []).map(([mx, my], i) => (

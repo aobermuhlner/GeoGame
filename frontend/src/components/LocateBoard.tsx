@@ -149,6 +149,7 @@ export function LocateBoard({
 
   return (
     <div class={`locate-board${fs ? ' fs' : ''}${rotated ? ' rotated' : ''}`}>
+      <div class="locate-inner">
       <div class="locate-top">
         {fs && hud && <div class="locate-hud">{hud}</div>}
         <div class="locate-prompt" aria-live="polite">
@@ -209,6 +210,7 @@ export function LocateBoard({
             Pass
           </button>
         </div>
+      </div>
       </div>
     </div>
   );
