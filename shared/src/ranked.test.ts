@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { countriesInRegions } from './game';
+import { COUNTRIES } from './countries';
 import {
   DIVISION_IDS,
   DIVISIONS,
@@ -12,6 +12,7 @@ import {
   newRating,
   parseQueueMessage,
   queueWindow,
+  tierOf,
   type Rating,
 } from './ranked';
 
@@ -27,18 +28,27 @@ describe('divisions', () => {
     expect(divisionOf(2400)).toBe('diamond');
   });
 
-  it('each division adds regions, Diamond has them all', () => {
-    expect(DIVISIONS.bronze.regions).toEqual(['europe']);
-    expect(DIVISIONS.silver.regions).toEqual(['europe', 'south-america', 'north-america']);
-    expect(DIVISIONS.gold.regions).toEqual(expect.arrayContaining(['central-america', 'asia']));
-    expect(DIVISIONS.platinum.regions).toContain('africa');
-    expect(DIVISIONS.platinum.regions).not.toContain('oceania');
-    expect(new Set(DIVISIONS.diamond.regions).size).toBe(8);
-    for (let i = 1; i < DIVISION_IDS.length; i++) {
-      const lower = DIVISIONS[DIVISION_IDS[i - 1]].regions;
-      expect(DIVISIONS[DIVISION_IDS[i]].regions).toEqual(expect.arrayContaining([...lower]));
+  it('splits every country into one tier of about 40, best known first', () => {
+    const all = DIVISION_IDS.flatMap((d) => DIVISIONS[d].tier);
+    expect(new Set(all).size).toBe(all.length);
+    expect([...all].sort()).toEqual(COUNTRIES.map((c) => c.code).sort());
+    for (const d of DIVISION_IDS) {
+      expect(DIVISIONS[d].tier.length).toBeGreaterThanOrEqual(35);
+      expect(DIVISIONS[d].tier.length).toBeLessThanOrEqual(45);
     }
-    for (const d of DIVISION_IDS) expect(countriesInRegions(DIVISIONS[d].regions).length).toBeGreaterThanOrEqual(10);
+    expect(DIVISIONS.bronze.tier).toEqual(expect.arrayContaining(['US', 'CN', 'BR', 'BE']));
+    expect(tierOf('IL')).toBe('silver');
+    expect(tierOf('TV')).toBe('diamond');
+  });
+
+  it('each division adds its tier to the ones below, Diamond has every country', () => {
+    expect(DIVISIONS.bronze.countries).toEqual(DIVISIONS.bronze.tier);
+    for (let i = 1; i < DIVISION_IDS.length; i++) {
+      const lower = DIVISIONS[DIVISION_IDS[i - 1]].countries;
+      const d = DIVISIONS[DIVISION_IDS[i]];
+      expect(d.countries).toEqual([...lower, ...d.tier]);
+    }
+    expect(DIVISIONS.diamond.countries).toHaveLength(COUNTRIES.length);
   });
 
   it('a cross-division match plays the lower division', () => {

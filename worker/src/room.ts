@@ -20,6 +20,7 @@ import {
   newRound,
   parseClientMessage,
   pickStages,
+  pickStagesFrom,
   scoresOf,
   stageAt,
   type ClientMessage,
@@ -81,6 +82,8 @@ export interface RoomState {
   /** Index = slot; slot 0 is the host */
   players: Player[];
   regions: RegionId[];
+  /** Ranked rooms: the division's countries, played instead of the regions */
+  pool?: string[];
   /** Minigames selected in the lobby (absent in rooms stored before modes existed → flags) */
   modes?: ModeId[];
   game: GameState | null;
@@ -92,7 +95,7 @@ export interface RoomState {
 
 interface RankedState {
   mode: ModeId;
-  /** Division whose regions are played (the lower of the two players') */
+  /** Division whose countries are played (the lower of the two players') */
   division: DivisionId;
   /** Idempotency key for rating the match */
   matchId: string;
@@ -186,7 +189,9 @@ export class Room extends DurableObject<Env> {
         disconnectedAt: now,
         rematch: false,
       })),
-      regions: [...DIVISIONS[division].regions],
+      // Shown as chips only; the rounds come from the pool.
+      regions: REGION_IDS.filter((r) => DIVISIONS[division].countries.some((c) => COUNTRY_BY_CODE[c]?.region === r)),
+      pool: [...DIVISIONS[division].countries],
       modes: [mode],
       game: null,
       ranked: {
@@ -415,7 +420,7 @@ export class Room extends DurableObject<Env> {
   private startCountdown(now: number) {
     const s = this.state!;
     const stages = s.modes ?? ['flags'];
-    const { codes, roundModes } = pickStages(s.regions, stages);
+    const { codes, roundModes } = s.pool ? pickStagesFrom(s.pool, stages) : pickStages(s.regions, stages);
     s.game = {
       stages,
       roundModes,
@@ -648,7 +653,7 @@ export class Room extends DurableObject<Env> {
         left: !!p.left,
       })),
       regions: s.regions,
-      countryCount: countriesInRegions(s.regions).length,
+      countryCount: s.pool?.length ?? countriesInRegions(s.regions).length,
       ...this.stageView(roundModes),
       round: g ? g.current + 1 : 0,
       totalRounds: g ? g.codes.length : ROUNDS_PER_GAME * (s.modes ?? ['flags']).length,

@@ -1,5 +1,6 @@
 export * from './regions';
 export * from './countries';
+export * from './fame';
 export * from './capitals';
 export * from './modes';
 export * from './normalize';

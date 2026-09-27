@@ -57,7 +57,16 @@ export function pickStages(
   count = ROUNDS_PER_GAME,
   rng: () => number = Math.random,
 ): { codes: string[]; roundModes: ModeId[] } {
-  const pool = countriesInRegions(regions);
+  return pickStagesFrom(countriesInRegions(regions), modes, count, rng);
+}
+
+/** Like pickStages, from an explicit list of country codes (ranked division pools). */
+export function pickStagesFrom(
+  pool: readonly string[],
+  modes: readonly ModeId[],
+  count = ROUNDS_PER_GAME,
+  rng: () => number = Math.random,
+): { codes: string[]; roundModes: ModeId[] } {
   const codes: string[] = [];
   const roundModes: ModeId[] = [];
   for (const mode of modes) {

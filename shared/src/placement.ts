@@ -1,19 +1,10 @@
 // Ranked placement test: a one-time solo run per minigame that unlocks ranked with a starting rating.
-// It asks the same number of countries from each division's regions (Bronze's Europe, what Silver adds, …),
-// so only knowing Europe can't score high. Speed doesn't count, only how many are right.
-import { countriesInRegions } from './game';
-import { DIVISIONS, DIVISION_IDS, START_RATING, divisionOf, type DivisionId } from './ranked';
-import { REGION_OF, type RegionId } from './regions';
+// It asks the same number of countries from each division's tier (Bronze's 40 best-known countries, the 40
+// Silver adds, …), so only knowing the famous ones can't score high. Speed doesn't count, only how many are right.
+import { DIVISIONS, DIVISION_IDS, START_RATING, divisionOf, tierOf, type DivisionId } from './ranked';
 
-/** Countries asked from each division's group of regions. */
+/** Countries asked from each division's tier. */
 export const PLACEMENT_PER_GROUP = 6;
-
-/** The regions each division adds to the one below (Bronze: all of its own). */
-export const PLACEMENT_GROUPS = {} as Record<DivisionId, readonly RegionId[]>;
-DIVISION_IDS.forEach((d, i) => {
-  const below = new Set<RegionId>(i > 0 ? DIVISIONS[DIVISION_IDS[i - 1]].regions : []);
-  PLACEMENT_GROUPS[d] = DIVISIONS[d].regions.filter((r) => !below.has(r));
-});
 
 export const PLACEMENT_ROUNDS = PLACEMENT_PER_GROUP * DIVISION_IDS.length;
 
@@ -32,11 +23,11 @@ export function placementRating(correct: number, total: number): number {
   return (PLACEMENT_BANDS.find((b) => share + 1e-9 >= b.min) ?? PLACEMENT_BANDS[PLACEMENT_BANDS.length - 1]).rating;
 }
 
-/** Countries for a placement test: PLACEMENT_PER_GROUP per division group, easiest group first. */
+/** Countries for a placement test: PLACEMENT_PER_GROUP per division tier, easiest tier first. */
 export function pickPlacement(rng: () => number = Math.random): string[] {
   const out: string[] = [];
   for (const d of DIVISION_IDS) {
-    const pool = countriesInRegions(PLACEMENT_GROUPS[d]);
+    const pool = [...DIVISIONS[d].tier];
     for (let i = pool.length - 1; i > 0; i--) {
       const j = Math.floor(rng() * (i + 1));
       [pool[i], pool[j]] = [pool[j], pool[i]];
@@ -46,11 +37,8 @@ export function pickPlacement(rng: () => number = Math.random): string[] {
   return out;
 }
 
-/** The division group a country belongs to. */
-export function placementGroupOf(code: string): DivisionId {
-  const region = REGION_OF[code];
-  return DIVISION_IDS.find((d) => PLACEMENT_GROUPS[d].includes(region)) ?? 'diamond';
-}
+/** The division tier a country belongs to. */
+export const placementGroupOf = (code: string): DivisionId => tierOf(code);
 
 export interface PlacementResult {
   correct: number;

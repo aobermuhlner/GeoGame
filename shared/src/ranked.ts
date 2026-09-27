@@ -1,8 +1,8 @@
-// Ranked 1 vs 1: divisions, their region pools, the Glicko-2 rating and the matchmaking protocol.
+// Ranked 1 vs 1: divisions, their country pools, the Glicko-2 rating and the matchmaking protocol.
 // Each minigame has its own rating. Everyone starts at START_RATING with a high rating deviation
 // (uncertainty), so the first games move the rating a lot; the swings shrink as the deviation drops.
+import { FAME_TIERS } from './fame';
 import { MODE_IDS, type ModeId } from './modes';
-import type { RegionId } from './regions';
 
 export const DIVISION_IDS = ['bronze', 'silver', 'gold', 'platinum', 'diamond'] as const;
 export type DivisionId = (typeof DIVISION_IDS)[number];
@@ -11,23 +11,27 @@ export interface Division {
   label: string;
   /** Lowest rating in this division */
   min: number;
-  /** Regions played in this division (each division adds to the one below) */
-  regions: readonly RegionId[];
+  /** The countries this division adds to the one below (ISO codes, best known first) */
+  tier: readonly string[];
+  /** Countries played in this division: its own tier plus every tier below */
+  countries: readonly string[];
 }
 
-const BRONZE: RegionId[] = ['europe'];
-const SILVER: RegionId[] = [...BRONZE, 'south-america', 'north-america'];
-const GOLD: RegionId[] = [...SILVER, 'central-america', 'asia'];
-const PLATINUM: RegionId[] = [...GOLD, 'africa'];
-const DIAMOND: RegionId[] = [...PLATINUM, 'caribbean', 'oceania'];
+const tier = (i: number) => FAME_TIERS[i].split(/\s+/);
+const upTo = (i: number) => FAME_TIERS.slice(0, i + 1).flatMap((t) => t.split(/\s+/));
 
 export const DIVISIONS: Record<DivisionId, Division> = {
-  bronze: { label: 'Bronze', min: -Infinity, regions: BRONZE },
-  silver: { label: 'Silver', min: 1200, regions: SILVER },
-  gold: { label: 'Gold', min: 1400, regions: GOLD },
-  platinum: { label: 'Platinum', min: 1600, regions: PLATINUM },
-  diamond: { label: 'Diamond', min: 1800, regions: DIAMOND },
+  bronze: { label: 'Bronze', min: -Infinity, tier: tier(0), countries: upTo(0) },
+  silver: { label: 'Silver', min: 1200, tier: tier(1), countries: upTo(1) },
+  gold: { label: 'Gold', min: 1400, tier: tier(2), countries: upTo(2) },
+  platinum: { label: 'Platinum', min: 1600, tier: tier(3), countries: upTo(3) },
+  diamond: { label: 'Diamond', min: 1800, tier: tier(4), countries: upTo(4) },
 };
+
+/** The division whose tier a country is in. */
+export function tierOf(code: string): DivisionId {
+  return DIVISION_IDS.find((d) => DIVISIONS[d].tier.includes(code)) ?? 'diamond';
+}
 
 export function divisionOf(rating: number): DivisionId {
   const r = Math.round(rating);
@@ -164,7 +168,7 @@ export interface RankedPlayerView {
 /** Ranked info of a room (null for friend lobbies). */
 export interface RankedView {
   mode: ModeId;
-  /** Division whose regions are played */
+  /** Division whose countries are played */
   division: DivisionId;
   /** Index = slot */
   players: RankedPlayerView[];

@@ -8,7 +8,6 @@ import {
   PLACEMENT_ROUNDS,
   RECONNECT_GRACE_MS,
   ROUND_TIME_MS,
-  countriesInRegions,
   placementRating,
   type DailyRun,
   type LoginResponse,
@@ -126,7 +125,7 @@ describe('ranked queue', () => {
     const st = await internal(ma.code);
     expect(st.ranked?.mode).toBe('capitals');
     expect(st.modes).toEqual(['capitals']);
-    expect(st.regions).toEqual(DIVISIONS.bronze.regions);
+    expect(st.pool).toEqual(DIVISIONS.bronze.countries);
   });
 
   it('keeps different minigames apart', async () => {
@@ -239,7 +238,10 @@ describe('ranked room', () => {
     // Names come from the accounts, not from hello.
     expect(s.room.players.map((p) => p.name).sort()).toEqual([a.user.displayName, b.user.displayName].sort());
     expect(s.room.ranked).toMatchObject({ mode: 'flags', division: 'bronze' });
-    expect(s.room.countryCount).toBe(countriesInRegions(DIVISIONS.bronze.regions).length);
+    expect(s.room.countryCount).toBe(DIVISIONS.bronze.countries.length);
+    // Rounds come from the division's countries only.
+    const codes = (await internal(ma.code)).game!.codes;
+    expect(codes.every((c) => DIVISIONS.bronze.countries.includes(c))).toBe(true);
 
     // No lobby controls in ranked.
     const err = cb.next('error');

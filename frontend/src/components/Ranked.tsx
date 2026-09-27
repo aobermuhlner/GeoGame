@@ -7,7 +7,7 @@ import {
   PLACEMENT_BANDS,
   PLACEMENT_PER_GROUP,
   PLACEMENT_ROUNDS,
-  REGION_LABELS,
+  COUNTRY_BY_CODE,
   divisionOf,
   type DivisionId,
   type ModeId,
@@ -54,19 +54,17 @@ export function DivisionBadge({
   );
 }
 
-/** "Europe, South America and North America" */
-function regionList(division: DivisionId): string {
-  const names = DIVISIONS[division].regions.map((r) => REGION_LABELS[r]);
-  if (division === 'diamond') return 'all regions';
-  return names.length === 1 ? names[0] : `${names.slice(0, -1).join(', ')} and ${names[names.length - 1]}`;
+/** "the 80 best-known countries" */
+function countryList(division: DivisionId): string {
+  const n = DIVISIONS[division].countries.length;
+  return division === 'diamond' ? `all ${n} countries` : `the ${n} best-known countries`;
 }
 
-/** What a division adds to the one below: "+ Africa" */
+/** What a division adds to the one below: "+ 40 countries: Israel, Nigeria, Sweden …" */
 export function added(division: DivisionId): string {
-  const i = DIVISION_IDS.indexOf(division);
-  if (i === 0) return DIVISIONS[division].regions.map((r) => REGION_LABELS[r]).join(', ');
-  const below = new Set(DIVISIONS[DIVISION_IDS[i - 1]].regions);
-  return '+ ' + DIVISIONS[division].regions.filter((r) => !below.has(r)).map((r) => REGION_LABELS[r]).join(', ');
+  const { tier } = DIVISIONS[division];
+  const names = tier.slice(0, 3).map((c) => COUNTRY_BY_CODE[c]?.name ?? c);
+  return `${division === 'bronze' ? '' : '+ '}${tier.length} countries: ${names.join(', ')} …`;
 }
 
 function Elapsed({ since }: { since: number }) {
@@ -180,7 +178,7 @@ export function RankedCard({
             )}
           </div>
           <p class="muted small ranked-regions">
-            {DIVISIONS[division].label} plays <strong>{regionList(division)}</strong>. Against a player from a lower
+            {DIVISIONS[division].label} plays <strong>{countryList(division)}</strong>. Against a player from a lower
             division, the match uses theirs.
           </p>
 
@@ -264,7 +262,7 @@ function Unlock({
         <div class="unlock-option">
           <h3>Placement test</h3>
           <p class="muted small">
-            {PLACEMENT_ROUNDS} countries from all regions ({PLACEMENT_PER_GROUP} per division). Your share of correct
+            {PLACEMENT_ROUNDS} countries, from famous to obscure ({PLACEMENT_PER_GROUP} from each division). Your share of correct
             answers sets your starting rating, up to Gold. One try only.
           </p>
           <button class="btn btn-primary" onClick={onPlacement} disabled={busy}>

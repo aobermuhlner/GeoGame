@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
   PLACEMENT_BANDS,
-  PLACEMENT_GROUPS,
   PLACEMENT_PER_GROUP,
   PLACEMENT_ROUNDS,
   pickPlacement,
@@ -10,14 +9,12 @@ import {
   placementResult,
 } from './placement';
 import { DIVISION_IDS, START_RATING, divisionOf } from './ranked';
-import { REGION_IDS } from './regions';
 
 describe('placement test', () => {
-  it('groups every region exactly once, by the division that adds it', () => {
-    const all = DIVISION_IDS.flatMap((d) => PLACEMENT_GROUPS[d]);
-    expect([...all].sort()).toEqual([...REGION_IDS].sort());
-    expect(PLACEMENT_GROUPS.bronze).toEqual(['europe']);
-    expect(PLACEMENT_GROUPS.platinum).toEqual(['africa']);
+  it('groups countries by the division tier that adds them', () => {
+    expect(placementGroupOf('US')).toBe('bronze');
+    expect(placementGroupOf('IL')).toBe('silver');
+    expect(placementGroupOf('TV')).toBe('diamond');
   });
 
   it('asks the same number of countries from each group, easiest first, no repeats', () => {

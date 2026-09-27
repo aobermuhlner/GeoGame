@@ -26,7 +26,7 @@ function RatingChange({ ranked, me }: { ranked: RankedView; me: Slot }) {
       {moved !== 0 && (
         <p class="banner-sub">
           {moved > 0
-            ? `Promoted to ${DIVISIONS[after].label}! New regions are in play now.`
+            ? `Promoted to ${DIVISIONS[after].label}! New countries are in play now.`
             : `Dropped to ${DIVISIONS[after].label}.`}
         </p>
       )}
@@ -34,7 +34,7 @@ function RatingChange({ ranked, me }: { ranked: RankedView; me: Slot }) {
         <RankUp
           division={after}
           kicker="Promoted!"
-          detail={`${MODES[ranked.mode].label} rating ${p.after} · new regions ${added(after)}`}
+          detail={`${MODES[ranked.mode].label} rating ${p.after} · ${added(after)}`}
           onClose={() => setCelebrate(false)}
         />
       )}

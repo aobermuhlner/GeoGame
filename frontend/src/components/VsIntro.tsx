@@ -41,7 +41,7 @@ export function VsIntro({ vm }: { vm: GameVM }) {
         <p class="vsi-foot">
           {ranked ? (
             <>
-              Ranked {MODES[ranked.mode].label} · <b>{DIVISIONS[ranked.division].label}</b> regions
+              Ranked {MODES[ranked.mode].label} · <b>{DIVISIONS[ranked.division].label}</b> countries
             </>
           ) : (
             <>Friendly match · {modes}</>
