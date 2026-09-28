@@ -25,8 +25,8 @@ export function Home({ name, initialCode, busy, error, onCreate, onJoin, onDemo,
   const codeOk = code.length === ROOM_CODE_LENGTH;
 
   return (
-    <main class="stack">
-      <section class="card home-card">
+    <main class="stack home">
+      <section class="card home-card home-hero">
         <header class="brand center">
           <Logo size={56} />
           <h1>

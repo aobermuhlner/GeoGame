@@ -47,6 +47,9 @@ export function pickFlags(
   return shuffleTake(countriesInRegions(regions), count, rng);
 }
 
+/** Rounds per minigame: the same for every mode, or chosen per mode. */
+export type StageCount = number | ((mode: ModeId) => number);
+
 /**
  * Countries for a multi-game match: `count` per mode, played in the given order.
  * Each stage avoids countries already used by earlier stages while the pool allows it.
@@ -54,7 +57,7 @@ export function pickFlags(
 export function pickStages(
   regions: readonly RegionId[],
   modes: readonly ModeId[],
-  count = ROUNDS_PER_GAME,
+  count: StageCount = ROUNDS_PER_GAME,
   rng: () => number = Math.random,
 ): { codes: string[]; roundModes: ModeId[] } {
   return pickStagesFrom(countriesInRegions(regions), modes, count, rng);
@@ -64,7 +67,7 @@ export function pickStages(
 export function pickStagesFrom(
   pool: readonly string[],
   modes: readonly ModeId[],
-  count = ROUNDS_PER_GAME,
+  count: StageCount = ROUNDS_PER_GAME,
   rng: () => number = Math.random,
 ): { codes: string[]; roundModes: ModeId[] } {
   const codes: string[] = [];
@@ -72,8 +75,9 @@ export function pickStagesFrom(
   for (const mode of modes) {
     const used = new Set(codes);
     const fresh = pool.filter((c) => !used.has(c));
-    const src = fresh.length >= Math.min(count, pool.length) ? fresh : pool;
-    const picked = shuffleTake(src, count, rng);
+    const n = typeof count === 'number' ? count : count(mode);
+    const src = fresh.length >= Math.min(n, pool.length) ? fresh : pool;
+    const picked = shuffleTake(src, n, rng);
     codes.push(...picked);
     roundModes.push(...picked.map(() => mode));
   }

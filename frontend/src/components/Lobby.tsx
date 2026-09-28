@@ -1,14 +1,15 @@
 import { useEffect, useState } from 'preact/hooks';
 import {
-  DUEL_ROUNDS,
   DUEL_TIME_MS,
+  MAX_GAME_ROUNDS,
+  MIN_GAME_ROUNDS,
   MIN_POOL_SIZE,
   MODES,
   MODE_IDS,
   REGION_IDS,
-  ROUNDS_PER_GAME,
   REGION_LABELS,
   countriesInRegions,
+  type GameId,
   type GameKind,
   type ModeId,
   type RegionId,
@@ -27,11 +28,47 @@ interface Props {
   onRegions: (regions: RegionId[]) => void;
   onModes: (modes: ModeId[]) => void;
   onKind: (kind: GameKind) => void;
+  onRounds: (game: GameId, rounds: number) => void;
   onLeave: () => void;
 }
 
 export function inviteLink(code: string): string {
   return `${location.origin}${import.meta.env.BASE_URL}?room=${code}`;
+}
+
+/** "− 10 rounds +" for the host; plain text for the guest. */
+function RoundsStepper({
+  value,
+  label,
+  editable,
+  onChange,
+}: {
+  value: number;
+  label: string;
+  editable: boolean;
+  onChange: (rounds: number) => void;
+}) {
+  const unit = value === 1 ? 'round' : 'rounds';
+  if (!editable) return <span class="rounds-fixed">{`${value} ${unit}`}</span>;
+  const step = (d: number) => (e: Event) => {
+    // Inside the game's <label>: don't toggle its checkbox.
+    e.preventDefault();
+    e.stopPropagation();
+    onChange(Math.min(MAX_GAME_ROUNDS, Math.max(MIN_GAME_ROUNDS, value + d)));
+  };
+  return (
+    <span class="rounds-step" role="group" aria-label={`${label}: rounds`}>
+      <button type="button" aria-label={`Fewer ${label} rounds`} disabled={value <= MIN_GAME_ROUNDS} onClick={step(-1)}>
+        −
+      </button>
+      <span class="rounds-val" aria-live="polite">
+        <b>{value}</b> {unit}
+      </span>
+      <button type="button" aria-label={`More ${label} rounds`} disabled={value >= MAX_GAME_ROUNDS} onClick={step(1)}>
+        +
+      </button>
+    </span>
+  );
 }
 
 /** The "Regions" card: world map plus a checklist. Used by the lobby and by practice. */
@@ -80,7 +117,7 @@ export function RegionPicker({
   );
 }
 
-export function Lobby({ room, you, onReady, onStart, onRegions, onModes, onKind, onLeave }: Props) {
+export function Lobby({ room, you, onReady, onStart, onRegions, onModes, onKind, onRounds, onLeave }: Props) {
   const [copied, setCopied] = useState(false);
   // Optimistic selection so quick successive clicks build on each other, not on a stale snapshot.
   const [draft, setDraft] = useState<RegionId[] | null>(null);
@@ -98,12 +135,25 @@ export function Lobby({ room, you, onReady, onStart, onRegions, onModes, onKind,
   useEffect(() => {
     if (kindDraft && kindDraft === room.kind) setKindDraft(null);
   }, [room.kind]);
+  const [countsDraft, setCountsDraft] = useState<Partial<Record<GameId, number>>>({});
+  const counts = { ...room.roundCounts, ...countsDraft };
+  useEffect(() => {
+    const pending = Object.entries(countsDraft).filter(([g, n]) => room.roundCounts[g as GameId] !== n);
+    if (pending.length < Object.keys(countsDraft).length) setCountsDraft(Object.fromEntries(pending));
+  }, [room.roundCounts]);
+  function setRounds(game: GameId, rounds: number) {
+    setCountsDraft((d) => ({ ...d, [game]: rounds }));
+    onRounds(game, rounds);
+  }
   const isHost = you === 0;
   const me = room.players[you];
   const full = room.players.length === 2;
   const allReady = full && room.players.every((p) => p.ready && p.connected);
   const countryCount = draft ? countriesInRegions(draft).length : room.countryCount;
   const poolOk = countryCount >= MIN_POOL_SIZE;
+  // A game can't have more rounds than there are countries to ask about.
+  const totalRounds =
+    kind === 'higher' ? counts.higher : modes.reduce((n, m) => n + Math.min(counts[m], countryCount), 0);
 
   async function copy() {
     const link = inviteLink(room.code);
@@ -184,7 +234,7 @@ export function Lobby({ room, you, onReady, onStart, onRegions, onModes, onKind,
       <section class="card modes-card">
         <div class="regions-head">
           <h2>Games</h2>
-          <span class="pool">{kind === 'higher' ? `${DUEL_ROUNDS} rounds` : `${modes.length * ROUNDS_PER_GAME} rounds`}</span>
+          <span class="pool">{totalRounds === 1 ? '1 round' : `${totalRounds} rounds`}</span>
         </div>
         <div class="seg kind-seg" role="tablist" aria-label="Match type">
           {(['classic', 'higher'] as const).map((k) => (
@@ -205,18 +255,29 @@ export function Lobby({ room, you, onReady, onStart, onRegions, onModes, onKind,
           ))}
         </div>
         {kind === 'higher' ? (
-          <p class="muted small">
-            Higher or lower: two countries and a new category every round — population, area, GDP, forests, mountains…
-            Both of you have {DUEL_TIME_MS / 1000} seconds to pick the one with the higher value; speed doesn't matter,
-            every correct pick is a point. {DUEL_ROUNDS} rounds; still tied after that? Sudden death until only one of
-            you is right.
-            {!isHost && ` ${room.players[0]?.name ?? 'The host'} picks the match type.`}
-          </p>
+          <>
+            <p class="muted small">
+              Higher or lower: two countries and a new category every round — population, area, GDP, forests, mountains…
+              Both of you have {DUEL_TIME_MS / 1000} seconds to pick the one with the higher value; speed doesn't
+              matter, every correct pick is a point. Still tied after the last round? Sudden death until only one of you
+              is right.
+              {!isHost && ` ${room.players[0]?.name ?? 'The host'} picks the match type and its length.`}
+            </p>
+            <div class="rounds-line">
+              <span class="m-name">Rounds</span>
+              <RoundsStepper
+                value={counts.higher}
+                label={GEO_KNOWLEDGE_LABEL}
+                editable={isHost}
+                onChange={(n) => setRounds('higher', n)}
+              />
+            </div>
+          </>
         ) : (
           <>
             <p class="muted small">
               {isHost
-                ? `Pick one or more. Each game is ${ROUNDS_PER_GAME} rounds, played in this order; most points overall wins.`
+                ? `Pick one or more and how many rounds each lasts (${MIN_GAME_ROUNDS}–${MAX_GAME_ROUNDS}). They're played in this order; most points overall wins.`
                 : `${room.players[0]?.name ?? 'The host'} picks the games.`}
             </p>
             <div class="mode-list" role="group" aria-label="Games">
@@ -237,6 +298,14 @@ export function Lobby({ room, you, onReady, onStart, onRegions, onModes, onKind,
                     <span class="mode-text">
                       <span class="m-name">{MODES[m].label}</span>
                       <span class="m-desc">{MODES[m].description}</span>
+                      {on && (
+                        <RoundsStepper
+                          value={counts[m]}
+                          label={MODES[m].label}
+                          editable={isHost}
+                          onChange={(n) => setRounds(m, n)}
+                        />
+                      )}
                     </span>
                   </label>
                 );

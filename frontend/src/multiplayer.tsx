@@ -380,6 +380,7 @@ export function Multiplayer({ name, onImmersive }: { name: string; onImmersive: 
             onRegions={(regions) => c.send({ t: 'setRegions', regions })}
             onModes={(modes) => c.send({ t: 'setModes', modes })}
             onKind={(kind) => c.send({ t: 'setKind', kind })}
+            onRounds={(game, rounds) => c.send({ t: 'setRounds', game, rounds })}
             onLeave={() => leave()}
           />
         )}

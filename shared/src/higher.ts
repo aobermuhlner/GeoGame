@@ -588,22 +588,26 @@ export function duelMisses(rounds: readonly DuelRound[]): [number, number] {
 }
 
 /**
- * Is the duel decided after its ended rounds? All DUEL_ROUNDS are always played; tied after them,
+ * Is the duel decided after its ended rounds? All `regular` rounds are always played; tied after them,
  * sudden death goes on until exactly one player is right in a round.
  */
-export function duelOver(rounds: readonly DuelRound[]): boolean {
+export function duelOver(rounds: readonly DuelRound[], regular = DUEL_ROUNDS): boolean {
   const n = rounds.filter((r) => r.end).length;
   const [a, b] = duelScores(rounds);
-  if (n < DUEL_ROUNDS) return false;
-  return a !== b || n >= DUEL_ROUNDS + DUEL_MAX_TIEBREAK;
+  if (n < regular) return false;
+  return a !== b || n >= regular + DUEL_MAX_TIEBREAK;
 }
 
-export function decideDuel(rounds: readonly DuelRound[], forfeitedBy: Slot | null = null): MatchResult {
+export function decideDuel(
+  rounds: readonly DuelRound[],
+  forfeitedBy: Slot | null = null,
+  regular = DUEL_ROUNDS,
+): MatchResult {
   const scores = duelScores(rounds);
   const wrongTotals = duelMisses(rounds);
   if (forfeitedBy !== null) return { winner: forfeitedBy === 0 ? 1 : 0, scores, wrongTotals, decidedBy: 'forfeit' };
   if (scores[0] === scores[1]) return { winner: null, scores, wrongTotals, decidedBy: 'draw' };
-  const suddenDeath = rounds.filter((r) => r.end).length > DUEL_ROUNDS;
+  const suddenDeath = rounds.filter((r) => r.end).length > regular;
   return {
     winner: scores[0] > scores[1] ? 0 : 1,
     scores,
@@ -637,12 +641,12 @@ export interface DuelView {
   history: DuelRoundView[];
 }
 
-export function duelRoundView(r: DuelRound, index: number): DuelRoundView {
+export function duelRoundView(r: DuelRound, index: number, regular = DUEL_ROUNDS): DuelRoundView {
   return {
     ...revealedPair(r.pair),
     picks: [r.picks[0], r.picks[1]],
     correct: [duelCorrect(r, 0), duelCorrect(r, 1)],
-    tiebreak: index >= DUEL_ROUNDS,
+    tiebreak: index >= regular,
     end: r.end ?? 'forfeit',
   };
 }

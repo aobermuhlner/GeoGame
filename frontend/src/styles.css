@@ -57,7 +57,7 @@ input {
 }
 
 .stack {
-  max-width: 760px;
+  max-width: 920px;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
@@ -211,18 +211,21 @@ em {
 }
 .flag-frame {
   margin-top: 22px;
-  width: min(340px, 100%);
+  width: min(400px, 100%);
   aspect-ratio: 4 / 3;
   display: grid;
   place-items: center;
+  container-type: inline-size;
 }
+/* Flags keep their real proportions and fit inside the frame (never cropped). */
 .flag {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  border-radius: 16px;
-  box-shadow: 0 14px 30px rgba(40, 30, 10, 0.18), 0 2px 6px rgba(40, 30, 10, 0.1);
-  background: #fff;
+  width: auto;
+  height: auto;
+  max-width: 100cqw;
+  max-height: 75cqw; /* the frame is 4:3 */
+  border-radius: 12px;
+  /* drop-shadow follows the flag's shape (Nepal isn't a rectangle) */
+  filter: drop-shadow(0 12px 16px rgba(40, 30, 10, 0.16)) drop-shadow(0 2px 3px rgba(40, 30, 10, 0.12));
   animation: flag-in 0.35s ease-out;
   user-select: none;
   -webkit-user-drag: none;
@@ -630,11 +633,10 @@ em {
   color: #4b5048;
 }
 .thumb {
-  width: 40px;
+  width: 44px;
   height: 30px;
-  object-fit: cover;
-  border-radius: 5px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  object-fit: contain;
+  filter: drop-shadow(0 1px 1.5px rgba(0, 0, 0, 0.25));
   display: block;
   margin: 0 auto;
 }
@@ -672,7 +674,7 @@ em {
 .small { font-size: 0.85rem; }
 .center { text-align: center; }
 .btn-sm { min-height: 36px; padding: 0 14px; font-size: 0.85rem; }
-.center-card { text-align: center; max-width: 460px; width: 100%; margin: 6vh auto 0; }
+.center-card { text-align: center; max-width: 560px; width: 100%; margin: 6vh auto 0; }
 .or {
   display: flex; align-items: center; gap: 10px;
   color: var(--muted); font-size: 0.78rem; font-weight: 600;
@@ -684,7 +686,7 @@ em {
 }
 .conn-banner {
   position: sticky; top: 0; z-index: 50;
-  max-width: 760px; margin: 0 auto 12px;
+  max-width: 1040px; margin: 0 auto 12px;
   background: #fff4d6; color: #7a5a00; border-radius: 12px;
   padding: 8px 14px; font-weight: 600; font-size: 0.88rem; text-align: center;
   box-shadow: var(--shadow);
@@ -855,6 +857,19 @@ em {
 .mode-text { display: flex; flex-direction: column; min-width: 0; }
 .m-name { font-weight: 700; }
 .m-desc { font-size: 0.8rem; color: var(--muted); }
+.rounds-step {
+  display: inline-flex; align-items: center; gap: 6px; margin-top: 6px; align-self: flex-start;
+  font-size: 0.85rem; color: var(--ink);
+}
+.rounds-step button {
+  width: 28px; height: 28px; border-radius: 50%; border: 1.5px solid #9cc5a8; background: var(--card);
+  color: var(--green); font-size: 1.05rem; font-weight: 700; line-height: 1; cursor: pointer; padding: 0;
+}
+.rounds-step button:disabled { opacity: 0.35; cursor: default; }
+.rounds-val { min-width: 5.2em; text-align: center; font-variant-numeric: tabular-nums; }
+.rounds-fixed { margin-top: 4px; font-size: 0.85rem; font-weight: 600; color: var(--green); }
+.rounds-line { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 4px; }
+.rounds-line .rounds-step, .rounds-line .rounds-fixed { margin-top: 0; }
 
 .stage-steps {
   list-style: none; margin: 0 0 10px; padding: 0; display: flex; flex-wrap: wrap; gap: 6px 18px;
@@ -893,7 +908,7 @@ em {
 
 /* ---------- Menu bar ---------- */
 .navbar {
-  max-width: 760px;
+  max-width: 1040px;
   margin: 0 auto 16px;
   display: flex;
   align-items: center;
@@ -1204,7 +1219,7 @@ button.gt-main:active, .gt-btn:active:not(:disabled) { transform: translateY(3px
 .map-card { padding: 16px 18px; }
 .locate-board { display: flex; flex-direction: column; gap: 10px; }
 .locate-board .locate-prompt { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 52px; }
-.locate-flag { height: 26px; width: 35px; object-fit: cover; background: #fff; border-radius: 4px; box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.08); margin-right: 4px; }
+.locate-flag { height: 28px; width: 44px; object-fit: contain; filter: drop-shadow(0 0 0.5px rgba(0, 0, 0, 0.4)); margin-right: 4px; }
 .locate-stage { position: relative; }
 .locate-overlay {
   position: absolute; inset: 0; display: grid; place-items: center;
@@ -1268,7 +1283,7 @@ html.map-fs-open, html.map-fs-open body { overflow: hidden; overscroll-behavior:
 .locate-board.fs .locate-prompt {
   min-height: 0; padding: 4px 14px; font-size: 1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
-.fs .locate-flag { height: 18px; width: 24px; }
+.fs .locate-flag { height: 20px; width: 30px; }
 .fs .locate-hud {
   display: flex; align-items: center; gap: 10px; padding: 4px 12px;
   font-size: 0.85rem; font-weight: 700; white-space: nowrap; font-variant-numeric: tabular-nums;
@@ -1287,7 +1302,20 @@ html.map-fs-open, html.map-fs-open body { overflow: hidden; overscroll-behavior:
 /* ---------- Ranked ---------- */
 .friend-card { margin-top: 0; padding-top: 22px; }
 .friend-card h2 { margin: 0 0 14px; font-size: 1.1rem; font-weight: 800; text-align: center; }
-.ranked-card, .home-card ~ .board-card { max-width: 460px; width: 100%; margin: 0 auto; }
+.ranked-card, .home-card ~ .board-card { max-width: 560px; width: 100%; margin: 0 auto; }
+
+/* Multiplayer home: hero on top, ranked + friend side by side, ladder below */
+.stack.home { max-width: 1040px; }
+.stack.home .home-card { max-width: 560px; }
+@media (min-width: 900px) {
+  .stack.home { display: grid; grid-template-columns: 3fr 2fr; align-items: start; }
+  .stack.home > * { grid-column: 1 / -1; }
+  .stack.home .home-card, .stack.home .ranked-card, .stack.home .board-card { max-width: none; margin: 0; }
+  .stack.home > .ranked-card { grid-column: 1; }
+  .stack.home > .friend-card { grid-column: 2; }
+  .stack.home > .home-hero { padding: 22px 24px; }
+  .stack.home > .home-hero .brand, .stack.home > .home-hero .tagline { margin-top: 0; }
+}
 .ranked-card h2 { margin: 0; font-size: 1.1rem; font-weight: 800; }
 .ranked-card > .btn-lg { width: 100%; }
 .rating-row { display: flex; align-items: center; gap: 12px; margin: 4px 0 8px; }
@@ -1600,8 +1628,8 @@ html.map-fs-open, html.map-fs-open body { overflow: hidden; overscroll-behavior:
 .hl-tile.lower { opacity: 0.8; }
 .hl-tile.wrong { border-color: var(--red); background: var(--red-soft); opacity: 1; }
 .hl-flag {
-  width: min(150px, 100%); aspect-ratio: 4 / 3; object-fit: cover; border-radius: 6px;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.18); background: var(--track);
+  width: min(150px, 100%); aspect-ratio: 3 / 2; object-fit: contain;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.22));
 }
 .hl-name { font-weight: 800; font-size: 1.05rem; line-height: 1.2; text-align: center; overflow-wrap: anywhere; }
 .hl-value {

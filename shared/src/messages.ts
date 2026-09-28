@@ -1,6 +1,6 @@
 // WebSocket protocol between the browser and the Room Durable Object.
-import type { GuessOutcome, MatchResult, RoundEnd, Slot } from './game';
-import type { DuelView } from './higher';
+import { ROUNDS_PER_GAME, type GuessOutcome, type MatchResult, type RoundEnd, type Slot } from './game';
+import { DUEL_ROUNDS, type DuelView } from './higher';
 import { MODE_IDS, type ModeId } from './modes';
 import type { RankedView } from './ranked';
 import { REGION_IDS, type RegionId } from './regions';
@@ -23,6 +23,20 @@ export const MAX_NAME_LENGTH = 16;
 export const GAME_KINDS = ['classic', 'higher'] as const;
 export type GameKind = (typeof GAME_KINDS)[number];
 
+/** Every game a friend lobby can play: the flag minigames plus the Higher or Lower duel. */
+export const GAME_IDS = [...MODE_IDS, 'higher'] as const;
+export type GameId = (typeof GAME_IDS)[number];
+/** Rounds each game lasts in a friend lobby (host's choice; ranked always uses the defaults). */
+export type RoundCounts = Record<GameId, number>;
+export const MIN_GAME_ROUNDS = 1;
+export const MAX_GAME_ROUNDS = 20;
+export const DEFAULT_ROUND_COUNTS: RoundCounts = {
+  flags: ROUNDS_PER_GAME,
+  capitals: ROUNDS_PER_GAME,
+  locate: ROUNDS_PER_GAME,
+  higher: DUEL_ROUNDS,
+};
+
 export type Phase = 'lobby' | 'countdown' | 'playing' | 'reveal' | 'finished';
 
 // ---------- Client → Server ----------
@@ -33,6 +47,8 @@ export type ClientMessage =
   | { t: 'setModes'; modes: ModeId[] }
   /** Flag games or Higher or Lower (host only, lobby only) */
   | { t: 'setKind'; kind: GameKind }
+  /** How many rounds a game lasts (host only, lobby only) */
+  | { t: 'setRounds'; game: GameId; rounds: number }
   | { t: 'ready'; ready: boolean }
   | { t: 'start' }
   | { t: 'guess'; round: number; text: string }
@@ -115,6 +131,8 @@ export interface RoomView {
   ranked: RankedView | null;
   /** Flag games or Higher or Lower */
   kind: GameKind;
+  /** Rounds per game chosen in the lobby */
+  roundCounts: RoundCounts;
   /** Higher or Lower duel state (kind 'higher', once the match has started) */
   higher: DuelView | null;
 }
@@ -176,6 +194,10 @@ export function parseClientMessage(raw: unknown): ClientMessage | null {
       return isInt(m.round) ? { t: 'pass', round: m.round } : null;
     case 'setKind':
       return (GAME_KINDS as readonly unknown[]).includes(m.kind) ? { t: 'setKind', kind: m.kind as GameKind } : null;
+    case 'setRounds':
+      if (!(GAME_IDS as readonly unknown[]).includes(m.game) || !Number.isInteger(m.rounds)) return null;
+      if ((m.rounds as number) < MIN_GAME_ROUNDS || (m.rounds as number) > MAX_GAME_ROUNDS) return null;
+      return { t: 'setRounds', game: m.game as GameId, rounds: m.rounds as number };
     case 'pick':
       if (!isInt(m.round) || typeof m.code !== 'string' || !/^[A-Z]{2}$/.test(m.code)) return null;
       return { t: 'pick', round: m.round, code: m.code };

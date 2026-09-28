@@ -8,12 +8,23 @@ import { fileURLToPath } from 'node:url';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const require = createRequire(import.meta.url);
-const flagDir = join(dirname(require.resolve('flag-icons/package.json')), 'flags', '4x3');
+// svg-country-flags keeps each flag's official proportions (flag-icons crops them all to 4:3).
+const flagDir = join(dirname(require.resolve('svg-country-flags/package.json')), 'svg');
 const regions = readFileSync(join(here, '../../shared/src/regions.ts'), 'utf8');
 const codes = [...regions.matchAll(/'([A-Z]{2}(?: [A-Z]{2})*)'/g)].flatMap((m) => m[1].split(' '));
 
 const flags = {};
-for (const code of codes) flags[code] = readFileSync(join(flagDir, `${code.toLowerCase()}.svg`), 'utf8');
+for (const code of codes) flags[code] = withSize(readFileSync(join(flagDir, `${code.toLowerCase()}.svg`), 'utf8'), code);
+
+/** Adds width/height (from the viewBox, 480 high) so an <img> knows the flag's real aspect ratio. */
+function withSize(svg, code) {
+  const open = svg.match(/<svg\b[^>]*>/);
+  const box = open?.[0].match(/viewBox="([^"]+)"/);
+  if (!box) throw new Error(`gen-flags: ${code} has no viewBox`);
+  const [, , w, h] = box[1].trim().split(/[\s,]+/).map(Number);
+  const tag = open[0].replace(/\s(width|height)="[^"]*"/g, '').replace(/^<svg/, `<svg width="${Math.round((480 * w) / h)}" height="480"`);
+  return svg.slice(0, open.index) + tag + svg.slice(open.index + open[0].length);
+}
 
 mkdirSync(join(here, '../src/generated'), { recursive: true });
 writeFileSync(

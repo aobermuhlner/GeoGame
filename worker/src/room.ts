@@ -8,9 +8,8 @@ import {
   RECONNECT_GRACE_MS,
   REGION_IDS,
   REVEAL_MS,
-  ROUNDS_PER_GAME,
   STAGE_INTRO_MS,
-  DUEL_ROUNDS,
+  DEFAULT_ROUND_COUNTS,
   HIGHER_REVEAL_MS,
   SUDDEN_DEATH_INTRO_MS,
   applyDuelPick,
@@ -49,6 +48,7 @@ import {
   type RegionId,
   type RankedView,
   type RoomView,
+  type RoundCounts,
   type RoundState,
   type RoundView,
   type ServerMessage,
@@ -58,6 +58,11 @@ import type { RankedOutcome } from './accounts';
 import { FLAGS } from './generated/flags';
 
 const IN_GAME: Phase[] = ['countdown', 'playing', 'reveal'];
+
+/** Rounds per game in a room; ranked matches always play the defaults. */
+const roundCountsOf = (s: RoomState): RoundCounts =>
+  s.ranked ? DEFAULT_ROUND_COUNTS : { ...DEFAULT_ROUND_COUNTS, ...s.roundCounts };
+const duelRegular = (g: GameState) => g.duel?.regular ?? DEFAULT_ROUND_COUNTS.higher;
 
 /** Delete a room's storage this long after the last player left. */
 export const EMPTY_ROOM_TTL_MS = 10 * 60_000;
@@ -90,7 +95,8 @@ interface GameState {
   forfeitReason: ForfeitReason | null;
   result: MatchResult | null;
   /** Higher or Lower duel (codes/tokens/rounds stay empty then) */
-  duel?: { pool: string[]; rounds: DuelRound[] };
+  /** `regular`: rounds before sudden death (absent in duels stored before it was configurable → DUEL_ROUNDS) */
+  duel?: { pool: string[]; rounds: DuelRound[]; regular?: number };
 }
 
 export interface RoomState {
@@ -106,6 +112,8 @@ export interface RoomState {
   modes?: ModeId[];
   /** Flag games or Higher or Lower (absent in rooms stored before it existed → flag games) */
   kind?: GameKind;
+  /** Rounds per game chosen by the host (absent in rooms stored before it existed → defaults) */
+  roundCounts?: Partial<RoundCounts>;
   game: GameState | null;
   /** Set for rooms made by the matchmaker: fixed seats, one match, rated when it ends */
   ranked?: RankedState;
@@ -326,7 +334,7 @@ export class Room extends DurableObject<Env> {
     const s = this.state!;
     const now = Date.now();
     // Ranked rooms are set up by the matchmaker and hold exactly one match.
-    const LOBBY_ONLY: ClientMessage['t'][] = ['setRegions', 'setModes', 'setKind', 'ready', 'start', 'rematch', 'backToLobby'];
+    const LOBBY_ONLY: ClientMessage['t'][] = ['setRegions', 'setModes', 'setKind', 'setRounds', 'ready', 'start', 'rematch', 'backToLobby'];
     if (s.ranked && LOBBY_ONLY.includes(msg.t)) return this.sendError(ws, 'not_allowed', 'Not in a ranked match');
     switch (msg.t) {
       case 'setRegions':
@@ -342,6 +350,11 @@ export class Room extends DurableObject<Env> {
       case 'setKind':
         if (slot !== 0 || s.phase !== 'lobby') return this.sendError(ws, 'not_allowed', 'Only the host can pick the games');
         s.kind = msg.kind;
+        break;
+
+      case 'setRounds':
+        if (slot !== 0 || s.phase !== 'lobby') return this.sendError(ws, 'not_allowed', 'Only the host can pick the games');
+        s.roundCounts = { ...s.roundCounts, [msg.game]: msg.rounds };
         break;
 
       case 'ready':
@@ -466,14 +479,16 @@ export class Room extends DurableObject<Env> {
         forfeitedBy: null,
         forfeitReason: null,
         result: null,
-        duel: { pool: s.pool ?? countriesInRegions(s.regions), rounds: [] },
+        duel: { pool: s.pool ?? countriesInRegions(s.regions), rounds: [], regular: roundCountsOf(s).higher },
       };
       s.phase = 'countdown';
       for (const p of s.players) p.rematch = false;
       return;
     }
     const stages = s.modes ?? ['flags'];
-    const { codes, roundModes } = s.pool ? pickStagesFrom(s.pool, stages) : pickStages(s.regions, stages);
+    const counts = roundCountsOf(s);
+    const count = (m: ModeId) => counts[m];
+    const { codes, roundModes } = s.pool ? pickStagesFrom(s.pool, stages, count) : pickStages(s.regions, stages, count);
     s.game = {
       stages,
       roundModes,
@@ -523,7 +538,7 @@ export class Room extends DurableObject<Env> {
   private finish() {
     const s = this.state!;
     const g = s.game!;
-    g.result = g.duel ? decideDuel(g.duel.rounds, g.forfeitedBy) : decideMatch(g.rounds, g.forfeitedBy);
+    g.result = g.duel ? decideDuel(g.duel.rounds, g.forfeitedBy, duelRegular(g)) : decideMatch(g.rounds, g.forfeitedBy);
     g.countdownEndsAt = null;
     g.revealEndsAt = null;
     s.phase = 'finished';
@@ -578,9 +593,9 @@ export class Room extends DurableObject<Env> {
     if (s.phase === 'reveal' && g?.revealEndsAt && now >= g.revealEndsAt) {
       const next = g.current + 1;
       if (g.duel) {
-        // Best of DUEL_ROUNDS, then sudden death: go on until the duel is decided.
-        if (duelOver(g.duel.rounds)) this.finish();
-        else if (next === DUEL_ROUNDS) {
+        // Best of `regular` rounds, then sudden death: go on until the duel is decided.
+        if (duelOver(g.duel.rounds, duelRegular(g))) this.finish();
+        else if (next === duelRegular(g)) {
           // Tied after the regular rounds: announce sudden death before its first round.
           s.phase = 'countdown';
           g.revealEndsAt = null;
@@ -696,16 +711,17 @@ export class Room extends DurableObject<Env> {
     const g = s.game;
     if (!g?.duel) return null;
     const cur = g.current >= 0 && s.phase !== 'countdown' ? g.duel.rounds[g.current] : undefined;
+    const regular = duelRegular(g);
     return {
       round: g.current + 1,
-      regularRounds: DUEL_ROUNDS,
+      regularRounds: regular,
       // During the sudden-death announcement `current` is still the last regular round.
-      tiebreak: (s.phase === 'countdown' ? g.current + 1 : g.current) >= DUEL_ROUNDS,
+      tiebreak: (s.phase === 'countdown' ? g.current + 1 : g.current) >= regular,
       pair: cur ? pairView(cur.pair) : null,
       picked: [cur?.picks[0] != null, cur?.picks[1] != null],
       mine: null,
-      reveal: s.phase === 'reveal' && cur ? duelRoundView(cur, g.current) : null,
-      history: g.duel.rounds.flatMap((r, i) => (r.end ? [duelRoundView(r, i)] : [])),
+      reveal: s.phase === 'reveal' && cur ? duelRoundView(cur, g.current, regular) : null,
+      history: g.duel.rounds.flatMap((r, i) => (r.end ? [duelRoundView(r, i, regular)] : [])),
     };
   }
 
@@ -718,6 +734,7 @@ export class Room extends DurableObject<Env> {
     const scores = duel ? duelScores(duel.rounds) : g ? scoresOf(g.rounds) : [0, 0];
     const wrong = duel ? duelMisses(duel.rounds) : [0, 1].map((i) => g?.rounds.reduce((n, r) => n + r.wrong[i], 0) ?? 0);
     const roundModes = g?.roundModes ?? g?.codes.map((): ModeId => 'flags') ?? [];
+    const counts = roundCountsOf(s);
     const roundView = (r: RoundState, i: number): RoundView => ({
       mode: r.mode ?? 'flags',
       flag: g!.tokens[i],
@@ -750,12 +767,12 @@ export class Room extends DurableObject<Env> {
       ...this.stageView(roundModes),
       round: g ? g.current + 1 : 0,
       totalRounds: duel
-        ? Math.max(DUEL_ROUNDS, g.current + 1)
+        ? Math.max(duelRegular(g), g.current + 1)
         : g
           ? g.codes.length
           : s.kind === 'higher'
-            ? DUEL_ROUNDS
-            : ROUNDS_PER_GAME * (s.modes ?? ['flags']).length,
+            ? counts.higher
+            : (s.modes ?? ['flags']).reduce((n, m) => n + counts[m], 0),
       flag: g && g.current >= 0 && s.phase !== 'countdown' ? g.tokens[g.current] : null,
       countdownEndsAt: g?.countdownEndsAt ?? null,
       deadline: cur && !cur.end ? cur.deadline : duelCur && !duelCur.end ? duelCur.deadline : null,
@@ -766,6 +783,7 @@ export class Room extends DurableObject<Env> {
       forfeitReason: g?.forfeitReason ?? null,
       ranked: s.ranked ? rankedView(s.ranked) : null,
       kind: s.kind ?? 'classic',
+      roundCounts: counts,
       higher: this.duelView(),
     };
   }
@@ -773,10 +791,13 @@ export class Room extends DurableObject<Env> {
   private stageView(roundModes: ModeId[]): Pick<RoomView, 'modes' | 'stage' | 'stageRound' | 'stageRounds' | 'prompt'> {
     const s = this.state!;
     const g = s.game;
-    if (!g) return { modes: s.modes ?? ['flags'], stage: 0, stageRound: 0, stageRounds: ROUNDS_PER_GAME, prompt: null };
+    if (!g) {
+      const modes = s.modes ?? ['flags'];
+      return { modes, stage: 0, stageRound: 0, stageRounds: roundCountsOf(s)[modes[0]], prompt: null };
+    }
     if (g.duel) {
       const round = s.phase === 'countdown' ? 0 : g.current + 1;
-      return { modes: s.modes ?? ['flags'], stage: 0, stageRound: round, stageRounds: DUEL_ROUNDS, prompt: null };
+      return { modes: s.modes ?? ['flags'], stage: 0, stageRound: round, stageRounds: duelRegular(g), prompt: null };
     }
     const counting = s.phase === 'countdown';
     const info = stageAt(roundModes, counting ? g.current + 1 : g.current);
