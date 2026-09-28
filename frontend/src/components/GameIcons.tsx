@@ -97,6 +97,44 @@ function LocateIcon() {
   );
 }
 
+function LandmarksIcon() {
+  return (
+    <>
+      <Card x={16} y={14} w={70} h={54} rot={-6} fill="#cfe6f7">
+        {/* photo: sky, hills, a tower */}
+        <path d="M16 56c12-10 22-12 34-5s22 4 36-4v21H16z" fill="#86c26a" />
+        <path d="M47 58V34l3-9 3 9v24z" fill={INK} />
+        <path d="M44 42h12" stroke={INK} stroke-width="2.4" stroke-linecap="round" />
+      </Card>
+      {/* magnifier */}
+      <g transform="translate(84 44)">
+        <circle r="15" fill="rgba(0,0,0,.14)" transform="translate(0 3)" />
+        <circle r="15" fill="#fff" stroke={INK} stroke-width="4" />
+        <path d="M11 11l11 11" stroke={INK} stroke-width="6" stroke-linecap="round" />
+        <path d="M-5-4a7 7 0 0 1 8-4" stroke="#9aa4ad" stroke-width="2.5" fill="none" stroke-linecap="round" />
+      </g>
+    </>
+  );
+}
+
+function LanguagesIcon() {
+  const font = { 'font-family': 'Lexend, system-ui, sans-serif', 'font-weight': 600, 'text-anchor': 'middle' } as const;
+  return (
+    <>
+      <Card x={16} y={12} w={52} h={42} rot={-8}>
+        <text x="42" y="42" font-size="24" fill={INK} {...font}>
+          Aa
+        </text>
+      </Card>
+      <Card x={52} y={30} w={52} h={42} rot={6} fill="#f7c948">
+        <text x="78" y="60" font-size="24" fill={INK} {...font}>
+          文
+        </text>
+      </Card>
+    </>
+  );
+}
+
 function HigherIcon() {
   return (
     <>
@@ -134,6 +172,8 @@ const ICONS: Record<TileIcon, () => JSX.Element> = {
   flags: FlagsIcon,
   capitals: CapitalsIcon,
   locate: LocateIcon,
+  landmarks: LandmarksIcon,
+  languages: LanguagesIcon,
   higher: HigherIcon,
   soon: SoonIcon,
 };

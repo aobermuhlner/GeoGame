@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
-import { MODES, MODE_IDS, REGION_IDS, ROOM_CODE_RE, type ModeId, type RoomView, type Slot } from '@flagduel/shared';
+import { MODES, MODE_IDS, REGION_IDS, ROOM_CODE_RE, type ModeId, type RankedModeId, type RoomView, type Slot } from '@flagduel/shared';
 import type { GameActions, GameVM } from './types';
 import { api } from './api';
 import { Home } from './components/Home';
@@ -76,6 +76,7 @@ function toVM(o: Online): GameVM | null {
       score: x.score,
       wrongTotal: x.wrongTotal,
       passed: x.passed,
+      locked: x.locked,
       connected: x.connected,
       rematch: x.rematch,
       graceEndsAt: conn.toLocal(x.graceEndsAt),
@@ -94,24 +95,18 @@ function toVM(o: Online): GameVM | null {
     stageRounds: room.stageRounds,
     prompt: room.prompt,
     flagUrl: room.flag ? flagSrc(room.flag) : null,
+    focus: room.focus,
+    myLock: room.myLock,
     countdownEndsAt: conn.toLocal(room.countdownEndsAt),
     deadline: conn.toLocal(room.deadline),
     regions: room.regions,
-    reveal: room.reveal
-      ? {
-          mode: room.reveal.mode,
-          code: room.reveal.code,
-          countryName: room.reveal.countryName,
-          answer: room.reveal.answer,
-          winner: room.reveal.winner,
-          end: room.reveal.end,
-        }
-      : null,
+    reveal: room.reveal ? { ...room.reveal, flagUrl: flagSrc(room.reveal.flag) } : null,
     oppWrongSeq: o.oppWrongSeq,
     history: room.history.map((h) => ({ ...h, flagUrl: flagSrc(h.flag) })),
     result: room.result,
     forfeitReason: room.forfeitReason,
     ranked: room.ranked,
+    higher: room.higher,
   };
 }
 
@@ -132,7 +127,7 @@ export function Multiplayer({ name, onImmersive }: { name: string; onImmersive: 
   const [rankedError, setRankedError] = useState<string | null>(null);
   const queueRef = useRef<RankedQueue | null>(null);
   /** Minigame whose placement test is open */
-  const [placement, setPlacement] = useState<ModeId | null>(null);
+  const [placement, setPlacement] = useState<RankedModeId | null>(null);
   const placementRun = useMemo(() => (placement ? placementSource(placement) : null), [placement]);
 
   // Local bot demo (dev only)
@@ -188,7 +183,7 @@ export function Multiplayer({ name, onImmersive }: { name: string; onImmersive: 
     setError(message);
   }
 
-  function findMatch(mode: ModeId) {
+  function findMatch(mode: RankedModeId) {
     const token = api.token();
     if (!token) return setRankedError('Please sign in again.');
     queueRef.current?.stop();
@@ -352,7 +347,12 @@ export function Multiplayer({ name, onImmersive }: { name: string; onImmersive: 
     }
     const c = online.conn;
     const room = online.room;
-    const duel = room.kind === 'higher' && room.phase !== 'lobby' && room.higher && room.players.length === 2;
+    // Higher or Lower stages have their own screen; so do the results of a Higher or Lower-only match.
+    const duel =
+      room.phase !== 'lobby' &&
+      !!room.higher &&
+      room.players.length === 2 &&
+      (room.phase === 'finished' ? room.modes.every((m) => m === 'higher') : room.modes[room.stage] === 'higher');
     return (
       <>
         {banner}
@@ -379,7 +379,7 @@ export function Multiplayer({ name, onImmersive }: { name: string; onImmersive: 
             onStart={() => c.send({ t: 'start' })}
             onRegions={(regions) => c.send({ t: 'setRegions', regions })}
             onModes={(modes) => c.send({ t: 'setModes', modes })}
-            onKind={(kind) => c.send({ t: 'setKind', kind })}
+            onRounds={(game, rounds) => c.send({ t: 'setRounds', game, rounds })}
             onLeave={() => leave()}
           />
         )}

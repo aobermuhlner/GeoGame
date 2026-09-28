@@ -1,7 +1,15 @@
 // Higher or Lower: two countries, one statistic — pick the country with the higher value.
 // Pure rules shared by the Accounts Durable Object (daily run), the Room (1 vs 1) and the browser.
 import { COUNTRIES, COUNTRY_BY_CODE } from './countries';
-import { COUNTDOWN_MS, type Slot, type MatchResult } from './game';
+import {
+  COUNTDOWN_MS,
+  decideMatch,
+  scoresOf,
+  wrongTotalsOf,
+  type MatchResult,
+  type RoundState,
+  type Slot,
+} from './game';
 import { STAT_DATA } from './statsData';
 
 export const STAT_IDS = [
@@ -588,22 +596,52 @@ export function duelMisses(rounds: readonly DuelRound[]): [number, number] {
 }
 
 /**
- * Is the duel decided after its ended rounds? All DUEL_ROUNDS are always played; tied after them,
+ * Is the duel decided after its ended rounds? All `regular` rounds are always played; tied after them,
  * sudden death goes on until exactly one player is right in a round.
  */
-export function duelOver(rounds: readonly DuelRound[]): boolean {
+export function duelOver(rounds: readonly DuelRound[], regular = DUEL_ROUNDS): boolean {
   const n = rounds.filter((r) => r.end).length;
   const [a, b] = duelScores(rounds);
-  if (n < DUEL_ROUNDS) return false;
-  return a !== b || n >= DUEL_ROUNDS + DUEL_MAX_TIEBREAK;
+  if (n < regular) return false;
+  return a !== b || n >= regular + DUEL_MAX_TIEBREAK;
 }
 
-export function decideDuel(rounds: readonly DuelRound[], forfeitedBy: Slot | null = null): MatchResult {
+export function decideDuel(
+  rounds: readonly DuelRound[],
+  forfeitedBy: Slot | null = null,
+  regular = DUEL_ROUNDS,
+): MatchResult {
   const scores = duelScores(rounds);
   const wrongTotals = duelMisses(rounds);
   if (forfeitedBy !== null) return { winner: forfeitedBy === 0 ? 1 : 0, scores, wrongTotals, decidedBy: 'forfeit' };
   if (scores[0] === scores[1]) return { winner: null, scores, wrongTotals, decidedBy: 'draw' };
-  const suddenDeath = rounds.filter((r) => r.end).length > DUEL_ROUNDS;
+  const suddenDeath = rounds.filter((r) => r.end).length > regular;
+  return {
+    winner: scores[0] > scores[1] ? 0 : 1,
+    scores,
+    wrongTotals,
+    decidedBy: suddenDeath ? 'tiebreaker' : 'points',
+  };
+}
+
+/**
+ * A match of minigame rounds and/or Higher or Lower rounds: points add up over all of them. With Higher or Lower
+ * in the match, a tie is played off in its sudden-death rounds (`regular` = its rounds before those); without it,
+ * fewer wrong answers wins.
+ */
+export function decideMixed(
+  rounds: readonly RoundState[],
+  duel: readonly DuelRound[] | null,
+  regular: number,
+  forfeitedBy: Slot | null = null,
+): MatchResult {
+  if (!duel?.length) return decideMatch(rounds, forfeitedBy);
+  const add = (a: [number, number], b: [number, number]): [number, number] => [a[0] + b[0], a[1] + b[1]];
+  const scores = add(scoresOf(rounds), duelScores(duel));
+  const wrongTotals = add(wrongTotalsOf(rounds), duelMisses(duel));
+  if (forfeitedBy !== null) return { winner: forfeitedBy === 0 ? 1 : 0, scores, wrongTotals, decidedBy: 'forfeit' };
+  if (scores[0] === scores[1]) return { winner: null, scores, wrongTotals, decidedBy: 'draw' };
+  const suddenDeath = duel.filter((r) => r.end).length > regular;
   return {
     winner: scores[0] > scores[1] ? 0 : 1,
     scores,
@@ -637,12 +675,12 @@ export interface DuelView {
   history: DuelRoundView[];
 }
 
-export function duelRoundView(r: DuelRound, index: number): DuelRoundView {
+export function duelRoundView(r: DuelRound, index: number, regular = DUEL_ROUNDS): DuelRoundView {
   return {
     ...revealedPair(r.pair),
     picks: [r.picks[0], r.picks[1]],
     correct: [duelCorrect(r, 0), duelCorrect(r, 1)],
-    tiebreak: index >= DUEL_ROUNDS,
+    tiebreak: index >= regular,
     end: r.end ?? 'forfeit',
   };
 }

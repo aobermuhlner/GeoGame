@@ -2,7 +2,7 @@
 // Each minigame has its own rating. Everyone starts at START_RATING with a high rating deviation
 // (uncertainty), so the first games move the rating a lot; the swings shrink as the deviation drops.
 import { FAME_TIERS } from './fame';
-import { MODE_IDS, type ModeId } from './modes';
+import { isRankedMode, type RankedModeId } from './modes';
 
 export const DIVISION_IDS = ['bronze', 'silver', 'gold', 'platinum', 'diamond'] as const;
 export type DivisionId = (typeof DIVISION_IDS)[number];
@@ -153,7 +153,7 @@ export function ratingView(
   return { rating: Math.round(r.rating), division: divisionOf(r.rating), provisional: r.rd > PROVISIONAL_RD, ...record, ...status };
 }
 
-export type RankedProfile = Record<ModeId, RatingView>;
+export type RankedProfile = Record<RankedModeId, RatingView>;
 
 export interface RankedPlayerView {
   rating: number;
@@ -167,7 +167,7 @@ export interface RankedPlayerView {
 
 /** Ranked info of a room (null for friend lobbies). */
 export interface RankedView {
-  mode: ModeId;
+  mode: RankedModeId;
   /** Division whose countries are played */
   division: DivisionId;
   /** Index = slot */
@@ -184,7 +184,7 @@ export interface RankedBoardEntry {
 }
 
 export interface RankedBoardResponse {
-  mode: ModeId;
+  mode: RankedModeId;
   entries: RankedBoardEntry[];
   you: RankedBoardEntry | null;
   players: number;
@@ -192,12 +192,12 @@ export interface RankedBoardResponse {
 
 // ---------- Matchmaking protocol (browser ↔ Matchmaker Durable Object, over WebSocket) ----------
 
-export type QueueClientMessage = { t: 'queue'; token: string; mode: ModeId } | { t: 'cancel' };
+export type QueueClientMessage = { t: 'queue'; token: string; mode: RankedModeId } | { t: 'cancel' };
 
 export type QueueServerMessage =
-  | { t: 'queued'; mode: ModeId; rating: RatingView; now: number }
+  | { t: 'queued'; mode: RankedModeId; rating: RatingView; now: number }
   /** Join room `code` with `ticket` as the session id (it is your seat). */
-  | { t: 'matched'; code: string; ticket: string; mode: ModeId; opponent: { name: string; rating: number; division: DivisionId } }
+  | { t: 'matched'; code: string; ticket: string; mode: RankedModeId; opponent: { name: string; rating: number; division: DivisionId } }
   | { t: 'error'; message: string };
 
 /** Rating gap two queued players accept; it widens with the longer wait so a quiet queue still matches. */
@@ -216,7 +216,7 @@ export function parseQueueMessage(raw: unknown): QueueClientMessage | null {
   if (typeof m !== 'object' || m === null) return null;
   const o = m as Record<string, unknown>;
   if (o.t === 'cancel') return { t: 'cancel' };
-  if (o.t === 'queue' && typeof o.token === 'string' && /^[0-9a-f]{64}$/.test(o.token) && MODE_IDS.includes(o.mode as ModeId))
-    return { t: 'queue', token: o.token, mode: o.mode as ModeId };
+  if (o.t === 'queue' && typeof o.token === 'string' && /^[0-9a-f]{64}$/.test(o.token) && isRankedMode(o.mode as string))
+    return { t: 'queue', token: o.token, mode: o.mode as RankedModeId };
   return null;
 }

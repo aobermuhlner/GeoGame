@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'preact/hooks';
-import { MAX_NAME_LENGTH, MODE_IDS, MODES, type MeResponse, type RankedProfile, type UserView } from '@flagduel/shared';
+import { MAX_NAME_LENGTH, MODE_IDS, MODES, RANKED_MODE_IDS, type MeResponse, type RankedProfile, type UserView } from '@flagduel/shared';
 import { api } from '../api';
 import { GoogleButton } from './Login';
 import { DivisionBadge } from './Ranked';
@@ -179,7 +179,7 @@ export function Profile({
       <section class="card stats-card">
         <h2>Ranked</h2>
         <div class="stats-row">
-          {MODE_IDS.map((m) => {
+          {RANKED_MODE_IDS.map((m) => {
             const r = ranked?.[m];
             return (
               <div class="stat" key={`r${m}`}>

@@ -10,7 +10,9 @@ import {
   countriesInRegions,
   dailyView,
   newDailyRun,
-  pickFlags,
+  pickStages,
+  poolLabel,
+  smallestPool,
   settleRun,
   soloGuess,
   soloNext,
@@ -46,14 +48,16 @@ function storeRegions(regions: RegionId[]) {
   }
 }
 
-const practiceFlagSrc = (code: string) => `${WORKER_URL}/practice/flags/${code}`;
+/** Practice images are fetched by item (the item is no secret here). */
+const practiceFlagSrc = (mode: ModeId) => (item: string) =>
+  MODES[mode].prompt === 'photo' ? `${WORKER_URL}/practice/landmarks/${item}` : `${WORKER_URL}/practice/flags/${item}`;
 
-/** A solo run kept in memory; the flag "token" is simply the ISO code. */
+/** A solo run kept in memory; the flag "token" is simply the item (ISO code or landmark id). */
 export function practiceSource(mode: ModeId, regions: RegionId[]): SoloSource {
   let run: DailyRun | null = null;
   const current = (): DailyRun => {
     if (!run) {
-      const codes = pickFlags(regions, ROUNDS_PER_GAME);
+      const { codes } = pickStages(regions, [mode], ROUNDS_PER_GAME);
       run = newDailyRun('', mode, codes, Date.now(), codes[0]);
     }
     return run;
@@ -83,7 +87,7 @@ export function practiceSource(mode: ModeId, regions: RegionId[]): SoloSource {
       soloNext(r, round, now, r.codes[round] ?? '');
       return view(now);
     },
-    flagSrc: practiceFlagSrc,
+    flagSrc: practiceFlagSrc(mode),
   };
 }
 
@@ -95,7 +99,7 @@ function PracticeMenu({ onMode }: { onMode: (m: ModeId) => void }) {
       <section class="card">
         <h2 class="page-title">Practice</h2>
         <p class="muted small rules">
-          Play any game as often as you like — {ROUNDS_PER_GAME} random countries from the regions you pick. Practice
+          Play any game as often as you like — {ROUNDS_PER_GAME} random rounds from the regions you pick. Practice
           isn't scored on a ranking and doesn't count towards your stats.
         </p>
         <div class="daily-modes">
@@ -135,8 +139,8 @@ export function Practice({
 
   if (!mode) return <PracticeMenu onMode={onMode} />;
 
-  const countryCount = countriesInRegions(regions).length;
-  const poolOk = countryCount >= MIN_POOL_SIZE;
+  const pool = smallestPool(regions, [mode]).size;
+  const poolOk = pool >= MIN_POOL_SIZE;
 
   function toggle(r: RegionId) {
     const next = REGION_IDS.filter((x) => (x === r ? !regions.includes(x) : regions.includes(x)));
@@ -170,7 +174,7 @@ export function Practice({
           <h2>Practice · Game</h2>
           <span class="pool">{ROUNDS_PER_GAME} rounds</span>
         </div>
-        <p class="muted small">Pick one game. Countries are random every time; scores aren't saved.</p>
+        <p class="muted small">Pick one game. Rounds are random every time; scores aren't saved.</p>
         <div class="mode-list" role="radiogroup" aria-label="Game">
           {MODE_IDS.map((m) => (
             <label class={`mode-opt${m === mode ? ' on' : ''}`} key={m}>
@@ -184,13 +188,17 @@ export function Practice({
         </div>
       </section>
 
-      <RegionPicker
-        regions={regions}
-        countryCount={countryCount}
-        editable
-        hint="Click a region on the map (or in the list) to leave it out."
-        onToggle={toggle}
-      />
+      {mode !== 'languages' && (
+        <RegionPicker
+          regions={regions}
+          countryCount={countriesInRegions(regions).length}
+          poolOk={poolOk}
+          countLabel={poolLabel(mode, pool)}
+          editable
+          hint="Click a region on the map (or in the list) to leave it out."
+          onToggle={toggle}
+        />
+      )}
 
       <section class="card actions-card">
         <div class="btn-row">
@@ -198,7 +206,7 @@ export function Practice({
             Start {MODES[mode].label}
           </button>
         </div>
-        {!poolOk && <p class="muted small center">Pick regions with at least {MIN_POOL_SIZE} countries.</p>}
+        {!poolOk && <p class="muted small center">Pick regions with at least {poolLabel(mode, MIN_POOL_SIZE)}.</p>}
       </section>
     </main>
   );

@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'preact/hooks';
-import { COUNTDOWN_MS, DIVISIONS, MODES, type RankedPlayerView } from '@flagduel/shared';
+import { COUNTDOWN_MS, DIVISIONS, MODES, gameLabel, type RankedPlayerView } from '@flagduel/shared';
 import type { GameVM } from '../types';
 import { Emblem } from './Emblem';
 import { useNow } from './common';
@@ -29,7 +29,7 @@ export function VsIntro({ vm, label }: { vm: IntroVM; label?: string }) {
   const me = vm.players[vm.me];
   const opp = vm.players[oppSlot];
   const ranked = vm.ranked ?? null;
-  const modes = vm.modes.map((m) => MODES[m].label).join(' · ');
+  const modes = vm.modes.map(gameLabel).join(' · ');
 
   return (
     <div

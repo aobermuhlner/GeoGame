@@ -1,7 +1,15 @@
 import { useState } from 'preact/hooks';
-import { COUNTDOWN_MS, DUEL_TIME_MS, STATS, type DuelRoundView, type RoomView, type Slot } from '@flagduel/shared';
+import {
+  COUNTDOWN_MS,
+  DUEL_TIME_MS,
+  STATS,
+  type DuelRoundView,
+  type DuelView,
+  type RoomView,
+  type Slot,
+} from '@flagduel/shared';
 import { codeFlagSrc } from '../api';
-import { Logo, RegionChips, useNow } from './common';
+import { Logo, RegionChips, StageSteps, useNow } from './common';
 import { GEO_KNOWLEDGE_LABEL, PairBoard, StatHeader, TimeBar, type PickTag } from './Higher';
 import { VsIntro } from './VsIntro';
 
@@ -119,27 +127,31 @@ export function HigherDuelScreen({
     );
   }
 
+  // Higher or Lower can be one game of a longer match: then it's a stage like the others.
+  const multi = room.modes.length > 1;
   const introVm = {
     phase: room.phase,
-    history: d.history,
+    // The "Name vs Name" intro only opens the match, not a later Higher or Lower stage.
+    history: [...room.history, ...d.history],
     countdownEndsAt,
     me: you,
     players: room.players,
     ranked: null,
-    modes: [],
+    modes: room.modes,
   };
 
   return (
     <main class="stack">
-      <VsIntro vm={introVm} label={`${GEO_KNOWLEDGE_LABEL} · ${d.regularRounds} rounds`} />
+      <VsIntro vm={introVm} label={multi ? undefined : `${GEO_KNOWLEDGE_LABEL} · ${d.regularRounds} rounds`} />
       {counting && d.tiebreak && <SuddenDeathIntro endsAt={countdownEndsAt} score={me.score} />}
       <section class="card top-card">
         <header class="brand">
           <Logo />
           <h1>
-            {GEO_KNOWLEDGE_LABEL} <em>· {d.regularRounds} rounds</em>
+            {multi ? 'Higher or Lower' : GEO_KNOWLEDGE_LABEL} <em>· {d.regularRounds} rounds</em>
           </h1>
         </header>
+        {multi && <StageSteps modes={room.modes} current={room.stage} />}
         <div class="status-row">
           <span class="round-label">
             {d.tiebreak ? `Sudden death · ${sdRound}` : `Round ${Math.max(1, d.round)}/${d.regularRounds}`}
@@ -183,7 +195,11 @@ export function HigherDuelScreen({
         {counting || !pair ? (
           <>
             <div class="hl-head">
-              <span class="hl-stat">A new category every round</span>
+              <span class="hl-stat">
+                {multi && d.history.length === 0
+                  ? `${room.stage === 0 ? 'First up' : 'Next up'} · game ${room.stage + 1} of ${room.modes.length}`
+                  : 'A new category every round'}
+              </span>
               <p class="hl-question">Pick the country with the higher value</p>
             </div>
             <div class="hl-countdown">
@@ -314,57 +330,74 @@ export function HigherDuelResults({ room, you, actions }: { room: RoomView; you:
         ) : null}
       </section>
 
-      {d.history.length > 0 && (
-        <section class="card rounds-card">
-          <h2>Rounds</h2>
-          <table class="rounds hl-rounds">
-            <thead>
-              <tr>
-                <th>#</th>
-                <th class="left">Category</th>
-                <th class="left">Higher</th>
-                <th class="left">Lower</th>
-                <th>You</th>
-                <th>{them.name}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {d.history.map((h, i) => {
-                const hi = h.answer === h.a ? 0 : 1;
-                const names = [h.aName, h.bName];
-                const codes = [h.a, h.b];
-                const s = STATS[h.stat];
-                return (
-                  <tr key={i} class={h.tiebreak && i === d.regularRounds ? 'sd-row' : ''}>
-                    <td class="num">{h.tiebreak ? `SD${i - d.regularRounds + 1}` : i + 1}</td>
-                    <td class="left">
-                      <span aria-hidden="true">{s.icon}</span> {s.label}
-                    </td>
-                    {[hi, 1 - hi].map((k) => (
-                      <td class="left" key={k}>
-                        <span class="hl-cell">
-                          <img class="thumb" src={codeFlagSrc(codes[k])} alt="" />
-                          <span>
-                            {names[k]}
-                            <span class="of-country">{s.format(h.values[k])}</span>
-                          </span>
-                        </span>
-                      </td>
-                    ))}
-                    {[you, opp].map((slot) => (
-                      <td key={slot}>
-                        <span class={`pill ${h.correct[slot] ? (slot === you ? 'me' : 'opp') : 'none'}`}>
-                          {h.correct[slot] ? '✓' : h.picks[slot] === null ? 'time' : '✗'}
-                        </span>
-                      </td>
-                    ))}
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </section>
-      )}
+      <DuelRoundsTable duel={d} you={you} oppName={them.name} />
     </main>
+  );
+}
+
+/** Every Higher or Lower round of a match: the pair, its values and who was right. */
+export function DuelRoundsTable({
+  duel: d,
+  you,
+  oppName,
+  title = 'Rounds',
+}: {
+  duel: DuelView;
+  you: Slot;
+  oppName: string;
+  title?: string;
+}) {
+  if (d.history.length === 0) return null;
+  const opp: Slot = you === 0 ? 1 : 0;
+  return (
+    <section class="card rounds-card">
+      <h2>{title}</h2>
+      <table class="rounds hl-rounds">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th class="left">Category</th>
+            <th class="left">Higher</th>
+            <th class="left">Lower</th>
+            <th>You</th>
+            <th>{oppName}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {d.history.map((h, i) => {
+            const hi = h.answer === h.a ? 0 : 1;
+            const names = [h.aName, h.bName];
+            const codes = [h.a, h.b];
+            const s = STATS[h.stat];
+            return (
+              <tr key={i} class={h.tiebreak && i === d.regularRounds ? 'sd-row' : ''}>
+                <td class="num">{h.tiebreak ? `SD${i - d.regularRounds + 1}` : i + 1}</td>
+                <td class="left">
+                  <span aria-hidden="true">{s.icon}</span> {s.label}
+                </td>
+                {[hi, 1 - hi].map((k) => (
+                  <td class="left" key={k}>
+                    <span class="hl-cell">
+                      <img class="thumb" src={codeFlagSrc(codes[k])} alt="" />
+                      <span>
+                        {names[k]}
+                        <span class="of-country">{s.format(h.values[k])}</span>
+                      </span>
+                    </span>
+                  </td>
+                ))}
+                {[you, opp].map((slot) => (
+                  <td key={slot}>
+                    <span class={`pill ${h.correct[slot] ? (slot === you ? 'me' : 'opp') : 'none'}`}>
+                      {h.correct[slot] ? '✓' : h.picks[slot] === null ? 'time' : '✗'}
+                    </span>
+                  </td>
+                ))}
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </section>
   );
 }

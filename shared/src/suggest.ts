@@ -1,5 +1,6 @@
 import { CAPITALS } from './capitals';
 import { COUNTRIES } from './countries';
+import { PLAYED_LANGUAGES } from './languageRules';
 import { normalize } from './normalize';
 
 interface Entry {
@@ -46,3 +47,6 @@ export const suggestCountries = makeSuggester(COUNTRIES);
 
 /** Autocomplete over ALL capitals (never filtered by region). */
 export const suggestCapitals = makeSuggester(CAPITALS);
+
+/** Autocomplete over every language that is played. */
+export const suggestLanguages = makeSuggester(PLAYED_LANGUAGES);

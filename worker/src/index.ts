@@ -1,7 +1,9 @@
 import {
   BOARD_IDS,
   FLAG_TOKEN_RE,
+  LANDMARK_BY_ID,
   MODE_IDS,
+  isRankedMode,
   ROOM_CODE_LENGTH,
   ROOM_CODE_RE,
   cleanName,
@@ -9,6 +11,7 @@ import {
   type AuthConfig,
   type BoardId,
   type ModeId,
+  type RankedModeId,
   type UserView,
 } from '@flagduel/shared';
 import { FLAGS } from './generated/flags';
@@ -46,6 +49,26 @@ const svgResponse = (svg: string) =>
       'Cross-Origin-Resource-Policy': 'cross-origin',
     },
   });
+
+const imageHeaders = (type: string) => ({
+  'Content-Type': type,
+  'Cache-Control': 'private, max-age=3600',
+  'X-Content-Type-Options': 'nosniff',
+  'Cross-Origin-Resource-Policy': 'cross-origin',
+});
+
+/**
+ * The image of a round's item: a flag SVG (bundled) or a landmark photo (Workers static assets, which are
+ * only reachable through here: `run_worker_first` keeps them off the public URL space).
+ */
+async function itemImage(item: string | null, env: Env): Promise<Response> {
+  if (item && FLAGS[item]) return svgResponse(FLAGS[item]);
+  if (item && LANDMARK_BY_ID[item]) {
+    const res = await env.ASSETS.fetch(new Request(`https://assets.local/${item}.jpg`));
+    if (res.ok) return new Response(res.body, { headers: imageHeaders('image/jpeg') });
+  }
+  return new Response('Not found', { status: 404 });
+}
 
 const isLocalOrigin = (origin: string) => /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin);
 
@@ -121,8 +144,8 @@ async function accountRoutes(request: Request, env: Env, url: URL, origin: strin
 
   // GET /ranked/leaderboard?mode=flags — signed out too
   if (path === '/ranked/leaderboard' && method === 'GET') {
-    const mode = (url.searchParams.get('mode') ?? 'flags') as ModeId;
-    if (!MODE_IDS.includes(mode)) return fail(400, 'Unknown mode');
+    const mode = (url.searchParams.get('mode') ?? 'flags') as RankedModeId;
+    if (!isRankedMode(mode)) return fail(400, 'Unknown mode');
     return json(await db.rankedBoard(user?.id ?? null, mode));
   }
 
@@ -145,8 +168,8 @@ async function accountRoutes(request: Request, env: Env, url: URL, origin: strin
 
   // /ranked/:mode/beginner (POST) · /ranked/:mode/placement (GET) · /ranked/:mode/placement/start|guess|pass|next (POST)
   const rk = /^\/ranked\/([a-z]+)\/(beginner|placement)(?:\/(start|guess|pass|next))?$/.exec(path);
-  if (rk && (MODE_IDS as readonly string[]).includes(rk[1])) {
-    const mode = rk[1] as ModeId;
+  if (rk && isRankedMode(rk[1])) {
+    const mode = rk[1];
     const action = rk[3];
     const noTest = (r: unknown) => (r ? json(r) : fail(404, 'No placement test to play'));
     if (rk[2] === 'beginner') return method === 'POST' && !action ? json(await db.rankedBeginner(user.id, mode)) : fail(404, 'Not found');
@@ -241,8 +264,7 @@ export default {
     const dailyFlag = /^\/daily\/flags\/([^/]+)$/.exec(url.pathname);
     if (dailyFlag && request.method === 'GET') {
       const token = dailyFlag[1];
-      const svg = DAILY_FLAG_RE.test(token) ? await env.ACCOUNTS.getByName('main').dailyFlag(token) : null;
-      return svg ? svgResponse(svg) : new Response('Not found', { status: 404 });
+      return itemImage(DAILY_FLAG_RE.test(token) ? await env.ACCOUNTS.getByName('main').dailyFlag(token) : null, env);
     }
 
     // GET /practice/flags/:code → SVG by ISO code. Practice runs in the browser and is never scored,
@@ -252,6 +274,10 @@ export default {
       const svg = FLAGS[practiceFlag[1].toUpperCase()];
       return svg ? svgResponse(svg) : new Response('Not found', { status: 404 });
     }
+
+    // GET /practice/landmarks/:id → a landmark photo by id (practice only; same reasoning as the flags above)
+    const practicePhoto = /^\/practice\/landmarks\/([a-z0-9-]+)$/.exec(url.pathname);
+    if (practicePhoto && request.method === 'GET') return itemImage(practicePhoto[1], env);
 
     // GET /ranked/ws → WebSocket to the ranked queue (the session token is sent in the first message)
     if (url.pathname === '/ranked/ws' && request.method === 'GET') {
@@ -298,9 +324,7 @@ export default {
     if (flag && request.method === 'GET') {
       const token = flag[1];
       if (!FLAG_TOKEN_RE.test(token)) return new Response('Not found', { status: 404 });
-      const svg = await env.ROOMS.getByName(token.slice(0, ROOM_CODE_LENGTH)).flag(token);
-      if (!svg) return new Response('Not found', { status: 404 });
-      return svgResponse(svg);
+      return itemImage(await env.ROOMS.getByName(token.slice(0, ROOM_CODE_LENGTH)).flag(token), env);
     }
 
     if (url.pathname === '/') return new Response('Flag Duel API', { headers: { 'Content-Type': 'text/plain' } });

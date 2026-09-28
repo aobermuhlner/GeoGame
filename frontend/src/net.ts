@@ -2,7 +2,7 @@ import type {
   ClientMessage,
   ErrorCode,
   GuessOutcome,
-  ModeId,
+  RankedModeId,
   QueueClientMessage,
   QueueServerMessage,
   RoomView,
@@ -173,7 +173,7 @@ export class RankedQueue {
 
   constructor(
     token: string,
-    readonly mode: ModeId,
+    readonly mode: RankedModeId,
     private h: { onMatched(m: Matched): void; onError(message: string): void },
   ) {
     const ws = new WebSocket(`${WORKER_URL.replace(/^http/, 'ws')}/ranked/ws`);

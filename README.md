@@ -15,7 +15,7 @@ row wherever both have one.
 
 ### Daily Games
 
-Every game (Flags, Capitals) can be played **once per day** (UTC). Everyone gets the same 10 countries,
+Every game (Flags, Capitals, GeoLocate, Landmarks, Languages) can be played **once per day** (UTC). Everyone gets the same 10 rounds,
 picked at random on the first request of the day. A correct answer scores 50 points plus up to 50 for
 speed, minus 5 per wrong guess (minimum 10); passes and timeouts score 0. Finished runs go on today's
 ranking (per game, plus an overall board summing both). The run is server-side: the timer keeps
@@ -36,7 +36,8 @@ The category rotates daily through all of them (`dailyStat`), each used once bef
 Hovering **Practice** in the menu bar lists the games; picking one opens its settings (game + regions,
 like the multiplayer lobby). A practice run is one game of 10 random countries from the chosen regions,
 played as often as you like. It runs entirely in the browser with the shared solo rules and is never
-sent to the server, ranked or counted in stats. Flags come from `GET /practice/flags/:code`.
+sent to the server, ranked or counted in stats. Flags come from `GET /practice/flags/:code`, landmark photos from
+`GET /practice/landmarks/:id`.
 
 ### Multiplayer — 1 vs 1
 
@@ -48,6 +49,16 @@ In the lobby the host picks one or more **games** (played in order, 10 rounds ea
 |---|---|---|
 | Flags | flag | country name |
 | Capitals | flag + country name | capital city |
+| GeoLocate | country name | a click on the world map |
+| Landmarks | a landmark photo, zoomed in, zooming out over 15 s | the country (one answer, locked in) |
+| Languages | a sentence | its language (one answer, locked in) |
+
+**Landmarks** and **Languages** are *lock-in* games: each player gets one answer per round (text that names no
+country/language is refused, so a typo never locks you in). The opponent only sees *that* you locked in. The round
+ends when both have answered or passed; the reveal shows both answers, the landmark on a map (or the sentence's
+English translation). A correct answer is 1 point, the quicker of the correct answers 1 more. Solo (daily, practice):
+one answer ends the round, a wrong one scores 0. They are not in ranked (ranked divisions are country pools).
+Languages ignores the region selection.
 
 A match with several games has a short "Next up" countdown between them; the overall winner has the most
 points across all games (tie → fewer wrong guesses in total).
@@ -197,6 +208,14 @@ Then every push to `main` that touches `frontend/` or `shared/` runs
 ## Editing data
 
 - Region assignment: [`shared/src/regions.ts`](shared/src/regions.ts) — one ISO list per region.
+- Landmarks: [`shared/src/landmarks.ts`](shared/src/landmarks.ts) (id, name, country, Wikipedia article, zoom focus,
+  optional Commons file). Then run `node worker/scripts/fetch-landmarks.mjs`: it downloads the photo (only freely
+  licensed Commons files), fits it into a 1600×1200 frame into `worker/landmarks/<id>.jpg`, and writes coordinates +
+  credits to `shared/src/landmarkMeta.ts`. The photos are Workers static assets with `run_worker_first`, so they are
+  only reachable through round tokens (or the practice route), never at a guessable URL.
+- Languages: [`shared/src/languages.ts`](shared/src/languages.ts) (name + accepted aliases). Sentences come from
+  Tatoeba: `node shared/scripts/fetch-sentences.mjs [id …]` writes `shared/src/sentencesData.ts`.
+- Credits for photos and sentences are on `credits.html` (linked from the footer and each photo reveal).
 - Country names and accepted aliases: [`shared/src/countries.ts`](shared/src/countries.ts).
 - Capitals and accepted aliases: [`shared/src/capitals.ts`](shared/src/capitals.ts).
 - Higher or Lower categories (label, question, number format): [`shared/src/higher.ts`](shared/src/higher.ts) → `STATS`.
@@ -212,5 +231,6 @@ Then every push to `main` that touches `frontend/` or `shared/` runs
 
 Games are registered in [`shared/src/modes.ts`](shared/src/modes.ts): add an id to `MODE_IDS` and an entry to
 `MODES` (label, lobby description, answer check, displayed answer, autocomplete). The lobby picker, round flow,
-stage countdown, scoring and results table pick it up from there. Every round still shows the country's flag;
+stage countdown, scoring and results table pick it up from there. A mode's `prompt` says what a round shows (flag,
+photo or sentence), `pool` which items rounds are about, and `lockIn` makes it a one-answer game;
 a game that needs a different kind of prompt would also extend `RoomView.prompt` and the game screen.

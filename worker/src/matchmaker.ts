@@ -4,7 +4,7 @@ import {
   parseQueueMessage,
   queueWindow,
   randomRoomCode,
-  type ModeId,
+  type RankedModeId,
   type QueueServerMessage,
 } from '@flagduel/shared';
 import type { RankedSeat } from './room';
@@ -16,7 +16,7 @@ export const PAIR_INTERVAL_MS = 1000;
 interface Waiting {
   userId: string;
   name: string;
-  mode: ModeId;
+  mode: RankedModeId;
   rating: number;
   provisional: boolean;
   joinedAt: number;

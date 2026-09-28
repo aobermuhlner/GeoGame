@@ -139,7 +139,7 @@ async function startedDuel(regions?: string[]) {
   const code = await createRoom();
   const host = await join(code, 'Adrian');
   const guest = await join(code, 'Anna');
-  await host.c.state({ t: 'setKind', kind: 'higher' }, (s) => s.room.kind === 'higher');
+  await host.c.state({ t: 'setModes', modes: ['higher'] }, (s) => s.room.modes[0] === 'higher');
   if (regions)
     await host.c.state({ t: 'setRegions', regions: regions as never }, (s) => s.room.regions.length === regions.length);
   await host.c.state({ t: 'ready', ready: true }, (s) => s.room.players[0].ready);
@@ -157,15 +157,15 @@ const pairOf = async (code: string) => {
 };
 
 describe('Higher or Lower duel', () => {
-  it('guest cannot change the game; the lobby shows the kind', async () => {
+  it('guest cannot change the game; the lobby shows the pick', async () => {
     const code = await createRoom();
     const host = await join(code, 'Host');
     const guest = await join(code, 'Guest');
     const err = guest.c.next('error');
-    guest.c.send({ t: 'setKind', kind: 'higher' });
+    guest.c.send({ t: 'setModes', modes: ['higher'] });
     expect((await err).code).toBe('not_allowed');
-    const s = await host.c.state({ t: 'setKind', kind: 'higher' }, (x) => x.room.kind === 'higher');
-    expect(s.room).toMatchObject({ kind: 'higher', totalRounds: DUEL_ROUNDS, higher: null });
+    const s = await host.c.state({ t: 'setModes', modes: ['higher'] }, (x) => x.room.modes[0] === 'higher');
+    expect(s.room).toMatchObject({ modes: ['higher'], totalRounds: DUEL_ROUNDS, higher: null });
   });
 
   it('both answer; picks stay secret until both are in; each correct pick scores', async () => {
@@ -259,7 +259,7 @@ describe('Higher or Lower duel', () => {
     // Rematch plays Higher or Lower again
     await host.c.state({ t: 'rematch' }, (s) => s.room.players[0].rematch);
     const again = await guest.c.state({ t: 'rematch' }, (s) => s.room.phase === 'countdown');
-    expect(again.room.kind).toBe('higher');
+    expect(again.room.modes).toEqual(['higher']);
     expect(again.room.higher!.history).toHaveLength(0);
   });
 

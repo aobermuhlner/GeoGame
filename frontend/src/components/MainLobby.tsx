@@ -1,6 +1,15 @@
 import type { ComponentChildren } from 'preact';
 import { useEffect, useState } from 'preact/hooks';
-import { MODE_IDS, MODES, type DailySummary, type MeResponse, type ModeId, type UserView } from '@flagduel/shared';
+import {
+  MODE_IDS,
+  MODES,
+  RANKED_MODE_IDS,
+  type DailySummary,
+  type MeResponse,
+  type ModeId,
+  type RankedModeId,
+  type UserView,
+} from '@flagduel/shared';
 import { api } from '../api';
 import { formatDuration } from './common';
 import { NextDaily } from './Daily';
@@ -8,6 +17,9 @@ import { DuelGlyph, GameIcon, PracticeGlyph, type TileIcon } from './GameIcons';
 import { GEO_KNOWLEDGE_LABEL, GEO_SPEED_LABEL, HIGHER_LABEL } from './Higher';
 import { storeRankedMode } from './Ranked';
 import type { GameId, Tab } from './NavBar';
+
+/** The lock-in games sit with Higher or Lower: one answer each, being right is what counts. */
+const KNOWLEDGE_MODES: ModeId[] = MODE_IDS.filter((m) => !(RANKED_MODE_IDS as readonly ModeId[]).includes(m));
 
 type Status = 'new' | 'playing' | 'finished';
 
@@ -94,7 +106,7 @@ export function MainLobby({
     : 0;
   const streak = me?.stats.streak ?? 0;
 
-  function duel(m: ModeId) {
+  function duel(m: RankedModeId) {
     storeRankedMode(m); // the ranked card opens on this game
     onNavigate('multi');
   }
@@ -122,7 +134,7 @@ export function MainLobby({
           <span class="muted small">Answer fast — every second counts</span>
         </div>
         <div class="game-row">
-          {MODE_IDS.map((m) => {
+          {RANKED_MODE_IDS.map((m) => {
             const info = today?.modes[m];
             return (
               <GameTile
@@ -158,12 +170,25 @@ export function MainLobby({
             onDaily={() => onNavigate('daily', 'higher')}
             actions={<TileButton icon={<DuelGlyph />} label="Duel a friend" onClick={() => onNavigate('multi')} />}
           />
-          <GameTile
-            icon="soon"
-            name="More coming soon"
-            status={null}
-            actions={<TileButton icon={null} label="New games on the way" disabled />}
-          />
+          {KNOWLEDGE_MODES.map((m) => {
+            const info = today?.modes[m];
+            return (
+              <GameTile
+                key={m}
+                icon={m}
+                name={MODES[m].label}
+                status={info?.status ?? null}
+                result={info ? `${info.score} pts${info.timeMs !== null ? ` · ${formatDuration(info.timeMs)}` : ''}` : ''}
+                onDaily={() => onNavigate('daily', m)}
+                actions={
+                  <>
+                    <TileButton icon={<PracticeGlyph />} label="Practice" onClick={() => onNavigate('practice', m)} />
+                    <TileButton icon={<DuelGlyph />} label="Duel a friend" onClick={() => onNavigate('multi')} />
+                  </>
+                }
+              />
+            );
+          })}
         </div>
       </section>
     </main>

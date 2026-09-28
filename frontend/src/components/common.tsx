@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'preact/hooks';
-import { MODES, REGION_IDS, REGION_LABELS, type ModeId, type RegionId } from '@flagduel/shared';
+import { MODES, REGION_IDS, REGION_LABELS, gameLabel, type GameId, type ModeId, type RegionId } from '@flagduel/shared';
 
 /** Re-renders the caller every `ms` while `active`. Returns Date.now(). */
 export function useNow(active: boolean, ms = 200): number {
@@ -58,7 +58,7 @@ export function formatDuration(ms: number): string {
 }
 
 /** "① Flags → ② Capitals" progress through the minigames of a match. */
-export function StageSteps({ modes, current }: { modes: ModeId[]; current: number }) {
+export function StageSteps({ modes, current }: { modes: GameId[]; current: number }) {
   return (
     <ol class="stage-steps" aria-label="Games in this match">
       {modes.map((m, i) => (
@@ -68,9 +68,22 @@ export function StageSteps({ modes, current }: { modes: ModeId[]; current: numbe
           aria-current={i === current ? 'step' : undefined}
         >
           <span class="step-num">{i < current ? '✓' : i + 1}</span>
-          {MODES[m].label}
+          {gameLabel(m)}
         </li>
       ))}
     </ol>
+  );
+}
+
+/** Where the photo, sentence and data credits live (their own page, opened in a new tab). */
+export const CREDITS_URL = `${import.meta.env.BASE_URL}credits.html`;
+
+export function CreditsLink() {
+  return (
+    <footer class="site-foot">
+      <a href={CREDITS_URL} target="_blank" rel="noopener">
+        Credits · photos, sentences &amp; data
+      </a>
+    </footer>
   );
 }

@@ -3,6 +3,8 @@ import {
   COUNTDOWN_MS,
   LEADERBOARD_SIZE,
   MODE_IDS,
+  RANKED_MODE_IDS,
+  type RankedModeId,
   REGION_IDS,
   cleanName,
   compareHigher,
@@ -61,7 +63,6 @@ import {
   type ModeStats,
   type UserView,
 } from '@flagduel/shared';
-import { FLAGS } from './generated/flags';
 import type { GoogleClaims } from './google';
 
 export const SESSION_TTL_MS = 90 * 24 * 3600_000;
@@ -506,11 +507,12 @@ export class Accounts extends DurableObject<Env> {
   }
 
   /** SVG of a daily round's flag, once that round has started. */
+  /** The item behind a daily round's token, once that round has started (the Worker serves its image). */
   async dailyFlag(token: string, now = Date.now()): Promise<string | null> {
     const row = this.sql
       .exec<{ code: string }>('SELECT code FROM daily_flags WHERE token = ? AND starts_at <= ?', token, now)
       .toArray()[0];
-    return row ? (FLAGS[row.code] ?? null) : null;
+    return row?.code ?? null;
   }
 
   // ---------- Daily Higher or Lower ----------
@@ -785,7 +787,7 @@ export class Accounts extends DurableObject<Env> {
   }
 
   async rankedProfile(userId: string, now = Date.now()): Promise<RankedProfile> {
-    return Object.fromEntries(MODE_IDS.map((m) => [m, this.viewOf(userId, m, now)])) as RankedProfile;
+    return Object.fromEntries(RANKED_MODE_IDS.map((m) => [m, this.viewOf(userId, m, now)])) as RankedProfile;
   }
 
   /**
@@ -844,7 +846,7 @@ export class Accounts extends DurableObject<Env> {
     return out;
   }
 
-  async rankedBoard(userId: string | null, mode: ModeId): Promise<RankedBoardResponse> {
+  async rankedBoard(userId: string | null, mode: RankedModeId): Promise<RankedBoardResponse> {
     const rows = this.sql
       .exec<{ user_id: string; name: string; rating: number; played: number }>(
         `SELECT r.user_id, u.display_name AS name, r.rating, r.played FROM ratings r

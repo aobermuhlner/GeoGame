@@ -12,6 +12,8 @@
     // "true" enables name-only sign-in for local development. Keep "false" here; override in .dev.vars.
     "DEV_LOGIN": "false"
   },
+  // Landmark photos. Only served through the Worker (per-round tokens), never at a public URL.
+  "assets": { "directory": "./landmarks", "binding": "ASSETS", "run_worker_first": true },
   "durable_objects": {
     "bindings": [
       { "name": "ROOMS", "class_name": "Room" },

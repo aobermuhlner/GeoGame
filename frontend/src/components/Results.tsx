@@ -1,8 +1,20 @@
 import { useState } from 'preact/hooks';
-import { DIVISIONS, DIVISION_IDS, MODES, divisionOf, type ModeId, type RankedView, type Slot } from '@flagduel/shared';
+import {
+  DIVISIONS,
+  DIVISION_IDS,
+  MODES,
+  divisionOf,
+  gameLabel,
+  isModeId,
+  type GameId,
+  type ModeId,
+  type RankedView,
+  type Slot,
+} from '@flagduel/shared';
 import type { GameActions, GameVM, RoundSummary } from '../types';
 import { Logo } from './common';
 import { RankUp } from './Emblem';
+import { DuelRoundsTable } from './HigherDuel';
 import { DivisionBadge, added } from './Ranked';
 
 /** "1000 → 1078 (+78)", plus a promotion/demotion note. */
@@ -42,11 +54,22 @@ function RatingChange({ ranked, me }: { ranked: RankedView; me: Slot }) {
   );
 }
 
-/** Points per player in each minigame, in play order. */
-function stageScores(vm: GameVM): { mode: ModeId; scores: [number, number] }[] {
+/** Points per player in each game, in play order. */
+function stageScores(vm: GameVM): { mode: GameId; scores: [number, number] }[] {
   return vm.modes.map((mode) => {
     const scores: [number, number] = [0, 0];
-    for (const r of vm.history) if (r.mode === mode && r.winner !== null) scores[r.winner]++;
+    if (mode === 'higher') {
+      for (const r of vm.higher?.history ?? []) {
+        if (r.correct[0]) scores[0]++;
+        if (r.correct[1]) scores[1]++;
+      }
+      return { mode, scores };
+    }
+    for (const r of vm.history) {
+      if (r.mode !== mode) continue;
+      scores[0] += r.points[0];
+      scores[1] += r.points[1];
+    }
     return { mode, scores };
   });
 }
@@ -81,11 +104,16 @@ export function Results({ vm, actions }: { vm: GameVM; actions: GameActions }) {
           ? `${who} left the game.`
           : `${who} gave up.`;
   }
+  // With Higher or Lower in the match, a tie goes to its sudden death instead of counting wrong guesses.
+  const suddenDeath = !!vm.higher;
   if (res.decidedBy === 'tiebreaker') {
     const [a, b] = [res.wrongTotals[res.winner!], res.wrongTotals[res.winner === 0 ? 1 : 0]];
-    sub = `Won on tie-breaker: ${a} vs ${b} wrong guesses`;
+    sub = suddenDeath
+      ? 'Tied — decided in Higher or Lower sudden death.'
+      : `Won on tie-breaker: ${a} vs ${b} wrong guesses`;
   }
-  if (res.decidedBy === 'draw') sub = 'Same points and same number of wrong guesses.';
+  if (res.decidedBy === 'draw')
+    sub = suddenDeath ? 'Still level after sudden death.' : 'Same points and same number of wrong guesses.';
 
   return (
     <main class="stack">
@@ -122,7 +150,7 @@ export function Results({ vm, actions }: { vm: GameVM; actions: GameActions }) {
             <tbody>
               {stageScores(vm).map(({ mode, scores }) => (
                 <tr key={mode}>
-                  <td class="left">{MODES[mode].label}</td>
+                  <td class="left">{gameLabel(mode)}</td>
                   <td class={scores[meSlot] > scores[oppSlot] ? 'lead' : ''}>{scores[meSlot]}</td>
                   <td class={scores[oppSlot] > scores[meSlot] ? 'lead' : ''}>{scores[oppSlot]}</td>
                 </tr>
@@ -167,6 +195,7 @@ export function Results({ vm, actions }: { vm: GameVM; actions: GameActions }) {
       </section>
 
       {vm.modes
+        .filter(isModeId)
         .filter((mode) => byRoundMode(mode).length > 0)
         .map((mode) => (
           <section class="card rounds-card" key={mode}>
@@ -175,11 +204,16 @@ export function Results({ vm, actions }: { vm: GameVM; actions: GameActions }) {
               <thead>
                 <tr>
                   <th>#</th>
-                  <th>Flag</th>
-                  <th class="left">{mode === 'capitals' ? 'Capital' : 'Country'}</th>
-                  <th>Point</th>
+                  {MODES[mode].prompt !== 'sentence' && <th>{MODES[mode].prompt === 'photo' ? 'Photo' : 'Flag'}</th>}
+                  <th class="left">
+                    {mode === 'capitals' ? 'Capital' : mode === 'languages' ? 'Language' : 'Country'}
+                  </th>
+                  <th>{MODES[mode].lockIn ? 'Points' : 'Point'}</th>
                   <th title="Wrong guesses">
-                    ✗ <span class="th-sub">{me.name} / {opp.name}</span>
+                    ✗{' '}
+                    <span class="th-sub">
+                      {me.name} / {opp.name}
+                    </span>
                   </th>
                 </tr>
               </thead>
@@ -187,20 +221,29 @@ export function Results({ vm, actions }: { vm: GameVM; actions: GameActions }) {
                 {byRoundMode(mode).map(([r, i], k) => (
                   <tr key={i}>
                     <td class="num">{k + 1}</td>
-                    <td>
-                      <img class="thumb" src={r.flagUrl} alt="" />
-                    </td>
+                    {MODES[mode].prompt !== 'sentence' && (
+                      <td>
+                        <img
+                          class={`thumb${MODES[mode].prompt === 'photo' ? ' photo-thumb' : ''}`}
+                          src={r.flagUrl}
+                          alt=""
+                        />
+                      </td>
+                    )}
                     <td class="left country">
                       {r.answer}
                       {r.mode === 'capitals' && <span class="of-country">{r.countryName}</span>}
+                      {r.mode === 'landmarks' && <span class="of-country">{r.detail}</span>}
                     </td>
                     <td>
-                      {r.winner === null ? (
+                      {MODES[mode].lockIn ? (
+                        <span class="num">
+                          {r.points[meSlot]} / {r.points[oppSlot]}
+                        </span>
+                      ) : r.winner === null ? (
                         <span class="pill none">—</span>
                       ) : (
-                        <span class={`pill ${r.winner === meSlot ? 'me' : 'opp'}`}>
-                          {vm.players[r.winner].name}
-                        </span>
+                        <span class={`pill ${r.winner === meSlot ? 'me' : 'opp'}`}>{vm.players[r.winner].name}</span>
                       )}
                     </td>
                     <td class="num">
@@ -212,6 +255,14 @@ export function Results({ vm, actions }: { vm: GameVM; actions: GameActions }) {
             </table>
           </section>
         ))}
+      {vm.higher && (
+        <DuelRoundsTable
+          duel={vm.higher}
+          you={meSlot}
+          oppName={opp.name}
+          title={multi ? 'Higher or Lower rounds' : 'Rounds'}
+        />
+      )}
     </main>
   );
 }

@@ -1,10 +1,17 @@
 import { useState } from 'preact/hooks';
-import { COUNTDOWN_MS, MODES } from '@flagduel/shared';
+import { COUNTDOWN_MS, MODES, ROUND_TIME_MS, focusOf, isModeId, type ModeId } from '@flagduel/shared';
 import type { GameActions, GameVM } from '../types';
 import { CountryInput } from './CountryInput';
 import { LocateBoard } from './LocateBoard';
+import { LockLines, PhotoCredit, RevealMap, SentenceCard, ZoomPhoto } from './RoundPrompt';
 import { Logo, RegionChips, StageSteps, formatClock, useNow } from './common';
 import { VsIntro } from './VsIntro';
+
+/** Minigame being played (this screen never shows a Higher or Lower stage). */
+const modeOf = (vm: GameVM): ModeId => {
+  const g = vm.modes[vm.stage];
+  return g && isModeId(g) ? g : 'flags';
+};
 
 export function TopCard({ vm }: { vm: GameVM }) {
   const now = useNow(vm.deadline !== null);
@@ -12,14 +19,22 @@ export function TopCard({ vm }: { vm: GameVM }) {
   const opp = vm.players[vm.me === 0 ? 1 : 0];
   const left = vm.deadline ? vm.deadline - now : null;
   const done = vm.history.length;
-  const mode = MODES[vm.modes[vm.stage] ?? 'flags'];
+  const mode = MODES[modeOf(vm)];
 
   return (
     <section class="card top-card">
       <header class="brand">
         <Logo />
         <h1>
-          {mode.title(vm.stageRounds)} As <em>Fast as You Can!</em>
+          {mode.lockIn ? (
+            <>
+              {mode.title(vm.stageRounds)} <em>· One Answer Each</em>
+            </>
+          ) : (
+            <>
+              {mode.title(vm.stageRounds)} As <em>Fast as You Can!</em>
+            </>
+          )}
         </h1>
       </header>
       {vm.modes.length > 1 && <StageSteps modes={vm.modes} current={vm.stage} />}
@@ -96,6 +111,24 @@ export function FlagImage({ src }: { src: string }) {
   );
 }
 
+/** What the round shows: a flag, a zooming landmark photo, or a sentence (kept through the reveal). */
+function RoundPrompt({ vm }: { vm: GameVM }) {
+  const m = MODES[modeOf(vm)];
+  const r = vm.phase === 'reveal' ? vm.reveal : null;
+  if (m.prompt === 'photo') {
+    const src = vm.flagUrl ?? r?.flagUrl;
+    const focus = vm.focus ?? (r ? focusOf(r.code) : null);
+    if (!src || !focus) return null;
+    const startedAt = vm.deadline !== null ? vm.deadline - ROUND_TIME_MS : null;
+    return <ZoomPhoto key={src} src={src} focus={focus} startedAt={startedAt} full={vm.phase !== 'playing'} />;
+  }
+  if (m.prompt === 'sentence') {
+    const text = vm.prompt ?? (r ? (m.promptText?.(r.code) ?? null) : null);
+    return text ? <SentenceCard text={text} translation={r?.detail} /> : null;
+  }
+  return vm.flagUrl ? <FlagImage src={vm.flagUrl} key={vm.flagUrl} /> : null;
+}
+
 function Countdown({ endsAt, vm }: { endsAt: number; vm: GameVM }) {
   const now = useNow(true, 100);
   // The match's first countdown also covers the VsIntro; count only the part after it.
@@ -109,7 +142,7 @@ function Countdown({ endsAt, vm }: { endsAt: number; vm: GameVM }) {
     );
   }
   // Multi-game match: say which minigame is next and what to do.
-  const mode = MODES[vm.modes[vm.stage]];
+  const mode = MODES[modeOf(vm)];
   return (
     <div class="countdown intro">
       <span class="intro-kicker">
@@ -129,6 +162,22 @@ function StatusLine({ vm }: { vm: GameVM }) {
   const me = vm.players[vm.me];
   const opp = vm.players[oppSlot];
   const now = useNow(opp.graceEndsAt !== null, 500);
+  if (vm.reveal && MODES[vm.reveal.mode].lockIn) {
+    const { answer, end, mode, detail, locks, points } = vm.reveal;
+    const mine = points[vm.me];
+    const theirs = points[oppSlot];
+    return (
+      <div class={`status-line reveal ${mine === theirs ? 'none' : mine > theirs ? 'win' : 'lose'}`}>
+        <strong class="reveal-country">{answer}</strong>
+        {mode === 'landmarks' && detail && <span class="reveal-of">{detail}</span>}
+        {locks ? (
+          <LockLines locks={locks} points={points} names={[vm.players[0].name, vm.players[1].name]} me={vm.me} />
+        ) : (
+          <span class="reveal-who">{end === 'timeout' ? "Time's up — nobody answered" : 'Nobody answered'}</span>
+        )}
+      </div>
+    );
+  }
   if (vm.reveal) {
     const { winner, countryName, answer, end, mode } = vm.reveal;
     const who = winner === null ? null : winner === vm.me ? 'You' : opp.name;
@@ -152,12 +201,26 @@ function StatusLine({ vm }: { vm: GameVM }) {
   }
   if (vm.phase === 'countdown') return <div class="status-line muted">Get ready…</div>;
   if (me.passed) {
-    const map = MODES[vm.modes[vm.stage] ?? 'flags'].input === 'map';
+    const map = MODES[modeOf(vm)].input === 'map';
     return (
       <div class="status-line muted">
         {map ? "You're out this round" : 'You passed'} — waiting for {opp.name}…
       </div>
     );
+  }
+  if (MODES[modeOf(vm)].lockIn) {
+    if (me.locked)
+      return (
+        <div class="status-line muted">
+          <span>
+            Locked in: <strong class="locked-answer">{vm.myLock ?? '…'}</strong>
+          </span>
+          <span>{opp.locked || opp.passed ? 'Revealing…' : `Waiting for ${opp.name}…`}</span>
+        </div>
+      );
+    if (opp.locked) return <div class="status-line muted">{opp.name} has locked in an answer!</div>;
+    if (opp.passed) return <div class="status-line muted">{opp.name} passed.</div>;
+    return <div class="status-line muted hint">One answer each · right = 1 point, first right +1</div>;
   }
   if (opp.passed) return <div class="status-line muted">{opp.name} passed. It's all yours!</div>;
   return <div class="status-line muted hint">First correct answer wins the point</div>;
@@ -166,8 +229,8 @@ function StatusLine({ vm }: { vm: GameVM }) {
 export function GameScreen({ vm, actions }: { vm: GameVM; actions: GameActions }) {
   const [confirmGiveUp, setConfirmGiveUp] = useState(false);
   const me = vm.players[vm.me];
-  const locked = vm.phase !== 'playing' || me.passed;
-  const mode = MODES[vm.modes[vm.stage] ?? 'flags'];
+  const locked = vm.phase !== 'playing' || me.passed || me.locked;
+  const mode = MODES[modeOf(vm)];
   const isMap = mode.input === 'map' && !(vm.phase === 'reveal' && vm.reveal?.mode !== 'locate');
 
   const giveUp = (withPass: boolean) => (
@@ -230,19 +293,25 @@ export function GameScreen({ vm, actions }: { vm: GameVM; actions: GameActions }
         <div class="round-badge" aria-label={`Round ${Math.max(1, vm.stageRound)}`}>
           {Math.max(1, vm.stageRound)}
         </div>
-        <div class="flag-frame">
+        <div class={`flag-frame ${mode.prompt}-prompt`}>
           {vm.phase === 'countdown' && vm.countdownEndsAt ? (
             <Countdown endsAt={vm.countdownEndsAt} vm={vm} />
-          ) : vm.flagUrl ? (
-            <FlagImage src={vm.flagUrl} key={vm.flagUrl} />
-          ) : null}
+          ) : (
+            <RoundPrompt vm={vm} />
+          )}
         </div>
-        {vm.prompt && vm.phase === 'playing' && (
+        {vm.prompt && vm.phase === 'playing' && mode.prompt === 'flag' && (
           <p class="prompt">
             Capital of <strong>{vm.prompt}</strong>?
           </p>
         )}
         <StatusLine vm={vm} />
+        {vm.phase === 'reveal' && vm.reveal?.mode === 'landmarks' && vm.reveal.country && (
+          <>
+            <RevealMap country={vm.reveal.country} landmark={vm.reveal.code} />
+            <PhotoCredit id={vm.reveal.code} />
+          </>
+        )}
         <div class="guess-row">
           <CountryInput
             locked={locked}
@@ -250,6 +319,7 @@ export function GameScreen({ vm, actions }: { vm: GameVM; actions: GameActions }
             onSubmit={actions.guess}
             suggest={mode.suggest}
             placeholder={mode.placeholder}
+            submitLabel={mode.lockIn ? 'Lock in' : undefined}
           />
         </div>
         {giveUp(true)}

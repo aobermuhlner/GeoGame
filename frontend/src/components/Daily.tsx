@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'preact/hooks';
 import {
   MODE_IDS,
   MODES,
-  REVEAL_MS,
+  ROUND_TIME_MS,
   SOLO_BASE_POINTS,
   SOLO_SPEED_POINTS,
   SOLO_WRONG_PENALTY,
@@ -14,6 +14,8 @@ import {
   type ModeId,
   type PlacementResult,
   type SoloRoundView,
+  focusOf,
+  revealMsOf,
 } from '@flagduel/shared';
 import { api, dailyFlagSrc } from '../api';
 import { Emblem, RankUp } from './Emblem';
@@ -21,6 +23,7 @@ import { DivisionBadge } from './Ranked';
 import { CountryInput } from './CountryInput';
 import { FlagImage } from './GameScreen';
 import { LocateBoard } from './LocateBoard';
+import { PhotoCredit, RevealMap, SentenceCard, ZoomPhoto } from './RoundPrompt';
 import { Leaderboard } from './Leaderboard';
 import { HigherBoard, HigherCard, HigherRules } from './Higher';
 import type { GameId } from './NavBar';
@@ -100,7 +103,8 @@ export function DailyHub({ onPlay }: { onPlay: (game: GameId) => void }) {
           Each game can be played <strong>once per day</strong> — everyone gets the same 10 countries. A correct answer
           is worth {SOLO_BASE_POINTS} points plus up to {SOLO_SPEED_POINTS} for speed, minus {SOLO_WRONG_PENALTY} per
           wrong guess. In GeoLocate every wrong click costs {SOLO_WRONG_PENALTY} points, even if you never find the
-          country. Your score and total time go on today's ranking — on equal points the faster run ranks higher.
+          country. Landmarks and Languages take one answer per round: lock it in — a wrong one scores nothing. Your
+          score and total time go on today's ranking — on equal points the faster run ranks higher.
         </p>
         {error && <p class="form-error">{error}</p>}
         <div class="daily-modes">
@@ -236,10 +240,10 @@ export function SoloGame({
       at = local(run.deadline) + 120;
       action = () => call(source.get());
     } else if (run.phase === 'reveal' && liveReveal) {
-      at = Date.now() + REVEAL_MS;
+      at = Date.now() + revealMsOf(run.mode);
       action = next;
     } else if (run.phase === 'finished' && !showResults) {
-      at = Date.now() + REVEAL_MS;
+      at = Date.now() + revealMsOf(run.mode);
       action = () => setShowResults(true);
     }
     if (at === null || !action) return;
@@ -350,12 +354,20 @@ function SoloScreen({
     ? run.history.filter((h) => h.end === 'correct').length
     : run.score - (isMap && run.phase === 'playing' ? run.wrong * SOLO_WRONG_PENALTY : 0);
   const missed = (end: string, wrong: number) =>
-    end === 'timeout' ? "Time's up" : mode.maxWrong !== undefined && wrong >= mode.maxWrong ? 'Out of tries' : 'Skipped';
+    end === 'timeout'
+      ? "Time's up"
+      : end === 'wrong'
+        ? 'Wrong'
+        : mode.maxWrong !== undefined && wrong >= mode.maxWrong
+          ? 'Out of tries'
+          : 'Skipped';
 
   const statusLine = r ? (
-    <div class={`status-line reveal ${r.end === 'correct' ? 'win' : 'none'}`}>
+    <div class={`status-line reveal ${r.end === 'correct' ? 'win' : r.end === 'wrong' ? 'lose' : 'none'}`}>
       <strong class="reveal-country">{r.answer}</strong>
       {run.mode === 'capitals' && <span class="reveal-of">capital of {r.countryName}</span>}
+      {run.mode === 'landmarks' && r.detail && <span class="reveal-of">{r.detail}</span>}
+      {r.given && r.end === 'wrong' && <span class="reveal-of">You said {r.given}</span>}
       <span class="reveal-who">
         {placement
           ? r.end === 'correct'
@@ -374,9 +386,11 @@ function SoloScreen({
         ? run.wrong > 0
           ? `${run.wrong} wrong`
           : 'Speed doesn’t count, only correct answers'
-        : run.wrong > 0
-          ? `${run.wrong} wrong (−${run.wrong * SOLO_WRONG_PENALTY})`
-          : 'Faster answers score more'}
+        : mode.lockIn
+          ? 'One answer — lock it in. The sooner, the more points'
+          : run.wrong > 0
+            ? `${run.wrong} wrong (−${run.wrong * SOLO_WRONG_PENALTY})`
+            : 'Faster answers score more'}
     </div>
   );
 
@@ -470,23 +484,43 @@ function SoloScreen({
       ) : (
         <section class="card game-card">
           <div class="round-badge">{run.round}</div>
-          <div class="flag-frame">
+          <div class={`flag-frame ${mode.prompt}-prompt`}>
             {run.phase === 'countdown' ? (
               <div class="countdown" key={Math.ceil((local(run.startsAt) - now) / 1000)}>
                 {Math.max(1, Math.ceil((local(run.startsAt) - now) / 1000))}
               </div>
+            ) : mode.prompt === 'photo' ? (
+              (run.flag ?? r?.flag) && (
+                <ZoomPhoto
+                  key={run.flag ?? r!.flag}
+                  src={source.flagSrc((run.flag ?? r!.flag)!)}
+                  focus={run.focus ?? focusOf(r!.code)}
+                  startedAt={deadline !== null && run.phase === 'playing' ? deadline - ROUND_TIME_MS : null}
+                  full={run.phase !== 'playing'}
+                />
+              )
+            ) : mode.prompt === 'sentence' ? (
+              (run.prompt ?? r) && (
+                <SentenceCard text={run.prompt ?? mode.promptText!(r!.code)} translation={r?.detail} />
+              )
             ) : run.flag ? (
               <FlagImage src={source.flagSrc(run.flag)} key={run.flag} />
             ) : r ? (
               <FlagImage src={source.flagSrc(r.flag)} key={r.flag} />
             ) : null}
           </div>
-          {run.prompt && run.phase === 'playing' && (
+          {run.prompt && run.phase === 'playing' && mode.prompt === 'flag' && (
             <p class="prompt">
               Capital of <strong>{run.prompt}</strong>?
             </p>
           )}
           {statusLine}
+          {r && run.mode === 'landmarks' && r.country && (
+            <>
+              <RevealMap country={r.country} landmark={r.code} />
+              <PhotoCredit id={r.code} />
+            </>
+          )}
           {manualNext ? (
             <div class="btn-row">
               <button class="btn btn-primary" onClick={onNext}>
@@ -501,6 +535,7 @@ function SoloScreen({
                 onSubmit={onGuess}
                 suggest={mode.suggest}
                 placeholder={mode.placeholder}
+                submitLabel={mode.lockIn ? 'Lock in' : undefined}
               />
             </div>
           )}
@@ -726,8 +761,8 @@ function SoloResults({
           <thead>
             <tr>
               <th>#</th>
-              <th>Flag</th>
-              <th class="left">{run.mode === 'capitals' ? 'Capital' : 'Country'}</th>
+              {mode.prompt !== 'sentence' && <th>{mode.prompt === 'photo' ? 'Photo' : 'Flag'}</th>}
+              <th class="left">{run.mode === 'capitals' ? 'Capital' : run.mode === 'languages' ? 'Language' : 'Country'}</th>
               <th>Time</th>
               <th>Points</th>
             </tr>
@@ -736,15 +771,25 @@ function SoloResults({
             {run.history.map((h, i) => (
               <tr key={i}>
                 <td class="num">{i + 1}</td>
-                <td>
-                  <img class="thumb" src={source.flagSrc(h.flag)} alt="" />
-                </td>
+                {mode.prompt !== 'sentence' && (
+                  <td>
+                    <img class={`thumb${mode.prompt === 'photo' ? ' photo-thumb' : ''}`} src={source.flagSrc(h.flag)} alt="" />
+                  </td>
+                )}
                 <td class="left country">
                   {h.answer}
                   {run.mode === 'capitals' && <span class="of-country">{h.countryName}</span>}
+                  {run.mode === 'landmarks' && <span class="of-country">{h.detail}</span>}
+                  {h.end === 'wrong' && h.given && <span class="of-country">you said {h.given}</span>}
                 </td>
                 <td class="num">
-                  {h.timeMs !== null ? `${(h.timeMs / 1000).toFixed(1)} s` : h.end === 'timeout' ? 'timeout' : 'passed'}
+                  {h.timeMs !== null
+                    ? `${(h.timeMs / 1000).toFixed(1)} s`
+                    : h.end === 'timeout'
+                      ? 'timeout'
+                      : h.end === 'wrong'
+                        ? 'wrong'
+                        : 'passed'}
                 </td>
                 <td>
                   <span class={`pill ${h.points > 0 ? 'me' : h.points < 0 ? 'minus' : 'none'}`}>

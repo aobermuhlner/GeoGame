@@ -3,14 +3,14 @@ import {
   DIVISIONS,
   DIVISION_IDS,
   MODES,
-  MODE_IDS,
+  RANKED_MODE_IDS,
   PLACEMENT_BANDS,
   PLACEMENT_PER_GROUP,
   PLACEMENT_ROUNDS,
   COUNTRY_BY_CODE,
   divisionOf,
   type DivisionId,
-  type ModeId,
+  type RankedModeId,
   type RankedBoardResponse,
   type RankedProfile,
 } from '@flagduel/shared';
@@ -19,16 +19,16 @@ import { Emblem } from './Emblem';
 
 const MODE_KEY = 'flagduel.rankedMode';
 
-export function loadRankedMode(): ModeId {
+export function loadRankedMode(): RankedModeId {
   try {
     const m = localStorage.getItem(MODE_KEY);
-    return MODE_IDS.find((x) => x === m) ?? 'flags';
+    return RANKED_MODE_IDS.find((x) => x === m) ?? 'flags';
   } catch {
     return 'flags';
   }
 }
 
-export function storeRankedMode(m: ModeId) {
+export function storeRankedMode(m: RankedModeId) {
   try {
     localStorage.setItem(MODE_KEY, m);
   } catch {
@@ -82,7 +82,7 @@ function Elapsed({ since }: { since: number }) {
 }
 
 export interface Searching {
-  mode: ModeId;
+  mode: RankedModeId;
   since: number;
 }
 
@@ -96,12 +96,12 @@ export function RankedCard({
 }: {
   searching: Searching | null;
   error: string | null;
-  onFind: (mode: ModeId) => void;
+  onFind: (mode: RankedModeId) => void;
   onCancel: () => void;
   /** Open the placement test of `mode` */
-  onPlacement: (mode: ModeId) => void;
+  onPlacement: (mode: RankedModeId) => void;
 }) {
-  const [mode, setMode] = useState<ModeId>(searching?.mode ?? loadRankedMode());
+  const [mode, setMode] = useState<RankedModeId>(searching?.mode ?? loadRankedMode());
   const [profile, setProfile] = useState<RankedProfile | null>(null);
   const [unlockError, setUnlockError] = useState<string | null>(null);
   const [unlocking, setUnlocking] = useState(false);
@@ -132,7 +132,7 @@ export function RankedCard({
         <span class="muted small">play a stranger · win or lose rating</span>
       </div>
       <div class="seg" role="tablist" aria-label="Ranked game">
-        {MODE_IDS.map((m) => (
+        {RANKED_MODE_IDS.map((m) => (
           <button
             key={m}
             role="tab"
@@ -243,7 +243,7 @@ function Unlock({
   onBeginner,
   onPlacement,
 }: {
-  mode: ModeId;
+  mode: RankedModeId;
   placing: boolean;
   busy: boolean;
   error: string | null;
@@ -303,7 +303,7 @@ function Unlock({
 
 /** Top ranked players of one minigame. */
 export function RankedBoard({ limit = 10 }: { limit?: number }) {
-  const [mode, setMode] = useState<ModeId>(loadRankedMode());
+  const [mode, setMode] = useState<RankedModeId>(loadRankedMode());
   const [data, setData] = useState<RankedBoardResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -329,7 +329,7 @@ export function RankedBoard({ limit = 10 }: { limit?: number }) {
         {data && <span class="muted small">{data.players} rated</span>}
       </div>
       <div class="seg" role="tablist" aria-label="Ranked ladder">
-        {MODE_IDS.map((m) => (
+        {RANKED_MODE_IDS.map((m) => (
           <button key={m} role="tab" aria-selected={m === mode} class={m === mode ? 'on' : ''} onClick={() => setMode(m)}>
             {MODES[m].label}
           </button>

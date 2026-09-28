@@ -24,6 +24,8 @@ interface Props {
   rotated?: boolean;
   /** Another control over the map (e.g. a full-screen button). */
   extraControl?: ComponentChildren;
+  /** Landmark id: a pin on its spot (Landmarks reveal) */
+  pin?: string | null;
 }
 
 type MapData = typeof LOCATE_MAP;
@@ -50,6 +52,7 @@ export function LocateMap({
   disabled,
   rotated = false,
   extraControl,
+  pin,
 }: Props) {
   const [map, setMap] = useState<MapData | null>(null);
   const [view, setView] = useState<View>({ k: 1, x: 0, y: 0 });
@@ -325,6 +328,13 @@ export function LocateMap({
               )),
             )}
           </g>
+          {pin && map.pins[pin] && (
+            // Drawn at a constant on-screen size; the tip sits on the spot.
+            <g class="lm-pin" transform={`translate(${map.pins[pin][0]} ${map.pins[pin][1]}) scale(${1 / u})`}>
+              <path d="M0 0c-3-6-10-11-10-18a10 10 0 0 1 20 0c0 7-7 12-10 18z" />
+              <circle cy="-18" r="3.8" />
+            </g>
+          )}
         </g>
       </svg>
 

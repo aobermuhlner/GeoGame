@@ -54,6 +54,15 @@ describe('practice flags', () => {
     expect((await exports.default.fetch(new Request(`${BASE}/practice/flags/ZZ`))).status).toBe(404);
     expect((await exports.default.fetch(new Request(`${BASE}/practice/flags/../x`))).status).toBe(404);
   });
+
+  it('serves landmark photos by id from the private assets, never at their file path', async () => {
+    const res = await exports.default.fetch(new Request(`${BASE}/practice/landmarks/eiffel-tower`));
+    expect(res.status).toBe(200);
+    expect(res.headers.get('Content-Type')).toBe('image/jpeg');
+    expect((await res.arrayBuffer()).byteLength).toBeGreaterThan(10_000);
+    expect((await exports.default.fetch(new Request(`${BASE}/practice/landmarks/atlantis`))).status).toBe(404);
+    expect((await exports.default.fetch(new Request(`${BASE}/eiffel-tower.jpg`))).status).toBe(404);
+  });
 });
 
 describe('auth', () => {
@@ -211,7 +220,7 @@ describe('daily challenge', () => {
     // Flag is hidden until the round starts.
     const tok0 = (await state()).rounds[0].token as string;
     expect(await db().dailyFlag(tok0, now - 1)).toBeNull();
-    expect(await db().dailyFlag(tok0, now)).toContain('<svg');
+    expect(await db().dailyFlag(tok0, now)).toMatch(/^[A-Z]{2}$/);
 
     for (let round = 1; round <= 10; round++) {
       const code = (await state()).codes[round - 1] as string;

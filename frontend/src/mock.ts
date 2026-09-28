@@ -3,29 +3,52 @@
 import {
   COUNTDOWN_MS,
   MATCH_INTRO_MS,
-  COUNTRY_BY_CODE,
   MODES,
-  REVEAL_MS,
   ROUND_TIME_MS,
   STAGE_INTRO_MS,
   applyGuess,
   applyPass,
   applyTimeout,
   decideMatch,
+  focusOf,
+  itemInfo,
   newRound,
   pickStages,
+  revealMsOf,
+  roundPoints,
   scoresOf,
   stageAt,
+  type Lock,
   type ModeId,
   type RegionId,
   type RoundState,
   type Slot,
 } from '@flagduel/shared';
-import type { GameActions, GameVM } from './types';
+import { WORKER_URL } from './net';
+import type { GameActions, GameVM, RoundSummary } from './types';
 
-function flagUrl(code: string): string {
+function flagUrl(mode: ModeId, code: string): string {
+  // Landmark photos come from the Worker's practice route (run the Worker for those).
+  if (MODES[mode].prompt === 'photo') return `${WORKER_URL}/practice/landmarks/${code}`;
   return `/dev-flags/${code.toLowerCase()}.svg`;
 }
+
+function summary(x: RoundState): RoundSummary {
+  const mode = x.mode ?? 'flags';
+  return {
+    mode,
+    flagUrl: flagUrl(mode, x.code),
+    code: x.code,
+    ...itemInfo(mode, x.code),
+    winner: x.winner,
+    wrong: [...x.wrong],
+    points: roundPoints(x),
+    locks: x.locks ? [lockView(x.locks[0]), lockView(x.locks[1])] : null,
+    end: x.end!,
+  };
+}
+
+const lockView = (l: Lock | null) => (l ? { answer: l.answer, correct: l.correct } : null);
 
 export function startMockGame(opts: {
   name: string;
@@ -71,8 +94,8 @@ export function startMockGame(opts: {
       phase,
       me: 0,
       players: [
-        { name: opts.name, score: scores[0], wrongTotal: wrong[0], passed: !!r?.passed[0], ...present },
-        { name: opts.botName, score: scores[1], wrongTotal: wrong[1], passed: !!r?.passed[1], ...present },
+        { name: opts.name, score: scores[0], wrongTotal: wrong[0], passed: !!r?.passed[0], locked: !!r?.locks?.[0], ...present },
+        { name: opts.botName, score: scores[1], wrongTotal: wrong[1], passed: !!r?.passed[1], locked: !!r?.locks?.[1], ...present },
       ],
       round: Math.max(1, current + 1),
       totalRounds: codes.length,
@@ -80,33 +103,16 @@ export function startMockGame(opts: {
       stage: stage.stage,
       stageRound: counting ? 0 : current - stage.start + 1,
       stageRounds: stage.rounds,
-      prompt: r && !counting && MODES[mode].showsCountry ? COUNTRY_BY_CODE[r.code].name : null,
-      flagUrl: r && !counting ? flagUrl(r.code) : null,
+      prompt: r && !counting ? (MODES[mode].promptText?.(r.code) ?? null) : null,
+      flagUrl: r && !counting ? flagUrl(mode, r.code) : null,
+      focus: r && !counting && MODES[mode].prompt === 'photo' ? focusOf(r.code) : null,
+      myLock: r && !r.end ? (r.locks?.[0]?.answer ?? null) : null,
       countdownEndsAt,
       deadline: r && !r.end ? r.deadline : null,
       regions: opts.regions,
-      reveal:
-        r?.end && phase === 'reveal'
-          ? {
-              mode,
-              code: r.code,
-              countryName: COUNTRY_BY_CODE[r.code].name,
-              answer: MODES[mode].answerOf(r.code),
-              winner: r.winner,
-              end: r.end,
-            }
-          : null,
+      reveal: r?.end && phase === 'reveal' ? summary(r) : null,
       oppWrongSeq,
-      history: ended.map((x) => ({
-        mode: x.mode ?? 'flags',
-        flagUrl: flagUrl(x.code),
-        code: x.code,
-        countryName: COUNTRY_BY_CODE[x.code].name,
-        answer: MODES[x.mode ?? 'flags'].answerOf(x.code),
-        winner: x.winner,
-        wrong: [...x.wrong],
-        end: x.end!,
-      })),
+      history: ended.map(summary),
       result: phase === 'finished' ? decideMatch(rounds, forfeitedBy) : null,
       forfeitReason: forfeitedBy === null ? null : 'gaveUp',
     });
@@ -141,6 +147,19 @@ export function startMockGame(opts: {
   function scheduleBot(r: RoundState) {
     const lazy = opts.bot === 'lazy';
     const knows = !lazy && Math.random() < 0.55;
+    const m = MODES[r.mode ?? 'flags'];
+    if (m.lockIn) {
+      // One answer: the right one if it knows, else a plausible wrong one.
+      later(lazy ? ROUND_TIME_MS - 2000 : 3000 + Math.random() * 12000, () => {
+        if (r.end || r !== rounds[current]) return;
+        const guess = knows ? m.answerOf(r.code) : m.prompt === 'sentence' ? 'Latin' : 'Atlantis';
+        const out = applyGuess(r, 1, guess, Date.now());
+        if (out === 'invalid' && applyPass(r, 1, Date.now())) finishRound();
+        else if (r.end) finishRound();
+        emit();
+      });
+      return;
+    }
     const wrongs = Math.floor(Math.random() * 3);
     for (let k = 0; k < wrongs; k++) {
       later(2000 + Math.random() * 7000, () => {
@@ -166,7 +185,7 @@ export function startMockGame(opts: {
     clearTimers();
     phase = 'reveal';
     emit();
-    later(REVEAL_MS, () => {
+    later(revealMsOf(roundModes[current]), () => {
       if (current + 1 >= codes.length) {
         phase = 'finished';
         emit();

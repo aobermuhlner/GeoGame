@@ -13,6 +13,8 @@ interface Props {
   /** Autocomplete source (countries by default; capitals in the capitals game) */
   suggest?: (query: string, limit?: number) => string[];
   placeholder?: string;
+  /** Button text ("Lock in" for one-answer games) */
+  submitLabel?: string;
 }
 
 export function CountryInput({
@@ -21,6 +23,7 @@ export function CountryInput({
   onSubmit,
   suggest = suggestCountries,
   placeholder = "Type a country name…",
+  submitLabel = "Submit",
 }: Props) {
   const [value, setValue] = useState("");
   const [open, setOpen] = useState(true);
@@ -45,7 +48,9 @@ export function CountryInput({
     setHi(0);
     inputRef.current?.focus({ preventScroll: true });
     const outcome = await onSubmit(text);
-    if (outcome === "wrong") {
+    // Names no possible answer (one-answer games refuse it): give the text back to fix.
+    if (outcome === "invalid") setValue(text);
+    if (outcome === "wrong" || outcome === "invalid") {
       setWrong(false);
       requestAnimationFrame(() => setWrong(true));
     }
@@ -137,7 +142,7 @@ export function CountryInput({
           submit(showList ? (suggestions[hi] ?? suggestions[0]) : value)
         }
       >
-        Submit
+        {submitLabel}
       </button>
     </>
   );

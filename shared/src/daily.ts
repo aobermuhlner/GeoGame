@@ -1,8 +1,8 @@
 // Single-player daily challenge: every account gets one run per game per (UTC) day.
 // Same countries for everyone that day. Pure rules, run by the Accounts Durable Object.
-import { COUNTRY_BY_CODE } from './countries';
 import { COUNTDOWN_MS, ROUND_TIME_MS, ROUNDS_PER_GAME, type GuessOutcome } from './game';
-import { MODES, type ModeId } from './modes';
+import { focusOf } from './landmarkRules';
+import { MODES, itemInfo, type ModeId } from './modes';
 
 export const DAILY_ROUNDS = ROUNDS_PER_GAME;
 /** Points for a correct answer: base + speed bonus (linear in the time left). */
@@ -12,7 +12,8 @@ export const SOLO_WRONG_PENALTY = 5;
 export const SOLO_MIN_POINTS = 10;
 export const SOLO_MAX_SCORE = DAILY_ROUNDS * (SOLO_BASE_POINTS + SOLO_SPEED_POINTS);
 
-export type SoloEnd = 'correct' | 'passed' | 'timeout';
+/** 'wrong': a lock-in mode's one answer was wrong */
+export type SoloEnd = 'correct' | 'passed' | 'timeout' | 'wrong';
 
 export interface SoloRound {
   code: string;
@@ -24,6 +25,8 @@ export interface SoloRound {
   end: SoloEnd | null;
   endedAt: number | null;
   points: number;
+  /** Lock-in modes: the answer given */
+  given?: string;
 }
 
 export interface DailyRun {
@@ -102,7 +105,17 @@ export function soloGuess(run: DailyRun, round: number, text: string, now: numbe
   settleRun(run, now);
   const r = currentOf(run);
   if (round !== run.rounds.length || r.end || now < r.startsAt) return 'ignored';
-  if (MODES[run.mode].isCorrect(text, r.code)) {
+  const mode = MODES[run.mode];
+  if (mode.lockIn) {
+    // One answer, and it ends the round (a typo that names nothing is refused).
+    const given = mode.nameOf(text);
+    if (!given) return 'invalid';
+    r.given = given;
+    const correct = mode.isCorrect(text, r.code);
+    endSoloRound(run, correct ? 'correct' : 'wrong', now);
+    return correct ? 'correct' : 'wrong';
+  }
+  if (mode.isCorrect(text, r.code)) {
     endSoloRound(run, 'correct', now);
     return 'correct';
   }
@@ -138,11 +151,17 @@ export function soloNext(run: DailyRun, round: number, now: number, token: strin
 
 export interface SoloRoundView {
   flag: string;
-  /** ISO code of the answer (safe: only sent once the round is over) */
+  /** The round's item (safe: only sent once the round is over) */
   code: string;
+  /** ISO code of the country it is about (null for languages) */
+  country: string | null;
   countryName: string;
-  /** What had to be typed (country or capital) */
+  /** What had to be typed (country, capital or language) */
   answer: string;
+  /** Landmark name or the sentence's translation */
+  detail: string | null;
+  /** Lock-in modes: what the player answered */
+  given: string | null;
   end: SoloEnd;
   wrong: number;
   points: number;
@@ -159,8 +178,10 @@ export interface DailyView {
   totalRounds: number;
   /** Current flag token (null during the countdown and once the round is over) */
   flag: string | null;
-  /** Country name for modes that show it (capitals) */
+  /** Text shown with the prompt (capitals: the country; languages: the sentence) */
   prompt: string | null;
+  /** Landmark photo rounds: where the zoom starts (null otherwise) */
+  focus: [number, number] | null;
   /** Server-clock ms */
   startsAt: number;
   deadline: number | null;
@@ -178,8 +199,8 @@ function roundView(mode: ModeId, r: SoloRound): SoloRoundView {
   return {
     flag: r.token,
     code: r.code,
-    countryName: COUNTRY_BY_CODE[r.code].name,
-    answer: MODES[mode].answerOf(r.code),
+    ...itemInfo(mode, r.code),
+    given: r.given ?? null,
     end: r.end!,
     wrong: r.wrong,
     points: r.points,
@@ -199,7 +220,8 @@ export function dailyView(run: DailyRun, now: number): DailyView {
     round: run.rounds.length,
     totalRounds: run.codes.length,
     flag: live ? r.token : null,
-    prompt: live && MODES[run.mode].showsCountry ? COUNTRY_BY_CODE[r.code].name : null,
+    prompt: live ? (MODES[run.mode].promptText?.(r.code) ?? null) : null,
+    focus: live && MODES[run.mode].prompt === 'photo' ? focusOf(r.code) : null,
     startsAt: r.startsAt,
     deadline: r.end ? null : r.deadline,
     wrong: r.wrong,

@@ -1,7 +1,7 @@
 // WebSocket protocol between the browser and the Room Durable Object.
-import type { GuessOutcome, MatchResult, RoundEnd, Slot } from './game';
-import type { DuelView } from './higher';
-import { MODE_IDS, type ModeId } from './modes';
+import { ROUNDS_PER_GAME, type GuessOutcome, type MatchResult, type RoundEnd, type Slot } from './game';
+import { DUEL_ROUNDS, type DuelView } from './higher';
+import { MODE_IDS, MODES, type ModeId } from './modes';
 import type { RankedView } from './ranked';
 import { REGION_IDS, type RegionId } from './regions';
 
@@ -19,9 +19,24 @@ export const FLAG_TOKEN_RE = /^[ABCDEFGHJKLMNPQRSTUVWXYZ23456789]{5}[0-9a-f]{16}
 export const MIN_POOL_SIZE = 10;
 export const MAX_NAME_LENGTH = 16;
 
-/** What a friend lobby plays: the flag games (one or more, in order) or a Higher or Lower duel. */
-export const GAME_KINDS = ['classic', 'higher'] as const;
-export type GameKind = (typeof GAME_KINDS)[number];
+/** Every game a friend lobby can play: the minigames plus the Higher or Lower duel, in play order. */
+export const GAME_IDS = [...MODE_IDS, 'higher'] as const;
+export type GameId = (typeof GAME_IDS)[number];
+export const isModeId = (g: GameId): g is ModeId => g !== 'higher';
+
+export const HIGHER_GAME = {
+  label: 'Higher or Lower',
+  description: 'Two countries, one category — pick the higher one. Only being right counts.',
+};
+export const gameLabel = (g: GameId): string => (isModeId(g) ? MODES[g].label : HIGHER_GAME.label);
+
+/** Rounds each game lasts in a friend lobby (host's choice; ranked always uses the defaults). */
+export type RoundCounts = Record<GameId, number>;
+export const MIN_GAME_ROUNDS = 1;
+export const MAX_GAME_ROUNDS = 20;
+export const DEFAULT_ROUND_COUNTS = Object.fromEntries(
+  GAME_IDS.map((g) => [g, g === 'higher' ? DUEL_ROUNDS : ROUNDS_PER_GAME]),
+) as RoundCounts;
 
 export type Phase = 'lobby' | 'countdown' | 'playing' | 'reveal' | 'finished';
 
@@ -29,10 +44,10 @@ export type Phase = 'lobby' | 'countdown' | 'playing' | 'reveal' | 'finished';
 export type ClientMessage =
   | { t: 'hello'; name: string; sessionId: string }
   | { t: 'setRegions'; regions: RegionId[] }
-  /** Minigames to play, in order (host only, lobby only) */
-  | { t: 'setModes'; modes: ModeId[] }
-  /** Flag games or Higher or Lower (host only, lobby only) */
-  | { t: 'setKind'; kind: GameKind }
+  /** Games to play, in GAME_IDS order (host only, lobby only) */
+  | { t: 'setModes'; modes: GameId[] }
+  /** How many rounds a game lasts (host only, lobby only) */
+  | { t: 'setRounds'; game: GameId; rounds: number }
   | { t: 'ready'; ready: boolean }
   | { t: 'start' }
   | { t: 'guess'; round: number; text: string }
@@ -55,6 +70,8 @@ export interface PlayerView {
   wrongTotal: number;
   /** Passed on the current round */
   passed: boolean;
+  /** Lock-in modes: has locked in an answer this round (what it is stays hidden until the reveal) */
+  locked: boolean;
   /** Accepted a rematch on the results screen */
   rematch: boolean;
   /** Server time by which a disconnected player must be back (null while connected) */
@@ -67,16 +84,30 @@ export type ForfeitReason = 'gaveUp' | 'left' | 'disconnected';
 
 export interface RoundView {
   mode: ModeId;
-  /** Flag image token, fetch from GET /flags/:token */
+  /** Flag (or photo) token, fetch from GET /flags/:token */
   flag: string;
-  /** ISO code of the answer (only sent once the round is over) */
+  /** The round's item: ISO code, landmark id or sentence id (only sent once the round is over) */
   code: string;
+  /** ISO code of the country it is about (null for languages) */
+  country: string | null;
+  /** Its name ('' for languages) */
   countryName: string;
-  /** What had to be typed: the country (flags) or its capital (capitals) */
+  /** What had to be typed: the country, capital or language */
   answer: string;
+  /** Landmark name or the sentence's translation */
+  detail: string | null;
   winner: Slot | null;
   wrong: [number, number];
+  /** Points each player got for the round */
+  points: [number, number];
+  /** Lock-in modes: what each player locked in (null: passed or out of time) */
+  locks: [LockView | null, LockView | null] | null;
   end: RoundEnd;
+}
+
+export interface LockView {
+  answer: string;
+  correct: boolean;
 }
 
 export interface RoomView {
@@ -86,16 +117,20 @@ export interface RoomView {
   players: PlayerView[];
   regions: RegionId[];
   countryCount: number;
-  /** Selected minigames (lobby) or the minigames of the running match, in play order */
-  modes: ModeId[];
+  /** Selected games (lobby) or the games of the running match, in play order */
+  modes: GameId[];
   /** 0-based index into `modes` of the minigame being played or about to start */
   stage: number;
   /** 1-based round within the current minigame (0 during its countdown) */
   stageRound: number;
   /** Rounds in the current minigame */
   stageRounds: number;
-  /** Country name shown with the flag, for minigames that reveal it (null otherwise) */
+  /** Text shown with the prompt: the country (capitals, GeoLocate) or the sentence (languages); null otherwise */
   prompt: string | null;
+  /** Landmark photo rounds: where the zoom starts, as fractions of the photo (null otherwise) */
+  focus: [number, number] | null;
+  /** Your own locked-in answer this round (lock-in modes; each player only gets theirs) */
+  myLock: string | null;
   /** 1-based current round over the whole match (0 before the first round) */
   round: number;
   totalRounds: number;
@@ -113,9 +148,9 @@ export interface RoomView {
   forfeitReason: ForfeitReason | null;
   /** Ranked match info; null in friend lobbies */
   ranked: RankedView | null;
-  /** Flag games or Higher or Lower */
-  kind: GameKind;
-  /** Higher or Lower duel state (kind 'higher', once the match has started) */
+  /** Rounds per game chosen in the lobby */
+  roundCounts: RoundCounts;
+  /** Higher or Lower state (matches with Higher or Lower rounds, once the match has started) */
   higher: DuelView | null;
 }
 
@@ -133,11 +168,15 @@ export type ServerMessage =
 const isObj = (v: unknown): v is Record<string, unknown> => typeof v === 'object' && v !== null && !Array.isArray(v);
 const isInt = (v: unknown): v is number => typeof v === 'number' && Number.isInteger(v) && v >= 0 && v < 1000;
 const REGION_SET = new Set<string>(REGION_IDS);
-const MODE_SET = new Set<string>(MODE_IDS);
+const GAME_SET = new Set<string>(GAME_IDS);
 
 export function cleanName(v: unknown): string | null {
   if (typeof v !== 'string') return null;
-  const name = v.replace(/[\u0000-\u001f\u007f]/g, '').replace(/\s+/g, ' ').trim().slice(0, MAX_NAME_LENGTH);
+  const name = v
+    .replace(/[\u0000-\u001f\u007f]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, MAX_NAME_LENGTH);
   return name.length > 0 ? name : null;
 }
 
@@ -163,9 +202,9 @@ export function parseClientMessage(raw: unknown): ClientMessage | null {
       return { t: 'setRegions', regions: REGION_IDS.filter((r) => (m.regions as string[]).includes(r)) };
     }
     case 'setModes': {
-      if (!Array.isArray(m.modes) || m.modes.length === 0 || m.modes.length > MODE_IDS.length) return null;
-      if (!m.modes.every((x) => typeof x === 'string' && MODE_SET.has(x))) return null;
-      return { t: 'setModes', modes: MODE_IDS.filter((x) => (m.modes as string[]).includes(x)) };
+      if (!Array.isArray(m.modes) || m.modes.length === 0 || m.modes.length > GAME_IDS.length) return null;
+      if (!m.modes.every((x) => typeof x === 'string' && GAME_SET.has(x))) return null;
+      return { t: 'setModes', modes: GAME_IDS.filter((x) => (m.modes as string[]).includes(x)) };
     }
     case 'ready':
       return typeof m.ready === 'boolean' ? { t: 'ready', ready: m.ready } : null;
@@ -174,8 +213,10 @@ export function parseClientMessage(raw: unknown): ClientMessage | null {
       return { t: 'guess', round: m.round, text: m.text };
     case 'pass':
       return isInt(m.round) ? { t: 'pass', round: m.round } : null;
-    case 'setKind':
-      return (GAME_KINDS as readonly unknown[]).includes(m.kind) ? { t: 'setKind', kind: m.kind as GameKind } : null;
+    case 'setRounds':
+      if (!GAME_SET.has(m.game as string) || !Number.isInteger(m.rounds)) return null;
+      if ((m.rounds as number) < MIN_GAME_ROUNDS || (m.rounds as number) > MAX_GAME_ROUNDS) return null;
+      return { t: 'setRounds', game: m.game as GameId, rounds: m.rounds as number };
     case 'pick':
       if (!isInt(m.round) || typeof m.code !== 'string' || !/^[A-Z]{2}$/.test(m.code)) return null;
       return { t: 'pick', round: m.round, code: m.code };

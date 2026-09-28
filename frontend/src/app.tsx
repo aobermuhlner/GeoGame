@@ -8,6 +8,7 @@ import { HigherGame } from './components/Higher';
 import { NavBar, type GameId, type Tab } from './components/NavBar';
 import { Practice } from './components/Practice';
 import { Profile } from './components/Profile';
+import { CreditsLink } from './components/common';
 import { Multiplayer } from './multiplayer';
 
 const hashPath = () => location.hash.replace(/^#\/?/, '').split('/');
@@ -118,6 +119,7 @@ export function App() {
         />
       )}
       {tab === 'multi' && <Multiplayer name={user.displayName} onImmersive={setImmersive} />}
+      {!immersive && <CreditsLink />}
     </>
   );
 }

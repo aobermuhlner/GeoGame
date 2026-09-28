@@ -5,7 +5,7 @@
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { dirname, join } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import { geoNaturalEarth1, geoPath } from 'd3-geo';
 import { feature } from 'topojson-client';
 
@@ -283,7 +283,12 @@ for (const [region, [w, s, e, n]] of Object.entries(REGION_VIEWS)) {
   views[region] = bbox(pts.map(([lon, lat]) => projection([wrap(lon), lat]))).map(r1);
 }
 
-const out = { width: WIDTH, height: HEIGHT, other, countries, views };
+// Landmarks game: where each landmark is, for the pin on the reveal map.
+const { LANDMARK_META } = await import(pathToFileURL(join(here, '../../shared/src/landmarkMeta.ts')).href);
+const pins = {};
+for (const [id, m] of Object.entries(LANDMARK_META)) if (m.lat !== null) pins[id] = projection([m.lon, m.lat]).map(r1);
+
+const out = { width: WIDTH, height: HEIGHT, other, countries, views, pins };
 mkdirSync(join(here, '../src/generated'), { recursive: true });
 writeFileSync(
   join(here, '../src/generated/locatemap.ts'),
@@ -295,7 +300,8 @@ writeFileSync(
     `  /** Island-group zones (SVG paths) that count as a hit */\n  z?: string[];\n}\n\n` +
     `export const LOCATE_MAP: {\n  width: number;\n  height: number;\n  other: string;\n  countries: LocateCountry[];\n` +
     `  /** Starting view [x0, y0, x1, y1] for a match that uses only this region */\n` +
-    `  views: Record<RegionId, [number, number, number, number]>;\n} = ` +
+    `  views: Record<RegionId, [number, number, number, number]>;\n` +
+    `  /** Landmark id → its position on the map */\n  pins: Record<string, [number, number]>;\n} = ` +
     `${JSON.stringify(out)};\n`,
 );
 const size = JSON.stringify(out).length;

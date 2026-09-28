@@ -216,3 +216,65 @@ describe('leaving', () => {
     expect(s.room.players[0].name).toBe('Anna');
   });
 });
+
+describe('lock-in games (Landmarks)', () => {
+  it('needs enough landmarks in the regions', async () => {
+    const code = await createRoom();
+    const host = await join(code, 'Adrian');
+    const guest = await join(code, 'Anna');
+    await host.c.state({ t: 'ready', ready: true }, (s) => s.room.players[0].ready);
+    await guest.c.state({ t: 'ready', ready: true }, (s) => s.room.players[1].ready);
+    await host.c.state({ t: 'setModes', modes: ['landmarks'] }, (s) => s.room.modes[0] === 'landmarks');
+    await host.c.state({ t: 'setRegions', regions: ['caribbean'] }, (s) => s.room.regions.length === 1);
+    const err = host.c.next('error');
+    host.c.send({ t: 'start' });
+    expect((await err).message).toMatch(/Landmarks needs regions with at least 10 landmarks/);
+  });
+
+  it('hides answers until both are in, then reveals both with points; the photo comes via its token', async () => {
+    const code = await createRoom();
+    const host = await join(code, 'Adrian');
+    const guest = await join(code, 'Anna');
+    await host.c.state({ t: 'setModes', modes: ['landmarks'] }, (s) => s.room.modes[0] === 'landmarks');
+    await host.c.state({ t: 'ready', ready: true }, (s) => s.room.players[0].ready);
+    await guest.c.state({ t: 'ready', ready: true }, (s) => s.room.players[1].ready);
+    await host.c.state({ t: 'start' }, (s) => s.room.phase === 'countdown');
+
+    const playing = guest.c.state(null, (s) => s.room.phase === 'playing');
+    await runInDurableObject(stub(code), async (room: Room) => {
+      await room.tick((await room.debugState())!.game!.countdownEndsAt!);
+    });
+    const s1 = await playing;
+    expect(s1.room.focus).toHaveLength(2);
+    const internal = await runInDurableObject(stub(code), (room: Room) => room.debugState());
+    const id = internal!.game!.codes[0];
+    expect(JSON.stringify(s1)).not.toContain(id);
+
+    const photo = await exports.default.fetch(new Request(`${BASE}/flags/${s1.room.flag}`));
+    expect(photo.status).toBe(200);
+    expect(photo.headers.get('Content-Type')).toBe('image/jpeg');
+
+    const { LANDMARK_BY_ID, COUNTRY_BY_CODE } = await import('@flagduel/shared');
+    const country = COUNTRY_BY_CODE[LANDMARK_BY_ID[id].country].name;
+
+    // A typo is refused; a real country locks in.
+    const bad = host.c.next('guessResult');
+    host.c.send({ t: 'guess', round: 1, text: 'Nowhereland' });
+    expect((await bad).outcome).toBe('invalid');
+    const seenLock = guest.c.state(null, (s) => s.room.players[0].locked);
+    const ok = host.c.next('guessResult');
+    host.c.send({ t: 'guess', round: 1, text: country });
+    expect((await ok).outcome).toBe('locked');
+    const g = await seenLock;
+    expect(g.room.myLock).toBeNull(); // the guest never sees the host's answer
+    expect(JSON.stringify(g)).not.toContain(`"${country}"`);
+
+    const reveal = guest.c.state(null, (s) => s.room.phase === 'reveal');
+    guest.c.send({ t: 'pass', round: 1 });
+    const r = (await reveal).room.reveal!;
+    expect(r.locks).toEqual([{ answer: country, correct: true }, null]);
+    expect(r.points).toEqual([2, 0]);
+    expect(r.detail).toBe(LANDMARK_BY_ID[id].name);
+    expect(r.end).toBe('locked');
+  });
+});

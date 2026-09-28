@@ -36,4 +36,10 @@ function devFlags(): Plugin {
 export default defineConfig(({ command }) => ({
   base: command === 'build' ? '/GeoGame/' : '/',
   plugins: [preact(), devFlags()],
+  build: {
+    rollupOptions: {
+      // The credits open in their own tab (linked from the footer and the photo credit lines).
+      input: { main: 'index.html', credits: 'credits.html' },
+    },
+  },
 }));

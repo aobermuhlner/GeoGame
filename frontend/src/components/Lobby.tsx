@@ -1,22 +1,25 @@
 import { useEffect, useState } from 'preact/hooks';
 import {
-  DUEL_ROUNDS,
-  DUEL_TIME_MS,
+  GAME_IDS,
+  HIGHER_GAME,
+  MAX_GAME_ROUNDS,
+  MIN_GAME_ROUNDS,
   MIN_POOL_SIZE,
   MODES,
-  MODE_IDS,
   REGION_IDS,
-  ROUNDS_PER_GAME,
   REGION_LABELS,
   countriesInRegions,
-  type GameKind,
-  type ModeId,
+  gameLabel,
+  isModeId,
+  landmarksInRegions,
+  poolLabel,
+  smallestPool,
+  type GameId,
   type RegionId,
   type RoomView,
   type Slot,
 } from '@flagduel/shared';
 import { Logo } from './common';
-import { GEO_KNOWLEDGE_LABEL, GEO_SPEED_LABEL } from './Higher';
 import { REGION_COLORS, WorldMap } from './WorldMap';
 
 interface Props {
@@ -25,8 +28,8 @@ interface Props {
   onReady: (ready: boolean) => void;
   onStart: () => void;
   onRegions: (regions: RegionId[]) => void;
-  onModes: (modes: ModeId[]) => void;
-  onKind: (kind: GameKind) => void;
+  onModes: (modes: GameId[]) => void;
+  onRounds: (game: GameId, rounds: number) => void;
   onLeave: () => void;
 }
 
@@ -34,26 +37,66 @@ export function inviteLink(code: string): string {
   return `${location.origin}${import.meta.env.BASE_URL}?room=${code}`;
 }
 
+/** "− 10 rounds +" for the host; plain text for the guest. */
+function RoundsStepper({
+  value,
+  label,
+  editable,
+  onChange,
+}: {
+  value: number;
+  label: string;
+  editable: boolean;
+  onChange: (rounds: number) => void;
+}) {
+  const unit = value === 1 ? 'round' : 'rounds';
+  if (!editable) return <span class="rounds-fixed">{`${value} ${unit}`}</span>;
+  const step = (d: number) => (e: Event) => {
+    // Inside the game's <label>: don't toggle its checkbox.
+    e.preventDefault();
+    e.stopPropagation();
+    onChange(Math.min(MAX_GAME_ROUNDS, Math.max(MIN_GAME_ROUNDS, value + d)));
+  };
+  return (
+    <span class="rounds-step" role="group" aria-label={`${label}: rounds`}>
+      <button type="button" aria-label={`Fewer ${label} rounds`} disabled={value <= MIN_GAME_ROUNDS} onClick={step(-1)}>
+        −
+      </button>
+      <span class="rounds-val" aria-live="polite">
+        <b>{value}</b> {unit}
+      </span>
+      <button type="button" aria-label={`More ${label} rounds`} disabled={value >= MAX_GAME_ROUNDS} onClick={step(1)}>
+        +
+      </button>
+    </span>
+  );
+}
+
 /** The "Regions" card: world map plus a checklist. Used by the lobby and by practice. */
 export function RegionPicker({
   regions,
   countryCount,
+  poolOk = countryCount >= MIN_POOL_SIZE,
+  countLabel = `${countryCount} countries`,
   editable,
   hint,
   onToggle,
 }: {
   regions: RegionId[];
   countryCount: number;
+  /** Enough to play (default: at least MIN_POOL_SIZE countries) */
+  poolOk?: boolean;
+  /** Pool size shown in the header (default "N countries") */
+  countLabel?: string;
   editable: boolean;
   hint: string;
   onToggle: (r: RegionId) => void;
 }) {
-  const poolOk = countryCount >= MIN_POOL_SIZE;
   return (
     <section class="card regions-card">
       <div class="regions-head">
         <h2>Regions</h2>
-        <span class={`pool${poolOk ? '' : ' bad'}`}>{countryCount} countries</span>
+        <span class={`pool${poolOk ? '' : ' bad'}`}>{countLabel}</span>
       </div>
       <p class="muted small">{hint}</p>
       <WorldMap selected={regions} editable={editable} onToggle={onToggle} />
@@ -80,7 +123,7 @@ export function RegionPicker({
   );
 }
 
-export function Lobby({ room, you, onReady, onStart, onRegions, onModes, onKind, onLeave }: Props) {
+export function Lobby({ room, you, onReady, onStart, onRegions, onModes, onRounds, onLeave }: Props) {
   const [copied, setCopied] = useState(false);
   // Optimistic selection so quick successive clicks build on each other, not on a stale snapshot.
   const [draft, setDraft] = useState<RegionId[] | null>(null);
@@ -88,22 +131,40 @@ export function Lobby({ room, you, onReady, onStart, onRegions, onModes, onKind,
   useEffect(() => {
     if (draft && draft.join() === room.regions.join()) setDraft(null);
   }, [room.regions]);
-  const [modesDraft, setModesDraft] = useState<ModeId[] | null>(null);
+  const [modesDraft, setModesDraft] = useState<GameId[] | null>(null);
   const modes = modesDraft ?? room.modes;
   useEffect(() => {
     if (modesDraft && modesDraft.join() === room.modes.join()) setModesDraft(null);
   }, [room.modes]);
-  const [kindDraft, setKindDraft] = useState<GameKind | null>(null);
-  const kind = kindDraft ?? room.kind;
+  const [countsDraft, setCountsDraft] = useState<Partial<Record<GameId, number>>>({});
+  const counts = { ...room.roundCounts, ...countsDraft };
   useEffect(() => {
-    if (kindDraft && kindDraft === room.kind) setKindDraft(null);
-  }, [room.kind]);
+    const pending = Object.entries(countsDraft).filter(([g, n]) => room.roundCounts[g as GameId] !== n);
+    if (pending.length < Object.keys(countsDraft).length) setCountsDraft(Object.fromEntries(pending));
+  }, [room.roundCounts]);
+  function setRounds(game: GameId, rounds: number) {
+    setCountsDraft((d) => ({ ...d, [game]: rounds }));
+    onRounds(game, rounds);
+  }
   const isHost = you === 0;
   const me = room.players[you];
   const full = room.players.length === 2;
   const allReady = full && room.players.every((p) => p.ready && p.connected);
   const countryCount = draft ? countriesInRegions(draft).length : room.countryCount;
-  const poolOk = countryCount >= MIN_POOL_SIZE;
+  // Every selected game needs enough rounds' worth in the selected regions (landmarks run out first);
+  // Higher or Lower draws its pairs from the countries.
+  const minigames = modes.filter(isModeId);
+  const small = minigames.length ? smallestPool(regions, minigames) : null;
+  const countriesOk = !modes.includes('higher') || countryCount >= MIN_POOL_SIZE;
+  const poolOk = countriesOk && (!small || small.size >= MIN_POOL_SIZE);
+  const countLabel =
+    `${countryCount} countries` +
+    (modes.includes('landmarks') ? ` · ${landmarksInRegions(regions).length} landmarks` : '');
+  // A game can't have more rounds than there are items to ask about.
+  const totalRounds = modes.reduce(
+    (n, g) => n + (isModeId(g) ? Math.min(counts[g], MODES[g].pool(regions).length) : counts[g]),
+    0,
+  );
 
   async function copy() {
     const link = inviteLink(room.code);
@@ -123,8 +184,8 @@ export function Lobby({ room, you, onReady, onStart, onRegions, onModes, onKind,
     onRegions(next);
   }
 
-  function toggleMode(m: ModeId) {
-    const next = MODE_IDS.filter((x) => (x === m ? !modes.includes(x) : modes.includes(x)));
+  function toggleMode(m: GameId) {
+    const next = GAME_IDS.filter((x) => (x === m ? !modes.includes(x) : modes.includes(x)));
     if (next.length === 0) return;
     setModesDraft(next);
     onModes(next);
@@ -132,7 +193,11 @@ export function Lobby({ room, you, onReady, onStart, onRegions, onModes, onKind,
 
   let startHint = '';
   if (!full) startHint = 'Waiting for an opponent to join…';
-  else if (!poolOk) startHint = `Pick regions with at least ${MIN_POOL_SIZE} countries.`;
+  else if (!poolOk)
+    startHint =
+      !countriesOk || !small
+        ? `Pick regions with at least ${MIN_POOL_SIZE} countries.`
+        : `${MODES[small.mode].label} needs regions with at least ${poolLabel(small.mode, MIN_POOL_SIZE)}.`;
   else if (!allReady) startHint = 'Both players need to be ready.';
   else if (!isHost) startHint = `Waiting for ${room.players[0].name} to start…`;
 
@@ -184,71 +249,51 @@ export function Lobby({ room, you, onReady, onStart, onRegions, onModes, onKind,
       <section class="card modes-card">
         <div class="regions-head">
           <h2>Games</h2>
-          <span class="pool">{kind === 'higher' ? `${DUEL_ROUNDS} rounds` : `${modes.length * ROUNDS_PER_GAME} rounds`}</span>
+          <span class="pool">{totalRounds === 1 ? '1 round' : `${totalRounds} rounds`}</span>
         </div>
-        <div class="seg kind-seg" role="tablist" aria-label="Match type">
-          {(['classic', 'higher'] as const).map((k) => (
-            <button
-              key={k}
-              role="tab"
-              aria-selected={kind === k}
-              class={kind === k ? 'on' : ''}
-              disabled={!isHost}
-              onClick={() => {
-                if (k === kind) return;
-                setKindDraft(k);
-                onKind(k);
-              }}
-            >
-              {k === 'classic' ? GEO_SPEED_LABEL : GEO_KNOWLEDGE_LABEL}
-            </button>
-          ))}
-        </div>
-        {kind === 'higher' ? (
-          <p class="muted small">
-            Higher or lower: two countries and a new category every round — population, area, GDP, forests, mountains…
-            Both of you have {DUEL_TIME_MS / 1000} seconds to pick the one with the higher value; speed doesn't matter,
-            every correct pick is a point. {DUEL_ROUNDS} rounds; still tied after that? Sudden death until only one of
-            you is right.
-            {!isHost && ` ${room.players[0]?.name ?? 'The host'} picks the match type.`}
-          </p>
-        ) : (
-          <>
-            <p class="muted small">
-              {isHost
-                ? `Pick one or more. Each game is ${ROUNDS_PER_GAME} rounds, played in this order; most points overall wins.`
-                : `${room.players[0]?.name ?? 'The host'} picks the games.`}
-            </p>
-            <div class="mode-list" role="group" aria-label="Games">
-              {MODE_IDS.map((m) => {
-                const on = modes.includes(m);
-                const order = modes.indexOf(m) + 1;
-                return (
-                  <label class={`mode-opt${on ? ' on' : ''}${isHost ? '' : ' locked'}`} key={m}>
-                    <input
-                      type="checkbox"
-                      checked={on}
-                      disabled={!isHost || (on && modes.length === 1)}
-                      onChange={() => toggleMode(m)}
+        <p class="muted small">
+          {isHost
+            ? `Pick any mix of games and how many rounds each lasts (${MIN_GAME_ROUNDS}–${MAX_GAME_ROUNDS}). They're played in this order; most points overall wins.`
+            : `${room.players[0]?.name ?? 'The host'} picks the games.`}
+        </p>
+        <div class="mode-list" role="group" aria-label="Games">
+          {GAME_IDS.map((m) => {
+            const on = modes.includes(m);
+            const order = modes.indexOf(m) + 1;
+            return (
+              <label class={`mode-opt${on ? ' on' : ''}${isHost ? '' : ' locked'}`} key={m}>
+                <input
+                  type="checkbox"
+                  checked={on}
+                  disabled={!isHost || (on && modes.length === 1)}
+                  onChange={() => toggleMode(m)}
+                />
+                <span class="mode-order" aria-hidden="true">
+                  {on && modes.length > 1 ? order : ''}
+                </span>
+                <span class="mode-text">
+                  <span class="m-name">{gameLabel(m)}</span>
+                  <span class="m-desc">{isModeId(m) ? MODES[m].description : HIGHER_GAME.description}</span>
+                  {on && (
+                    <RoundsStepper
+                      value={counts[m]}
+                      label={gameLabel(m)}
+                      editable={isHost}
+                      onChange={(n) => setRounds(m, n)}
                     />
-                    <span class="mode-order" aria-hidden="true">
-                      {on && modes.length > 1 ? order : ''}
-                    </span>
-                    <span class="mode-text">
-                      <span class="m-name">{MODES[m].label}</span>
-                      <span class="m-desc">{MODES[m].description}</span>
-                    </span>
-                  </label>
-                );
-              })}
-            </div>
-          </>
-        )}
+                  )}
+                </span>
+              </label>
+            );
+          })}
+        </div>
       </section>
 
       <RegionPicker
         regions={regions}
         countryCount={countryCount}
+        poolOk={poolOk}
+        countLabel={countLabel}
         editable={isHost}
         hint={
           isHost
