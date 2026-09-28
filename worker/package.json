@@ -20,6 +20,7 @@
     "@cloudflare/vitest-plugin": "^1.2.8",
     "flag-icons": "^7.5.0",
     "sharp": "^0.35.4",
+    "svg-country-flags": "^1.2.10",
     "vitest": "^4.1.11",
     "wrangler": "^4.141.0"
   }

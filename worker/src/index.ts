@@ -268,7 +268,7 @@ export default {
     }
 
     // GET /practice/flags/:code → SVG by ISO code. Practice runs in the browser and is never scored,
-    // so there is nothing to hide (flag-icons is public anyway).
+    // so there is nothing to hide (the flag set is public anyway).
     const practiceFlag = /^\/practice\/flags\/([A-Za-z]{2})$/.exec(url.pathname);
     if (practiceFlag && request.method === 'GET') {
       const svg = FLAGS[practiceFlag[1].toUpperCase()];
