@@ -7,13 +7,14 @@ import { DailyHub, SoloGame, dailySource } from './components/Daily';
 import { HigherGame } from './components/Higher';
 import { NavBar, type GameId, type Tab } from './components/NavBar';
 import { Practice } from './components/Practice';
+import { Profile } from './components/Profile';
 import { Multiplayer } from './multiplayer';
 
 const hashPath = () => location.hash.replace(/^#\/?/, '').split('/');
 
 function tabFromHash(): Tab {
   const [h] = hashPath();
-  return h === 'daily' || h === 'multi' || h === 'practice' ? h : 'lobby';
+  return h === 'daily' || h === 'multi' || h === 'practice' || h === 'profile' ? h : 'lobby';
 }
 
 /** #/daily/<mode> or #/practice/<mode> → that game; #/daily, #/practice → null (the tab's overview) */
@@ -92,7 +93,8 @@ export function App() {
   return (
     <>
       {!immersive && <NavBar tab={tab} user={user} onTab={navigate} />}
-      {tab === 'lobby' && <MainLobby user={user} onUser={setUser} onSignOut={signOut} onNavigate={navigate} />}
+      {tab === 'lobby' && <MainLobby user={user} onNavigate={navigate} />}
+      {tab === 'profile' && <Profile user={user} onUser={setUser} onSignOut={signOut} />}
       {tab === 'daily' &&
         (dailyMode === 'higher' ? (
           <HigherGame onExit={() => navigate('daily')} onImmersive={setImmersive} />

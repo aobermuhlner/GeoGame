@@ -3,7 +3,7 @@ import { MODES, MODE_IDS, type ModeId, type UserView } from '@flagduel/shared';
 import { Logo } from './common';
 import { HIGHER_DESC, HIGHER_LABEL } from './Higher';
 
-export type Tab = 'lobby' | 'daily' | 'practice' | 'multi';
+export type Tab = 'lobby' | 'daily' | 'practice' | 'multi' | 'profile';
 /** A flag game, or Higher or Lower (daily only) */
 export type GameId = ModeId | 'higher';
 
@@ -100,7 +100,12 @@ export function NavBar({
           </li>
         ))}
       </ul>
-      <button class="nav-user" title="Your account" onClick={() => onTab('lobby')}>
+      <button
+        class={`nav-user${tab === 'profile' ? ' on' : ''}`}
+        title="Your profile and stats"
+        aria-current={tab === 'profile' ? 'page' : undefined}
+        onClick={() => onTab('profile')}
+      >
         <Avatar user={user} size={30} />
         <span class="nav-name">{user.displayName}</span>
       </button>

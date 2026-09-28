@@ -1,268 +1,171 @@
+import type { ComponentChildren } from 'preact';
 import { useEffect, useState } from 'preact/hooks';
-import {
-  MAX_NAME_LENGTH,
-  MODE_IDS,
-  MODES,
-  type DailySummary,
-  type MeResponse,
-  type RankedProfile,
-  type UserView,
-} from '@flagduel/shared';
+import { MODE_IDS, MODES, type DailySummary, type MeResponse, type ModeId, type UserView } from '@flagduel/shared';
 import { api } from '../api';
 import { formatDuration } from './common';
 import { NextDaily } from './Daily';
-import { GoogleButton } from './Login';
-import { Leaderboard } from './Leaderboard';
-import { DivisionBadge } from './Ranked';
-import { HIGHER_LABEL } from './Higher';
-import { Avatar, type Tab } from './NavBar';
+import { DuelGlyph, GameIcon, PracticeGlyph, type TileIcon } from './GameIcons';
+import { GEO_KNOWLEDGE_LABEL, GEO_SPEED_LABEL, HIGHER_LABEL } from './Higher';
+import { storeRankedMode } from './Ranked';
+import type { GameId, Tab } from './NavBar';
 
-/** Guests: attach a Google account so the scores and ratings survive sign-out and other devices. */
-function LinkGoogle({ onUser }: { onUser: (u: UserView) => void }) {
-  const [clientId, setClientId] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
+type Status = 'new' | 'playing' | 'finished';
 
-  useEffect(() => {
-    api
-      .config()
-      .then((c) => setClientId(c.googleClientId))
-      .catch(() => {});
-  }, []);
-
-  if (!clientId) return null;
-  return (
-    <div class="link-google">
-      <p class="small">
-        <strong>Keep your progress.</strong> Guest scores live only in this browser. Link a Google account to sign
-        in anywhere. If you already have one, this guest's history is added to it.
-      </p>
-      <GoogleButton
-        clientId={clientId}
-        onCredential={(c) => {
-          setError(null);
-          api
-            .linkGoogle(c)
-            .then(onUser)
-            .catch((e: Error) => setError(e.message));
-        }}
-      />
-      {error && <p class="form-error">{error}</p>}
-    </div>
-  );
-}
-
-function AccountCard({
-  user,
-  onUser,
-  onSignOut,
+/** A big tile: the card plays today's daily game, the buttons below open practice / a duel. */
+function GameTile({
+  icon,
+  name,
+  status,
+  result,
+  onDaily,
+  actions,
 }: {
-  user: UserView;
-  onUser: (u: UserView) => void;
-  onSignOut: () => void;
+  icon: TileIcon;
+  name: string;
+  status: Status | null;
+  /** Today's result, shown once finished */
+  result?: string;
+  onDaily?: () => void;
+  actions: ComponentChildren;
 }) {
-  const [editing, setEditing] = useState(false);
-  const [name, setName] = useState(user.displayName);
-  const [error, setError] = useState<string | null>(null);
-
-  async function save() {
-    setError(null);
-    try {
-      onUser(await api.rename(name.trim()));
-      setEditing(false);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'Could not save');
-    }
-  }
-
-  return (
-    <section class="card account-card">
-      <Avatar user={user} size={64} />
-      <div class="acc-main">
-        {editing ? (
-          <form
-            class="join-row"
-            onSubmit={(e) => {
-              e.preventDefault();
-              if (name.trim()) save();
-            }}
-          >
-            <input
-              class="text-input"
-              value={name}
-              maxLength={MAX_NAME_LENGTH}
-              aria-label="Display name"
-              autoFocus
-              onInput={(e) => setName((e.target as HTMLInputElement).value)}
-            />
-            <button class="btn btn-primary btn-sm" type="submit" disabled={!name.trim()}>
-              Save
-            </button>
-            <button
-              class="link"
-              type="button"
-              onClick={() => {
-                setEditing(false);
-                setName(user.displayName);
-              }}
-            >
-              Cancel
-            </button>
-          </form>
-        ) : (
-          <h2 class="acc-name">
-            {user.displayName}{' '}
-            <button class="link small" onClick={() => setEditing(true)}>
-              Edit name
-            </button>
-          </h2>
-        )}
-        {error && <p class="form-error">{error}</p>}
-        <p class="muted small">
-          {user.email ?? (user.guest ? 'Guest account (this browser)' : 'Local dev account')} · member since{' '}
-          {new Date(user.createdAt).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}
-        </p>
-        <p class="muted small">Your display name is shown on the ranking and to your opponents.</p>
-      </div>
-      <button class="btn btn-ghost btn-sm" onClick={onSignOut}>
-        Sign out
-      </button>
-      {user.guest && <LinkGoogle onUser={onUser} />}
-    </section>
+  const badge =
+    status === 'finished' ? `✓ ${result}` : status === 'playing' ? 'Daily · in progress' : status ? 'Daily · play now' : '';
+  const body = (
+    <>
+      <GameIcon id={icon} />
+      <span class="gt-text">
+        <span class="gt-name">{name}</span>
+        {badge && <span class={`gt-badge ${status}`}>{badge}</span>}
+      </span>
+    </>
   );
-}
-
-function Stat({ value, label }: { value: string | number; label: string }) {
   return (
-    <div class="stat">
-      <span class="stat-value">{value}</span>
-      <span class="stat-label">{label}</span>
+    <div class={`game-tile t-${icon}`}>
+      {onDaily ? (
+        <button class="gt-main" onClick={onDaily} aria-label={`${name}: play today's daily game`}>
+          {body}
+        </button>
+      ) : (
+        <div class="gt-main">{body}</div>
+      )}
+      <div class="gt-actions">{actions}</div>
     </div>
   );
 }
 
+function TileButton({
+  icon,
+  label,
+  onClick,
+  disabled,
+}: {
+  icon: ComponentChildren;
+  label: string;
+  onClick?: () => void;
+  disabled?: boolean;
+}) {
+  return (
+    <button class="gt-btn" onClick={onClick} disabled={disabled}>
+      {icon}
+      {label}
+    </button>
+  );
+}
+
+/** The start screen: quick access to every game — daily (the big tile), practice and duels. */
 export function MainLobby({
   user,
-  onUser,
-  onSignOut,
   onNavigate,
 }: {
   user: UserView;
-  onUser: (u: UserView) => void;
-  onSignOut: () => void;
-  onNavigate: (t: Tab) => void;
+  onNavigate: (t: Tab, mode?: GameId | null) => void;
 }) {
-  const [me, setMe] = useState<MeResponse | null>(null);
   const [today, setToday] = useState<DailySummary | null>(null);
-  const [ranked, setRanked] = useState<RankedProfile | null>(null);
+  const [me, setMe] = useState<MeResponse | null>(null);
 
   useEffect(() => {
-    api.me().then(setMe).catch(() => {});
-    api.ranked().then(setRanked).catch(() => {});
     api.dailySummary().then(setToday).catch(() => {});
-  }, [user.id]); // linking a guest to an existing Google account switches accounts
+    api.me().then(setMe).catch(() => {});
+  }, [user.id]);
 
-  const stats = me?.stats;
-  const dash = '–';
   const games = MODE_IDS.length + 1; // + Higher or Lower
   const doneToday = today
     ? MODE_IDS.filter((m) => today.modes[m].status === 'finished').length + (today.higher.status === 'finished' ? 1 : 0)
     : 0;
+  const streak = me?.stats.streak ?? 0;
+
+  function duel(m: ModeId) {
+    storeRankedMode(m); // the ranked card opens on this game
+    onNavigate('multi');
+  }
 
   return (
-    <main class="stack">
-      <AccountCard user={user} onUser={onUser} onSignOut={onSignOut} />
-
-      <div class="lobby-grid">
-        <section class="card play-card">
-          <h2>Daily Games</h2>
+    <main class="stack lobby">
+      <header class="lobby-hello">
+        <div>
+          <h1>Hi, {user.displayName}!</h1>
           <p class="muted small">
-            {today
-              ? doneToday === games
-                ? 'All done for today — see you tomorrow!'
-                : `${doneToday} of ${games} games played today.`
-              : 'Loading…'}
+            {!today
+              ? 'Loading today’s games…'
+              : doneToday === games
+                ? 'All daily games done — see you tomorrow!'
+                : `${doneToday} of ${games} daily games played today.`}
+            {streak > 0 && <span class="streak-chip">🔥 {streak}-day streak</span>}
           </p>
-          <ul class="today-list">
-            {MODE_IDS.map((m) => {
-              const info = today?.modes[m];
-              return (
-                <li key={m}>
-                  <span>{MODES[m].label}</span>
-                  <span class={`today-status ${info?.status ?? ''}`}>
-                    {!info ? dash : info.status === 'finished' ? `${info.score} pts${info.timeMs !== null ? ` · ${formatDuration(info.timeMs)}` : ''}` : info.status === 'playing' ? 'in progress' : 'not played'}
-                  </span>
-                </li>
-              );
-            })}
-            <li>
-              <span>{HIGHER_LABEL}</span>
-              <span class={`today-status ${today?.higher.status ?? ''}`}>
-                {!today
-                  ? dash
-                  : today.higher.status === 'finished'
-                    ? `${today.higher.flawless} flawless`
-                    : today.higher.status === 'playing'
-                      ? 'in progress'
-                      : 'not played'}
-              </span>
-            </li>
-          </ul>
-          {today && <NextDaily at={today.nextAt} />}
-          <button class="btn btn-primary" onClick={() => onNavigate('daily')}>
-            {doneToday === games ? 'See ranking' : 'Play daily'}
-          </button>
-        </section>
-
-        <section class="card play-card">
-          <h2>Multiplayer</h2>
-          <p class="muted small">1 vs 1 in real time: same flag, same moment — the first correct answer wins the point.</p>
-          <ul class="today-list">
-            <li>
-              <span>Ranked</span>
-              <span class="today-status">play strangers, climb from Bronze to Diamond</span>
-            </li>
-            <li>
-              <span>Friends</span>
-              <span class="today-status">share a 5-letter code</span>
-            </li>
-          </ul>
-          <button class="btn btn-primary" onClick={() => onNavigate('multi')}>
-            Play multiplayer
-          </button>
-        </section>
-      </div>
-
-      <section class="card stats-card">
-        <h2>Your stats</h2>
-        <div class="stats-row">
-          <Stat value={stats ? stats.streak : dash} label="day streak" />
-          <Stat value={stats ? stats.daysPlayed : dash} label="days played" />
-          {MODE_IDS.map((m) => (
-            <Stat key={m} value={stats?.daily[m].best ?? dash} label={`best ${MODES[m].label.toLowerCase()}`} />
-          ))}
-          {MODE_IDS.map((m) => (
-            <Stat key={`a${m}`} value={stats?.daily[m].average ?? dash} label={`avg ${MODES[m].label.toLowerCase()}`} />
-          ))}
-          <Stat value={stats?.higher.bestFlawless ?? dash} label="best flawless (higher or lower)" />
         </div>
-        <h3 class="stats-sub">Ranked</h3>
-        <div class="stats-row">
+        {today && <NextDaily at={today.nextAt} />}
+      </header>
+
+      <section class="game-group" aria-labelledby="g-speed">
+        <div class="group-head">
+          <h2 id="g-speed">{GEO_SPEED_LABEL}</h2>
+          <span class="muted small">Answer fast — every second counts</span>
+        </div>
+        <div class="game-row">
           {MODE_IDS.map((m) => {
-            const r = ranked?.[m];
+            const info = today?.modes[m];
             return (
-              <div class="stat" key={`r${m}`}>
-                <span class="stat-value">{r && !r.locked ? r.rating : dash}</span>
-                {r && !r.locked && <DivisionBadge division={r.division} small />}
-                <span class="stat-label">
-                  {MODES[m].label.toLowerCase()} · {r?.locked ? 'locked' : r && r.played ? `${r.wins}W ${r.losses}L` : 'unplayed'}
-                </span>
-              </div>
+              <GameTile
+                key={m}
+                icon={m}
+                name={MODES[m].label}
+                status={info?.status ?? null}
+                result={info ? `${info.score} pts${info.timeMs !== null ? ` · ${formatDuration(info.timeMs)}` : ''}` : ''}
+                onDaily={() => onNavigate('daily', m)}
+                actions={
+                  <>
+                    <TileButton icon={<PracticeGlyph />} label="Practice" onClick={() => onNavigate('practice', m)} />
+                    <TileButton icon={<DuelGlyph />} label="Duel" onClick={() => duel(m)} />
+                  </>
+                }
+              />
             );
           })}
         </div>
       </section>
 
-      <Leaderboard limit={5} />
+      <section class="game-group" aria-labelledby="g-knowledge">
+        <div class="group-head">
+          <h2 id="g-knowledge">{GEO_KNOWLEDGE_LABEL}</h2>
+          <span class="muted small">Take your time — only being right counts</span>
+        </div>
+        <div class="game-row">
+          <GameTile
+            icon="higher"
+            name={HIGHER_LABEL}
+            status={today?.higher.status ?? null}
+            result={today ? `${today.higher.flawless} flawless` : ''}
+            onDaily={() => onNavigate('daily', 'higher')}
+            actions={<TileButton icon={<DuelGlyph />} label="Duel a friend" onClick={() => onNavigate('multi')} />}
+          />
+          <GameTile
+            icon="soon"
+            name="More coming soon"
+            status={null}
+            actions={<TileButton icon={null} label="New games on the way" disabled />}
+          />
+        </div>
+      </section>
     </main>
   );
 }

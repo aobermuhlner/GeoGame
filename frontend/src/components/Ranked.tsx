@@ -28,7 +28,7 @@ export function loadRankedMode(): ModeId {
   }
 }
 
-function storeRankedMode(m: ModeId) {
+export function storeRankedMode(m: ModeId) {
   try {
     localStorage.setItem(MODE_KEY, m);
   } catch {
