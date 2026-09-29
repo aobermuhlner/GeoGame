@@ -20,6 +20,7 @@ import { verifyGoogleIdToken } from './google';
 export { Room } from './room';
 export { Accounts } from './accounts';
 export { Matchmaker } from './matchmaker';
+export { GroupRoom } from './group';
 
 const DAILY_FLAG_RE = /^[0-9a-f]{32}$/;
 const SESSION_TOKEN_RE = /^[0-9a-f]{64}$/;
@@ -301,13 +302,43 @@ export default {
       return withCors(new Response('Could not allocate a room', { status: 503 }), origin);
     }
 
-    // GET /rooms/:code → { code, phase, players } (lets the join screen say "not found")
+    // POST /groups → { code } (a group lobby; codes are shared with the 1 vs 1 rooms, never both)
+    if (url.pathname === '/groups' && request.method === 'POST') {
+      if (!origin) return new Response('Forbidden origin', { status: 403 });
+      for (let attempt = 0; attempt < 5; attempt++) {
+        const code = randomRoomCode();
+        if (await env.ROOMS.getByName(code).summary()) continue;
+        if (await env.GROUPS.getByName(code).init(code)) return withCors(Response.json({ code }), origin);
+      }
+      return withCors(new Response('Could not allocate a room', { status: 503 }), origin);
+    }
+
+    // GET /rooms/:code → { code, kind, phase, players } (lets the join screen say "not found", and which kind it is)
     const info = /^\/rooms\/([^/]+)$/.exec(url.pathname);
     if (info && request.method === 'GET') {
       const code = info[1].toUpperCase();
-      const summary = ROOM_CODE_RE.test(code) ? await env.ROOMS.getByName(code).summary() : null;
-      if (!summary) return withCors(new Response('Room not found', { status: 404 }), origin);
-      return withCors(Response.json({ code, ...summary }), origin);
+      const valid = ROOM_CODE_RE.test(code);
+      const duel = valid ? await env.ROOMS.getByName(code).summary() : null;
+      const group = valid && !duel ? await env.GROUPS.getByName(code).summary() : null;
+      if (!duel && !group) return withCors(new Response('Room not found', { status: 404 }), origin);
+      return withCors(Response.json(duel ? { code, kind: 'duel', ...duel } : { code, kind: 'group', ...group }), origin);
+    }
+
+    // GET /groups/:code/ws → WebSocket, handled by the group's Durable Object
+    const gws = /^\/groups\/([^/]+)\/ws$/.exec(url.pathname);
+    if (gws && request.method === 'GET') {
+      if (!origin) return new Response('Forbidden origin', { status: 403 });
+      const code = gws[1].toUpperCase();
+      if (!ROOM_CODE_RE.test(code)) return new Response('Room not found', { status: 404 });
+      return env.GROUPS.getByName(code).fetch(request);
+    }
+
+    // GET /groups/flags/:token → image of a group round's item
+    const gflag = /^\/groups\/flags\/([^/]+)$/.exec(url.pathname);
+    if (gflag && request.method === 'GET') {
+      const token = gflag[1];
+      if (!FLAG_TOKEN_RE.test(token)) return new Response('Not found', { status: 404 });
+      return itemImage(await env.GROUPS.getByName(token.slice(0, ROOM_CODE_LENGTH)).flag(token), env);
     }
 
     // GET /rooms/:code/ws → WebSocket, handled by the room's Durable Object

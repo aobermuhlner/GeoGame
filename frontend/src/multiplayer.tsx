@@ -9,7 +9,8 @@ import { GameScreen } from './components/GameScreen';
 import { Results } from './components/Results';
 import { SoloGame, placementSource } from './components/Daily';
 import { HigherDuelResults, HigherDuelScreen, type DuelActions } from './components/HigherDuel';
-import { RankedQueue, RoomConnection, createRoom, flagSrc, getSessionId, roomExists, type ConnStatus } from './net';
+import { GroupPlay } from './components/Group';
+import { RankedQueue, RoomConnection, createGroup, createRoom, flagSrc, getSessionId, roomKind, type ConnStatus } from './net';
 
 // The current room is remembered per tab.
 const LAST_ROOM_KEY = 'flagduel.lastRoom';
@@ -27,6 +28,25 @@ function storeLastRoom(value: string | null) {
     else sessionStorage.setItem(LAST_ROOM_KEY, value);
   } catch {
     /* storage unavailable — ignore */
+  }
+}
+
+// The group lobby this tab is in, so a reload rejoins it.
+const LAST_GROUP_KEY = 'flagduel.lastGroup';
+
+function loadLastGroup(): string {
+  try {
+    return sessionStorage.getItem(LAST_GROUP_KEY) ?? '';
+  } catch {
+    return '';
+  }
+}
+function storeLastGroup(value: string | null) {
+  try {
+    if (value === null) sessionStorage.removeItem(LAST_GROUP_KEY);
+    else sessionStorage.setItem(LAST_GROUP_KEY, value);
+  } catch {
+    /* storage unavailable — a reload then can't rejoin */
   }
 }
 
@@ -121,6 +141,8 @@ export function Multiplayer({ name, onImmersive }: { name: string; onImmersive: 
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const onlineRef = useRef<Online | null>(null);
+  /** Code of the group lobby this tab is in */
+  const [group, setGroup] = useState<string | null>(null);
 
   // Ranked queue
   const [searching, setSearching] = useState<Searching | null>(null);
@@ -183,6 +205,32 @@ export function Multiplayer({ name, onImmersive }: { name: string; onImmersive: 
     setError(message);
   }
 
+  function openGroup(code: string) {
+    setError(null);
+    storeLastGroup(code);
+    setRoomInUrl(code);
+    setGroup(code);
+  }
+
+  function leaveGroup(message: string | null = null) {
+    storeLastGroup(null);
+    setRoomInUrl(null);
+    setGroup(null);
+    setError(message);
+  }
+
+  async function onCreateGroup() {
+    setBusy(true);
+    setError(null);
+    try {
+      openGroup(await createGroup());
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Could not reach the server.');
+    } finally {
+      setBusy(false);
+    }
+  }
+
   function findMatch(mode: RankedModeId) {
     const token = api.token();
     if (!token) return setRankedError('Please sign in again.');
@@ -226,7 +274,9 @@ export function Multiplayer({ name, onImmersive }: { name: string; onImmersive: 
     setBusy(true);
     setError(null);
     try {
-      if (!(await roomExists(code))) setError(`No lobby with code ${code}.`);
+      const kind = await roomKind(code);
+      if (!kind) setError(`No lobby with code ${code}.`);
+      else if (kind === 'group') openGroup(code);
       else connect(code);
     } catch {
       setError('Could not reach the server.');
@@ -238,6 +288,7 @@ export function Multiplayer({ name, onImmersive }: { name: string; onImmersive: 
   // Reload with ?room=CODE of the room we were in → rejoin automatically (same session id).
   useEffect(() => {
     if (ROOM_CODE_RE.test(urlRoom) && urlRoom === loadLastRoom()) connect(urlRoom, loadTicket(urlRoom));
+    else if (ROOM_CODE_RE.test(urlRoom) && urlRoom === loadLastGroup()) setGroup(urlRoom);
     return () => {
       queueRef.current?.stop();
       onlineRef.current?.conn.stop();
@@ -272,7 +323,7 @@ export function Multiplayer({ name, onImmersive }: { name: string; onImmersive: 
     };
   }
 
-  const immersive = !!online || !!demoVm;
+  const immersive = !!online || !!demoVm || !!group;
   useEffect(() => {
     onImmersive(immersive);
   }, [immersive]);
@@ -318,6 +369,8 @@ export function Multiplayer({ name, onImmersive }: { name: string; onImmersive: 
       <GameScreen vm={demoVm} actions={demoRef.current} />
     );
   }
+
+  if (group) return <GroupPlay key={group} code={group} name={name} onLeave={leaveGroup} />;
 
   if (online) {
     const banner =
@@ -406,6 +459,7 @@ export function Multiplayer({ name, onImmersive }: { name: string; onImmersive: 
       busy={busy || !!searching}
       error={error}
       onCreate={onCreate}
+      onCreateGroup={onCreateGroup}
       onJoin={onJoin}
       onDemo={startDemo}
       ranked={<RankedCard searching={searching} error={rankedError} onFind={findMatch} onCancel={cancelSearch} onPlacement={setPlacement} />}

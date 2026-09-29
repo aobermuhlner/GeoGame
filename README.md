@@ -69,6 +69,22 @@ players have 20 seconds to lock in one country, the pick is final and the oppone
 not what. Every correct pick is a point. All 10 rounds are always played; tied after them, a "Sudden death"
 announcement is followed by extra rounds until exactly one player is right.
 
+### Multiplayer — Group game
+
+**Create group lobby** under Multiplayer opens a lobby for **2–8 players** (friends join with the same code box or
+invite link as a duel; the Worker tells which kind of lobby a code is). It starts with every game selected, 5 rounds
+each; the host can change games, rounds and regions like in a duel, and starts once at least two players are there.
+
+Everyone answers every round. A right answer scores 50 points plus up to 50 for speed (linear in the time left);
+in Flags, Capitals and GeoLocate each wrong try costs 5 (minimum 10). Landmarks, Languages and Higher or Lower take
+one locked-in answer, and during the round others only see *that* you answered. Higher or Lower shows everyone the
+same pair. A round ends when every connected player has answered or passed, or when time is up; the reveal lists
+everyone's answer, time and points. After each game the **standings** show the new overall ranking — who moved up or
+down and how many points they got — and the match moves on by itself. It ends on a **podium** (gold on the throne,
+silver, bronze, then the rest) with a ranking table of each player's points per game. Ties: more right answers, then
+less time on them. Leaving mid-game keeps your place in the ranking; the rounds just stop waiting for you. Group games
+are not rated. Server-authoritative in the `GroupRoom` Durable Object (`worker/src/group.ts`, rules in `shared/src/group.ts`).
+
 ### Ranked
 
 **Find match** under Multiplayer queues you against a stranger in one game (Flags, Capitals or GeoLocate,

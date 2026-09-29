@@ -1,6 +1,6 @@
 import type { ComponentChildren } from 'preact';
 import { useState } from 'preact/hooks';
-import { ROOM_CODE_LENGTH } from '@flagduel/shared';
+import { GROUP_MAX_PLAYERS, ROOM_CODE_LENGTH } from '@flagduel/shared';
 import { Logo } from './common';
 
 interface Props {
@@ -10,6 +10,8 @@ interface Props {
   busy: boolean;
   error: string | null;
   onCreate: () => void;
+  /** Create a group lobby (up to 8 players) */
+  onCreateGroup: () => void;
   onJoin: (code: string) => void;
   onDemo: () => void;
   /** Ranked card, shown under the header card */
@@ -20,7 +22,7 @@ interface Props {
 
 const NOT_CODE_CHARS = /[^ABCDEFGHJKLMNPQRSTUVWXYZ23456789]/g;
 
-export function Home({ name, initialCode, busy, error, onCreate, onJoin, onDemo, ranked, below }: Props) {
+export function Home({ name, initialCode, busy, error, onCreate, onCreateGroup, onJoin, onDemo, ranked, below }: Props) {
   const [code, setCode] = useState(initialCode);
   const codeOk = code.length === ROOM_CODE_LENGTH;
 
@@ -96,6 +98,20 @@ export function Home({ name, initialCode, busy, error, onCreate, onJoin, onDemo,
             </button>
           </div>
         )}
+      </section>
+
+      <section class="card home-card group-card">
+        <h2>Group game</h2>
+        <p class="muted small">
+          Up to {GROUP_MAX_PLAYERS} players, everyone answers every round — right and quick scores most. After each game
+          the ranking shows who climbed and who fell; the best overall takes the throne. Friends join with the code
+          above.
+        </p>
+        <div class="btn-row">
+          <button type="button" class="btn btn-primary btn-lg" disabled={busy} onClick={onCreateGroup}>
+            Create group lobby
+          </button>
+        </div>
       </section>
 
       {below}

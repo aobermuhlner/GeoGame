@@ -199,7 +199,7 @@ describe('room info', () => {
     await join(code, 'Adrian');
     const res = await exports.default.fetch(new Request(`${BASE}/rooms/${code.toLowerCase()}`, { headers: { Origin: ORIGIN } }));
     expect(res.status).toBe(200);
-    expect(await res.json()).toEqual({ code, phase: 'lobby', players: 1 });
+    expect(await res.json()).toEqual({ code, kind: 'duel', phase: 'lobby', players: 1 });
     expect((await exports.default.fetch(new Request(`${BASE}/rooms/AAAAA`))).status).toBe(404);
   });
 });

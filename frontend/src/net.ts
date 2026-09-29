@@ -1,6 +1,8 @@
 import type {
   ClientMessage,
   ErrorCode,
+  GroupServerMessage,
+  GroupView,
   GuessOutcome,
   RankedModeId,
   QueueClientMessage,
@@ -16,6 +18,7 @@ export const WORKER_URL = ((import.meta.env.VITE_WORKER_URL as string | undefine
 );
 
 export const flagSrc = (token: string) => `${WORKER_URL}/flags/${token}`;
+export const groupFlagSrc = (token: string) => `${WORKER_URL}/groups/flags/${token}`;
 
 const SESSION_KEY = 'flagduel.session';
 let memorySession: string | null = null;
@@ -43,26 +46,36 @@ export async function createRoom(): Promise<string> {
   return ((await res.json()) as { code: string }).code;
 }
 
-export async function roomExists(code: string): Promise<boolean> {
+export async function createGroup(): Promise<string> {
+  const res = await fetch(`${WORKER_URL}/groups`, { method: 'POST' });
+  if (!res.ok) throw new Error(`Could not create a group lobby (${res.status})`);
+  return ((await res.json()) as { code: string }).code;
+}
+
+export type RoomKind = 'duel' | 'group';
+
+/** Which kind of lobby a code belongs to, or null if there is none. */
+export async function roomKind(code: string): Promise<RoomKind | null> {
   const res = await fetch(`${WORKER_URL}/rooms/${code}`);
-  if (res.status === 404) return false;
+  if (res.status === 404) return null;
   if (!res.ok) throw new Error(`Server error (${res.status})`);
-  return true;
+  return ((await res.json()) as { kind?: RoomKind }).kind ?? 'duel';
 }
 
 export type ConnStatus = 'connecting' | 'open' | 'reconnecting' | 'closed';
 
-interface Handlers {
-  onState(room: RoomView, you: Slot): void;
+interface Handlers<V, Y> {
+  onState(room: V, you: Y): void;
   onStatus(status: ConnStatus): void;
   /** Fatal errors end the connection (room full, not found, …); others are informational. */
   onError(code: ErrorCode, message: string, fatal: boolean): void;
-  onOppWrong(round: number): void;
+  onOppWrong?(round: number): void;
 }
 
 const FATAL: ErrorCode[] = ['room_full', 'not_found', 'in_progress'];
 
-export class RoomConnection {
+/** A 1 vs 1 room (`/rooms`) or, with `V = GroupView`, a group lobby (`/groups`). */
+export class RoomConnection<V = RoomView, Y = Slot> {
   private ws: WebSocket | null = null;
   private stopped = false;
   private attempt = 0;
@@ -76,15 +89,16 @@ export class RoomConnection {
   constructor(
     readonly code: string,
     private name: string,
-    private h: Handlers,
+    private h: Handlers<V, Y>,
     private sessionId: string = getSessionId(),
+    private path: 'rooms' | 'groups' = 'rooms',
   ) {
     this.open();
   }
 
   private open() {
     this.h.onStatus(this.attempt === 0 ? 'connecting' : 'reconnecting');
-    const ws = new WebSocket(`${WORKER_URL.replace(/^http/, 'ws')}/rooms/${this.code}/ws`);
+    const ws = new WebSocket(`${WORKER_URL.replace(/^http/, 'ws')}/${this.path}/${this.code}/ws`);
     this.ws = ws;
     ws.onopen = () => {
       this.attempt = 0;
@@ -92,7 +106,7 @@ export class RoomConnection {
       this.h.onStatus('open');
       this.pingTimer = setInterval(() => this.send({ t: 'ping' }), 30_000);
     };
-    ws.onmessage = (e) => this.onMessage(JSON.parse(e.data as string) as ServerMessage);
+    ws.onmessage = (e) => this.onMessage(JSON.parse(e.data as string) as ServerMessage | GroupServerMessage);
     ws.onclose = (e) => {
       if (this.pingTimer) clearInterval(this.pingTimer);
       this.flushGuesses('ignored');
@@ -105,17 +119,17 @@ export class RoomConnection {
     };
   }
 
-  private onMessage(m: ServerMessage) {
+  private onMessage(m: ServerMessage | GroupServerMessage) {
     switch (m.t) {
       case 'state':
         this.offset = m.now - Date.now();
-        this.h.onState(m.room, m.you);
+        this.h.onState(m.room as V, m.you as Y);
         break;
       case 'guessResult':
         this.guessWaiters.shift()?.(m.outcome);
         break;
       case 'oppWrong':
-        this.h.onOppWrong(m.round);
+        this.h.onOppWrong?.(m.round);
         break;
       case 'error': {
         const fatal = FATAL.includes(m.code);
@@ -166,6 +180,10 @@ type Matched = Extract<QueueServerMessage, { t: 'matched' }>;
  * Waiting in the ranked queue. The socket is the queue spot: stop() (or closing the tab) leaves it.
  * The session token goes in the first message, not the URL, so it never lands in access logs.
  */
+/** A group lobby's connection. */
+export const connectGroup = (code: string, name: string, h: Handlers<GroupView, number>) =>
+  new RoomConnection<GroupView, number>(code, name, h, getSessionId(), 'groups');
+
 export class RankedQueue {
   private ws: WebSocket;
   private done = false;

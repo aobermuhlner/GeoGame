@@ -123,9 +123,24 @@ export function RegionPicker({
   );
 }
 
-export function Lobby({ room, you, onReady, onStart, onRegions, onModes, onRounds, onLeave }: Props) {
-  const [copied, setCopied] = useState(false);
-  // Optimistic selection so quick successive clicks build on each other, not on a stale snapshot.
+/** What the settings cards need from a lobby (1 vs 1 or group). */
+interface SettingsRoom {
+  regions: RegionId[];
+  modes: GameId[];
+  roundCounts: Record<GameId, number>;
+  countryCount: number;
+}
+
+/**
+ * The host's game and region choices with optimistic drafts, so quick successive clicks build on each other,
+ * not on a stale snapshot. Also says whether the pools are big enough to play.
+ */
+export function useGameSettings(
+  room: SettingsRoom,
+  onRegions: (regions: RegionId[]) => void,
+  onModes: (modes: GameId[]) => void,
+  onRounds: (game: GameId, rounds: number) => void,
+) {
   const [draft, setDraft] = useState<RegionId[] | null>(null);
   const regions = draft ?? room.regions;
   useEffect(() => {
@@ -146,10 +161,6 @@ export function Lobby({ room, you, onReady, onStart, onRegions, onModes, onRound
     setCountsDraft((d) => ({ ...d, [game]: rounds }));
     onRounds(game, rounds);
   }
-  const isHost = you === 0;
-  const me = room.players[you];
-  const full = room.players.length === 2;
-  const allReady = full && room.players.every((p) => p.ready && p.connected);
   const countryCount = draft ? countriesInRegions(draft).length : room.countryCount;
   // Every selected game needs enough rounds' worth in the selected regions (landmarks run out first);
   // Higher or Lower draws its pairs from the countries.
@@ -165,19 +176,13 @@ export function Lobby({ room, you, onReady, onStart, onRegions, onModes, onRound
     (n, g) => n + (isModeId(g) ? Math.min(counts[g], MODES[g].pool(regions).length) : counts[g]),
     0,
   );
+  const poolHint = poolOk
+    ? ''
+    : !countriesOk || !small
+      ? `Pick regions with at least ${MIN_POOL_SIZE} countries.`
+      : `${MODES[small.mode].label} needs regions with at least ${poolLabel(small.mode, MIN_POOL_SIZE)}.`;
 
-  async function copy() {
-    const link = inviteLink(room.code);
-    try {
-      await navigator.clipboard.writeText(link);
-    } catch {
-      window.prompt('Copy this link', link);
-    }
-    setCopied(true);
-    setTimeout(() => setCopied(false), 1800);
-  }
-
-  function toggle(r: RegionId) {
+  function toggleRegion(r: RegionId) {
     const next = REGION_IDS.filter((x) => (x === r ? !regions.includes(x) : regions.includes(x)));
     if (next.length === 0) return;
     setDraft(next);
@@ -191,13 +196,99 @@ export function Lobby({ room, you, onReady, onStart, onRegions, onModes, onRound
     onModes(next);
   }
 
+  return { regions, modes, counts, countryCount, poolOk, poolHint, countLabel, totalRounds, toggleRegion, toggleMode, setRounds };
+}
+
+/** The "Games" card: which games are played, in order, and how many rounds each. */
+export function GamesCard({
+  modes,
+  counts,
+  totalRounds,
+  editable,
+  hint,
+  onToggle,
+  onRounds,
+}: {
+  modes: GameId[];
+  counts: Record<GameId, number>;
+  totalRounds: number;
+  editable: boolean;
+  hint: string;
+  onToggle: (m: GameId) => void;
+  onRounds: (game: GameId, rounds: number) => void;
+}) {
+  return (
+    <section class="card modes-card">
+      <div class="regions-head">
+        <h2>Games</h2>
+        <span class="pool">{totalRounds === 1 ? '1 round' : `${totalRounds} rounds`}</span>
+      </div>
+      <p class="muted small">{hint}</p>
+      <div class="mode-list" role="group" aria-label="Games">
+        {GAME_IDS.map((m) => {
+          const on = modes.includes(m);
+          const order = modes.indexOf(m) + 1;
+          return (
+            <label class={`mode-opt${on ? ' on' : ''}${editable ? '' : ' locked'}`} key={m}>
+              <input
+                type="checkbox"
+                checked={on}
+                disabled={!editable || (on && modes.length === 1)}
+                onChange={() => onToggle(m)}
+              />
+              <span class="mode-order" aria-hidden="true">
+                {on && modes.length > 1 ? order : ''}
+              </span>
+              <span class="mode-text">
+                <span class="m-name">{gameLabel(m)}</span>
+                <span class="m-desc">{isModeId(m) ? MODES[m].description : HIGHER_GAME.description}</span>
+                {on && (
+                  <RoundsStepper
+                    value={counts[m]}
+                    label={gameLabel(m)}
+                    editable={editable}
+                    onChange={(n) => onRounds(m, n)}
+                  />
+                )}
+              </span>
+            </label>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
+/** "Copy invite link" button that says when it worked. */
+export function CopyInvite({ code }: { code: string }) {
+  const [copied, setCopied] = useState(false);
+  async function copy() {
+    const link = inviteLink(code);
+    try {
+      await navigator.clipboard.writeText(link);
+    } catch {
+      window.prompt('Copy this link', link);
+    }
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1800);
+  }
+  return (
+    <button class="btn btn-ghost btn-sm" onClick={copy}>
+      {copied ? '✓ Link copied' : 'Copy invite link'}
+    </button>
+  );
+}
+
+export function Lobby({ room, you, onReady, onStart, onRegions, onModes, onRounds, onLeave }: Props) {
+  const set = useGameSettings(room, onRegions, onModes, onRounds);
+  const isHost = you === 0;
+  const me = room.players[you];
+  const full = room.players.length === 2;
+  const allReady = full && room.players.every((p) => p.ready && p.connected);
+
   let startHint = '';
   if (!full) startHint = 'Waiting for an opponent to join…';
-  else if (!poolOk)
-    startHint =
-      !countriesOk || !small
-        ? `Pick regions with at least ${MIN_POOL_SIZE} countries.`
-        : `${MODES[small.mode].label} needs regions with at least ${poolLabel(small.mode, MIN_POOL_SIZE)}.`;
+  else if (!set.poolOk) startHint = set.poolHint;
   else if (!allReady) startHint = 'Both players need to be ready.';
   else if (!isHost) startHint = `Waiting for ${room.players[0].name} to start…`;
 
@@ -216,9 +307,7 @@ export function Lobby({ room, you, onReady, onStart, onRegions, onModes, onRound
           <span class="code-big" aria-label={`Lobby code ${room.code.split('').join(' ')}`}>
             {room.code}
           </span>
-          <button class="btn btn-ghost btn-sm" onClick={copy}>
-            {copied ? '✓ Link copied' : 'Copy invite link'}
-          </button>
+          <CopyInvite code={room.code} />
         </div>
 
         <ul class="players">
@@ -246,61 +335,32 @@ export function Lobby({ room, you, onReady, onStart, onRegions, onModes, onRound
         </ul>
       </section>
 
-      <section class="card modes-card">
-        <div class="regions-head">
-          <h2>Games</h2>
-          <span class="pool">{totalRounds === 1 ? '1 round' : `${totalRounds} rounds`}</span>
-        </div>
-        <p class="muted small">
-          {isHost
+      <GamesCard
+        modes={set.modes}
+        counts={set.counts}
+        totalRounds={set.totalRounds}
+        editable={isHost}
+        hint={
+          isHost
             ? `Pick any mix of games and how many rounds each lasts (${MIN_GAME_ROUNDS}–${MAX_GAME_ROUNDS}). They're played in this order; most points overall wins.`
-            : `${room.players[0]?.name ?? 'The host'} picks the games.`}
-        </p>
-        <div class="mode-list" role="group" aria-label="Games">
-          {GAME_IDS.map((m) => {
-            const on = modes.includes(m);
-            const order = modes.indexOf(m) + 1;
-            return (
-              <label class={`mode-opt${on ? ' on' : ''}${isHost ? '' : ' locked'}`} key={m}>
-                <input
-                  type="checkbox"
-                  checked={on}
-                  disabled={!isHost || (on && modes.length === 1)}
-                  onChange={() => toggleMode(m)}
-                />
-                <span class="mode-order" aria-hidden="true">
-                  {on && modes.length > 1 ? order : ''}
-                </span>
-                <span class="mode-text">
-                  <span class="m-name">{gameLabel(m)}</span>
-                  <span class="m-desc">{isModeId(m) ? MODES[m].description : HIGHER_GAME.description}</span>
-                  {on && (
-                    <RoundsStepper
-                      value={counts[m]}
-                      label={gameLabel(m)}
-                      editable={isHost}
-                      onChange={(n) => setRounds(m, n)}
-                    />
-                  )}
-                </span>
-              </label>
-            );
-          })}
-        </div>
-      </section>
+            : `${room.players[0]?.name ?? 'The host'} picks the games.`
+        }
+        onToggle={set.toggleMode}
+        onRounds={set.setRounds}
+      />
 
       <RegionPicker
-        regions={regions}
-        countryCount={countryCount}
-        poolOk={poolOk}
-        countLabel={countLabel}
+        regions={set.regions}
+        countryCount={set.countryCount}
+        poolOk={set.poolOk}
+        countLabel={set.countLabel}
         editable={isHost}
         hint={
           isHost
             ? 'Click a region on the map (or in the list) to leave it out.'
             : `${room.players[0]?.name ?? 'The host'} picks the regions.`
         }
-        onToggle={toggle}
+        onToggle={set.toggleRegion}
       />
 
       <section class="card actions-card">
@@ -309,7 +369,7 @@ export function Lobby({ room, you, onReady, onStart, onRegions, onModes, onRound
             {me.ready ? 'Not ready' : "I'm ready"}
           </button>
           {isHost && (
-            <button class="btn btn-lg btn-primary" disabled={!allReady || !poolOk} onClick={onStart}>
+            <button class="btn btn-lg btn-primary" disabled={!allReady || !set.poolOk} onClick={onStart}>
               Start game
             </button>
           )}

@@ -9,6 +9,7 @@ interface __BaseEnv_Env {
 	ROOMS: DurableObjectNamespace<import("./src/index").Room>;
 	ACCOUNTS: DurableObjectNamespace<import("./src/index").Accounts>;
 	MATCHMAKER: DurableObjectNamespace<import("./src/index").Matchmaker>;
+	GROUPS: DurableObjectNamespace<import("./src/index").GroupRoom>;
 }
 declare namespace Cloudflare {
 	interface GlobalProps {
