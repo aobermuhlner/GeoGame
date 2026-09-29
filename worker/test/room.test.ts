@@ -277,4 +277,35 @@ describe('lock-in games (Landmarks)', () => {
     expect(r.detail).toBe(LANDMARK_BY_ID[id].name);
     expect(r.end).toBe('locked');
   });
+
+  it('moves on to the reveal once both players have locked in', async () => {
+    const code = await createRoom();
+    const host = await join(code, 'Adrian');
+    const guest = await join(code, 'Anna');
+    await host.c.state({ t: 'setModes', modes: ['landmarks'] }, (s) => s.room.modes[0] === 'landmarks');
+    await host.c.state({ t: 'ready', ready: true }, (s) => s.room.players[0].ready);
+    await guest.c.state({ t: 'ready', ready: true }, (s) => s.room.players[1].ready);
+    await host.c.state({ t: 'start' }, (s) => s.room.phase === 'countdown');
+
+    const playing = guest.c.state(null, (s) => s.room.phase === 'playing');
+    await runInDurableObject(stub(code), async (room: Room) => {
+      await room.tick((await room.debugState())!.game!.countdownEndsAt!);
+    });
+    await playing;
+    const id = (await runInDurableObject(stub(code), (room: Room) => room.debugState()))!.game!.codes[0];
+    const { LANDMARK_BY_ID, COUNTRY_BY_CODE } = await import('@flagduel/shared');
+    const country = COUNTRY_BY_CODE[LANDMARK_BY_ID[id].country].name;
+    const other = country === 'France' ? 'Germany' : 'France';
+
+    const hostLocked = host.c.next('guessResult');
+    host.c.send({ t: 'guess', round: 1, text: other });
+    expect((await hostLocked).outcome).toBe('locked');
+    const reveal = host.c.state(null, (s) => s.room.phase === 'reveal');
+    const guestLocked = guest.c.next('guessResult');
+    guest.c.send({ t: 'guess', round: 1, text: country });
+    expect((await guestLocked).outcome).toBe('locked');
+    const r = (await reveal).room.reveal!;
+    expect(r.end).toBe('locked');
+    expect(r.points).toEqual([0, 2]);
+  });
 });

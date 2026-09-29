@@ -444,8 +444,8 @@ export class Room extends DurableObject<Env> {
           else return;
         }
         if (outcome === 'wrong') this.sendToSlot(slot === 0 ? 1 : 0, { t: 'oppWrong', round: msg.round });
-        // Correct, or both players out of tries (map modes).
-        if (outcome === 'correct' || cur?.end === 'passed') this.endRound(now);
+        // Correct, both players out of tries (map modes), or both locked in (lock-in modes).
+        if (outcome !== 'ignored' && cur?.end) this.endRound(now);
         break;
       }
 
