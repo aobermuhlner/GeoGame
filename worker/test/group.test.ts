@@ -51,9 +51,9 @@ describe('group lobby', () => {
     for (let i = 0; i < GROUP_MAX_PLAYERS; i++) seats.push(await joinGroup(code, `P${i}`));
     expect(seats.map((s) => s.you)).toEqual([0, 1, 2, 3, 4, 5, 6, 7]);
     const last = await waitState(seats[0].c, (s) => s.room.players.length === GROUP_MAX_PLAYERS);
-    expect(last.room.modes).toEqual(['flags', 'capitals', 'locate', 'landmarks', 'languages', 'higher']);
+    expect(last.room.modes).toEqual(['flags', 'capitals', 'locate', 'landmarks', 'languages', 'guess', 'higher']);
     expect(Object.values(last.room.roundCounts).every((n) => n === 5)).toBe(true);
-    expect(last.room.totalRounds).toBe(30);
+    expect(last.room.totalRounds).toBe(35);
 
     const res = await exports.default.fetch(
       new Request(`${BASE}/groups/${code}/ws`, { headers: { Upgrade: 'websocket', Origin: ORIGIN } }),
@@ -156,10 +156,10 @@ describe('group match', () => {
     const code = await createGroup();
     const a = await joinGroup(code, 'Ann');
     await joinGroup(code, 'Ben');
-    for (const game of ['flags', 'capitals', 'locate', 'landmarks', 'languages', 'higher'] as const)
+    for (const game of ['flags', 'capitals', 'locate', 'landmarks', 'languages', 'guess', 'higher'] as const)
       a.c.send({ t: 'setRounds', game, rounds: 1 });
     a.c.send({ t: 'setShuffle', shuffle: true });
-    await waitState(a.c, (s) => s.room.shuffle && s.room.totalRounds === 6);
+    await waitState(a.c, (s) => s.room.shuffle && s.room.totalRounds === 7);
     await a.c.state({ t: 'start' }, (s) => (s as unknown as State).room.phase === 'countdown');
     const st = await internal(code);
     expect([...st.game!.stages].sort()).toEqual([...st.modes].sort());

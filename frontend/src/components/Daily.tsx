@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from 'preact/hooks';
 import {
+  GUESS_MAX_POINTS,
   MODE_IDS,
   MODES,
   PIN_POINTS,
-  ROUND_TIME_MS,
   SOLO_BASE_POINTS,
   SOLO_SPEED_POINTS,
   SOLO_WRONG_PENALTY,
@@ -18,7 +18,10 @@ import {
   answerLabel,
   focusOf,
   revealMsOf,
+  roundTimeOf,
+  topPercent,
 } from '@flagduel/shared';
+import { EstimateLine, NumberInput, QuestionCard, UnitSystemSwitch, questionOf } from './Guess';
 import { api, dailyFlagSrc } from '../api';
 import { Emblem, RankUp } from './Emblem';
 import { DivisionBadge } from './Ranked';
@@ -62,7 +65,9 @@ function ModeCard({
     <article class={`daily-mode ${status}`}>
       <div class="dm-text">
         <h3>Daily {m.label}</h3>
-        <p class="muted small">{m.description} 10 rounds, 20 s each.</p>
+        <p class="muted small">
+          {m.description} 10 rounds, {roundTimeOf(mode) / 1000} s each.
+        </p>
       </div>
       {status === 'finished' ? (
         <div class="dm-done">
@@ -71,6 +76,9 @@ function ModeCard({
             {info!.rank ? `rank #${info!.rank}` : 'points'}
             {info!.timeMs !== null && ` · ${formatDuration(info!.timeMs)}`}
           </span>
+          {topPercent(info!.rank, info!.players) !== null && (
+            <span class="top-pct">Top {topPercent(info!.rank, info!.players)} %</span>
+          )}
           <button class="link" onClick={onPlay}>
             Results
           </button>
@@ -106,8 +114,10 @@ export function DailyHub({ onPlay }: { onPlay: (game: GameId) => void }) {
           Each game can be played <strong>once per day</strong> — everyone gets the same 10 countries. A correct answer
           is worth {SOLO_BASE_POINTS} points plus up to {SOLO_SPEED_POINTS} for speed, minus {SOLO_WRONG_PENALTY} per
           wrong guess. In GeoLocate every wrong click costs {SOLO_WRONG_PENALTY} points, even if you never find the
-          country. Landmarks and Languages take one answer per round: lock it in — a wrong one scores nothing. Your
-          score and total time go on today's ranking — on equal points the faster run ranks higher.
+          country. Landmarks and Languages take one answer per round: lock it in — a wrong one scores nothing.
+          GeoGuesser asks for a number (30 s per question): up to {GUESS_MAX_POINTS} points the closer your estimate
+          is, whatever units you answer in. Your score and total time go on today's ranking — on equal points the
+          faster run ranks higher, and your results show which top percentage of today's players you are in.
         </p>
         {error && <p class="form-error">{error}</p>}
         <div class="daily-modes">
@@ -365,7 +375,16 @@ function SoloScreen({
           ? 'Out of tries'
           : 'Skipped';
 
-  const statusLine = r ? (
+  const estimate = mode.input === 'number';
+  const statusLine = r && estimate ? (
+    <div class={`status-line reveal ${r.points >= 50 ? 'win' : r.points > 0 ? 'none' : 'lose'}`}>
+      <ul class="lock-lines estimates">
+        <EstimateLine who="You" code={r.code} raw={r.given} points={r.points} pointsLabel={`${r.points} points`} />
+      </ul>
+      {r.end === 'timeout' && <span class="reveal-who">Time's up — no points</span>}
+      {r.end === 'passed' && <span class="reveal-who">Skipped — no points</span>}
+    </div>
+  ) : r ? (
     <div class={`status-line reveal ${r.end === 'correct' ? 'win' : r.end === 'wrong' ? 'lose' : 'none'}`}>
       <strong class="reveal-country">{r.answer}</strong>
       {run.mode === 'capitals' && <span class="reveal-of">capital of {r.countryName}</span>}
@@ -395,7 +414,9 @@ function SoloScreen({
           ? `${run.wrong} wrong`
           : 'Speed doesn’t count, only correct answers'
         : mode.input === 'pin'
-          ? 'Pin the landmark · the smaller your circle and the sooner, the more points'
+          ? 'Pin the landmark Â· the smaller your circle and the sooner, the more points'
+          : estimate
+            ? 'One estimate â€” the closer, the more points. Take your time'
           : mode.lockIn
           ? 'One answer — lock it in. The sooner, the more points'
           : run.wrong > 0
@@ -505,10 +526,12 @@ function SoloScreen({
                   key={run.flag ?? r!.flag}
                   src={source.flagSrc((run.flag ?? r!.flag)!)}
                   focus={run.focus ?? focusOf(r!.code)}
-                  startedAt={deadline !== null && run.phase === 'playing' ? deadline - ROUND_TIME_MS : null}
+                  startedAt={deadline !== null && run.phase === 'playing' ? deadline - roundTimeOf(run.mode) : null}
                   full={run.phase !== 'playing'}
                 />
               )
+            ) : mode.prompt === 'question' ? (
+              <QuestionCard prompt={run.prompt} code={r?.code ?? null} />
             ) : mode.prompt === 'sentence' ? (
               (run.prompt ?? r) && (
                 <SentenceCard text={run.prompt ?? mode.promptText!(r!.code)} translation={r?.detail} />
@@ -543,6 +566,13 @@ function SoloScreen({
                 Next round
               </button>
             </div>
+          ) : estimate ? (
+            <NumberInput
+              quantity={questionOf(run.prompt, r?.code ?? null)?.quantity ?? null}
+              locked={locked}
+              focusKey={run.round}
+              onSubmit={onGuess}
+            />
           ) : (
             mode.input !== 'pin' && (
             <div class="guess-row">
@@ -747,7 +777,8 @@ function SoloResults({
         <Logo size={52} />
         <h1>{practice ? `Practice ${mode.label} done!` : `Daily ${mode.label} done!`}</h1>
         <p class="banner-sub">
-          {correct} of {run.totalRounds} correct{practice ? ' · not saved' : ` · ${run.date}`}
+          {correct} of {run.totalRounds} {mode.input === 'number' ? 'good estimates' : 'correct'}
+          {practice ? ' · not saved' : ` · ${run.date}`}
         </p>
         <div class="final-score solo">
           <div class="fs-player">
@@ -759,6 +790,7 @@ function SoloResults({
             <span class="fs-name">total time</span>
           </div>
         </div>
+        {!practice && <TopPercentBanner mode={run.mode} refreshKey={run.score} />}
         <div class="btn-row">
           {onReplay && (
             <button class="btn btn-primary" onClick={onReplay}>
@@ -773,6 +805,9 @@ function SoloResults({
 
       {!practice && <Leaderboard initial={run.mode} refreshKey={run.score} />}
 
+      {mode.input === 'number' ? (
+        <EstimateRounds run={run} />
+      ) : (
       <section class="card rounds-card">
         <h2>Your rounds</h2>
         <table class="rounds">
@@ -824,6 +859,67 @@ function SoloResults({
           </tbody>
         </table>
       </section>
+      )}
     </main>
+  );
+}
+
+/** "Top 12 %": where the finished daily run stands among today's players. */
+function TopPercentBanner({ mode, refreshKey }: { mode: ModeId; refreshKey: unknown }) {
+  const [data, setData] = useState<{ rank: number; players: number } | null>(null);
+  useEffect(() => {
+    let alive = true;
+    api
+      .leaderboard(mode)
+      .then((d) => alive && d.you && setData({ rank: d.you.rank, players: d.players }))
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, [mode, refreshKey]);
+  if (!data) return null;
+  const pct = topPercent(data.rank, data.players);
+  return (
+    <div class="top-banner">
+      {pct === null ? (
+        <>
+          <strong>First to finish today!</strong>
+          <span class="muted small">Check back later to see how you compare.</span>
+        </>
+      ) : (
+        <>
+          <span class="muted small">You are in the</span>
+          <strong>Top {pct} %</strong>
+          <span class="muted small">
+            of today's players · rank {data.rank} of {data.players}
+          </span>
+        </>
+      )}
+    </div>
+  );
+}
+
+/** GeoGuesser rounds: the question, the answer, your estimate and its points. */
+function EstimateRounds({ run }: { run: DailyView }) {
+  return (
+    <section class="card rounds-card">
+      <div class="board-head">
+        <h2>Your estimates</h2>
+        <UnitSystemSwitch />
+      </div>
+      <ol class="estimate-rounds">
+        {run.history.map((h, i) => (
+          <li key={i}>
+            <span class="er-num">{i + 1}</span>
+            <div class="er-body">
+              <QuestionCard prompt={null} code={h.code} />
+              <ul class="lock-lines estimates">
+                <EstimateLine who="You" code={h.code} raw={h.given} points={h.points} />
+              </ul>
+            </div>
+          </li>
+        ))}
+      </ol>
+    </section>
   );
 }

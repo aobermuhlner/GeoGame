@@ -1,5 +1,6 @@
 // Pure game rules shared by the Durable Object (authoritative) and the local mock.
 import { COUNTRIES } from './countries';
+import { duelEstimatePoints } from './guess';
 import { MODES, type ModeId } from './modes';
 import type { RegionId } from './regions';
 
@@ -27,6 +28,8 @@ export interface Lock {
   answer: string;
   at: number;
   correct: boolean;
+  /** Estimation games: how close the answer was, 0…1 */
+  accuracy?: number;
 }
 
 /** Lock-in rounds: a correct answer scores 1 (pins: 1–5 by radius), and the quicker of the correct answers 1 more. */
@@ -171,14 +174,18 @@ export function stageAt<T extends string = ModeId>(roundModes: readonly T[], ind
   return { stage, mode, start, rounds: end - start + 1 };
 }
 
-export const revealMsOf = (mode: ModeId): number => (MODES[mode].lockIn ? LOCK_REVEAL_MS : REVEAL_MS);
+export const revealMsOf = (mode: ModeId): number =>
+  MODES[mode].revealMs ?? (MODES[mode].lockIn ? LOCK_REVEAL_MS : REVEAL_MS);
+
+/** Time per round of a game. */
+export const roundTimeOf = (mode: ModeId): number => MODES[mode].timeMs ?? ROUND_TIME_MS;
 
 export function newRound(code: string, now: number, mode: ModeId = 'flags'): RoundState {
   return {
     mode,
     code,
     startedAt: now,
-    deadline: now + ROUND_TIME_MS,
+    deadline: now + roundTimeOf(mode),
     wrong: [0, 0],
     passed: [false, false],
     winner: null,
@@ -210,9 +217,11 @@ export function applyGuess(round: RoundState, slot: Slot, text: string, now: num
     if (round.locks?.[slot]) return 'ignored';
     const answer = mode.nameOf(text);
     if (!answer) return 'invalid';
-    const correct = mode.isCorrect(text, round.code);
-    (round.locks ??= [null, null])[slot] = { answer, at: now, correct };
-    if (!correct) round.wrong[slot]++;
+    const accuracy = mode.accuracy?.(text, round.code);
+    // Estimates are only right or wrong once both are in (the closer one wins); see scoreEstimates.
+    const correct = accuracy === undefined ? mode.isCorrect(text, round.code) : false;
+    (round.locks ??= [null, null])[slot] = { answer, at: now, correct, ...(accuracy !== undefined && { accuracy }) };
+    if (!correct && accuracy === undefined) round.wrong[slot]++;
     if (allAnswered(round)) endRound(round, 'locked', now);
     return 'locked';
   }
@@ -255,7 +264,9 @@ function endRound(round: RoundState, end: RoundEnd, now: number) {
 /** Lock-in scoring; the round's winner is whoever scored more in it (null on equal points). */
 function scoreLocks(round: RoundState) {
   const locks = round.locks!;
-  const worth = MODES[round.mode ?? 'flags'].lockPoints;
+  const mode = MODES[round.mode ?? 'flags'];
+  if (mode.accuracy) return scoreEstimates(round);
+  const worth = mode.lockPoints;
   const points: [number, number] = [0, 0];
   let first: Slot | null = null;
   for (const s of [0, 1] as const) {
@@ -265,6 +276,23 @@ function scoreLocks(round: RoundState) {
     if (first === null || l.at < locks[first]!.at) first = s;
   }
   if (first !== null) points[first] += LOCK_SPEED_BONUS;
+  round.points = points;
+  round.winner = points[0] === points[1] ? null : points[0] > points[1] ? 0 : 1;
+}
+
+/**
+ * Estimation rounds: the closer answer scores 1 (both on a tie), a spot-on one 1 more. An answer that scored
+ * counts as right; the other one as a wrong answer (the match tiebreaker).
+ */
+function scoreEstimates(round: RoundState) {
+  const locks = round.locks!;
+  const points = duelEstimatePoints([locks[0]?.accuracy ?? null, locks[1]?.accuracy ?? null]) as [number, number];
+  for (const s of [0, 1] as const) {
+    const l = locks[s];
+    if (!l) continue;
+    l.correct = points[s] > 0;
+    if (!l.correct) round.wrong[s]++;
+  }
   round.points = points;
   round.winner = points[0] === points[1] ? null : points[0] > points[1] ? 0 : 1;
 }

@@ -449,14 +449,24 @@ export class Accounts extends DurableObject<Env> {
     const modes = {} as DailySummary['modes'];
     for (const mode of MODE_IDS) {
       const run = this.currentRun(userId, mode, now);
+      const board = run?.finishedAt != null ? this.board(date, mode, userId) : null;
       modes[mode] = {
         status: !run ? 'new' : run.finishedAt === null ? 'playing' : 'finished',
         score: run?.finishedAt != null ? run.score : null,
         timeMs: run?.finishedAt != null ? runTimeMs(run) : null,
-        rank: run?.finishedAt != null ? (this.board(date, mode, userId).you?.rank ?? null) : null,
+        rank: board?.you?.rank ?? null,
+        players: board?.players ?? this.finishedRuns(date, mode),
       };
     }
     return { date, nextAt: nextDayAt(now), modes, higher: this.higherSummary(userId, now) };
+  }
+
+  private finishedRuns(date: string, mode: ModeId): number {
+    return (
+      this.sql
+        .exec<{ n: number }>('SELECT COUNT(*) AS n FROM daily_runs WHERE date = ? AND mode = ? AND finished_at IS NOT NULL', date, mode)
+        .toArray()[0]?.n ?? 0
+    );
   }
 
   /** Start today's run for `mode`, or resume it. */

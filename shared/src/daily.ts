@@ -1,6 +1,7 @@
 // Single-player daily challenge: every account gets one run per game per (UTC) day.
 // Same countries for everyone that day. Pure rules, run by the Accounts Durable Object.
-import { COUNTDOWN_MS, ROUND_TIME_MS, ROUNDS_PER_GAME, type GuessOutcome } from './game';
+import { COUNTDOWN_MS, ROUND_TIME_MS, ROUNDS_PER_GAME, roundTimeOf, type GuessOutcome } from './game';
+import { estimatePoints } from './guess';
 import { focusOf } from './landmarkRules';
 import { MODES, itemInfo, type ModeId } from './modes';
 
@@ -27,6 +28,8 @@ export interface SoloRound {
   points: number;
   /** Lock-in modes: the answer given */
   given?: string;
+  /** Estimation games: how close the answer was, 0…1 */
+  accuracy?: number;
 }
 
 export interface DailyRun {
@@ -56,8 +59,8 @@ export function soloPoints(elapsedMs: number, wrong: number): number {
   return Math.max(SOLO_MIN_POINTS, pts);
 }
 
-function newSoloRound(code: string, token: string, startsAt: number): SoloRound {
-  return { code, token, startsAt, deadline: startsAt + ROUND_TIME_MS, wrong: 0, end: null, endedAt: null, points: 0 };
+function newSoloRound(code: string, token: string, startsAt: number, mode: ModeId): SoloRound {
+  return { code, token, startsAt, deadline: startsAt + roundTimeOf(mode), wrong: 0, end: null, endedAt: null, points: 0 };
 }
 
 /** A fresh run; the first round starts after the usual countdown. */
@@ -66,7 +69,7 @@ export function newDailyRun(date: string, mode: ModeId, codes: string[], now: nu
     date,
     mode,
     codes,
-    rounds: [newSoloRound(codes[0], token, now + COUNTDOWN_MS)],
+    rounds: [newSoloRound(codes[0], token, now + COUNTDOWN_MS, mode)],
     startedAt: now,
     finishedAt: null,
     score: 0,
@@ -85,7 +88,9 @@ function endSoloRound(run: DailyRun, end: SoloEnd, now: number) {
   r.end = end;
   r.endedAt = now;
   const m = MODES[run.mode];
-  if (end === 'correct') {
+  // Estimation games: points for accuracy, whatever the speed.
+  if (r.accuracy !== undefined) r.points = estimatePoints(r.accuracy);
+  else if (end === 'correct') {
     r.points = soloPoints(now - r.startsAt, r.wrong);
     // Pins: a bigger circle is worth less.
     if (m.lockPoints && r.given) r.points = Math.round((r.points * m.lockPoints(r.given)) / m.maxLockPoints!);
@@ -116,6 +121,8 @@ export function soloGuess(run: DailyRun, round: number, text: string, now: numbe
     const given = mode.nameOf(text);
     if (!given) return 'invalid';
     r.given = given;
+    const accuracy = mode.accuracy?.(text, r.code);
+    if (accuracy !== undefined) r.accuracy = accuracy;
     const correct = mode.isCorrect(text, r.code);
     endSoloRound(run, correct ? 'correct' : 'wrong', now);
     return correct ? 'correct' : 'wrong';
@@ -148,7 +155,7 @@ export function soloNext(run: DailyRun, round: number, now: number, token: strin
   settleRun(run, now);
   const r = currentOf(run);
   if (round !== run.rounds.length || !r.end || run.rounds.length >= run.codes.length) return false;
-  run.rounds.push(newSoloRound(run.codes[run.rounds.length], token, now));
+  run.rounds.push(newSoloRound(run.codes[run.rounds.length], token, now, run.mode));
   return true;
 }
 
@@ -167,6 +174,8 @@ export interface SoloRoundView {
   detail: string | null;
   /** Lock-in modes: what the player answered */
   given: string | null;
+  /** Estimation games: how close the answer was, 0…1 (null otherwise, or without an answer) */
+  accuracy: number | null;
   end: SoloEnd;
   wrong: number;
   points: number;
@@ -206,6 +215,7 @@ function roundView(mode: ModeId, r: SoloRound): SoloRoundView {
     code: r.code,
     ...itemInfo(mode, r.code),
     given: r.given ?? null,
+    accuracy: r.accuracy ?? null,
     end: r.end!,
     wrong: r.wrong,
     points: r.points,

@@ -1022,6 +1022,7 @@ em {
 .t-soon { --tile: #cdb2f7; --tile-edge: #a98bd6; }
 .t-landmarks { --tile: #7cc4e8; --tile-edge: #549fc6; }
 .t-languages { --tile: #cdb2f7; --tile-edge: #a98bd6; }
+.t-guess { --tile: #f5a97f; --tile-edge: #d4845a; }
 
 .gt-main, .gt-btn {
   border: 0; font: inherit; color: var(--ink);
@@ -2161,3 +2162,89 @@ html.map-fs-open, html.map-fs-open body { overflow: hidden; overscroll-behavior:
     font-size: 0.8rem;
   }
 }
+/* ---------- GeoGuesser ---------- */
+.flag-frame.question-prompt {
+  width: 100%;
+  aspect-ratio: auto;
+  min-height: 150px;
+}
+.question-card {
+  margin: 0;
+  width: 100%;
+  padding: 22px 24px 24px;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 14px 30px rgba(40, 30, 10, 0.12), 0 2px 6px rgba(40, 30, 10, 0.08);
+  text-align: center;
+  animation: pop 0.25s ease-out;
+}
+.qc-head { display: flex; justify-content: center; align-items: center; gap: 10px; margin-bottom: 8px; }
+.qc-icon { font-size: 1.8rem; line-height: 1; }
+.qc-flag { height: 26px; border-radius: 4px; box-shadow: 0 1px 4px rgba(0, 0, 0, 0.18); }
+.question-card blockquote {
+  margin: 0;
+  font-size: clamp(1.15rem, 4vw, 1.5rem);
+  font-weight: 700;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+.question-card figcaption { display: flex; flex-direction: column; align-items: center; gap: 3px; margin-top: 14px; }
+.qc-answer {
+  font-size: clamp(1.5rem, 5.5vw, 2.1rem);
+  font-weight: 800;
+  color: var(--green);
+  font-variant-numeric: tabular-nums;
+}
+.qc-alt { font-size: 0.85rem; color: var(--muted); }
+.qc-note { margin-top: 6px; font-size: 0.92rem; color: #4b5048; font-style: italic; }
+.qc-source { font-size: 0.75rem; color: var(--muted); }
+
+.number-input { width: min(460px, 100%); display: flex; flex-direction: column; gap: 6px; }
+.ni-row { display: flex; gap: 10px; align-items: stretch; }
+.ni-row .btn { border-radius: 999px; min-height: 54px; }
+.ni-field { position: relative; flex: 1; min-width: 0; }
+.ni-field .guess-input { padding-right: 96px; font-variant-numeric: tabular-nums; font-size: 1.15rem; }
+.ni-unit {
+  position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+  padding: 6px 10px; border-radius: 999px; border: 0;
+  background: #f1ece0; color: var(--ink); font: inherit; font-weight: 700; font-size: 0.9rem;
+  white-space: nowrap;
+}
+.ni-unit.switch { cursor: pointer; background: #e3f3e7; color: var(--green); }
+.ni-unit.switch:hover { filter: brightness(0.96); }
+.ni-unit.switch span { opacity: 0.7; margin-left: 2px; }
+.ni-preview { margin: 0; min-height: 1.3em; text-align: center; font-variant-numeric: tabular-nums; }
+
+.lock-lines.estimates {
+  flex-direction: column; flex-wrap: nowrap; align-items: stretch;
+  width: 100%; max-width: 540px; margin-inline: auto; align-self: center;
+}
+.lock-lines.estimates li { justify-content: flex-start; flex-wrap: nowrap; border-radius: 12px; padding: 6px 12px; min-width: 0; }
+.lock-lines.estimates .ll-name { flex: none; }
+.lock-lines.estimates .ll-off { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lock-lines.estimates .ll-points { flex: none; }
+.lock-lines.estimates li.spot { background: #d6f0dc; }
+.lock-lines.estimates .ll-answer { font-weight: 800; font-variant-numeric: tabular-nums; }
+.ll-off { font-size: 0.85rem; opacity: 0.85; }
+.lock-lines.estimates .ll-points { margin-left: auto; }
+
+.top-banner {
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  margin: 6px auto 4px; padding: 10px 22px; border-radius: 14px;
+  background: #fff4d6; color: #7a5a00;
+}
+.top-banner strong { font-size: 1.6rem; font-weight: 800; }
+.top-pct {
+  display: inline-block; padding: 2px 8px; border-radius: 999px;
+  background: #fff4d6; color: #7a5a00; font-size: 0.78rem; font-weight: 700;
+}
+
+.estimate-rounds { list-style: none; margin: 0; padding: 0; display: grid; gap: 14px; }
+.estimate-rounds > li { display: grid; grid-template-columns: 2em 1fr; gap: 8px; align-items: start; }
+.er-num { font-weight: 800; color: var(--muted); padding-top: 18px; text-align: center; }
+.er-body { display: grid; gap: 8px; }
+.er-body .question-card { padding: 14px 16px; box-shadow: 0 2px 8px rgba(40, 30, 10, 0.08); animation: none; }
+.er-body .question-card blockquote { font-size: 1rem; }
+.er-body .qc-answer { font-size: 1.3rem; }
+.unit-switch { margin: 0; }
+.unit-switch button { flex: none; }

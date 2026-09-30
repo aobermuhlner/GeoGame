@@ -120,6 +120,8 @@ export interface RoundView {
 export interface LockView {
   answer: string;
   correct: boolean;
+  /** Estimation games: how close it was, 0…1 (null otherwise) */
+  accuracy: number | null;
 }
 
 export interface RoomView {
