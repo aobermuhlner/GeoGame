@@ -27,6 +27,7 @@ import {
   ranksOf,
   revealedPair,
   settleGroupRound,
+  shuffleGames,
   smallestPool,
   tallyOf,
   type ClientMessage,
@@ -88,6 +89,8 @@ export interface GroupState {
   regions: RegionId[];
   modes: GameId[];
   roundCounts: RoundCounts;
+  /** Play the games in a random order (drawn when each match starts; absent in rooms stored before it existed) */
+  shuffle?: boolean;
   game: GameState | null;
   emptySince: number | null;
 }
@@ -273,6 +276,11 @@ export class GroupRoom extends DurableObject<Env> {
         s.roundCounts = { ...s.roundCounts, [msg.game]: msg.rounds };
         break;
 
+      case 'setShuffle':
+        if (!hostOnly('pick the games')) return;
+        s.shuffle = msg.shuffle;
+        break;
+
       case 'start': {
         if (!hostOnly('start')) return;
         if (s.players.filter((p) => p.connected).length < GROUP_MIN_PLAYERS)
@@ -362,7 +370,8 @@ export class GroupRoom extends DurableObject<Env> {
 
   private startMatch(now: number) {
     const s = this.state!;
-    const games = s.modes;
+    // Random order: a new one every match.
+    const games = s.shuffle ? shuffleGames(s.modes) : s.modes;
     const counts = s.roundCounts;
     const picked = pickStages(s.regions, games.filter(isModeId), (m: ModeId) => counts[m]);
     const pool = countriesInRegions(s.regions);
@@ -588,6 +597,7 @@ export class GroupRoom extends DurableObject<Env> {
       countryCount: countriesInRegions(s.regions).length,
       modes: g ? g.stages : s.modes,
       roundCounts: s.roundCounts,
+      shuffle: !!s.shuffle,
       stage: g && span ? Math.max(0, g.stages.indexOf(games[at])) : 0,
       stageRound: g && span && !counting ? g.current - span.start + 1 : 0,
       stageRounds: span?.rounds ?? s.roundCounts[s.modes[0]],

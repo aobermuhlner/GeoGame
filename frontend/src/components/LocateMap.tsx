@@ -26,6 +26,15 @@ interface Props {
   extraControl?: ComponentChildren;
   /** Landmark id: a pin on its spot (Landmarks reveal) */
   pin?: string | null;
+  /**
+   * Pin mode (Landmarks): called with the tapped point in map units, anywhere on the map (no country
+   * picking, no hover highlight).
+   */
+  onTap?: (x: number, y: number) => void;
+  /** Drawn over the map, in map units; `u` = screen px per map unit (for constant on-screen sizes) */
+  layer?: (u: number) => ComponentChildren;
+  /** Animate the view to show this box [x0, y0, x1, y1] (map units) */
+  focusBox?: readonly number[] | null;
 }
 
 type MapData = typeof LOCATE_MAP;
@@ -53,6 +62,9 @@ export function LocateMap({
   rotated = false,
   extraControl,
   pin,
+  onTap,
+  layer,
+  focusBox,
 }: Props) {
   const [map, setMap] = useState<MapData | null>(null);
   const [view, setView] = useState<View>({ k: 1, x: 0, y: 0 });
@@ -215,7 +227,12 @@ export function LocateMap({
     const g = gesture.current;
     if (pointers.current.size === 0) {
       gesture.current = null;
-      if (g && !g.moved && g.code && !disabled) onPick?.(g.code);
+      if (!g || g.moved || disabled) return;
+      if (onTap) {
+        const [px, py] = toMap(e.clientX, e.clientY);
+        const v = viewRef.current;
+        onTap((px - v.x) / v.k, (py - v.y) / v.k);
+      } else if (g.code) onPick?.(g.code);
     }
   }
 
@@ -254,6 +271,11 @@ export function LocateMap({
     const c = map.countries.find((x) => x.c === focus);
     if (c) animateTo(fit(c.b, 90, 6));
   }, [focus, map]);
+
+  const boxKey = focusBox?.join(',');
+  useEffect(() => {
+    if (map && focusBox) animateTo(fit(focusBox, 60, 8));
+  }, [boxKey, map]);
 
   // New round: back to the start view.
   useEffect(() => {
@@ -297,7 +319,7 @@ export function LocateMap({
     <div class="locate-wrap" style={{ aspectRatio: `${W} / ${H}`, '--ar': W / H }}>
       <svg
         ref={svgRef}
-        class={`locate-map${disabled ? ' disabled' : ''}`}
+        class={`locate-map${disabled ? ' disabled' : ''}${onTap ? ' pin-mode' : ''}`}
         viewBox={`0 0 ${W} ${H}`}
         role="img"
         aria-label="World map: click the country you are asked for. Scroll or pinch to zoom, drag to pan."
@@ -307,6 +329,7 @@ export function LocateMap({
         onPointerCancel={onPointerUp}
         onPointerLeave={() => setHover(null)}
         onPointerOver={(e) => {
+          if (onTap) return;
           const code = (e.target as Element).closest?.('[data-c]')?.getAttribute('data-c') ?? null;
           if (!showNames) setHover(code ? { code, x: 0, y: 0 } : null);
         }}
@@ -335,6 +358,7 @@ export function LocateMap({
               <circle cy="-18" r="3.8" />
             </g>
           )}
+          {layer?.(u)}
         </g>
       </svg>
 

@@ -6,6 +6,7 @@ export * from './modes';
 export * from './landmarks';
 export * from './landmarkMeta';
 export * from './landmarkRules';
+export * from './pin';
 export * from './languages';
 export * from './sentencesData';
 export * from './languageRules';

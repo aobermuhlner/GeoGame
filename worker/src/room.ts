@@ -39,6 +39,7 @@ import {
   pickStages,
   pickStagesFrom,
   scoresOf,
+  shuffleGames,
   stageAt,
   wrongTotalsOf,
   type ClientMessage,
@@ -151,6 +152,8 @@ export interface RoomState {
   kind?: 'classic' | 'higher';
   /** Rounds per game chosen by the host (absent in rooms stored before it existed → defaults) */
   roundCounts?: Partial<RoundCounts>;
+  /** Play the games in a random order (drawn when each match starts) */
+  shuffle?: boolean;
   game: GameState | null;
   /** Set for rooms made by the matchmaker: fixed seats, one match, rated when it ends */
   ranked?: RankedState;
@@ -382,6 +385,7 @@ export class Room extends DurableObject<Env> {
       'setRegions',
       'setModes',
       'setRounds',
+      'setShuffle',
       'ready',
       'start',
       'rematch',
@@ -406,6 +410,12 @@ export class Room extends DurableObject<Env> {
         if (slot !== 0 || s.phase !== 'lobby')
           return this.sendError(ws, 'not_allowed', 'Only the host can pick the games');
         s.roundCounts = { ...s.roundCounts, [msg.game]: msg.rounds };
+        break;
+
+      case 'setShuffle':
+        if (slot !== 0 || s.phase !== 'lobby')
+          return this.sendError(ws, 'not_allowed', 'Only the host can pick the games');
+        s.shuffle = msg.shuffle;
         break;
 
       case 'ready':
@@ -527,7 +537,8 @@ export class Room extends DurableObject<Env> {
 
   private startCountdown(now: number) {
     const s = this.state!;
-    const games = gamesOf(s);
+    // Random order: a new one every match (rematches too).
+    const games = s.shuffle && !s.ranked ? shuffleGames(gamesOf(s)) : gamesOf(s);
     const counts = roundCountsOf(s);
     const modes = games.filter(isModeId);
     const count = (m: ModeId) => counts[m];
@@ -897,6 +908,7 @@ export class Room extends DurableObject<Env> {
       forfeitReason: g?.forfeitReason ?? null,
       ranked: s.ranked ? rankedView(s.ranked) : null,
       roundCounts: counts,
+      shuffle: !!s.shuffle && !s.ranked,
       higher: this.duelView(),
       myLock: null,
     };

@@ -17,6 +17,7 @@ import {
   pickFlags,
   pickStages,
   resolveGuess,
+  shuffleGames,
   stageAt,
   suggestCapitals,
   suggestCountries,
@@ -245,6 +246,20 @@ describe('multi-game matches', () => {
     expect(stageAt(modes, 19)).toMatchObject({ stage: 1, start: 10 });
     expect(stageAt(modes, -1)).toMatchObject({ stage: 0 });
   });
+  it('shuffleGames reorders without losing or repeating a game', () => {
+    const games = ['flags', 'capitals', 'locate', 'higher'] as const;
+    let seed = 7;
+    const rng = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+    const orders = new Set<string>();
+    for (let i = 0; i < 50; i++) {
+      const out = shuffleGames(games, rng);
+      expect([...out].sort()).toEqual([...games].sort());
+      orders.add(out.join());
+    }
+    expect(orders.size).toBeGreaterThan(5);
+    expect(games).toEqual(['flags', 'capitals', 'locate', 'higher']); // input untouched
+  });
+
   it('setModes is validated and put into canonical order', () => {
     expect(parseClientMessage(JSON.stringify({ t: 'setModes', modes: ['capitals', 'flags'] }))).toEqual({
       t: 'setModes',

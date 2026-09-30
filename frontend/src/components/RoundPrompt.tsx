@@ -109,11 +109,14 @@ export function LockLines({
   points,
   names,
   me,
+  label = (a) => a,
 }: {
   locks: [LockView | null, LockView | null];
   points: [number, number];
   names: [string, string];
   me: 0 | 1;
+  /** How an answer is shown (pins: "312 km off · 500 km circle") */
+  label?: (answer: string) => string;
 }) {
   const order = me === 0 ? ([0, 1] as const) : ([1, 0] as const);
   return (
@@ -123,7 +126,7 @@ export function LockLines({
         return (
           <li key={s} class={l ? (l.correct ? 'ok' : 'bad') : 'none'}>
             <span class="ll-name">{s === me ? 'You' : names[s]}</span>
-            <span class="ll-answer">{l ? l.answer : 'no answer'}</span>
+            <span class="ll-answer">{l ? label(l.answer) : 'no answer'}</span>
             <span class="ll-mark">{l ? (l.correct ? '✓' : '✗') : '—'}</span>
             {points[s] > 0 && <span class="ll-points">+{points[s]}</span>}
           </li>

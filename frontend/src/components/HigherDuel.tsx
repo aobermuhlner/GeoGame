@@ -138,6 +138,7 @@ export function HigherDuelScreen({
     players: room.players,
     ranked: null,
     modes: room.modes,
+    shuffle: room.shuffle,
   };
 
   return (
@@ -151,7 +152,7 @@ export function HigherDuelScreen({
             {multi ? 'Higher or Lower' : GEO_KNOWLEDGE_LABEL} <em>· {d.regularRounds} rounds</em>
           </h1>
         </header>
-        {multi && <StageSteps modes={room.modes} current={room.stage} />}
+        {multi && <StageSteps modes={room.modes} current={room.stage} hideAhead={room.shuffle} />}
         <div class="status-row">
           <span class="round-label">
             {d.tiebreak ? `Sudden death · ${sdRound}` : `Round ${Math.max(1, d.round)}/${d.regularRounds}`}

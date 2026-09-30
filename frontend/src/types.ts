@@ -59,6 +59,8 @@ export interface GameVM {
   totalRounds: number;
   /** Games of this match, in play order (Higher or Lower stages are played on their own screen) */
   modes: GameId[];
+  /** The games come in a random order: the ones still to come are not shown */
+  shuffle?: boolean;
   /** 0-based index into `modes` of the minigame being played or about to start */
   stage: number;
   /** 1-based round within the current minigame (0 during its countdown) */

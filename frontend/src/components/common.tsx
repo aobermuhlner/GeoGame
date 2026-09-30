@@ -57,22 +57,33 @@ export function formatDuration(ms: number): string {
   return `${m}:${(t - m * 60).toFixed(1).padStart(4, '0')}`;
 }
 
-/** "① Flags → ② Capitals" progress through the minigames of a match. */
-export function StageSteps({ modes, current }: { modes: GameId[]; current: number }) {
+/**
+ * "① Flags → ② Capitals" progress through the minigames of a match. With `hideAhead` (random order) the
+ * games still to come show as "?".
+ */
+export function StageSteps({ modes, current, hideAhead }: { modes: GameId[]; current: number; hideAhead?: boolean }) {
   return (
     <ol class="stage-steps" aria-label="Games in this match">
-      {modes.map((m, i) => (
-        <li
-          key={m}
-          class={i === current ? 'now' : i < current ? 'done' : ''}
-          aria-current={i === current ? 'step' : undefined}
-        >
-          <span class="step-num">{i < current ? '✓' : i + 1}</span>
-          {gameLabel(m)}
-        </li>
-      ))}
+      {modes.map((m, i) => {
+        const hidden = hideAhead && i > current;
+        return (
+          <li
+            key={hidden ? `?${i}` : m}
+            class={i === current ? 'now' : i < current ? 'done' : hidden ? 'mystery' : ''}
+            aria-current={i === current ? 'step' : undefined}
+          >
+            <span class="step-num">{i < current ? '✓' : i + 1}</span>
+            {hidden ? <span aria-label="Surprise game">?</span> : gameLabel(m)}
+          </li>
+        );
+      })}
     </ol>
   );
+}
+
+/** "Flags · Capitals" for an intro; in random order just how many games are coming. */
+export function gamesSummary(modes: GameId[], shuffle?: boolean): string {
+  return shuffle && modes.length > 1 ? `${modes.length} games in random order` : modes.map(gameLabel).join(' · ');
 }
 
 /** Where the photo, sentence and data credits live (their own page, opened in a new tab). */

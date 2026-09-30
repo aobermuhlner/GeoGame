@@ -852,6 +852,14 @@ em {
   font-size: 0.75rem; font-weight: 700; color: #fff; background: var(--green);
 }
 .mode-order:empty { visibility: hidden; }
+.shuffle-opt {
+  display: flex; align-items: center; gap: 10px; padding: 10px 14px; margin: 0 0 10px;
+  border: 1.5px dashed var(--line); border-radius: 12px; cursor: pointer; color: #8a8a80;
+}
+.shuffle-opt.on { border-style: solid; border-color: #e0bf5c; background: #fbf3dc; color: var(--ink); }
+.shuffle-opt.locked { cursor: default; }
+.shuffle-opt input { accent-color: var(--green); width: 17px; height: 17px; margin: 0; flex: none; }
+.shuffle-icon { width: 22px; flex: none; text-align: center; font-size: 1.05rem; }
 .mode-text { display: flex; flex-direction: column; min-width: 0; }
 .m-name { font-weight: 700; }
 .m-desc { font-size: 0.8rem; color: var(--muted); }
@@ -880,6 +888,7 @@ em {
 .stage-steps li.now { color: var(--green); }
 .stage-steps li.now .step-num { background: var(--green); border-color: var(--green); color: #fff; }
 .stage-steps li.done { color: var(--ink); }
+.stage-steps li.mystery { color: #b7b1a2; }
 
 .countdown.intro {
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
@@ -2008,4 +2017,147 @@ html.map-fs-open, html.map-fs-open body { overflow: hidden; overscroll-behavior:
 @media (prefers-reduced-motion: reduce) {
   .g-row, .g-gained, .g-move-wrap { transition: none; }
   .g-step, .g-crown, .g-gain, .g-thinking { animation: none; }
+}
+
+/* ---------- Landmarks: pin + circle on the map ---------- */
+.pin-board {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 6px;
+}
+.pin-map {
+  position: relative;
+}
+.locate-map.pin-mode {
+  cursor: crosshair;
+}
+.locate-map.pin-mode.disabled {
+  cursor: grab;
+}
+/* GeoLocate's click helpers for tiny countries mean nothing here */
+.locate-map.pin-mode .lm-markers,
+.locate-map.pin-mode .lm-zones {
+  display: none;
+}
+.pin-tip {
+  position: absolute;
+  left: 50%;
+  top: 10px;
+  transform: translateX(-50%);
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.92);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--muted);
+  pointer-events: none;
+  white-space: nowrap;
+}
+.pb-ring {
+  vector-effect: non-scaling-stroke;
+  stroke-width: 2;
+  fill: rgba(47, 111, 214, 0.14);
+  stroke: #2f6fd6;
+}
+.pb-ring.locked {
+  stroke-dasharray: 6 4;
+}
+.pb-ring.opp {
+  fill: rgba(140, 90, 200, 0.1);
+  stroke: #8c5ac8;
+}
+.pb-ring.ok {
+  stroke-width: 2.5;
+}
+.pb-ring.bad {
+  fill: none;
+  stroke-dasharray: 5 4;
+}
+.pb-miss {
+  vector-effect: non-scaling-stroke;
+  stroke: rgba(40, 40, 40, 0.45);
+  stroke-width: 1.5;
+  stroke-dasharray: 3 4;
+}
+.pb-pin {
+  pointer-events: none;
+}
+.pb-pin path {
+  fill: #2f6fd6;
+  stroke: #fff;
+  stroke-width: 1.5;
+}
+.pb-pin.opp path {
+  fill: #8c5ac8;
+}
+.pb-pin.target path {
+  fill: var(--red);
+}
+.pb-pin circle {
+  fill: #fff;
+}
+.pb-pin text {
+  font: 700 12px system-ui, sans-serif;
+  fill: #222;
+  paint-order: stroke;
+  stroke: #fff;
+  stroke-width: 3px;
+}
+.pin-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 8px 12px;
+}
+.pin-radii {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+}
+.pin-radius {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 70px;
+  padding: 5px 10px;
+  border: 2px solid #e4dfd2;
+  border-radius: 12px;
+  background: #fff;
+  font: inherit;
+  line-height: 1.2;
+  cursor: pointer;
+}
+.pin-radius strong {
+  font-size: 0.9rem;
+}
+.pin-radius span {
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+.pin-radius.on {
+  border-color: #2f6fd6;
+  background: #eaf1fc;
+}
+.pin-radius:disabled {
+  cursor: default;
+  opacity: 0.6;
+}
+.pin-radius.on:disabled {
+  opacity: 1;
+}
+.pin-lock {
+  min-width: 120px;
+}
+@media (max-width: 520px) {
+  .pin-radius {
+    min-width: 0;
+    padding: 4px 7px;
+  }
+  .pin-radius strong {
+    font-size: 0.8rem;
+  }
 }

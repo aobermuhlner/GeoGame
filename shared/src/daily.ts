@@ -84,9 +84,14 @@ function endSoloRound(run: DailyRun, end: SoloEnd, now: number) {
   const r = currentOf(run);
   r.end = end;
   r.endedAt = now;
-  if (end === 'correct') r.points = soloPoints(now - r.startsAt, r.wrong);
+  const m = MODES[run.mode];
+  if (end === 'correct') {
+    r.points = soloPoints(now - r.startsAt, r.wrong);
+    // Pins: a bigger circle is worth less.
+    if (m.lockPoints && r.given) r.points = Math.round((r.points * m.lockPoints(r.given)) / m.maxLockPoints!);
+  }
   // Map modes: wrong clicks cost points even when the country is never found.
-  else if (MODES[run.mode].maxWrong !== undefined) r.points = -SOLO_WRONG_PENALTY * r.wrong;
+  else if (m.maxWrong !== undefined) r.points = -SOLO_WRONG_PENALTY * r.wrong;
   run.score = run.rounds.reduce((n, x) => n + x.points, 0);
   if (run.rounds.length >= run.codes.length) run.finishedAt = now;
 }

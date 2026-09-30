@@ -96,6 +96,9 @@ function finishEntry(r: GroupRound, e: Entry, end: EntryEnd, now: number) {
   e.end = end;
   e.at = now;
   e.points = end === 'correct' ? groupPoints(now - r.startedAt, r.deadline - r.startedAt, e.wrong) : 0;
+  // Pins: a bigger circle is worth less.
+  const m = r.game === 'higher' ? null : MODES[r.game];
+  if (m?.lockPoints && e.points && e.answer) e.points = Math.round((e.points * m.lockPoints(e.answer)) / m.maxLockPoints!);
 }
 
 const open = (r: GroupRound, i: number, now: number) => !r.ended && now < r.deadline && !!r.entries[i] && !r.entries[i].end;
@@ -268,6 +271,8 @@ export interface GroupView {
   /** Selected games (lobby) or the games of the running match, in play order */
   modes: GameId[];
   roundCounts: RoundCounts;
+  /** Games are played in a random order (the games still to come stay hidden) */
+  shuffle: boolean;
   /** 0-based index into `modes` of the game being played, about to start, or just finished (standings) */
   stage: number;
   /** 1-based round within the game (0 during its countdown) */

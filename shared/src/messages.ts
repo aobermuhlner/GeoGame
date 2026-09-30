@@ -30,6 +30,16 @@ export const HIGHER_GAME = {
 };
 export const gameLabel = (g: GameId): string => (isModeId(g) ? MODES[g].label : HIGHER_GAME.label);
 
+/** The games in a random play order (the lobby's "Random order" option). */
+export function shuffleGames(games: readonly GameId[], rng: () => number = Math.random): GameId[] {
+  const out = [...games];
+  for (let i = out.length - 1; i > 0; i--) {
+    const j = Math.floor(rng() * (i + 1));
+    [out[i], out[j]] = [out[j], out[i]];
+  }
+  return out;
+}
+
 /** Rounds each game lasts in a friend lobby (host's choice; ranked always uses the defaults). */
 export type RoundCounts = Record<GameId, number>;
 export const MIN_GAME_ROUNDS = 1;
@@ -48,6 +58,8 @@ export type ClientMessage =
   | { t: 'setModes'; modes: GameId[] }
   /** How many rounds a game lasts (host only, lobby only) */
   | { t: 'setRounds'; game: GameId; rounds: number }
+  /** Play the games in a random order, drawn anew for every match (host only, lobby only) */
+  | { t: 'setShuffle'; shuffle: boolean }
   | { t: 'ready'; ready: boolean }
   | { t: 'start' }
   | { t: 'guess'; round: number; text: string }
@@ -150,6 +162,8 @@ export interface RoomView {
   ranked: RankedView | null;
   /** Rounds per game chosen in the lobby */
   roundCounts: RoundCounts;
+  /** Games are played in a random order (the games still to come stay hidden) */
+  shuffle: boolean;
   /** Higher or Lower state (matches with Higher or Lower rounds, once the match has started) */
   higher: DuelView | null;
 }
@@ -208,6 +222,8 @@ export function parseClientMessage(raw: unknown): ClientMessage | null {
     }
     case 'ready':
       return typeof m.ready === 'boolean' ? { t: 'ready', ready: m.ready } : null;
+    case 'setShuffle':
+      return typeof m.shuffle === 'boolean' ? { t: 'setShuffle', shuffle: m.shuffle } : null;
     case 'guess':
       if (!isInt(m.round) || typeof m.text !== 'string' || m.text.length > 80) return null;
       return { t: 'guess', round: m.round, text: m.text };

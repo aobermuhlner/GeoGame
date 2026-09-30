@@ -29,7 +29,7 @@ export interface Lock {
   correct: boolean;
 }
 
-/** Lock-in rounds: a correct answer scores 1, and the quicker of the correct answers 1 more. */
+/** Lock-in rounds: a correct answer scores 1 (pins: 1–5 by radius), and the quicker of the correct answers 1 more. */
 export const LOCK_POINTS = 1;
 export const LOCK_SPEED_BONUS = 1;
 
@@ -255,12 +255,13 @@ function endRound(round: RoundState, end: RoundEnd, now: number) {
 /** Lock-in scoring; the round's winner is whoever scored more in it (null on equal points). */
 function scoreLocks(round: RoundState) {
   const locks = round.locks!;
+  const worth = MODES[round.mode ?? 'flags'].lockPoints;
   const points: [number, number] = [0, 0];
   let first: Slot | null = null;
   for (const s of [0, 1] as const) {
     const l = locks[s];
     if (!l?.correct) continue;
-    points[s] = LOCK_POINTS;
+    points[s] = worth ? worth(l.answer) : LOCK_POINTS;
     if (first === null || l.at < locks[first]!.at) first = s;
   }
   if (first !== null) points[first] += LOCK_SPEED_BONUS;

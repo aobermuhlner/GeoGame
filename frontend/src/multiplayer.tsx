@@ -110,6 +110,7 @@ function toVM(o: Online): GameVM | null {
     round: Math.max(1, room.round),
     totalRounds: room.totalRounds,
     modes: room.modes,
+    shuffle: room.shuffle,
     stage: room.stage,
     stageRound: room.stageRound,
     stageRounds: room.stageRounds,
@@ -433,6 +434,7 @@ export function Multiplayer({ name, onImmersive }: { name: string; onImmersive: 
             onRegions={(regions) => c.send({ t: 'setRegions', regions })}
             onModes={(modes) => c.send({ t: 'setModes', modes })}
             onRounds={(game, rounds) => c.send({ t: 'setRounds', game, rounds })}
+            onShuffle={(shuffle) => c.send({ t: 'setShuffle', shuffle })}
             onLeave={() => leave()}
           />
         )}

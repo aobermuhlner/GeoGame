@@ -1,14 +1,14 @@
 import { useEffect, useRef } from 'preact/hooks';
-import { COUNTDOWN_MS, DIVISIONS, MODES, gameLabel, type RankedPlayerView } from '@flagduel/shared';
+import { COUNTDOWN_MS, DIVISIONS, MODES, type RankedPlayerView } from '@flagduel/shared';
 import type { GameVM } from '../types';
 import { Emblem } from './Emblem';
-import { useNow } from './common';
+import { gamesSummary, useNow } from './common';
 
 /** How long before the intro ends it starts fading into the countdown */
 const FADE_MS = 400;
 
 /** What the intro needs from a match (flag games pass their GameVM). */
-type IntroVM = Pick<GameVM, 'countdownEndsAt' | 'me' | 'modes' | 'ranked'> & {
+type IntroVM = Pick<GameVM, 'countdownEndsAt' | 'me' | 'modes' | 'shuffle' | 'ranked'> & {
   phase: string;
   history: readonly unknown[];
   players: readonly { name: string }[];
@@ -29,7 +29,7 @@ export function VsIntro({ vm, label }: { vm: IntroVM; label?: string }) {
   const me = vm.players[vm.me];
   const opp = vm.players[oppSlot];
   const ranked = vm.ranked ?? null;
-  const modes = vm.modes.map(gameLabel).join(' · ');
+  const modes = gamesSummary(vm.modes, vm.shuffle);
 
   return (
     <div

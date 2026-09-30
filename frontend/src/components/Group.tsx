@@ -10,6 +10,8 @@ import {
   MAX_GAME_ROUNDS,
   MIN_GAME_ROUNDS,
   MODES,
+  PIN_POINTS,
+  answerLabel,
   focusOf,
   gameLabel,
   groupTimeOf,
@@ -28,7 +30,8 @@ import { FlagImage } from './GameScreen';
 import { PairBoard, StatHeader, TimeBar, type PickTag } from './Higher';
 import { CopyInvite, GamesCard, RegionPicker, useGameSettings } from './Lobby';
 import { LocateBoard } from './LocateBoard';
-import { PhotoCredit, RevealMap, SentenceCard, ZoomPhoto } from './RoundPrompt';
+import { PinBoard } from './PinBoard';
+import { PhotoCredit, SentenceCard, ZoomPhoto } from './RoundPrompt';
 import { Logo, RegionChips, StageSteps, formatClock, useNow } from './common';
 
 /** One color per seat, for the avatars. */
@@ -144,6 +147,7 @@ export function GroupPlay({
           onRegions={(regions) => conn.send({ t: 'setRegions', regions })}
           onModes={(modes) => conn.send({ t: 'setModes', modes })}
           onRounds={(game, rounds) => conn.send({ t: 'setRounds', game, rounds })}
+          onShuffle={(shuffle) => conn.send({ t: 'setShuffle', shuffle })}
           onLeave={leave}
         />
       ) : room.phase === 'standings' ? (
@@ -174,6 +178,7 @@ function GroupLobby({
   onRegions,
   onModes,
   onRounds,
+  onShuffle,
   onLeave,
 }: {
   room: GroupView;
@@ -182,9 +187,10 @@ function GroupLobby({
   onRegions: (regions: RegionId[]) => void;
   onModes: (modes: GameId[]) => void;
   onRounds: (game: GameId, rounds: number) => void;
+  onShuffle: (shuffle: boolean) => void;
   onLeave: () => void;
 }) {
-  const set = useGameSettings(room, onRegions, onModes, onRounds);
+  const set = useGameSettings(room, onRegions, onModes, onRounds, onShuffle);
   const isHost = you === 0;
   const here = room.players.filter((p) => p.connected).length;
   const enough = here >= GROUP_MIN_PLAYERS;
@@ -252,14 +258,16 @@ function GroupLobby({
         modes={set.modes}
         counts={set.counts}
         totalRounds={set.totalRounds}
+        shuffle={set.shuffle}
         editable={isHost}
         hint={
           isHost
-            ? `Pick the games and how many rounds each lasts (${MIN_GAME_ROUNDS}–${MAX_GAME_ROUNDS}). They're played in this order.`
+            ? `Pick the games and how many rounds each lasts (${MIN_GAME_ROUNDS}–${MAX_GAME_ROUNDS}). ${set.shuffle ? 'They come in a random order.' : "They're played in this order."}`
             : `${host} picks the games.`
         }
         onToggle={set.toggleMode}
         onRounds={set.setRounds}
+        onShuffle={set.setShuffle}
       />
 
       <RegionPicker
@@ -361,7 +369,7 @@ function RoundResults({ room, you }: { room: GroupView; you: number }) {
   const lockIn = r.game === 'higher' || MODES[r.game].lockIn;
   const answerText = (e: GroupEntryView) => {
     if (r.game === 'higher' && e.answer && r.pair) return e.answer === r.pair.a ? r.pair.aName : r.pair.bName;
-    if (lockIn) return e.answer ?? (e.end === 'passed' ? 'passed' : 'no answer');
+    if (lockIn) return e.answer ? answerLabel(r.game as ModeId, e.answer, r.code) : e.end === 'passed' ? 'passed' : 'no answer';
     if (e.end === 'correct') return `${(e.timeMs! / 1000).toFixed(1)} s${e.wrong ? ` · ${e.wrong} wrong` : ''}`;
     if (e.end === 'passed') return 'passed';
     if (e.end === 'wrong') return 'out of tries';
@@ -431,7 +439,9 @@ function StatusLine({ room, you }: { room: GroupView; you: number }) {
     <div class="status-line muted hint">
       {done > 0
         ? `${done} of ${others.length} ${others.length === 1 ? 'player has' : 'players have'} answered`
-        : lockIn
+        : isModeId(game) && MODES[game].input === 'pin'
+          ? 'Pin it · small circle and quick scores most'
+          : lockIn
           ? 'One answer · right and quick scores most'
           : 'Everyone answers · the quicker, the more points'}
     </div>
@@ -473,7 +483,7 @@ function GroupTop({ room, you, toLocal }: { room: GroupView; you: number; toLoca
           {title} <em>· Everyone Answers</em>
         </h1>
       </header>
-      {room.modes.length > 1 && <StageSteps modes={room.modes} current={room.stage} />}
+      {room.modes.length > 1 && <StageSteps modes={room.modes} current={room.stage} hideAhead={room.shuffle} />}
       <div class="status-row">
         <span class="round-label">
           Round {Math.max(1, room.stageRound)}/{room.stageRounds}
@@ -610,8 +620,11 @@ function GroupGame({
     );
   }
 
+  const pin = mode.input === 'pin';
+  const reveal = room.phase === 'reveal' ? room.reveal : null;
+
   return (
-    <main class="stack">
+    <main class={`stack${pin ? ' wide' : ''}`}>
       <GroupTop room={room} you={you} toLocal={toLocal} />
       <section class="card game-card">
         <div class="round-badge" aria-label={`Round ${Math.max(1, room.stageRound)}`}>
@@ -626,22 +639,40 @@ function GroupGame({
           </p>
         )}
         <StatusLine room={room} you={you} />
-        {room.phase === 'reveal' && room.reveal?.game === 'landmarks' && room.reveal.country && (
-          <>
-            <RevealMap country={room.reveal.country} landmark={room.reveal.code} />
-            <PhotoCredit id={room.reveal.code} />
-          </>
-        )}
-        <div class="guess-row">
-          <CountryInput
+        {pin ? (
+          <PinBoard
+            roundKey={room.round}
             locked={locked}
-            focusKey={room.round}
-            onSubmit={onGuess}
-            suggest={mode.suggest}
-            placeholder={mode.placeholder}
-            submitLabel={mode.lockIn ? 'Lock in' : undefined}
+            onLock={onGuess}
+            mine={room.mine?.answer ?? null}
+            regions={room.regions}
+            worth={(i) => `${PIN_POINTS[i] * 20}%`}
+            reveal={
+              reveal?.game === 'landmarks'
+                ? {
+                    landmark: reveal.code,
+                    pins: reveal.entries.flatMap((e, seat) =>
+                      e.answer
+                        ? [{ answer: e.answer, correct: e.end === 'correct', me: seat === you, label: nameOf(room, seat, you) }]
+                        : [],
+                    ),
+                  }
+                : null
+            }
           />
-        </div>
+        ) : (
+          <div class="guess-row">
+            <CountryInput
+              locked={locked}
+              focusKey={room.round}
+              onSubmit={onGuess}
+              suggest={mode.suggest}
+              placeholder={mode.placeholder}
+              submitLabel={mode.lockIn ? 'Lock in' : undefined}
+            />
+          </div>
+        )}
+        {reveal?.game === 'landmarks' && <PhotoCredit id={reveal.code} />}
         {passBtn}
         <LeaveLink onLeave={onLeave} />
       </section>
@@ -802,7 +833,11 @@ function GroupStandings({
             />
           </div>
           <span class="muted small">
-            {next ? `Next up: ${gameLabel(next)} in ${secs} s` : `And the winner is… ${secs} s`}
+            {next
+              ? room.shuffle
+                ? `Next game in ${secs} s — which one is a surprise`
+                : `Next up: ${gameLabel(next)} in ${secs} s`
+              : `And the winner is… ${secs} s`}
           </span>
         </div>
         <LeaveLink onLeave={onLeave} />

@@ -90,6 +90,29 @@ describe('picking games and rounds', () => {
     expect((await internal(code)).game!.roundModes).toEqual([...Array(3).fill('flags'), ...Array(5).fill('capitals')]);
   });
 
+  it('random order: the host can shuffle the games; every match draws its own order', async () => {
+    const msg = (m: object) => parseClientMessage(JSON.stringify(m));
+    expect(msg({ t: 'setShuffle', shuffle: true })).toEqual({ t: 'setShuffle', shuffle: true });
+    expect(msg({ t: 'setShuffle', shuffle: 'yes' })).toBeNull();
+
+    const { code, host, guest } = await lobby();
+    const err = guest.c.next('error');
+    guest.c.send({ t: 'setShuffle', shuffle: true });
+    expect((await err).code).toBe('not_allowed');
+    const on = await host.c.state({ t: 'setShuffle', shuffle: true }, (s) => s.room.shuffle);
+    expect(on.room.modes).toEqual(['flags']); // the lobby keeps listing the games in their usual order
+
+    const all: GameId[] = ['flags', 'capitals', 'locate', 'languages'];
+    const playing = await start(code, host, guest, { flags: 1, capitals: 1, locate: 1, languages: 1 });
+    expect(playing.room.shuffle).toBe(true);
+    expect([...playing.room.modes].sort()).toEqual([...all].sort());
+    const st = await internal(code);
+    // Rounds follow the drawn order, one game after the other.
+    expect(st.game!.roundModes).toEqual(st.game!.stages);
+    expect(playing.room.stage).toBe(0);
+    expect(st.game!.roundModes![0]).toBe(playing.room.modes[0]);
+  });
+
   it('Higher or Lower alone uses the chosen number of regular rounds', async () => {
     const { code, host, guest } = await lobby();
     const playing = await start(code, host, guest, { higher: 1 });

@@ -206,7 +206,7 @@ export function Results({ vm, actions }: { vm: GameVM; actions: GameActions }) {
                   <th>#</th>
                   {MODES[mode].prompt !== 'sentence' && <th>{MODES[mode].prompt === 'photo' ? 'Photo' : 'Flag'}</th>}
                   <th class="left">
-                    {mode === 'capitals' ? 'Capital' : mode === 'languages' ? 'Language' : 'Country'}
+                    {mode === 'capitals' ? 'Capital' : mode === 'languages' ? 'Language' : mode === 'landmarks' ? 'Landmark' : 'Country'}
                   </th>
                   <th>{MODES[mode].lockIn ? 'Points' : 'Point'}</th>
                   <th title="Wrong guesses">

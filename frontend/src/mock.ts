@@ -2,7 +2,9 @@
 // here are named by ISO code, which is exactly what the real server avoids.
 import {
   COUNTDOWN_MS,
+  LANDMARK_META,
   MATCH_INTRO_MS,
+  PIN_RADII,
   MODES,
   ROUND_TIME_MS,
   STAGE_INTRO_MS,
@@ -10,6 +12,8 @@ import {
   applyPass,
   applyTimeout,
   decideMatch,
+  destination,
+  formatPin,
   focusOf,
   itemInfo,
   newRound,
@@ -152,7 +156,14 @@ export function startMockGame(opts: {
       // One answer: the right one if it knows, else a plausible wrong one.
       later(lazy ? ROUND_TIME_MS - 2000 : 3000 + Math.random() * 12000, () => {
         if (r.end || r !== rounds[current]) return;
-        const guess = knows ? m.answerOf(r.code) : m.prompt === 'sentence' ? 'Latin' : 'Atlantis';
+        const guess =
+          m.input === 'pin'
+            ? botPin(r.code, knows)
+            : knows
+              ? m.answerOf(r.code)
+              : m.prompt === 'sentence'
+                ? 'Latin'
+                : 'Atlantis';
         const out = applyGuess(r, 1, guess, Date.now());
         if (out === 'invalid' && applyPass(r, 1, Date.now())) finishRound();
         else if (r.end) finishRound();
@@ -230,4 +241,13 @@ export function startMockGame(opts: {
     leave: clearTimers,
     dispose: clearTimers,
   };
+}
+
+/** Landmarks: a pin some way off the spot (far off if the bot doesn't know it), with a random circle. */
+function botPin(landmark: string, knows: boolean): string {
+  const m = LANDMARK_META[landmark];
+  const off = knows ? Math.random() * 400 : 800 + Math.random() * 3000;
+  const [lat, lon] = destination(m?.lat ?? 0, m?.lon ?? 0, off, Math.random() * 360);
+  const km = PIN_RADII[Math.floor(Math.random() * PIN_RADII.length)];
+  return formatPin({ lat, lon, km });
 }

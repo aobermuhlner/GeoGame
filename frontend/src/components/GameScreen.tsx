@@ -1,9 +1,10 @@
 import { useState } from 'preact/hooks';
-import { COUNTDOWN_MS, MODES, ROUND_TIME_MS, focusOf, isModeId, type ModeId } from '@flagduel/shared';
+import { COUNTDOWN_MS, MODES, ROUND_TIME_MS, answerLabel, focusOf, isModeId, type ModeId } from '@flagduel/shared';
 import type { GameActions, GameVM } from '../types';
 import { CountryInput } from './CountryInput';
 import { LocateBoard } from './LocateBoard';
-import { LockLines, PhotoCredit, RevealMap, SentenceCard, ZoomPhoto } from './RoundPrompt';
+import { PinBoard } from './PinBoard';
+import { LockLines, PhotoCredit, SentenceCard, ZoomPhoto } from './RoundPrompt';
 import { Logo, RegionChips, StageSteps, formatClock, useNow } from './common';
 import { VsIntro } from './VsIntro';
 
@@ -37,7 +38,7 @@ export function TopCard({ vm }: { vm: GameVM }) {
           )}
         </h1>
       </header>
-      {vm.modes.length > 1 && <StageSteps modes={vm.modes} current={vm.stage} />}
+      {vm.modes.length > 1 && <StageSteps modes={vm.modes} current={vm.stage} hideAhead={vm.shuffle} />}
       <div class="status-row">
         <span class="round-label">
           Round {Math.max(1, vm.stageRound)}/{vm.stageRounds}
@@ -163,7 +164,7 @@ function StatusLine({ vm }: { vm: GameVM }) {
   const opp = vm.players[oppSlot];
   const now = useNow(opp.graceEndsAt !== null, 500);
   if (vm.reveal && MODES[vm.reveal.mode].lockIn) {
-    const { answer, end, mode, detail, locks, points } = vm.reveal;
+    const { answer, end, mode, detail, locks, points, code } = vm.reveal;
     const mine = points[vm.me];
     const theirs = points[oppSlot];
     return (
@@ -171,7 +172,13 @@ function StatusLine({ vm }: { vm: GameVM }) {
         <strong class="reveal-country">{answer}</strong>
         {mode === 'landmarks' && detail && <span class="reveal-of">{detail}</span>}
         {locks ? (
-          <LockLines locks={locks} points={points} names={[vm.players[0].name, vm.players[1].name]} me={vm.me} />
+          <LockLines
+            locks={locks}
+            points={points}
+            names={[vm.players[0].name, vm.players[1].name]}
+            me={vm.me}
+            label={(a) => answerLabel(mode, a, code)}
+          />
         ) : (
           <span class="reveal-who">{end === 'timeout' ? "Time's up — nobody answered" : 'Nobody answered'}</span>
         )}
@@ -213,13 +220,15 @@ function StatusLine({ vm }: { vm: GameVM }) {
       return (
         <div class="status-line muted">
           <span>
-            Locked in: <strong class="locked-answer">{vm.myLock ?? '…'}</strong>
+            Locked in: <strong class="locked-answer">{vm.myLock ? answerLabel(modeOf(vm), vm.myLock) : '…'}</strong>
           </span>
           <span>{opp.locked || opp.passed ? 'Revealing…' : `Waiting for ${opp.name}…`}</span>
         </div>
       );
     if (opp.locked) return <div class="status-line muted">{opp.name} has locked in an answer!</div>;
     if (opp.passed) return <div class="status-line muted">{opp.name} passed.</div>;
+    if (MODES[modeOf(vm)].input === 'pin')
+      return <div class="status-line muted hint">Landmark inside your circle scores · smaller circle, more points · first right +1</div>;
     return <div class="status-line muted hint">One answer each · right = 1 point, first right +1</div>;
   }
   if (opp.passed) return <div class="status-line muted">{opp.name} passed. It's all yours!</div>;
@@ -285,8 +294,11 @@ export function GameScreen({ vm, actions }: { vm: GameVM; actions: GameActions }
     );
   }
 
+  const pin = mode.input === 'pin';
+  const reveal = vm.phase === 'reveal' ? vm.reveal : null;
+
   return (
-    <main class="stack">
+    <main class={`stack${pin ? ' wide' : ''}`}>
       <VsIntro vm={vm} />
       <TopCard vm={vm} />
       <section class="card game-card">
@@ -306,22 +318,42 @@ export function GameScreen({ vm, actions }: { vm: GameVM; actions: GameActions }
           </p>
         )}
         <StatusLine vm={vm} />
-        {vm.phase === 'reveal' && vm.reveal?.mode === 'landmarks' && vm.reveal.country && (
+        {pin ? (
+          <PinBoard
+            roundKey={vm.round}
+            locked={locked}
+            onLock={actions.guess}
+            mine={vm.myLock}
+            regions={vm.regions}
+            reveal={
+              reveal?.mode === 'landmarks'
+                ? {
+                    landmark: reveal.code,
+                    pins: ([0, 1] as const).flatMap((s) => {
+                      const l = reveal.locks?.[s];
+                      return l
+                        ? [{ answer: l.answer, correct: l.correct, me: s === vm.me, label: s === vm.me ? 'You' : vm.players[s].name }]
+                        : [];
+                    }),
+                  }
+                : null
+            }
+          />
+        ) : (
           <>
-            <RevealMap country={vm.reveal.country} landmark={vm.reveal.code} />
-            <PhotoCredit id={vm.reveal.code} />
+            <div class="guess-row">
+              <CountryInput
+                locked={locked}
+                focusKey={vm.round}
+                onSubmit={actions.guess}
+                suggest={mode.suggest}
+                placeholder={mode.placeholder}
+                submitLabel={mode.lockIn ? 'Lock in' : undefined}
+              />
+            </div>
           </>
         )}
-        <div class="guess-row">
-          <CountryInput
-            locked={locked}
-            focusKey={vm.round}
-            onSubmit={actions.guess}
-            suggest={mode.suggest}
-            placeholder={mode.placeholder}
-            submitLabel={mode.lockIn ? 'Lock in' : undefined}
-          />
-        </div>
+        {reveal?.mode === 'landmarks' && <PhotoCredit id={reveal.code} />}
         {giveUp(true)}
       </section>
     </main>

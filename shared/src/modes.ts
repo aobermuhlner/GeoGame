@@ -8,6 +8,7 @@ import { COUNTRY_BY_CODE } from './countries';
 import { LANDMARK_BY_ID, landmarksInRegions } from './landmarkRules';
 import { LANGUAGE_BY_ID, SENTENCE_ITEMS, languageNameOf, languageOfItem, sentenceOf } from './languageRules';
 import { isCorrectGuess, normalize, resolveGuess } from './normalize';
+import { PIN_MAX_POINTS, formatKm, formatPin, isPinCorrect, parsePin, pinMissKm, pinPoints } from './pin';
 import { REGION_OF, type RegionId } from './regions';
 import { suggestCapitals, suggestCountries, suggestLanguages } from './suggest';
 
@@ -29,8 +30,11 @@ export interface Mode {
   /** Headline on the game screen, e.g. "Guess 10 Flags" */
   title: (rounds: number) => string;
   placeholder: string;
-  /** How answers are given: typed text, or a click on the world map (the guess is the clicked ISO code) */
-  input: 'text' | 'map';
+  /**
+   * How answers are given: typed text, a click on the world map (the guess is the clicked ISO code),
+   * or a pin with a radius on the map (the guess is "lat,lon,km", see pin.ts)
+   */
+  input: 'text' | 'map' | 'pin';
   /** What a round shows: a flag, a (zooming) landmark photo, or a sentence */
   prompt: 'flag' | 'photo' | 'sentence';
   /** What the pool is counted in ("12 countries", "30 landmarks") */
@@ -44,6 +48,13 @@ export interface Mode {
    * right, first correct wins). Text that names no possible answer is refused, so a typo never locks you in.
    */
   lockIn?: boolean;
+  /**
+   * Lock-in modes whose right answers are worth more or less (pins: the smaller the circle, the more).
+   * Duel points for a right `answer` (otherwise LOCK_POINTS); solo and group games scale their points by
+   * this over `maxLockPoints`.
+   */
+  lockPoints?: (answer: string) => number;
+  maxLockPoints?: number;
   /** Wrong guesses allowed per round; reaching it counts as passing (unlimited when absent) */
   maxWrong?: number;
   /** Text shown with the prompt while the round runs (capitals: the country; languages: the sentence) */
@@ -133,20 +144,26 @@ export const MODES: Record<ModeId, Mode> = {
   },
   landmarks: {
     label: 'Landmarks',
-    description: 'A famous place, zoomed in. Name its country — one answer, locked in.',
-    title: (n) => `Spot ${n} Landmarks`,
-    placeholder: 'Type a country name…',
-    input: 'text',
+    description: 'A famous place, zoomed in. Pin it on the map — the smaller your circle, the more points.',
+    title: (n) => `Pin ${n} Landmarks`,
+    placeholder: '',
+    input: 'pin',
     prompt: 'photo',
     unit: ['landmark', 'landmarks'],
     pool: landmarksInRegions,
     lockIn: true,
+    lockPoints: pinPoints,
+    maxLockPoints: PIN_MAX_POINTS,
     countryOf: (id) => LANDMARK_BY_ID[id].country,
-    answerOf: (id) => COUNTRY_BY_CODE[LANDMARK_BY_ID[id].country].name,
-    detailOf: (id) => LANDMARK_BY_ID[id].name,
-    nameOf: countryName,
-    isCorrect: (guess, id) => resolveGuess(guess) === LANDMARK_BY_ID[id]?.country,
-    suggest: suggestCountries,
+    answerOf: (id) => LANDMARK_BY_ID[id].name,
+    detailOf: (id) => COUNTRY_BY_CODE[LANDMARK_BY_ID[id].country].name,
+    // The answer is kept as the canonical pin text; the screens turn it into "312 km off".
+    nameOf: (guess) => {
+      const p = parsePin(guess);
+      return p ? formatPin(p) : null;
+    },
+    isCorrect: isPinCorrect,
+    suggest: () => [],
   },
   languages: {
     label: 'Languages',
@@ -173,6 +190,18 @@ export const MODES: Record<ModeId, Mode> = {
     suggest: suggestLanguages,
   },
 };
+
+/**
+ * A locked-in answer as shown to players. Pins: "500 km circle", and once the round's item is known,
+ * "312 km off · 500 km circle".
+ */
+export function answerLabel(mode: ModeId, answer: string, item?: string): string {
+  if (MODES[mode].input !== 'pin') return answer;
+  const p = parsePin(answer);
+  if (!p) return answer;
+  const miss = item ? pinMissKm(answer, item) : null;
+  return miss === null ? `${formatKm(p.km)} circle` : `${formatKm(miss)} off · ${formatKm(p.km)} circle`;
+}
 
 /** "12 countries" / "1 landmark" */
 export function poolLabel(mode: ModeId, n: number): string {

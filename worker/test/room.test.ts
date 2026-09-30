@@ -254,27 +254,29 @@ describe('lock-in games (Landmarks)', () => {
     expect(photo.status).toBe(200);
     expect(photo.headers.get('Content-Type')).toBe('image/jpeg');
 
-    const { LANDMARK_BY_ID, COUNTRY_BY_CODE } = await import('@flagduel/shared');
-    const country = COUNTRY_BY_CODE[LANDMARK_BY_ID[id].country].name;
+    const { LANDMARK_BY_ID, LANDMARK_META, COUNTRY_BY_CODE, formatPin } = await import('@flagduel/shared');
+    const { lat, lon } = LANDMARK_META[id];
+    const pin = formatPin({ lat: lat!, lon: lon!, km: 100 });
 
-    // A typo is refused; a real country locks in.
+    // Text that is no pin is refused; a pin locks in.
     const bad = host.c.next('guessResult');
-    host.c.send({ t: 'guess', round: 1, text: 'Nowhereland' });
+    host.c.send({ t: 'guess', round: 1, text: 'France' });
     expect((await bad).outcome).toBe('invalid');
     const seenLock = guest.c.state(null, (s) => s.room.players[0].locked);
     const ok = host.c.next('guessResult');
-    host.c.send({ t: 'guess', round: 1, text: country });
+    host.c.send({ t: 'guess', round: 1, text: pin });
     expect((await ok).outcome).toBe('locked');
     const g = await seenLock;
     expect(g.room.myLock).toBeNull(); // the guest never sees the host's answer
-    expect(JSON.stringify(g)).not.toContain(`"${country}"`);
+    expect(JSON.stringify(g)).not.toContain(pin);
 
     const reveal = guest.c.state(null, (s) => s.room.phase === 'reveal');
     guest.c.send({ t: 'pass', round: 1 });
     const r = (await reveal).room.reveal!;
-    expect(r.locks).toEqual([{ answer: country, correct: true }, null]);
-    expect(r.points).toEqual([2, 0]);
-    expect(r.detail).toBe(LANDMARK_BY_ID[id].name);
+    expect(r.locks).toEqual([{ answer: pin, correct: true }, null]);
+    expect(r.points).toEqual([6, 0]); // smallest circle 5, first right +1
+    expect(r.answer).toBe(LANDMARK_BY_ID[id].name);
+    expect(r.detail).toBe(COUNTRY_BY_CODE[LANDMARK_BY_ID[id].country].name);
     expect(r.end).toBe('locked');
   });
 
@@ -293,19 +295,20 @@ describe('lock-in games (Landmarks)', () => {
     });
     await playing;
     const id = (await runInDurableObject(stub(code), (room: Room) => room.debugState()))!.game!.codes[0];
-    const { LANDMARK_BY_ID, COUNTRY_BY_CODE } = await import('@flagduel/shared');
-    const country = COUNTRY_BY_CODE[LANDMARK_BY_ID[id].country].name;
-    const other = country === 'France' ? 'Germany' : 'France';
+    const { LANDMARK_META, formatPin } = await import('@flagduel/shared');
+    const { lat, lon } = LANDMARK_META[id];
+    const right = formatPin({ lat: lat!, lon: lon!, km: 500 });
+    const wrong = formatPin({ lat: -lat!, lon: lon! > 0 ? lon! - 180 : lon! + 180, km: 2000 }); // the antipode
 
     const hostLocked = host.c.next('guessResult');
-    host.c.send({ t: 'guess', round: 1, text: other });
+    host.c.send({ t: 'guess', round: 1, text: wrong });
     expect((await hostLocked).outcome).toBe('locked');
     const reveal = host.c.state(null, (s) => s.room.phase === 'reveal');
     const guestLocked = guest.c.next('guessResult');
-    guest.c.send({ t: 'guess', round: 1, text: country });
+    guest.c.send({ t: 'guess', round: 1, text: right });
     expect((await guestLocked).outcome).toBe('locked');
     const r = (await reveal).room.reveal!;
     expect(r.end).toBe('locked');
-    expect(r.points).toEqual([0, 2]);
+    expect(r.points).toEqual([0, 4]); // 500 km circle 3, first right +1
   });
 });

@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'preact/hooks';
 import {
   MODE_IDS,
   MODES,
+  PIN_POINTS,
   ROUND_TIME_MS,
   SOLO_BASE_POINTS,
   SOLO_SPEED_POINTS,
@@ -14,6 +15,7 @@ import {
   type ModeId,
   type PlacementResult,
   type SoloRoundView,
+  answerLabel,
   focusOf,
   revealMsOf,
 } from '@flagduel/shared';
@@ -23,7 +25,8 @@ import { DivisionBadge } from './Ranked';
 import { CountryInput } from './CountryInput';
 import { FlagImage } from './GameScreen';
 import { LocateBoard } from './LocateBoard';
-import { PhotoCredit, RevealMap, SentenceCard, ZoomPhoto } from './RoundPrompt';
+import { PinBoard } from './PinBoard';
+import { PhotoCredit, SentenceCard, ZoomPhoto } from './RoundPrompt';
 import { Leaderboard } from './Leaderboard';
 import { HigherBoard, HigherCard, HigherRules } from './Higher';
 import type { GameId } from './NavBar';
@@ -367,7 +370,12 @@ function SoloScreen({
       <strong class="reveal-country">{r.answer}</strong>
       {run.mode === 'capitals' && <span class="reveal-of">capital of {r.countryName}</span>}
       {run.mode === 'landmarks' && r.detail && <span class="reveal-of">{r.detail}</span>}
-      {r.given && r.end === 'wrong' && <span class="reveal-of">You said {r.given}</span>}
+      {r.given && (r.end === 'wrong' || mode.input === 'pin') && (
+        <span class="reveal-of">
+          {mode.input === 'pin' ? 'Your pin: ' : 'You said '}
+          {answerLabel(run.mode, r.given, r.code)}
+        </span>
+      )}
       <span class="reveal-who">
         {placement
           ? r.end === 'correct'
@@ -386,7 +394,9 @@ function SoloScreen({
         ? run.wrong > 0
           ? `${run.wrong} wrong`
           : 'Speed doesn’t count, only correct answers'
-        : mode.lockIn
+        : mode.input === 'pin'
+          ? 'Pin the landmark · the smaller your circle and the sooner, the more points'
+          : mode.lockIn
           ? 'One answer — lock it in. The sooner, the more points'
           : run.wrong > 0
             ? `${run.wrong} wrong (−${run.wrong * SOLO_WRONG_PENALTY})`
@@ -395,7 +405,7 @@ function SoloScreen({
   );
 
   return (
-    <main class={`stack${isMap ? ' wide' : ''}`}>
+    <main class={`stack${isMap || mode.input === 'pin' ? ' wide' : ''}`}>
       <section class="card top-card">
         <header class="brand">
           <Logo />
@@ -515,12 +525,18 @@ function SoloScreen({
             </p>
           )}
           {statusLine}
-          {r && run.mode === 'landmarks' && r.country && (
-            <>
-              <RevealMap country={r.country} landmark={r.code} />
-              <PhotoCredit id={r.code} />
-            </>
+          {mode.input === 'pin' && (
+            <PinBoard
+              roundKey={run.round}
+              locked={locked}
+              onLock={onGuess}
+              worth={(i) => `${PIN_POINTS[i] * 20}%`}
+              reveal={
+                r ? { landmark: r.code, pins: r.given ? [{ answer: r.given, correct: r.end === 'correct', me: true, label: 'You' }] : [] } : null
+              }
+            />
           )}
+          {r && run.mode === 'landmarks' && <PhotoCredit id={r.code} />}
           {manualNext ? (
             <div class="btn-row">
               <button class="btn btn-primary" onClick={onNext}>
@@ -528,6 +544,7 @@ function SoloScreen({
               </button>
             </div>
           ) : (
+            mode.input !== 'pin' && (
             <div class="guess-row">
               <CountryInput
                 locked={locked}
@@ -538,6 +555,7 @@ function SoloScreen({
                 submitLabel={mode.lockIn ? 'Lock in' : undefined}
               />
             </div>
+            )
           )}
           {!manualNext && (
             <div class="give-up">
@@ -762,7 +780,7 @@ function SoloResults({
             <tr>
               <th>#</th>
               {mode.prompt !== 'sentence' && <th>{mode.prompt === 'photo' ? 'Photo' : 'Flag'}</th>}
-              <th class="left">{run.mode === 'capitals' ? 'Capital' : run.mode === 'languages' ? 'Language' : 'Country'}</th>
+              <th class="left">{run.mode === 'capitals' ? 'Capital' : run.mode === 'languages' ? 'Language' : run.mode === 'landmarks' ? 'Landmark' : 'Country'}</th>
               <th>Time</th>
               <th>Points</th>
             </tr>
@@ -780,7 +798,12 @@ function SoloResults({
                   {h.answer}
                   {run.mode === 'capitals' && <span class="of-country">{h.countryName}</span>}
                   {run.mode === 'landmarks' && <span class="of-country">{h.detail}</span>}
-                  {h.end === 'wrong' && h.given && <span class="of-country">you said {h.given}</span>}
+                  {h.given && (h.end === 'wrong' || mode.input === 'pin') && (
+                    <span class="of-country">
+                      {mode.input === 'pin' ? '' : 'you said '}
+                      {answerLabel(run.mode, h.given, h.code)}
+                    </span>
+                  )}
                 </td>
                 <td class="num">
                   {h.timeMs !== null

@@ -30,6 +30,7 @@ interface Props {
   onRegions: (regions: RegionId[]) => void;
   onModes: (modes: GameId[]) => void;
   onRounds: (game: GameId, rounds: number) => void;
+  onShuffle: (shuffle: boolean) => void;
   onLeave: () => void;
 }
 
@@ -129,6 +130,7 @@ interface SettingsRoom {
   modes: GameId[];
   roundCounts: Record<GameId, number>;
   countryCount: number;
+  shuffle: boolean;
 }
 
 /**
@@ -140,7 +142,17 @@ export function useGameSettings(
   onRegions: (regions: RegionId[]) => void,
   onModes: (modes: GameId[]) => void,
   onRounds: (game: GameId, rounds: number) => void,
+  onShuffle: (shuffle: boolean) => void,
 ) {
+  const [shuffleDraft, setShuffleDraft] = useState<boolean | null>(null);
+  const shuffle = shuffleDraft ?? room.shuffle;
+  useEffect(() => {
+    if (shuffleDraft === room.shuffle) setShuffleDraft(null);
+  }, [room.shuffle]);
+  function setShuffle(on: boolean) {
+    setShuffleDraft(on);
+    onShuffle(on);
+  }
   const [draft, setDraft] = useState<RegionId[] | null>(null);
   const regions = draft ?? room.regions;
   useEffect(() => {
@@ -196,26 +208,44 @@ export function useGameSettings(
     onModes(next);
   }
 
-  return { regions, modes, counts, countryCount, poolOk, poolHint, countLabel, totalRounds, toggleRegion, toggleMode, setRounds };
+  return {
+    regions,
+    modes,
+    counts,
+    shuffle,
+    countryCount,
+    poolOk,
+    poolHint,
+    countLabel,
+    totalRounds,
+    toggleRegion,
+    toggleMode,
+    setRounds,
+    setShuffle,
+  };
 }
 
-/** The "Games" card: which games are played, in order, and how many rounds each. */
+/** The "Games" card: which games are played, in order (or shuffled), and how many rounds each. */
 export function GamesCard({
   modes,
   counts,
   totalRounds,
+  shuffle,
   editable,
   hint,
   onToggle,
   onRounds,
+  onShuffle,
 }: {
   modes: GameId[];
   counts: Record<GameId, number>;
   totalRounds: number;
+  shuffle: boolean;
   editable: boolean;
   hint: string;
   onToggle: (m: GameId) => void;
   onRounds: (game: GameId, rounds: number) => void;
+  onShuffle: (shuffle: boolean) => void;
 }) {
   return (
     <section class="card modes-card">
@@ -224,6 +254,25 @@ export function GamesCard({
         <span class="pool">{totalRounds === 1 ? '1 round' : `${totalRounds} rounds`}</span>
       </div>
       <p class="muted small">{hint}</p>
+      {modes.length > 1 && (
+      <label class={`shuffle-opt${shuffle ? ' on' : ''}${editable ? '' : ' locked'}`}>
+        <input
+          type="checkbox"
+          checked={shuffle}
+          disabled={!editable}
+          onChange={(e) => onShuffle((e.target as HTMLInputElement).checked)}
+        />
+        <span class="shuffle-icon" aria-hidden="true">
+          🔀
+        </span>
+        <span class="mode-text">
+          <span class="m-name">Random order</span>
+          <span class="m-desc">
+            The games come in a surprise order, drawn anew every match. You only find out which is next when it starts.
+          </span>
+        </span>
+      </label>
+      )}
       <div class="mode-list" role="group" aria-label="Games">
         {GAME_IDS.map((m) => {
           const on = modes.includes(m);
@@ -237,7 +286,7 @@ export function GamesCard({
                 onChange={() => onToggle(m)}
               />
               <span class="mode-order" aria-hidden="true">
-                {on && modes.length > 1 ? order : ''}
+                {on && modes.length > 1 ? (shuffle ? '?' : order) : ''}
               </span>
               <span class="mode-text">
                 <span class="m-name">{gameLabel(m)}</span>
@@ -279,8 +328,8 @@ export function CopyInvite({ code }: { code: string }) {
   );
 }
 
-export function Lobby({ room, you, onReady, onStart, onRegions, onModes, onRounds, onLeave }: Props) {
-  const set = useGameSettings(room, onRegions, onModes, onRounds);
+export function Lobby({ room, you, onReady, onStart, onRegions, onModes, onRounds, onShuffle, onLeave }: Props) {
+  const set = useGameSettings(room, onRegions, onModes, onRounds, onShuffle);
   const isHost = you === 0;
   const me = room.players[you];
   const full = room.players.length === 2;
@@ -339,14 +388,16 @@ export function Lobby({ room, you, onReady, onStart, onRegions, onModes, onRound
         modes={set.modes}
         counts={set.counts}
         totalRounds={set.totalRounds}
+        shuffle={set.shuffle}
         editable={isHost}
         hint={
           isHost
-            ? `Pick any mix of games and how many rounds each lasts (${MIN_GAME_ROUNDS}–${MAX_GAME_ROUNDS}). They're played in this order; most points overall wins.`
+            ? `Pick any mix of games and how many rounds each lasts (${MIN_GAME_ROUNDS}–${MAX_GAME_ROUNDS}). ${set.shuffle ? 'They come in a random order' : "They're played in this order"}; most points overall wins.`
             : `${room.players[0]?.name ?? 'The host'} picks the games.`
         }
         onToggle={set.toggleMode}
         onRounds={set.setRounds}
+        onShuffle={set.setShuffle}
       />
 
       <RegionPicker

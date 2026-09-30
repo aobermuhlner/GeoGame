@@ -152,6 +152,23 @@ describe('group match', () => {
     expect((lobby as unknown as State).room.players).toHaveLength(3);
   });
 
+  it('random order: games are shuffled when the match starts', async () => {
+    const code = await createGroup();
+    const a = await joinGroup(code, 'Ann');
+    await joinGroup(code, 'Ben');
+    for (const game of ['flags', 'capitals', 'locate', 'landmarks', 'languages', 'higher'] as const)
+      a.c.send({ t: 'setRounds', game, rounds: 1 });
+    a.c.send({ t: 'setShuffle', shuffle: true });
+    await waitState(a.c, (s) => s.room.shuffle && s.room.totalRounds === 6);
+    await a.c.state({ t: 'start' }, (s) => (s as unknown as State).room.phase === 'countdown');
+    const st = await internal(code);
+    expect([...st.game!.stages].sort()).toEqual([...st.modes].sort());
+    expect(st.game!.roundGames).toEqual(st.game!.stages);
+    const counting = await waitState(a.c, (s) => s.room.phase === 'countdown');
+    expect(counting.room.modes).toEqual(st.game!.stages);
+    expect(counting.room.stage).toBe(0);
+  });
+
   it('stops waiting for a player who left', async () => {
     const code = await createGroup();
     const a = await joinGroup(code, 'Ann');

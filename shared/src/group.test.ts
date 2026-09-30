@@ -52,6 +52,16 @@ describe('group rounds', () => {
     expect(r.endedAt).toBe(T0 + ROUND_TIME_MS);
   });
 
+  it('landmarks: a right pin scores less the bigger its circle', () => {
+    const r = newGroupRound('landmarks', 'eiffel-tower', null, 3, T0);
+    expect(groupGuess(r, 0, '48.86,2.29,100', T0 + 2000)).toBe('locked');
+    expect(groupGuess(r, 1, '48.86,2.29,1000', T0 + 2000)).toBe('locked');
+    expect(groupGuess(r, 2, '40.7,-74,2000', T0 + 2000)).toBe('locked');
+    const full = groupPoints(2000, ROUND_TIME_MS, 0);
+    expect(r.entries.map((e) => e.points)).toEqual([full, Math.round((full * 2) / 5), 0]);
+    expect(r.entries.map((e) => e.end)).toEqual(['correct', 'correct', 'wrong']);
+  });
+
   it('takes one final answer per player in lock-in games, refusing typos', () => {
     const r = newGroupRound('languages', 'spa.1', null, 2, T0);
     expect(groupGuess(r, 0, 'xyzzy', T0 + 100)).toBe('invalid');
