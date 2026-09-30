@@ -30,6 +30,8 @@ export interface Lock {
   correct: boolean;
   /** Estimation games: how close the answer was, 0…1 */
   accuracy?: number;
+  /** Not locked in by the player: their draft, taken when the time ran out (no speed bonus) */
+  auto?: boolean;
 }
 
 /** Lock-in rounds: a correct answer scores 1 (pins: 1–5 by radius), and the quicker of the correct answers 1 more. */
@@ -53,6 +55,8 @@ export interface RoundState {
   locks?: [Lock | null, Lock | null];
   /** Lock-in modes: points per player, set when the round ends (other modes: 1 for the winner) */
   points?: [number, number];
+  /** Auto-lock modes: each player's latest draft (e.g. a placed pin), locked in at the deadline if they didn't */
+  drafts?: [string | null, string | null];
 }
 
 export function countriesInRegions(regions: readonly RegionId[]): string[] {
@@ -209,19 +213,13 @@ const allAnswered = (round: RoundState) => ([0, 1] as const).every((s) => round.
 export function applyGuess(round: RoundState, slot: Slot, text: string, now: number): GuessOutcome {
   if (round.end || round.passed[slot]) return 'ignored';
   if (now >= round.deadline) {
-    endRound(round, 'timeout', now);
+    timeOut(round, now);
     return 'ignored';
   }
   const mode = MODES[round.mode ?? 'flags'];
   if (mode.lockIn) {
     if (round.locks?.[slot]) return 'ignored';
-    const answer = mode.nameOf(text);
-    if (!answer) return 'invalid';
-    const accuracy = mode.accuracy?.(text, round.code);
-    // Estimates are only right or wrong once both are in (the closer one wins); see scoreEstimates.
-    const correct = accuracy === undefined ? mode.isCorrect(text, round.code) : false;
-    (round.locks ??= [null, null])[slot] = { answer, at: now, correct, ...(accuracy !== undefined && { accuracy }) };
-    if (!correct && accuracy === undefined) round.wrong[slot]++;
+    if (!lockAnswer(round, slot, text, now)) return 'invalid';
     if (allAnswered(round)) endRound(round, 'locked', now);
     return 'locked';
   }
@@ -235,6 +233,46 @@ export function applyGuess(round: RoundState, slot: Slot, text: string, now: num
   const max = mode.maxWrong;
   if (max !== undefined && round.wrong[slot] >= max) applyPass(round, slot, now);
   return 'wrong';
+}
+
+/** Locks in `text` as `slot`'s answer; false if it names no answer. Mutates `round`. */
+function lockAnswer(round: RoundState, slot: Slot, text: string, at: number, auto = false): boolean {
+  const mode = MODES[round.mode ?? 'flags'];
+  const answer = mode.nameOf(text);
+  if (!answer) return false;
+  const accuracy = mode.accuracy?.(text, round.code);
+  // Estimates are only right or wrong once both are in (the closer one wins); see scoreEstimates.
+  const correct = accuracy === undefined ? mode.isCorrect(text, round.code) : false;
+  (round.locks ??= [null, null])[slot] = {
+    answer,
+    at,
+    correct,
+    ...(accuracy !== undefined && { accuracy }),
+    ...(auto && { auto }),
+  };
+  if (!correct && accuracy === undefined) round.wrong[slot]++;
+  return true;
+}
+
+/**
+ * Auto-lock modes: remember `slot`'s current answer (a placed pin), locked in for them if the time runs out
+ * first. Returns true if taken. Mutates `round`.
+ */
+export function applyDraft(round: RoundState, slot: Slot, text: string, now: number): boolean {
+  if (round.end || round.passed[slot] || round.locks?.[slot] || now >= round.deadline) return false;
+  const mode = MODES[round.mode ?? 'flags'];
+  if (!mode.autoLock || !mode.nameOf(text)) return false;
+  (round.drafts ??= [null, null])[slot] = text;
+  return true;
+}
+
+/** Time's up: drafts become answers, then the round ends. */
+function timeOut(round: RoundState, now: number) {
+  for (const s of [0, 1] as const) {
+    const d = round.drafts?.[s];
+    if (d && !round.locks?.[s] && !round.passed[s]) lockAnswer(round, s, d, round.deadline, true);
+  }
+  endRound(round, 'timeout', now);
 }
 
 /** Returns true if this pass ended the round (both passed, or the other one locked in). Mutates `round`. */
@@ -251,7 +289,7 @@ export function applyPass(round: RoundState, slot: Slot, now: number): boolean {
 /** Ends the round if the deadline has passed. Returns true if it ended now. */
 export function applyTimeout(round: RoundState, now: number): boolean {
   if (round.end || now < round.deadline) return false;
-  endRound(round, 'timeout', now);
+  timeOut(round, now);
   return true;
 }
 
@@ -273,7 +311,7 @@ function scoreLocks(round: RoundState) {
     const l = locks[s];
     if (!l?.correct) continue;
     points[s] = worth ? worth(l.answer) : LOCK_POINTS;
-    if (first === null || l.at < locks[first]!.at) first = s;
+    if (!l.auto && (first === null || l.at < locks[first]!.at)) first = s;
   }
   if (first !== null) points[first] += LOCK_SPEED_BONUS;
   round.points = points;

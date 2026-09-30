@@ -353,6 +353,7 @@ export function GameScreen({ vm, actions }: { vm: GameVM; actions: GameActions }
             roundKey={vm.round}
             locked={locked}
             onLock={actions.guess}
+            onDraft={actions.draft}
             mine={vm.myLock}
             regions={vm.regions}
             reveal={

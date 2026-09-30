@@ -30,6 +30,8 @@ export interface SoloRound {
   given?: string;
   /** Estimation games: how close the answer was, 0…1 */
   accuracy?: number;
+  /** Auto-lock games: the latest draft (a placed pin), locked in at the deadline if not locked in before */
+  draft?: string;
 }
 
 export interface DailyRun {
@@ -53,8 +55,8 @@ export function nextDayAt(ms: number): number {
   return Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate() + 1);
 }
 
-export function soloPoints(elapsedMs: number, wrong: number): number {
-  const left = Math.max(0, Math.min(1, 1 - elapsedMs / ROUND_TIME_MS));
+export function soloPoints(elapsedMs: number, wrong: number, roundMs = ROUND_TIME_MS): number {
+  const left = Math.max(0, Math.min(1, 1 - elapsedMs / roundMs));
   const pts = SOLO_BASE_POINTS + Math.round(SOLO_SPEED_POINTS * left) - SOLO_WRONG_PENALTY * wrong;
   return Math.max(SOLO_MIN_POINTS, pts);
 }
@@ -91,7 +93,7 @@ function endSoloRound(run: DailyRun, end: SoloEnd, now: number) {
   // Estimation games: points for accuracy, whatever the speed.
   if (r.accuracy !== undefined) r.points = estimatePoints(r.accuracy);
   else if (end === 'correct') {
-    r.points = soloPoints(now - r.startsAt, r.wrong);
+    r.points = soloPoints(now - r.startsAt, r.wrong, r.deadline - r.startsAt);
     // Pins: a bigger circle is worth less.
     if (m.lockPoints && r.given) r.points = Math.round((r.points * m.lockPoints(r.given)) / m.maxLockPoints!);
   }
@@ -105,8 +107,8 @@ function endSoloRound(run: DailyRun, end: SoloEnd, now: number) {
 export function settleRun(run: DailyRun, now: number): boolean {
   const r = currentOf(run);
   if (r.end || now < r.deadline) return false;
-  // Timed out rounds end at their deadline, even if we only notice later.
-  endSoloRound(run, 'timeout', r.deadline);
+  // Timed out rounds end at their deadline, even if we only notice later. A draft counts as the answer.
+  if (!(r.draft && lockSolo(run, r.draft, r.deadline))) endSoloRound(run, 'timeout', r.deadline);
   return true;
 }
 
@@ -116,17 +118,8 @@ export function soloGuess(run: DailyRun, round: number, text: string, now: numbe
   const r = currentOf(run);
   if (round !== run.rounds.length || r.end || now < r.startsAt) return 'ignored';
   const mode = MODES[run.mode];
-  if (mode.lockIn) {
-    // One answer, and it ends the round (a typo that names nothing is refused).
-    const given = mode.nameOf(text);
-    if (!given) return 'invalid';
-    r.given = given;
-    const accuracy = mode.accuracy?.(text, r.code);
-    if (accuracy !== undefined) r.accuracy = accuracy;
-    const correct = mode.isCorrect(text, r.code);
-    endSoloRound(run, correct ? 'correct' : 'wrong', now);
-    return correct ? 'correct' : 'wrong';
-  }
+  // Lock-in modes: one answer, and it ends the round (a typo that names nothing is refused).
+  if (mode.lockIn) return lockSolo(run, text, now) ?? 'invalid';
   if (mode.isCorrect(text, r.code)) {
     endSoloRound(run, 'correct', now);
     return 'correct';
@@ -136,6 +129,31 @@ export function soloGuess(run: DailyRun, round: number, text: string, now: numbe
   const max = MODES[run.mode].maxWrong;
   if (max !== undefined && r.wrong >= max) endSoloRound(run, 'passed', now);
   return 'wrong';
+}
+
+/** Takes `text` as the current round's one answer and ends it; null if it names no answer. Mutates `run`. */
+function lockSolo(run: DailyRun, text: string, at: number): 'correct' | 'wrong' | null {
+  const r = currentOf(run);
+  const mode = MODES[run.mode];
+  const given = mode.nameOf(text);
+  if (!given) return null;
+  r.given = given;
+  delete r.draft;
+  const accuracy = mode.accuracy?.(text, r.code);
+  if (accuracy !== undefined) r.accuracy = accuracy;
+  const correct = mode.isCorrect(text, r.code);
+  endSoloRound(run, correct ? 'correct' : 'wrong', at);
+  return correct ? 'correct' : 'wrong';
+}
+
+/** Auto-lock games: remember the current answer (a placed pin). Returns true if taken. Mutates `run`. */
+export function soloDraft(run: DailyRun, round: number, text: string, now: number): boolean {
+  settleRun(run, now);
+  const r = currentOf(run);
+  const mode = MODES[run.mode];
+  if (round !== run.rounds.length || r.end || now < r.startsAt || !mode.autoLock || !mode.nameOf(text)) return false;
+  r.draft = text;
+  return true;
 }
 
 /** Returns true if the round was skipped. Mutates `run`. */

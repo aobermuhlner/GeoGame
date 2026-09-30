@@ -15,6 +15,7 @@ import {
   SUDDEN_DEATH_INTRO_MS,
   applyDuelPick,
   applyDuelTimeout,
+  applyDraft,
   applyGuess,
   applyPass,
   applyTimeout,
@@ -457,6 +458,13 @@ export class Room extends DurableObject<Env> {
         // Correct, both players out of tries (map modes), or both locked in (lock-in modes).
         if (outcome !== 'ignored' && cur?.end) this.endRound(now);
         break;
+      }
+
+      case 'draft': {
+        const cur = this.currentRound(msg.round);
+        // Kept for the deadline only: stored, nothing to broadcast (nobody else may see it).
+        if (cur && s.phase === 'playing' && applyDraft(cur, slot, msg.text, now)) await this.ctx.storage.put('state', s);
+        return;
       }
 
       case 'pick': {

@@ -219,8 +219,8 @@ async function accountRoutes(request: Request, env: Env, url: URL, origin: strin
     return noRun(await db.higherPick(user.id, b.round, b.code));
   }
 
-  // /daily/:mode  (GET)   ·   /daily/:mode/start|guess|pass|next  (POST)
-  const m = /^\/daily\/([a-z]+)(?:\/(start|guess|pass|next))?$/.exec(path);
+  // /daily/:mode  (GET)   ·   /daily/:mode/start|guess|draft|pass|next  (POST)
+  const m = /^\/daily\/([a-z]+)(?:\/(start|guess|draft|pass|next))?$/.exec(path);
   if (!m || !(MODE_IDS as readonly string[]).includes(m[1])) return fail(404, 'Not found');
   const mode = m[1] as ModeId;
   const action = m[2];
@@ -235,6 +235,9 @@ async function accountRoutes(request: Request, env: Env, url: URL, origin: strin
     case 'guess':
       if (typeof b.text !== 'string' || b.text.length > 80) return fail(400, 'Missing guess');
       return runOr404(await db.dailyGuess(user.id, mode, b.round, b.text));
+    case 'draft':
+      if (typeof b.text !== 'string' || b.text.length > 80) return fail(400, 'Missing draft');
+      return runOr404(await db.dailyDraft(user.id, mode, b.round, b.text));
     case 'pass':
       return runOr404(await db.dailyPass(user.id, mode, b.round));
     default:

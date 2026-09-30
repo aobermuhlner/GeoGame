@@ -161,6 +161,7 @@ export function GroupPlay({
           you={you}
           toLocal={toLocal}
           onGuess={(text) => conn.guess(room.round, text)}
+          onDraft={(text) => conn.send({ t: 'draft', round: room.round, text })}
           onPass={() => conn.send({ t: 'pass', round: room.round })}
           onPick={(c) => conn.send({ t: 'pick', round: room.round, code: c })}
           onLeave={leave}
@@ -553,6 +554,7 @@ function GroupGame({
   you,
   toLocal,
   onGuess,
+  onDraft,
   onPass,
   onPick,
   onLeave,
@@ -561,6 +563,7 @@ function GroupGame({
   you: number;
   toLocal: (ms: number | null) => number | null;
   onGuess: (text: string) => ReturnType<RoomConnection['guess']>;
+  onDraft: (text: string) => void;
   onPass: () => void;
   onPick: (code: string) => void;
   onLeave: () => void;
@@ -663,6 +666,7 @@ function GroupGame({
             roundKey={room.round}
             locked={locked}
             onLock={onGuess}
+            onDraft={onDraft}
             mine={room.mine?.answer ?? null}
             regions={room.regions}
             worth={(i) => `${PIN_POINTS[i] * 20}%`}

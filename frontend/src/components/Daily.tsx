@@ -142,6 +142,8 @@ export interface SoloSource {
   start(): Promise<DailyResponse>;
   get(): Promise<DailyResponse>;
   guess(round: number, text: string): Promise<DailyGuessResponse>;
+  /** Auto-lock games: the answer set up so far (a placed pin), locked in at the deadline */
+  draft?(round: number, text: string): void;
   pass(round: number): Promise<DailyResponse>;
   next(round: number): Promise<DailyResponse>;
   flagSrc(flag: string): string;
@@ -153,6 +155,7 @@ export function dailySource(mode: ModeId): SoloSource {
     start: () => api.dailyStart(mode),
     get: () => api.dailyGet(mode),
     guess: (round, text) => api.dailyGuess(mode, round, text),
+    draft: (round, text) => void api.dailyDraft(mode, round, text).catch(() => {}),
     pass: (round) => api.dailyPass(mode, round),
     next: (round) => api.dailyNext(mode, round),
     flagSrc: dailyFlagSrc,
@@ -553,6 +556,7 @@ function SoloScreen({
               roundKey={run.round}
               locked={locked}
               onLock={onGuess}
+              onDraft={source.draft && ((text) => source.draft!(run.round, text))}
               worth={(i) => `${PIN_POINTS[i] * 20}%`}
               reveal={
                 r ? { landmark: r.code, pins: r.given ? [{ answer: r.given, correct: r.end === 'correct', me: true, label: 'You' }] : [] } : null

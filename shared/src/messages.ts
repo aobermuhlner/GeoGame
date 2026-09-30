@@ -63,6 +63,8 @@ export type ClientMessage =
   | { t: 'ready'; ready: boolean }
   | { t: 'start' }
   | { t: 'guess'; round: number; text: string }
+  /** Auto-lock games: the answer set up so far (a placed pin), locked in for you if the time runs out */
+  | { t: 'draft'; round: number; text: string }
   | { t: 'pass'; round: number }
   /** Higher or Lower: lock in the country you think is higher (ISO code) */
   | { t: 'pick'; round: number; code: string }
@@ -227,8 +229,9 @@ export function parseClientMessage(raw: unknown): ClientMessage | null {
     case 'setShuffle':
       return typeof m.shuffle === 'boolean' ? { t: 'setShuffle', shuffle: m.shuffle } : null;
     case 'guess':
+    case 'draft':
       if (!isInt(m.round) || typeof m.text !== 'string' || m.text.length > 80) return null;
-      return { t: 'guess', round: m.round, text: m.text };
+      return { t: m.t, round: m.round, text: m.text };
     case 'pass':
       return isInt(m.round) ? { t: 'pass', round: m.round } : null;
     case 'setRounds':

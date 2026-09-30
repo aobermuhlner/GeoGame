@@ -33,6 +33,8 @@ interface Props {
   /** No pin can be placed or locked in (countdown, reveal, passed, already locked in) */
   locked: boolean;
   onLock: (text: string) => Promise<GuessOutcome> | GuessOutcome | void;
+  /** The pin as it is now (placed or resized), so it counts even if the time runs out before "Lock in" */
+  onDraft?: (text: string) => void;
   /** Your locked-in answer, kept on the map until the reveal */
   mine?: string | null;
   /** The round is over: the landmark and every answer */
@@ -87,7 +89,7 @@ function PinMark({ x, y, u, cls, label }: { x: number; y: number; u: number; cls
   );
 }
 
-export function PinBoard({ roundKey, locked, onLock, mine, reveal, regions = [], worth = duelWorth }: Props) {
+export function PinBoard({ roundKey, locked, onLock, onDraft, mine, reveal, regions = [], worth = duelWorth }: Props) {
   const proj = useProjection();
   const [spot, setSpot] = useState<[number, number] | null>(null);
   const [km, setKm] = useState<number>(PIN_DEFAULT_RADIUS);
@@ -101,6 +103,12 @@ export function PinBoard({ roundKey, locked, onLock, mine, reveal, regions = [],
 
   const mineParsed = mine ? parsePin(mine) : null;
   const blocked = locked || pending || !!mineParsed;
+
+  // Every change to the pin is sent as a draft: the last one is locked in when the time runs out.
+  const draftText = spot ? formatPin({ lat: spot[0], lon: spot[1], km }) : null;
+  useEffect(() => {
+    if (draftText && !blocked) onDraft?.(draftText);
+  }, [draftText]);
 
   function tap(x: number, y: number) {
     if (blocked || !proj) return;

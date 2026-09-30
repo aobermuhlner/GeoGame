@@ -13,7 +13,7 @@ import {
 } from './higher';
 import { GUESS_REVEAL_MS, estimatePoints } from './guess';
 import { GAME_IDS, type ErrorCode, type GameId, type RoundCounts } from './messages';
-import { MODES } from './modes';
+import { MODES, type ModeId } from './modes';
 import type { RegionId } from './regions';
 
 export const GROUP_MAX_PLAYERS = 8;
@@ -70,6 +70,8 @@ export interface Entry {
   points: number;
   /** Estimation games: how close the answer was, 0…1 */
   accuracy?: number;
+  /** Auto-lock games: the latest draft (a placed pin), locked in at the deadline if they didn't */
+  draft?: string;
 }
 
 export interface GroupRound {
@@ -125,16 +127,7 @@ export function groupGuess(r: GroupRound, i: number, text: string, now: number):
   if (r.game === 'higher' || !open(r, i, now)) return 'ignored';
   const mode = MODES[r.game];
   const e = r.entries[i];
-  if (mode.lockIn) {
-    const answer = mode.nameOf(text);
-    if (!answer) return 'invalid';
-    e.answer = answer;
-    const accuracy = mode.accuracy?.(text, r.code);
-    if (accuracy !== undefined) e.accuracy = accuracy;
-    const correct = mode.isCorrect(text, r.code);
-    finishEntry(r, e, correct ? 'correct' : 'wrong', now);
-    return 'locked';
-  }
+  if (mode.lockIn) return lockEntry(r, e, text, now) ? 'locked' : 'invalid';
   if (mode.isCorrect(text, r.code)) {
     finishEntry(r, e, 'correct', now);
     return 'correct';
@@ -142,6 +135,28 @@ export function groupGuess(r: GroupRound, i: number, text: string, now: number):
   e.wrong++;
   if (mode.maxWrong !== undefined && e.wrong >= mode.maxWrong) finishEntry(r, e, 'wrong', now);
   return 'wrong';
+}
+
+/** One final answer; false if it names no answer. Mutates `r`. */
+function lockEntry(r: GroupRound, e: Entry, text: string, now: number): boolean {
+  const mode = MODES[r.game as ModeId];
+  const answer = mode.nameOf(text);
+  if (!answer) return false;
+  e.answer = answer;
+  delete e.draft;
+  const accuracy = mode.accuracy?.(text, r.code);
+  if (accuracy !== undefined) e.accuracy = accuracy;
+  finishEntry(r, e, mode.isCorrect(text, r.code) ? 'correct' : 'wrong', now);
+  return true;
+}
+
+/** Auto-lock games: remember player `i`'s current answer (a placed pin). Returns true if taken. Mutates `r`. */
+export function groupDraft(r: GroupRound, i: number, text: string, now: number): boolean {
+  if (r.game === 'higher' || !open(r, i, now)) return false;
+  const mode = MODES[r.game];
+  if (!mode.autoLock || !mode.nameOf(text)) return false;
+  r.entries[i].draft = text;
+  return true;
 }
 
 /** Higher or Lower: lock in the country you think is higher. Returns true if accepted. Mutates `r`. */
@@ -169,8 +184,11 @@ export function settleGroupRound(r: GroupRound, active: readonly boolean[], now:
   if (r.ended) return false;
   const allDone = r.entries.every((e, i) => e.end !== null || !active[i]);
   if (!allDone && now < r.deadline) return false;
+  const end = Math.min(now, r.deadline);
+  // Placed but not locked in: the draft counts.
+  for (const e of r.entries) if (!e.end && e.draft) lockEntry(r, e, e.draft, end);
   r.ended = true;
-  r.endedAt = Math.min(now, r.deadline);
+  r.endedAt = end;
   return true;
 }
 

@@ -21,7 +21,7 @@ export const focusOf = (id: string): [number, number] => LANDMARK_BY_ID[id]?.foc
 
 /** How far in a landmark round starts (times the full photo), and how long it takes to zoom all the way out. */
 export const PHOTO_START_ZOOM = 5;
-export const PHOTO_ZOOM_MS = 15_000;
+export const PHOTO_ZOOM_MS = 22_500;
 
 /** Zoom factor `elapsedMs` into a round: exponential, so it feels like a steady zoom-out, then the full photo. */
 export function photoZoom(elapsedMs: number): number {

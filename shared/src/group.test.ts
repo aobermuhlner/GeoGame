@@ -2,10 +2,12 @@ import { describe, expect, it } from 'vitest';
 import {
   GROUP_BASE_POINTS,
   GROUP_SPEED_POINTS,
+  groupDraft,
   groupGuess,
   groupPass,
   groupPick,
   groupPoints,
+  groupTimeOf,
   newGroupRound,
   pickGroupPairs,
   ranksOf,
@@ -57,9 +59,23 @@ describe('group rounds', () => {
     expect(groupGuess(r, 0, '48.86,2.29,100', T0 + 2000)).toBe('locked');
     expect(groupGuess(r, 1, '48.86,2.29,1000', T0 + 2000)).toBe('locked');
     expect(groupGuess(r, 2, '40.7,-74,2000', T0 + 2000)).toBe('locked');
-    const full = groupPoints(2000, ROUND_TIME_MS, 0);
+    const full = groupPoints(2000, groupTimeOf('landmarks'), 0);
     expect(r.entries.map((e) => e.points)).toEqual([full, Math.round((full * 2) / 5), 0]);
     expect(r.entries.map((e) => e.end)).toEqual(['correct', 'correct', 'wrong']);
+  });
+
+  it('landmarks: a pin placed but not locked in counts at the deadline', () => {
+    const r = newGroupRound('landmarks', 'eiffel-tower', null, 3, T0);
+    expect(groupDraft(r, 0, 'France', T0 + 500)).toBe(false);
+    expect(groupDraft(r, 0, '40.7,-74,2000', T0 + 1000)).toBe(true);
+    expect(groupDraft(r, 0, '48.86,2.29,500', T0 + 2000)).toBe(true); // the latest one counts
+    expect(groupDraft(r, 1, '40.7,-74,100', T0 + 1000)).toBe(true);
+    expect(settleGroupRound(r, [true, true, true], T0 + 5000)).toBe(false);
+    expect(settleGroupRound(r, [true, true, true], r.deadline)).toBe(true);
+    expect(r.entries.map((e) => e.end)).toEqual(['correct', 'wrong', null]);
+    expect(r.entries[0].answer).toBe('48.860,2.290,500');
+    // No speed points: it only counted when the time was up.
+    expect(r.entries[0].points).toBe(Math.round((groupPoints(r.deadline - T0, r.deadline - T0, 0) * 3) / 5));
   });
 
   it('takes one final answer per player in lock-in games, refusing typos', () => {

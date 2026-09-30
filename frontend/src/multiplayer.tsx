@@ -338,6 +338,7 @@ export function Multiplayer({ name, onImmersive }: { name: string; onImmersive: 
     const ranked = () => onlineRef.current?.room?.ranked ?? null;
     return {
       guess: (text) => conn.guess(onlineRef.current?.room?.round ?? 0, text),
+      draft: (text) => conn.send({ t: 'draft', round: onlineRef.current?.room?.round ?? 0, text }),
       pass: () => conn.send({ t: 'pass', round: onlineRef.current?.room?.round ?? 0 }),
       giveUp: () => conn.send({ t: 'giveUp' }),
       // Ranked rooms hold one match: "rematch" searches for a new opponent, "leave" leaves.

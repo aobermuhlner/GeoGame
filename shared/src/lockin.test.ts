@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { soloGuess, newDailyRun, dailyView } from './daily';
-import { applyGuess, applyPass, applyTimeout, decideMatch, newRound, pickStages, scoresOf, smallestPool } from './game';
+import { soloDraft, soloGuess, soloPoints, newDailyRun, dailyView, settleRun } from './daily';
+import { applyDraft, applyGuess, applyPass, applyTimeout, decideMatch, newRound, pickStages, scoresOf, smallestPool } from './game';
 import { LANDMARKS } from './landmarks';
 import { LANDMARK_META } from './landmarkMeta';
 import { landmarksInRegions, photoZoom, PHOTO_START_ZOOM } from './landmarkRules';
@@ -145,6 +145,25 @@ describe('lock-in rounds', () => {
     expect(decideMatch([a, b]).decidedBy).toBe('draw');
   });
 
+  it('a pin placed but not locked in counts when the time runs out, without the speed bonus', () => {
+    const r = round();
+    expect(r.deadline - r.startedAt).toBe(30_000);
+    expect(applyDraft(r, 0, 'France', T0 + 500)).toBe(false);
+    expect(applyDraft(r, 0, LONDON_250, T0 + 1000)).toBe(true);
+    expect(applyDraft(r, 0, LONDON_500, T0 + 2000)).toBe(true); // the latest one counts
+    expect(applyDraft(r, 1, PARIS, T0 + 1000)).toBe(true);
+    applyGuess(r, 1, LONDON_500, T0 + 20_000); // locking in beats the draft
+    expect(applyTimeout(r, r.deadline)).toBe(true);
+    expect(r.locks?.[0]).toMatchObject({ answer: '51.500,-0.120,500', correct: true, auto: true });
+    expect(r.points).toEqual([3, 4]);
+    expect(applyDraft(r, 0, PARIS, r.deadline + 1)).toBe(false);
+  });
+
+  it('only auto-lock modes take drafts', () => {
+    const item = SENTENCE_ITEMS.find((i) => languageOfItem(i) === 'spa')!;
+    expect(applyDraft(newRound(item, T0, 'languages'), 0, 'Spanish', T0 + 1)).toBe(false);
+  });
+
   it('languages: right = 1, first right +1', () => {
     const item = SENTENCE_ITEMS.find((i) => languageOfItem(i) === 'spa')!;
     const r = newRound(item, T0, 'languages');
@@ -166,6 +185,16 @@ describe('solo lock-in', () => {
     expect(v.reveal?.points).toBe(0);
     expect(v.reveal?.answer).toBe('Eiffel Tower');
     expect(v.reveal?.detail).toBe('France');
+  });
+
+  it('a placed pin counts at the deadline, with the points of a last-second answer', () => {
+    const run = newDailyRun('', 'landmarks', ['eiffel-tower', 'colosseum'], T0, 't');
+    const r = run.rounds[0];
+    expect(soloDraft(run, 1, PARIS, r.startsAt + 1000)).toBe(true);
+    expect(settleRun(run, r.deadline + 50)).toBe(true);
+    expect(r.end).toBe('correct');
+    expect(r.given).toBe('48.860,2.290,100');
+    expect(r.points).toBe(soloPoints(30_000, 0, 30_000));
   });
 
   it('a bigger circle scores less', () => {

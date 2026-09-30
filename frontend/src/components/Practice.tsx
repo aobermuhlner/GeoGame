@@ -14,6 +14,7 @@ import {
   poolLabel,
   smallestPool,
   settleRun,
+  soloDraft,
   soloGuess,
   soloNext,
   soloPass,
@@ -75,6 +76,9 @@ export function practiceSource(mode: ModeId, regions: RegionId[]): SoloSource {
       const now = Date.now();
       const outcome = soloGuess(current(), round, text, now);
       return { outcome, ...view(now) };
+    },
+    draft(round, text) {
+      soloDraft(current(), round, text, Date.now());
     },
     async pass(round) {
       const now = Date.now();

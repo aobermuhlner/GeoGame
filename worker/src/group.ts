@@ -12,6 +12,7 @@ import {
   REGION_IDS,
   countriesInRegions,
   focusOf,
+  groupDraft,
   groupGuess,
   groupPass,
   groupPick,
@@ -310,6 +311,13 @@ export class GroupRoom extends DurableObject<Env> {
         }
         this.settle(now);
         break;
+      }
+
+      case 'draft': {
+        const r = this.currentRound(msg.round);
+        // Kept for the deadline only: stored, nothing to broadcast (nobody else may see it).
+        if (r && s.phase === 'playing' && groupDraft(r, seat, msg.text, now)) await this.ctx.storage.put('state', s);
+        return;
       }
 
       case 'pick': {

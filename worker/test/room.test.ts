@@ -280,6 +280,45 @@ describe('lock-in games (Landmarks)', () => {
     expect(r.end).toBe('locked');
   });
 
+  it('Landmarks: a placed pin that was never locked in counts when the time runs out', async () => {
+    const code = await createRoom();
+    const host = await join(code, 'Adrian');
+    const guest = await join(code, 'Anna');
+    await host.c.state({ t: 'setModes', modes: ['landmarks'] }, (s) => s.room.modes[0] === 'landmarks');
+    await host.c.state({ t: 'ready', ready: true }, (s) => s.room.players[0].ready);
+    await guest.c.state({ t: 'ready', ready: true }, (s) => s.room.players[1].ready);
+    await host.c.state({ t: 'start' }, (s) => s.room.phase === 'countdown');
+
+    const playing = guest.c.state(null, (s) => s.room.phase === 'playing');
+    let startedAt = 0;
+    await runInDurableObject(stub(code), async (room: Room) => {
+      startedAt = (await room.debugState())!.game!.countdownEndsAt!;
+      await room.tick(startedAt);
+    });
+    const s1 = await playing;
+    expect(s1.room.deadline! - startedAt).toBeGreaterThanOrEqual(30_000 - 50);
+    const id = (await runInDurableObject(stub(code), (room: Room) => room.debugState()))!.game!.codes[0];
+    const { LANDMARK_META, formatPin } = await import('@flagduel/shared');
+    const { lat, lon } = LANDMARK_META[id];
+    const pin = formatPin({ lat: lat!, lon: lon!, km: 250 });
+
+    host.c.send({ t: 'draft', round: 1, text: pin });
+    // Stored (only a ping round-trip later can we be sure the message was handled)
+    host.c.send({ t: 'ping' });
+    await host.c.next('pong');
+    const internal = await runInDurableObject(stub(code), (room: Room) => room.debugState());
+    expect(internal!.game!.rounds[0].drafts).toEqual([pin, null]);
+
+    const reveal = guest.c.state(null, (s) => s.room.phase === 'reveal');
+    await runInDurableObject(stub(code), async (room: Room) => {
+      await room.tick((await room.debugState())!.game!.rounds[0].deadline);
+    });
+    const r = (await reveal).room.reveal!;
+    expect(r.end).toBe('timeout');
+    expect(r.locks).toEqual([{ answer: pin, correct: true, accuracy: null }, null]);
+    expect(r.points).toEqual([4, 0]); // 250 km circle; no speed bonus for a pin that wasn't locked in
+  });
+
   it('GeoGuesser: 30 s rounds, estimates stay hidden, the closer one scores', async () => {
     const code = await createRoom();
     const host = await join(code, 'Adrian');

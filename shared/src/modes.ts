@@ -52,6 +52,11 @@ export interface Mode {
   prompt: 'flag' | 'photo' | 'sentence' | 'question';
   /** Time per round (default ROUND_TIME_MS) */
   timeMs?: number;
+  /**
+   * Lock-in modes: an answer set up but not locked in (sent as a draft, e.g. a placed pin) is locked in
+   * automatically when the time runs out.
+   */
+  autoLock?: boolean;
   /** How long the reveal stays up (default: REVEAL_MS, LOCK_REVEAL_MS for lock-in games) */
   revealMs?: number;
   /**
@@ -174,6 +179,9 @@ export const MODES: Record<ModeId, Mode> = {
     unit: ['landmark', 'landmarks'],
     pool: landmarksInRegions,
     lockIn: true,
+    autoLock: true,
+    // Time to look at the photo and to find the spot (the photo zooms out over most of it).
+    timeMs: 30_000,
     lockPoints: pinPoints,
     maxLockPoints: PIN_MAX_POINTS,
     countryOf: (id) => LANDMARK_BY_ID[id].country,

@@ -92,6 +92,8 @@ export interface GameVM {
 
 export interface GameActions {
   guess(text: string): Promise<GuessOutcome> | GuessOutcome;
+  /** Auto-lock games: the answer set up so far (a placed pin), locked in if the time runs out */
+  draft(text: string): void;
   pass(): void;
   giveUp(): void;
   rematch(): void;

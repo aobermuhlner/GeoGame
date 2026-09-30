@@ -113,6 +113,8 @@ export const api = {
   dailyGet: (mode: ModeId) => request<DailyResponse>(`/daily/${mode}`),
   dailyGuess: (mode: ModeId, round: number, text: string) =>
     request<DailyGuessResponse>(`/daily/${mode}/guess`, { method: 'POST', body: { round, text } }),
+  dailyDraft: (mode: ModeId, round: number, text: string) =>
+    request<{ ok: boolean }>(`/daily/${mode}/draft`, { method: 'POST', body: { round, text } }),
   dailyPass: (mode: ModeId, round: number) =>
     request<DailyResponse>(`/daily/${mode}/pass`, { method: 'POST', body: { round } }),
   dailyNext: (mode: ModeId, round: number) =>

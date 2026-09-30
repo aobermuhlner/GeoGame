@@ -32,6 +32,7 @@ import {
   START_VOLATILITY,
   runTimeMs,
   settleRun,
+  soloDraft,
   soloGuess,
   soloNext,
   soloPass,
@@ -494,6 +495,15 @@ export class Accounts extends DurableObject<Env> {
     const outcome = soloGuess(run, round, text, now);
     this.saveRun(userId, run);
     return { outcome, run: dailyView(run, now), now };
+  }
+
+  /** Auto-lock games: the answer set up so far (a placed pin), locked in at the deadline. */
+  async dailyDraft(userId: string, mode: ModeId, round: number, text: string, now = Date.now()): Promise<{ ok: boolean } | null> {
+    const run = this.loadRun(userId, dayOf(now), mode);
+    if (!run) return null;
+    const ok = soloDraft(run, round, text, now);
+    if (ok) this.saveRun(userId, run);
+    return { ok };
   }
 
   async dailyPass(userId: string, mode: ModeId, round: number, now = Date.now()): Promise<DailyResponse | null> {

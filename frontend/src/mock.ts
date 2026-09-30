@@ -8,6 +8,7 @@ import {
   MODES,
   roundTimeOf,
   STAGE_INTRO_MS,
+  applyDraft,
   applyGuess,
   applyPass,
   applyTimeout,
@@ -222,6 +223,10 @@ export function startMockGame(opts: {
       if (outcome === 'correct' || r.end) finishRound();
       else emit();
       return outcome;
+    },
+    draft(text) {
+      const r = rounds[current];
+      if (r && phase === 'playing') applyDraft(r, 0, text, Date.now());
     },
     pass() {
       const r = rounds[current];
