@@ -148,6 +148,25 @@ function HigherIcon() {
   );
 }
 
+function GuessIcon() {
+  const font = { 'font-family': 'Lexend, system-ui, sans-serif', 'font-weight': 700, 'text-anchor': 'middle' } as const;
+  return (
+    <>
+      <Card x={16} y={14} w={60} h={46} rot={-7}>
+        {/* a mountain with a height mark */}
+        <path d="M22 54l16-24 8 10 6-7 14 21z" fill="#86c26a" />
+        <path d="M38 30l-3.5 5.2 3.5-1.6 3.5 2.4z" fill="#fff" />
+        <path d="M68 28v26M65 28h6M65 54h6" stroke={INK} stroke-width="2.2" stroke-linecap="round" />
+      </Card>
+      <Card x={54} y={34} w={52} h={38} rot={5} fill="#f7c948">
+        <text x="80" y="60" font-size="18" fill={INK} {...font}>
+          ≈42
+        </text>
+      </Card>
+    </>
+  );
+}
+
 function SoonIcon() {
   return (
     <>
@@ -175,6 +194,7 @@ const ICONS: Record<TileIcon, () => JSX.Element> = {
   landmarks: LandmarksIcon,
   languages: LanguagesIcon,
   higher: HigherIcon,
+  guess: GuessIcon,
   soon: SoonIcon,
 };
 

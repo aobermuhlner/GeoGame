@@ -15,11 +15,36 @@ row wherever both have one.
 
 ### Daily Games
 
-Every game (Flags, Capitals, GeoLocate, Landmarks, Languages) can be played **once per day** (UTC). Everyone gets the same 10 rounds,
+Every game (Flags, Capitals, GeoLocate, Landmarks, Languages, GeoGuesser) can be played **once per day** (UTC). Everyone gets the same 10 rounds,
 picked at random on the first request of the day. A correct answer scores 50 points plus up to 50 for
 speed, minus 5 per wrong guess (minimum 10); passes and timeouts score 0. Finished runs go on today's
 ranking (per game, plus an overall board summing both). The run is server-side: the timer keeps
 running if you close the tab, and answers are only revealed after each round.
+
+Finished runs show where you stand today: **Top X %** (rank ÷ players who finished that game today, rounded up;
+`topPercent` in `shared/src/api.ts`).
+
+### GeoGuesser
+
+Estimate a number: a mountain's height, a river's length, a record temperature, a country's population, the year a
+canal opened. 30 seconds per question, one locked-in estimate. The score is about closeness, never speed:
+
+- **Solo and group games:** up to 100 points per question. Amounts that span orders of magnitude (people, areas,
+  lengths, heights, money, counts) are judged by ratio, bounded ones (temperatures, years, shares, life expectancy)
+  by difference; `toleranceOf` in `shared/src/guess.ts` says how far off scores 0.
+- **Duels:** the closer estimate gets 1 point (both on a tie), a *spot-on* one (🎯, accuracy ≥ 90 %) 1 more.
+
+**Units.** Answers travel and are scored in one canonical unit per quantity (°C, km, m, km²), so players from
+different places play the very same question. Each player picks °C/°F, km/mi, m/ft and km²/mi² (the unit chip next to
+the input, or Metric/US on the results; stored per browser, US units by default for `en-US`). The browser converts
+what is typed and shows every number (answers, everyone's estimates) in the player's own units. The input accepts
+"1,234", "1.234,5", "1.5 million", "1.5m", "3k", "−89" and "300 BC", and shows how it reads the text before you lock in.
+
+**Questions** (`shared/src/guess.ts`): hand-picked facts in `shared/src/guessFacts.ts` (each with its source, checked
+2026-09-30; values that change with every heatwave or survey are left out), plus questions generated from the country
+statistics in `statsData.ts` for the 80 best-known countries. Population, area and density are only asked where the
+three agree (the World Bank data has a few bad areas). A game picks one question per topic first, so it stays varied.
+During a round the prompt carries the question text and quantity, not its id.
 
 ### Daily Higher or Lower
 
@@ -52,6 +77,7 @@ In the lobby the host picks one or more **games** (played in order, 10 rounds ea
 | GeoLocate | country name | a click on the world map |
 | Landmarks | a landmark photo, zoomed in, zooming out over 15 s | the country (one answer, locked in) |
 | Languages | a sentence | its language (one answer, locked in) |
+| GeoGuesser | a question | a number, in your own units (one estimate, locked in; closer wins) |
 
 **Landmarks** and **Languages** are *lock-in* games: each player gets one answer per round (text that names no
 country/language is refused, so a typo never locks you in). The opponent only sees *that* you locked in. The round

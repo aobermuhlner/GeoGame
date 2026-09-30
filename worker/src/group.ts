@@ -113,6 +113,7 @@ function stageSpan(games: readonly GameId[], i: number): { start: number; rounds
 const entryView = (r: GroupRound, e: Entry): GroupEntryView => ({
   end: e.end,
   answer: e.answer,
+  accuracy: e.accuracy ?? null,
   wrong: e.wrong,
   points: e.points,
   timeMs: e.end === 'correct' && e.at !== null ? e.at - r.startedAt : null,

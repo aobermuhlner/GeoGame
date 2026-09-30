@@ -16,6 +16,10 @@ import { Logo } from './common';
 import { RankUp } from './Emblem';
 import { DuelRoundsTable } from './HigherDuel';
 import { DivisionBadge, added } from './Ranked';
+import { GuessAnswerCell } from './Guess';
+
+/** Games whose rounds show an image (flag or photo) in the results table. */
+const hasImage = (mode: ModeId) => MODES[mode].prompt === 'flag' || MODES[mode].prompt === 'photo';
 
 /** "1000 → 1078 (+78)", plus a promotion/demotion note. */
 function RatingChange({ ranked, me }: { ranked: RankedView; me: Slot }) {
@@ -204,9 +208,15 @@ export function Results({ vm, actions }: { vm: GameVM; actions: GameActions }) {
               <thead>
                 <tr>
                   <th>#</th>
-                  {MODES[mode].prompt !== 'sentence' && <th>{MODES[mode].prompt === 'photo' ? 'Photo' : 'Flag'}</th>}
+                  {hasImage(mode) && <th>{MODES[mode].prompt === 'photo' ? 'Photo' : 'Flag'}</th>}
                   <th class="left">
-                    {mode === 'capitals' ? 'Capital' : mode === 'languages' ? 'Language' : 'Country'}
+                    {mode === 'capitals'
+                      ? 'Capital'
+                      : mode === 'languages'
+                        ? 'Language'
+                        : mode === 'guess'
+                          ? 'Answer'
+                          : 'Country'}
                   </th>
                   <th>{MODES[mode].lockIn ? 'Points' : 'Point'}</th>
                   <th title="Wrong guesses">
@@ -221,7 +231,7 @@ export function Results({ vm, actions }: { vm: GameVM; actions: GameActions }) {
                 {byRoundMode(mode).map(([r, i], k) => (
                   <tr key={i}>
                     <td class="num">{k + 1}</td>
-                    {MODES[mode].prompt !== 'sentence' && (
+                    {hasImage(mode) && (
                       <td>
                         <img
                           class={`thumb${MODES[mode].prompt === 'photo' ? ' photo-thumb' : ''}`}
@@ -231,7 +241,7 @@ export function Results({ vm, actions }: { vm: GameVM; actions: GameActions }) {
                       </td>
                     )}
                     <td class="left country">
-                      {r.answer}
+                      {r.mode === 'guess' ? <GuessAnswerCell code={r.code} /> : r.answer}
                       {r.mode === 'capitals' && <span class="of-country">{r.countryName}</span>}
                       {r.mode === 'landmarks' && <span class="of-country">{r.detail}</span>}
                     </td>

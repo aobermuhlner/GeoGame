@@ -4,7 +4,7 @@ import {
   COUNTDOWN_MS,
   MATCH_INTRO_MS,
   MODES,
-  ROUND_TIME_MS,
+  roundTimeOf,
   STAGE_INTRO_MS,
   applyGuess,
   applyPass,
@@ -48,7 +48,7 @@ function summary(x: RoundState): RoundSummary {
   };
 }
 
-const lockView = (l: Lock | null) => (l ? { answer: l.answer, correct: l.correct } : null);
+const lockView = (l: Lock | null) => (l ? { answer: l.answer, correct: l.correct, accuracy: l.accuracy ?? null } : null);
 
 export function startMockGame(opts: {
   name: string;
@@ -137,7 +137,7 @@ export function startMockGame(opts: {
     const r = newRound(codes[i], Date.now(), roundModes[i]);
     rounds[i] = r;
     phase = 'playing';
-    later(ROUND_TIME_MS + 5, () => {
+    later(roundTimeOf(roundModes[i]) + 5, () => {
       if (applyTimeout(r, Date.now())) finishRound();
     });
     scheduleBot(r);
@@ -148,11 +148,19 @@ export function startMockGame(opts: {
     const lazy = opts.bot === 'lazy';
     const knows = !lazy && Math.random() < 0.55;
     const m = MODES[r.mode ?? 'flags'];
+    const time = roundTimeOf(r.mode ?? 'flags');
     if (m.lockIn) {
-      // One answer: the right one if it knows, else a plausible wrong one.
-      later(lazy ? ROUND_TIME_MS - 2000 : 3000 + Math.random() * 12000, () => {
+      // One answer: the right one if it knows, else a plausible wrong one (estimates: off by up to ×2 either way).
+      later(lazy ? time - 2000 : 3000 + Math.random() * 12000, () => {
         if (r.end || r !== rounds[current]) return;
-        const guess = knows ? m.answerOf(r.code) : m.prompt === 'sentence' ? 'Latin' : 'Atlantis';
+        const guess =
+          m.input === 'number'
+            ? String(Math.round(Number(m.answerOf(r.code)) * (lazy ? 7 : 2 ** (Math.random() * 2 - 1))))
+            : knows
+              ? m.answerOf(r.code)
+              : m.prompt === 'sentence'
+                ? 'Latin'
+                : 'Atlantis';
         const out = applyGuess(r, 1, guess, Date.now());
         if (out === 'invalid' && applyPass(r, 1, Date.now())) finishRound();
         else if (r.end) finishRound();
@@ -169,7 +177,7 @@ export function startMockGame(opts: {
         emit();
       });
     }
-    const decideAt = lazy ? ROUND_TIME_MS - 2000 : knows ? 4000 + Math.random() * 10000 : 8000 + Math.random() * 8000;
+    const decideAt = lazy ? time - 2000 : knows ? 4000 + Math.random() * 10000 : 8000 + Math.random() * 8000;
     later(decideAt, () => {
       if (r.end || r !== rounds[current]) return;
       if (knows) {

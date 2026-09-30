@@ -19,3 +19,6 @@ export * from './ranked';
 export * from './placement';
 export * from './higher';
 export * from './group';
+export * from './units';
+export * from './guessFacts';
+export * from './guess';

@@ -66,7 +66,7 @@ import type { RankedOutcome } from './accounts';
 
 const IN_GAME: Phase[] = ['countdown', 'playing', 'reveal'];
 
-const lockView = (l: Lock | null) => (l ? { answer: l.answer, correct: l.correct } : null);
+const lockView = (l: Lock | null) => (l ? { answer: l.answer, correct: l.correct, accuracy: l.accuracy ?? null } : null);
 
 /** Games a room plays: ranked its one minigame; friend lobbies what the host picked. */
 function gamesOf(s: RoomState): GameId[] {

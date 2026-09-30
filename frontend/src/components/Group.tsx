@@ -24,6 +24,7 @@ import {
 } from '@flagduel/shared';
 import { connectGroup, groupFlagSrc, type ConnStatus, type RoomConnection } from '../net';
 import { CountryInput } from './CountryInput';
+import { EstimateLine, NumberInput, QuestionCard, questionOf } from './Guess';
 import { FlagImage } from './GameScreen';
 import { PairBoard, StatHeader, TimeBar, type PickTag } from './Higher';
 import { CopyInvite, GamesCard, RegionPicker, useGameSettings } from './Lobby';
@@ -206,7 +207,8 @@ function GroupLobby({
         </header>
         <p class="muted small">
           Everyone answers every round. Right answers score {GROUP_BASE_POINTS} points plus up to {GROUP_SPEED_POINTS}{' '}
-          for speed. After each game you see how the ranking changed; the best overall takes the throne.
+          for speed; GeoGuesser estimates score up to 100 the closer they are. After each game you see how the ranking
+          changed; the best overall takes the throne.
         </p>
 
         <div class="code-box">
@@ -358,6 +360,18 @@ function StageIntro({ room, endsAt }: { room: GroupView; endsAt: number }) {
 /** Each player's result of the round that just ended, best first. */
 function RoundResults({ room, you }: { room: GroupView; you: number }) {
   const r = room.reveal!;
+  if (r.game !== 'higher' && MODES[r.game].accuracy) {
+    const order = r.entries
+      .map((e, seat) => ({ e, seat }))
+      .sort((a, b) => b.e.points - a.e.points || a.seat - b.seat);
+    return (
+      <ul class="lock-lines g-results estimates">
+        {order.map(({ e, seat }) => (
+          <EstimateLine key={seat} who={nameOf(room, seat, you)} code={r.code} raw={e.answer} points={e.points} />
+        ))}
+      </ul>
+    );
+  }
   const lockIn = r.game === 'higher' || MODES[r.game].lockIn;
   const answerText = (e: GroupEntryView) => {
     if (r.game === 'higher' && e.answer && r.pair) return e.answer === r.pair.a ? r.pair.aName : r.pair.bName;
@@ -393,9 +407,11 @@ function StatusLine({ room, you }: { room: GroupView; you: number }) {
     const cls = mine?.end === 'correct' ? 'win' : 'lose';
     const headline =
       r.game === 'higher' && r.pair ? `${r.pair.answer === r.pair.a ? r.pair.aName : r.pair.bName} is higher` : r.answer;
+    // GeoGuesser: the question card above shows the answer.
+    const estimate = r.game !== 'higher' && !!MODES[r.game].accuracy;
     return (
       <div class={`status-line reveal ${cls}`}>
-        <strong class="reveal-country">{headline}</strong>
+        {!estimate && <strong class="reveal-country">{headline}</strong>}
         {r.game === 'capitals' && <span class="reveal-of">capital of {r.countryName}</span>}
         {r.game === 'landmarks' && r.detail && <span class="reveal-of">{r.detail}</span>}
         <RoundResults room={room} you={you} />
@@ -431,7 +447,9 @@ function StatusLine({ room, you }: { room: GroupView; you: number }) {
     <div class="status-line muted hint">
       {done > 0
         ? `${done} of ${others.length} ${others.length === 1 ? 'player has' : 'players have'} answered`
-        : lockIn
+        : isModeId(game) && MODES[game].accuracy
+          ? 'One estimate each · up to 100 points, the closer the more'
+          : lockIn
           ? 'One answer · right and quick scores most'
           : 'Everyone answers · the quicker, the more points'}
     </div>
@@ -450,6 +468,7 @@ function RoundPrompt({ room, mode, toLocal }: { room: GroupView; mode: ModeId; t
     const src = groupFlagSrc(token);
     return <ZoomPhoto key={src} src={src} focus={focus} startedAt={startedAt} full={room.phase !== 'playing'} />;
   }
+  if (m.prompt === 'question') return <QuestionCard prompt={room.prompt} code={r?.code ?? null} />;
   if (m.prompt === 'sentence') {
     const text = room.prompt ?? (r ? (m.promptText?.(r.code) ?? null) : null);
     return text ? <SentenceCard text={text} translation={r?.detail} /> : null;
@@ -632,16 +651,25 @@ function GroupGame({
             <PhotoCredit id={room.reveal.code} />
           </>
         )}
-        <div class="guess-row">
-          <CountryInput
+        {mode.input === 'number' ? (
+          <NumberInput
+            quantity={questionOf(room.prompt, room.reveal?.code ?? null)?.quantity ?? null}
             locked={locked}
             focusKey={room.round}
             onSubmit={onGuess}
-            suggest={mode.suggest}
-            placeholder={mode.placeholder}
-            submitLabel={mode.lockIn ? 'Lock in' : undefined}
           />
-        </div>
+        ) : (
+          <div class="guess-row">
+            <CountryInput
+              locked={locked}
+              focusKey={room.round}
+              onSubmit={onGuess}
+              suggest={mode.suggest}
+              placeholder={mode.placeholder}
+              submitLabel={mode.lockIn ? 'Lock in' : undefined}
+            />
+          </div>
+        )}
         {passBtn}
         <LeaveLink onLeave={onLeave} />
       </section>

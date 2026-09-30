@@ -5,13 +5,25 @@
 // sentence ("spa.3" = Spanish sentence 3). The mode says what the item shows and what answers it.
 import { CAPITAL_BY_CODE } from './capitals';
 import { COUNTRY_BY_CODE } from './countries';
+import {
+  GOOD_ESTIMATE,
+  GUESS_BY_ID,
+  GUESS_REVEAL_MS,
+  GUESS_TIME_MS,
+  canonicalText,
+  guessAccuracy,
+  guessPool,
+  guessPrompt,
+  parseCanonical,
+  topicOf,
+} from './guess';
 import { LANDMARK_BY_ID, landmarksInRegions } from './landmarkRules';
 import { LANGUAGE_BY_ID, SENTENCE_ITEMS, languageNameOf, languageOfItem, sentenceOf } from './languageRules';
 import { isCorrectGuess, normalize, resolveGuess } from './normalize';
 import { REGION_OF, type RegionId } from './regions';
 import { suggestCapitals, suggestCountries, suggestLanguages } from './suggest';
 
-export const MODE_IDS = ['flags', 'capitals', 'locate', 'landmarks', 'languages'] as const;
+export const MODE_IDS = ['flags', 'capitals', 'locate', 'landmarks', 'languages', 'guess'] as const;
 
 export type ModeId = (typeof MODE_IDS)[number];
 
@@ -29,10 +41,22 @@ export interface Mode {
   /** Headline on the game screen, e.g. "Guess 10 Flags" */
   title: (rounds: number) => string;
   placeholder: string;
-  /** How answers are given: typed text, or a click on the world map (the guess is the clicked ISO code) */
-  input: 'text' | 'map';
-  /** What a round shows: a flag, a (zooming) landmark photo, or a sentence */
-  prompt: 'flag' | 'photo' | 'sentence';
+  /**
+   * How answers are given: typed text, a click on the world map (the guess is the clicked ISO code), or a
+   * number (sent as the canonical number, see units.ts)
+   */
+  input: 'text' | 'map' | 'number';
+  /** What a round shows: a flag, a (zooming) landmark photo, a sentence, or a question */
+  prompt: 'flag' | 'photo' | 'sentence' | 'question';
+  /** Time per round (default ROUND_TIME_MS) */
+  timeMs?: number;
+  /** How long the reveal stays up (default: REVEAL_MS, LOCK_REVEAL_MS for lock-in games) */
+  revealMs?: number;
+  /**
+   * Estimation games: how close an answer is, 0…1. Scored by closeness instead of right/wrong: solo and group
+   * games give points for accuracy, duels a point to the closer answer (see game.ts).
+   */
+  accuracy?: (guess: string, item: string) => number;
   /** What the pool is counted in ("12 countries", "30 landmarks") */
   unit: [one: string, many: string];
   /** The items rounds can be about, given the selected regions */
@@ -171,6 +195,32 @@ export const MODES: Record<ModeId, Mode> = {
       return !!lang && g !== '' && [lang.name, ...lang.aliases].some((a) => normalize(a) === g);
     },
     suggest: suggestLanguages,
+  },
+  guess: {
+    label: 'GeoGuesser',
+    description: 'Estimate the number: heights, distances, temperatures, populations. The closer, the more points.',
+    title: (n) => `Estimate ${n} Numbers`,
+    placeholder: 'Your estimate…',
+    input: 'number',
+    prompt: 'question',
+    unit: ['question', 'questions'],
+    pool: guessPool,
+    groupOf: topicOf,
+    lockIn: true,
+    timeMs: GUESS_TIME_MS,
+    revealMs: GUESS_REVEAL_MS,
+    promptText: guessPrompt,
+    countryOf: (id) => GUESS_BY_ID[id]?.country ?? null,
+    // Canonical numbers as text; the browser shows them in the player's units.
+    answerOf: (id) => canonicalText(GUESS_BY_ID[id]?.answer ?? 0),
+    detailOf: (id) => GUESS_BY_ID[id]?.note ?? null,
+    nameOf: (guess) => {
+      const v = parseCanonical(guess);
+      return v === null ? null : canonicalText(v);
+    },
+    accuracy: guessAccuracy,
+    isCorrect: (guess, id) => guessAccuracy(guess, id) >= GOOD_ESTIMATE,
+    suggest: () => [],
   },
 };
 

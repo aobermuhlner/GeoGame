@@ -51,9 +51,9 @@ describe('group lobby', () => {
     for (let i = 0; i < GROUP_MAX_PLAYERS; i++) seats.push(await joinGroup(code, `P${i}`));
     expect(seats.map((s) => s.you)).toEqual([0, 1, 2, 3, 4, 5, 6, 7]);
     const last = await waitState(seats[0].c, (s) => s.room.players.length === GROUP_MAX_PLAYERS);
-    expect(last.room.modes).toEqual(['flags', 'capitals', 'locate', 'landmarks', 'languages', 'higher']);
+    expect(last.room.modes).toEqual(['flags', 'capitals', 'locate', 'landmarks', 'languages', 'guess', 'higher']);
     expect(Object.values(last.room.roundCounts).every((n) => n === 5)).toBe(true);
-    expect(last.room.totalRounds).toBe(30);
+    expect(last.room.totalRounds).toBe(35);
 
     const res = await exports.default.fetch(
       new Request(`${BASE}/groups/${code}/ws`, { headers: { Upgrade: 'websocket', Origin: ORIGIN } }),

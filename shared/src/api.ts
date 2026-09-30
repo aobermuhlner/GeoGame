@@ -56,7 +56,17 @@ export interface DailySummary {
   date: string;
   /** Server-clock ms when the next daily unlocks */
   nextAt: number;
-  modes: Record<ModeId, { status: DailyStatus; score: number | null; timeMs: number | null; rank: number | null }>;
+  modes: Record<
+    ModeId,
+    {
+      status: DailyStatus;
+      score: number | null;
+      timeMs: number | null;
+      rank: number | null;
+      /** Finished runs of this game today (with `rank`: "top 12 %") */
+      players: number;
+    }
+  >;
   higher: HigherSummary;
 }
 
@@ -135,3 +145,12 @@ export interface LeaderboardResponse {
 }
 
 export const LEADERBOARD_SIZE = 50;
+
+/**
+ * "Top X %" for rank `rank` of `players` (1-based; rank 1 of 200 → 1, rank 50 of 200 → 25). Null when there is
+ * nobody to compare with.
+ */
+export function topPercent(rank: number | null, players: number): number | null {
+  if (rank === null || players < 2) return null;
+  return Math.max(1, Math.ceil((rank / players) * 100));
+}

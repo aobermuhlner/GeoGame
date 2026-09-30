@@ -11,6 +11,7 @@ import {
   type PairView,
   type RevealedPair,
 } from './higher';
+import { GUESS_REVEAL_MS, estimatePoints } from './guess';
 import { GAME_IDS, type ErrorCode, type GameId, type RoundCounts } from './messages';
 import { MODES } from './modes';
 import type { RegionId } from './regions';
@@ -38,9 +39,15 @@ export const GROUP_STANDINGS_MS = 9_000;
 /** "Next up: Capitals" before each game. */
 export const GROUP_STAGE_INTRO_MS = 4_000;
 
-export const groupTimeOf = (game: GameId): number => (game === 'higher' ? DUEL_TIME_MS : ROUND_TIME_MS);
+export const groupTimeOf = (game: GameId): number => (game === 'higher' ? DUEL_TIME_MS : (MODES[game].timeMs ?? ROUND_TIME_MS));
 export const groupRevealMsOf = (game: GameId): number =>
-  game === 'higher' || MODES[game].lockIn ? GROUP_LOCK_REVEAL_MS : GROUP_REVEAL_MS;
+  game === 'higher'
+    ? GROUP_LOCK_REVEAL_MS
+    : MODES[game].accuracy
+      ? GUESS_REVEAL_MS + 1_500
+      : MODES[game].lockIn
+        ? GROUP_LOCK_REVEAL_MS
+        : GROUP_REVEAL_MS;
 
 export function groupPoints(elapsedMs: number, totalMs: number, wrong: number): number {
   const left = Math.max(0, Math.min(1, 1 - elapsedMs / totalMs));
@@ -58,9 +65,11 @@ export interface Entry {
   end: EntryEnd | null;
   /** When they finished */
   at: number | null;
-  /** Lock-in games: the answer's display name; Higher or Lower: the ISO code picked */
+  /** Lock-in games: the answer's display name; Higher or Lower: the ISO code picked; GeoGuesser: the number */
   answer: string | null;
   points: number;
+  /** Estimation games: how close the answer was, 0…1 */
+  accuracy?: number;
 }
 
 export interface GroupRound {
@@ -95,7 +104,9 @@ export function newGroupRound(game: GameId, code: string, pair: HigherPair | nul
 function finishEntry(r: GroupRound, e: Entry, end: EntryEnd, now: number) {
   e.end = end;
   e.at = now;
-  e.points = end === 'correct' ? groupPoints(now - r.startedAt, r.deadline - r.startedAt, e.wrong) : 0;
+  // Estimation games: points for accuracy only (no speed bonus: the extra time is there to think).
+  if (e.accuracy !== undefined) e.points = estimatePoints(e.accuracy);
+  else e.points = end === 'correct' ? groupPoints(now - r.startedAt, r.deadline - r.startedAt, e.wrong) : 0;
 }
 
 const open = (r: GroupRound, i: number, now: number) => !r.ended && now < r.deadline && !!r.entries[i] && !r.entries[i].end;
@@ -112,6 +123,8 @@ export function groupGuess(r: GroupRound, i: number, text: string, now: number):
     const answer = mode.nameOf(text);
     if (!answer) return 'invalid';
     e.answer = answer;
+    const accuracy = mode.accuracy?.(text, r.code);
+    if (accuracy !== undefined) e.accuracy = accuracy;
     const correct = mode.isCorrect(text, r.code);
     finishEntry(r, e, correct ? 'correct' : 'wrong', now);
     return 'locked';
@@ -226,6 +239,8 @@ export interface GroupEntryView {
   end: EntryEnd | null;
   /** Lock-in answer or Higher or Lower pick (ISO code) */
   answer: string | null;
+  /** Estimation games: how close the answer was, 0…1 */
+  accuracy: number | null;
   wrong: number;
   points: number;
   /** Time to a right answer */

@@ -272,10 +272,51 @@ describe('lock-in games (Landmarks)', () => {
     const reveal = guest.c.state(null, (s) => s.room.phase === 'reveal');
     guest.c.send({ t: 'pass', round: 1 });
     const r = (await reveal).room.reveal!;
-    expect(r.locks).toEqual([{ answer: country, correct: true }, null]);
+    expect(r.locks).toEqual([{ answer: country, correct: true, accuracy: null }, null]);
     expect(r.points).toEqual([2, 0]);
     expect(r.detail).toBe(LANDMARK_BY_ID[id].name);
     expect(r.end).toBe('locked');
+  });
+
+  it('GeoGuesser: 30 s rounds, estimates stay hidden, the closer one scores', async () => {
+    const code = await createRoom();
+    const host = await join(code, 'Adrian');
+    const guest = await join(code, 'Anna');
+    await host.c.state({ t: 'setModes', modes: ['guess'] }, (s) => s.room.modes[0] === 'guess');
+    await host.c.state({ t: 'ready', ready: true }, (s) => s.room.players[0].ready);
+    await guest.c.state({ t: 'ready', ready: true }, (s) => s.room.players[1].ready);
+    await host.c.state({ t: 'start' }, (s) => s.room.phase === 'countdown');
+
+    const playing = guest.c.state(null, (s) => s.room.phase === 'playing');
+    let startedAt = 0;
+    await runInDurableObject(stub(code), async (room: Room) => {
+      startedAt = (await room.debugState())!.game!.countdownEndsAt!;
+      await room.tick(startedAt);
+    });
+    const s1 = await playing;
+    const id = (await runInDurableObject(stub(code), (room: Room) => room.debugState()))!.game!.codes[0];
+    const { GUESS_BY_ID, GUESS_TIME_MS, parseGuessPrompt } = await import('@flagduel/shared');
+    const q = GUESS_BY_ID[id];
+    expect(parseGuessPrompt(s1.room.prompt!)).toEqual({ quantity: q.quantity, text: q.text });
+    expect(JSON.stringify(s1)).not.toContain(id);
+    expect(s1.room.deadline! - startedAt).toBeGreaterThanOrEqual(GUESS_TIME_MS - 50);
+
+    const bad = host.c.next('guessResult');
+    host.c.send({ t: 'guess', round: 1, text: 'a lot' });
+    expect((await bad).outcome).toBe('invalid');
+    const exact = String(q.answer);
+    const seenLock = guest.c.state(null, (s) => s.room.players[0].locked);
+    host.c.send({ t: 'guess', round: 1, text: exact });
+    const g = await seenLock;
+    expect(g.room.myLock).toBeNull();
+
+    const reveal = guest.c.state(null, (s) => s.room.phase === 'reveal');
+    guest.c.send({ t: 'guess', round: 1, text: String(q.answer * 3 + 1000) });
+    const r = (await reveal).room.reveal!;
+    expect(r.code).toBe(id);
+    expect(r.locks![0]).toMatchObject({ answer: exact, correct: true, accuracy: 1 });
+    expect(r.locks![1]!.correct).toBe(false);
+    expect(r.points).toEqual([2, 0]);
   });
 
   it('moves on to the reveal once both players have locked in', async () => {

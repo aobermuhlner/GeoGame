@@ -1,7 +1,8 @@
 import { useState } from 'preact/hooks';
-import { COUNTDOWN_MS, MODES, ROUND_TIME_MS, focusOf, isModeId, type ModeId } from '@flagduel/shared';
+import { COUNTDOWN_MS, MODES, focusOf, isModeId, roundTimeOf, type ModeId } from '@flagduel/shared';
 import type { GameActions, GameVM } from '../types';
 import { CountryInput } from './CountryInput';
+import { EstimateLines, NumberInput, QuestionCard, formatEstimate, questionOf, useUnits } from './Guess';
 import { LocateBoard } from './LocateBoard';
 import { LockLines, PhotoCredit, RevealMap, SentenceCard, ZoomPhoto } from './RoundPrompt';
 import { Logo, RegionChips, StageSteps, formatClock, useNow } from './common';
@@ -119,9 +120,10 @@ function RoundPrompt({ vm }: { vm: GameVM }) {
     const src = vm.flagUrl ?? r?.flagUrl;
     const focus = vm.focus ?? (r ? focusOf(r.code) : null);
     if (!src || !focus) return null;
-    const startedAt = vm.deadline !== null ? vm.deadline - ROUND_TIME_MS : null;
+    const startedAt = vm.deadline !== null ? vm.deadline - roundTimeOf('landmarks') : null;
     return <ZoomPhoto key={src} src={src} focus={focus} startedAt={startedAt} full={vm.phase !== 'playing'} />;
   }
+  if (m.prompt === 'question') return <QuestionCard prompt={vm.prompt} code={r?.code ?? null} />;
   if (m.prompt === 'sentence') {
     const text = vm.prompt ?? (r ? (m.promptText?.(r.code) ?? null) : null);
     return text ? <SentenceCard text={text} translation={r?.detail} /> : null;
@@ -162,6 +164,21 @@ function StatusLine({ vm }: { vm: GameVM }) {
   const me = vm.players[vm.me];
   const opp = vm.players[oppSlot];
   const now = useNow(opp.graceEndsAt !== null, 500);
+  const units = useUnits();
+  if (vm.reveal && MODES[vm.reveal.mode].accuracy) {
+    const { code, locks, points, end } = vm.reveal;
+    const mine = points[vm.me];
+    const theirs = points[oppSlot];
+    return (
+      <div class={`status-line reveal ${mine === theirs ? 'none' : mine > theirs ? 'win' : 'lose'}`}>
+        {locks ? (
+          <EstimateLines code={code} locks={locks} points={points} names={[vm.players[0].name, vm.players[1].name]} me={vm.me} />
+        ) : (
+          <span class="reveal-who">{end === 'timeout' ? "Time's up — nobody answered" : 'Nobody answered'}</span>
+        )}
+      </div>
+    );
+  }
   if (vm.reveal && MODES[vm.reveal.mode].lockIn) {
     const { answer, end, mode, detail, locks, points } = vm.reveal;
     const mine = points[vm.me];
@@ -213,14 +230,25 @@ function StatusLine({ vm }: { vm: GameVM }) {
       return (
         <div class="status-line muted">
           <span>
-            Locked in: <strong class="locked-answer">{vm.myLock ?? '…'}</strong>
+            Locked in:{' '}
+            <strong class="locked-answer">
+              {vm.myLock && MODES[modeOf(vm)].input === 'number'
+                ? formatEstimate(questionOf(vm.prompt, null)?.quantity ?? 'count', vm.myLock, units)
+                : (vm.myLock ?? '…')}
+            </strong>
           </span>
           <span>{opp.locked || opp.passed ? 'Revealing…' : `Waiting for ${opp.name}…`}</span>
         </div>
       );
     if (opp.locked) return <div class="status-line muted">{opp.name} has locked in an answer!</div>;
     if (opp.passed) return <div class="status-line muted">{opp.name} passed.</div>;
-    return <div class="status-line muted hint">One answer each · right = 1 point, first right +1</div>;
+    return (
+      <div class="status-line muted hint">
+        {MODES[modeOf(vm)].accuracy
+          ? 'One estimate each · closer = 1 point, spot on 🎯 +1'
+          : 'One answer each · right = 1 point, first right +1'}
+      </div>
+    );
   }
   if (opp.passed) return <div class="status-line muted">{opp.name} passed. It's all yours!</div>;
   return <div class="status-line muted hint">First correct answer wins the point</div>;
@@ -312,16 +340,25 @@ export function GameScreen({ vm, actions }: { vm: GameVM; actions: GameActions }
             <PhotoCredit id={vm.reveal.code} />
           </>
         )}
-        <div class="guess-row">
-          <CountryInput
+        {mode.input === 'number' ? (
+          <NumberInput
+            quantity={questionOf(vm.prompt, vm.reveal?.code ?? null)?.quantity ?? null}
             locked={locked}
             focusKey={vm.round}
             onSubmit={actions.guess}
-            suggest={mode.suggest}
-            placeholder={mode.placeholder}
-            submitLabel={mode.lockIn ? 'Lock in' : undefined}
           />
-        </div>
+        ) : (
+          <div class="guess-row">
+            <CountryInput
+              locked={locked}
+              focusKey={vm.round}
+              onSubmit={actions.guess}
+              suggest={mode.suggest}
+              placeholder={mode.placeholder}
+              submitLabel={mode.lockIn ? 'Lock in' : undefined}
+            />
+          </div>
+        )}
         {giveUp(true)}
       </section>
     </main>
