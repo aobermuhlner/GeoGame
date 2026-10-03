@@ -754,7 +754,7 @@ function GroupGame({
   const mode = MODES[game];
   if (mode.input === 'map') {
     return (
-      <main class="stack wide">
+      <main class="stack wide fit">
         <GroupTop room={room} you={you} toLocal={toLocal} />
         <section class="card game-card map-card">
           <LocateBoard
@@ -779,24 +779,14 @@ function GroupGame({
   const pin = mode.input === 'pin';
   const reveal = room.phase === 'reveal' ? room.reveal : null;
 
-  return (
-    <main class={`stack${pin ? ' wide' : ''}`}>
-      <GroupTop room={room} you={you} toLocal={toLocal} />
-      <section class="card game-card">
-        <div class="round-badge" aria-label={`Round ${Math.max(1, room.stageRound)}`}>
-          {Math.max(1, room.stageRound)}
-        </div>
-        <div class={`flag-frame ${mode.prompt}-prompt`}>
-          {intro ?? <RoundPrompt room={room} mode={game} toLocal={toLocal} />}
-        </div>
-        {room.prompt && room.phase === 'playing' && mode.prompt === 'flag' && (
-          <p class="prompt">
-            Capital of <strong>{room.prompt}</strong>?
-          </p>
-        )}
-        <StatusLine room={room} you={you} />
-        {pin ? (
+  if (pin) {
+    return (
+      <main class="stack wide fit">
+        <GroupTop room={room} you={you} toLocal={toLocal} />
+        <section class="card game-card pin-card">
+          <StatusLine room={room} you={you} />
           <PinBoard
+            photo={intro ?? <RoundPrompt room={room} mode={game} toLocal={toLocal} />}
             roundKey={room.round}
             locked={locked}
             onLock={onGuess}
@@ -816,8 +806,38 @@ function GroupGame({
                   }
                 : null
             }
+            actions={
+              !reveal && (
+                <button class="btn btn-pass" type="button" disabled={locked} onClick={onPass}>
+                  Pass
+                </button>
+              )
+            }
           />
-        ) : mode.input === 'number' ? (
+          {reveal?.game === 'landmarks' && <PhotoCredit id={reveal.code} />}
+          <LeaveLink onLeave={onLeave} />
+        </section>
+      </main>
+    );
+  }
+
+  return (
+    <main class="stack">
+      <GroupTop room={room} you={you} toLocal={toLocal} />
+      <section class="card game-card">
+        <div class="round-badge" aria-label={`Round ${Math.max(1, room.stageRound)}`}>
+          {Math.max(1, room.stageRound)}
+        </div>
+        <div class={`flag-frame ${mode.prompt}-prompt`}>
+          {intro ?? <RoundPrompt room={room} mode={game} toLocal={toLocal} />}
+        </div>
+        {room.prompt && room.phase === 'playing' && mode.prompt === 'flag' && (
+          <p class="prompt">
+            Capital of <strong>{room.prompt}</strong>?
+          </p>
+        )}
+        <StatusLine room={room} you={you} />
+        {mode.input === 'number' ? (
           <NumberInput
             quantity={questionOf(room.prompt, room.reveal?.code ?? null)?.quantity ?? null}
             locked={locked}
@@ -836,7 +856,6 @@ function GroupGame({
             />
           </div>
         )}
-        {reveal?.game === 'landmarks' && <PhotoCredit id={reveal.code} />}
         {passBtn}
         <LeaveLink onLeave={onLeave} />
       </section>

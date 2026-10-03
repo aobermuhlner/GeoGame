@@ -433,7 +433,7 @@ function SoloScreen({
   );
 
   return (
-    <main class={`stack${isMap || mode.input === 'pin' ? ' wide' : ''}`}>
+    <main class={`stack${isMap || mode.input === 'pin' ? ' wide fit' : ''}`}>
       <section class="card top-card">
         <header class="brand">
           <Logo />
@@ -520,6 +520,54 @@ function SoloScreen({
           {error && <p class="form-error">{error}</p>}
           <SoloNote onQuit={onQuit} />
         </section>
+      ) : mode.input === 'pin' ? (
+        <section class="card game-card pin-card">
+          {statusLine}
+          <PinBoard
+            photo={
+              run.phase === 'countdown' ? (
+                <div class="countdown" key={count}>
+                  {count}
+                </div>
+              ) : (
+                (run.flag ?? r?.flag) && (
+                  <ZoomPhoto
+                    key={run.flag ?? r!.flag}
+                    src={source.flagSrc((run.flag ?? r!.flag)!)}
+                    focus={run.focus ?? focusOf(r!.code)}
+                    startedAt={deadline !== null && run.phase === 'playing' ? deadline - roundTimeOf(run.mode) : null}
+                    full={run.phase !== 'playing'}
+                  />
+                )
+              )
+            }
+            roundKey={run.round}
+            locked={locked}
+            onLock={onGuess}
+            onDraft={source.draft && ((text) => source.draft!(run.round, text))}
+            regions={source.regions}
+            worth={(i) => `${PIN_POINTS[i] * 20}%`}
+            reveal={
+              r ? { landmark: r.code, pins: r.given ? [{ answer: r.given, correct: r.end === 'correct', me: true, label: 'You' }] : [] } : null
+            }
+            actions={
+              manualNext ? (
+                <button class="btn btn-primary" onClick={onNext}>
+                  Next round
+                </button>
+              ) : (
+                !r && (
+                  <button class="btn btn-pass" type="button" disabled={locked} onClick={onPass}>
+                    Pass
+                  </button>
+                )
+              )
+            }
+          />
+          {r && <PhotoCredit id={r.code} />}
+          {error && <p class="form-error">{error}</p>}
+          <SoloNote onQuit={onQuit} />
+        </section>
       ) : (
         <section class="card game-card">
           <div class="round-badge">{run.round}</div>
@@ -528,16 +576,6 @@ function SoloScreen({
               <div class="countdown" key={Math.ceil((local(run.startsAt) - now) / 1000)}>
                 {Math.max(1, Math.ceil((local(run.startsAt) - now) / 1000))}
               </div>
-            ) : mode.prompt === 'photo' ? (
-              (run.flag ?? r?.flag) && (
-                <ZoomPhoto
-                  key={run.flag ?? r!.flag}
-                  src={source.flagSrc((run.flag ?? r!.flag)!)}
-                  focus={run.focus ?? focusOf(r!.code)}
-                  startedAt={deadline !== null && run.phase === 'playing' ? deadline - roundTimeOf(run.mode) : null}
-                  full={run.phase !== 'playing'}
-                />
-              )
             ) : mode.prompt === 'question' ? (
               <QuestionCard prompt={run.prompt} code={r?.code ?? null} />
             ) : mode.prompt === 'sentence' ? (
@@ -556,20 +594,6 @@ function SoloScreen({
             </p>
           )}
           {statusLine}
-          {mode.input === 'pin' && (
-            <PinBoard
-              roundKey={run.round}
-              locked={locked}
-              onLock={onGuess}
-              onDraft={source.draft && ((text) => source.draft!(run.round, text))}
-              regions={source.regions}
-              worth={(i) => `${PIN_POINTS[i] * 20}%`}
-              reveal={
-                r ? { landmark: r.code, pins: r.given ? [{ answer: r.given, correct: r.end === 'correct', me: true, label: 'You' }] : [] } : null
-              }
-            />
-          )}
-          {r && run.mode === 'landmarks' && <PhotoCredit id={r.code} />}
           {manualNext ? (
             <div class="btn-row">
               <button class="btn btn-primary" onClick={onNext}>
@@ -584,7 +608,6 @@ function SoloScreen({
               onSubmit={onGuess}
             />
           ) : (
-            mode.input !== 'pin' && (
             <div class="guess-row">
               <CountryInput
                 locked={locked}
@@ -595,7 +618,6 @@ function SoloScreen({
                 submitLabel={mode.lockIn ? 'Lock in' : undefined}
               />
             </div>
-            )
           )}
           {!manualNext && (
             <div class="give-up">

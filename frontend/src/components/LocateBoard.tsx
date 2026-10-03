@@ -166,6 +166,7 @@ export function LocateBoard({
       </div>
       <div class="locate-stage">
         <LocateMap
+          fill={!fs}
           onPick={pick}
           marks={shown}
           focus={missed}

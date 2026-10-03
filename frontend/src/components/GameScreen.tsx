@@ -300,7 +300,7 @@ export function GameScreen({ vm, actions }: { vm: GameVM; actions: GameActions }
 
   if (isMap) {
     return (
-      <main class="stack wide">
+      <main class="stack wide fit">
         <VsIntro vm={vm} />
         <TopCard vm={vm} />
         <section class="card game-card map-card">
@@ -328,29 +328,15 @@ export function GameScreen({ vm, actions }: { vm: GameVM; actions: GameActions }
   const pin = mode.input === 'pin';
   const reveal = vm.phase === 'reveal' ? vm.reveal : null;
 
-  return (
-    <main class={`stack${pin ? ' wide' : ''}`}>
-      <VsIntro vm={vm} />
-      <TopCard vm={vm} />
-      <section class="card game-card">
-        <div class="round-badge" aria-label={`Round ${Math.max(1, vm.stageRound)}`}>
-          {Math.max(1, vm.stageRound)}
-        </div>
-        <div class={`flag-frame ${mode.prompt}-prompt`}>
-          {vm.phase === 'countdown' && vm.countdownEndsAt ? (
-            <Countdown endsAt={vm.countdownEndsAt} vm={vm} />
-          ) : (
-            <RoundPrompt vm={vm} />
-          )}
-        </div>
-        {vm.prompt && vm.phase === 'playing' && mode.prompt === 'flag' && (
-          <p class="prompt">
-            Capital of <strong>{vm.prompt}</strong>?
-          </p>
-        )}
-        <StatusLine vm={vm} />
-        {pin ? (
+  if (pin) {
+    return (
+      <main class="stack wide fit">
+        <VsIntro vm={vm} />
+        <TopCard vm={vm} />
+        <section class="card game-card pin-card">
+          <StatusLine vm={vm} />
           <PinBoard
+            photo={vm.phase === 'countdown' && vm.countdownEndsAt ? <Countdown endsAt={vm.countdownEndsAt} vm={vm} /> : <RoundPrompt vm={vm} />}
             roundKey={vm.round}
             locked={locked}
             onLock={actions.guess}
@@ -370,22 +356,52 @@ export function GameScreen({ vm, actions }: { vm: GameVM; actions: GameActions }
                   }
                 : null
             }
+            actions={
+              !reveal && (
+                <button class="btn btn-pass" type="button" disabled={locked} onClick={actions.pass}>
+                  Pass
+                </button>
+              )
+            }
           />
-        ) : (
-          <>
-            <div class="guess-row">
-              <CountryInput
-                locked={locked}
-                focusKey={vm.round}
-                onSubmit={actions.guess}
-                suggest={mode.suggest}
-                placeholder={mode.placeholder}
-                submitLabel={mode.lockIn ? 'Lock in' : undefined}
-              />
-            </div>
-          </>
+          {reveal?.mode === 'landmarks' && <PhotoCredit id={reveal.code} />}
+          {giveUp(false)}
+        </section>
+      </main>
+    );
+  }
+
+  return (
+    <main class="stack">
+      <VsIntro vm={vm} />
+      <TopCard vm={vm} />
+      <section class="card game-card">
+        <div class="round-badge" aria-label={`Round ${Math.max(1, vm.stageRound)}`}>
+          {Math.max(1, vm.stageRound)}
+        </div>
+        <div class={`flag-frame ${mode.prompt}-prompt`}>
+          {vm.phase === 'countdown' && vm.countdownEndsAt ? (
+            <Countdown endsAt={vm.countdownEndsAt} vm={vm} />
+          ) : (
+            <RoundPrompt vm={vm} />
+          )}
+        </div>
+        {vm.prompt && vm.phase === 'playing' && mode.prompt === 'flag' && (
+          <p class="prompt">
+            Capital of <strong>{vm.prompt}</strong>?
+          </p>
         )}
-        {reveal?.mode === 'landmarks' && <PhotoCredit id={reveal.code} />}
+        <StatusLine vm={vm} />
+        <div class="guess-row">
+          <CountryInput
+            locked={locked}
+            focusKey={vm.round}
+            onSubmit={actions.guess}
+            suggest={mode.suggest}
+            placeholder={mode.placeholder}
+            submitLabel={mode.lockIn ? 'Lock in' : undefined}
+          />
+        </div>
         {giveUp(true)}
       </section>
     </main>

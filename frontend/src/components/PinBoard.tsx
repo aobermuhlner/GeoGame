@@ -1,5 +1,9 @@
 // Landmarks game: place a pin on the world map, pick a circle around it, lock it in. The landmark has to be
 // inside the circle; the smaller the circle, the more it is worth. The reveal shows everyone's circles.
+// The photo and the map share one stage that fills the screen. Rounds start with the photo large and the map
+// small in the corner: the small map works as it is (zoom, pan, pin), or its button makes it the large one
+// (click the small photo to swap back). The reveal shows the map with the photo beside it.
+import type { ComponentChildren } from 'preact';
 import { useEffect, useMemo, useState } from 'preact/hooks';
 import {
   LANDMARK_META,
@@ -28,6 +32,8 @@ export interface RevealPin {
 }
 
 interface Props {
+  /** The round's photo (or the countdown before it) */
+  photo: ComponentChildren;
   /** Changes every round: clears the pin */
   roundKey: string | number;
   /** No pin can be placed or locked in (countdown, reveal, passed, already locked in) */
@@ -42,6 +48,8 @@ interface Props {
   regions?: readonly RegionId[];
   /** What each radius is worth, shown on its button (default: duel points) */
   worth?: (i: number) => string;
+  /** More buttons beside "Lock in" (Pass, Next round) */
+  actions?: ComponentChildren;
 }
 
 const duelWorth = (i: number) => `${PIN_POINTS[i]} pt${PIN_POINTS[i] === 1 ? '' : 's'}`;
@@ -91,17 +99,30 @@ function PinMark({ x, y, u, cls, label }: { x: number; y: number; u: number; cls
   );
 }
 
-export function PinBoard({ roundKey, locked, onLock, onDraft, mine, reveal, regions = [], worth = duelWorth }: Props) {
+export function PinBoard({
+  photo,
+  roundKey,
+  locked,
+  onLock,
+  onDraft,
+  mine,
+  reveal,
+  regions = [],
+  worth = duelWorth,
+  actions,
+}: Props) {
   const { partial, active } = useRegionFocus(regions);
   const proj = useProjection(partial && isPacific(regions));
   const [spot, setSpot] = useState<[number, number] | null>(null);
   const [km, setKm] = useState<number>(PIN_DEFAULT_RADIUS);
   const [pending, setPending] = useState(false);
+  const [mapBig, setMapBig] = useState(false);
 
   useEffect(() => {
     setSpot(null);
     setKm(PIN_DEFAULT_RADIUS);
     setPending(false);
+    setMapBig(false);
   }, [roundKey]);
 
   const mineParsed = mine ? parsePin(mine) : null;
@@ -159,63 +180,87 @@ export function PinBoard({ roundKey, locked, onLock, onDraft, mine, reveal, regi
 
   return (
     <div class="pin-board">
-      <div class="pin-map">
-        <LocateMap
-          onTap={tap}
-          resetKey={roundKey}
-          region={partial ? regions : null}
-          active={active}
-          disabled={blocked && !reveal}
-          focusBox={focusBox}
-          layer={(u) =>
-            shapes && (
-              <g class="pb-layer">
-                {shapes.pins.map((p, i) => (
-                  <path key={`r${i}`} class={`pb-ring ${p.cls}`} d={p.ring} />
-                ))}
-                {shapes.t &&
-                  shapes.pins.map((p, i) => (
-                    <line
-                      key={`l${i}`}
-                      class="pb-miss"
-                      x1={p.xy[0]}
-                      y1={p.xy[1]}
-                      x2={shapes.t![0]}
-                      y2={shapes.t![1]}
-                     
-                    />
+      <div class={`pin-stage ${reveal ? 'revealed' : mapBig ? 'map-big' : 'photo-big'}`}>
+        <div class="ps-pane ps-photo">
+          <div class="ps-photo-box">{photo}</div>
+          {mapBig && !reveal && (
+            <button type="button" class="ps-cover" aria-label="Show the photo" onClick={() => setMapBig(false)}>
+              <span class="ps-label">Photo</span>
+            </button>
+          )}
+        </div>
+        <div class="ps-pane ps-map">
+          <LocateMap
+            fill
+            onTap={tap}
+            resetKey={roundKey}
+            region={partial ? regions : null}
+            active={active}
+            disabled={blocked && !reveal}
+            focusBox={focusBox}
+            layer={(u) =>
+              shapes && (
+                <g class="pb-layer">
+                  {shapes.pins.map((p, i) => (
+                    <path key={`r${i}`} class={`pb-ring ${p.cls}`} d={p.ring} />
                   ))}
-                {shapes.pins.map((p, i) => (
-                  <PinMark key={`p${i}`} x={p.xy[0]} y={p.xy[1]} u={u} cls={p.cls} label={p.label} />
-                ))}
-                {shapes.t && <PinMark x={shapes.t[0]} y={shapes.t[1]} u={u} cls="target" />}
-              </g>
-            )
-          }
-        />
-        {!reveal && !spot && !mineParsed && !locked && <div class="pin-tip">Tap the map to place your pin</div>}
+                  {shapes.t &&
+                    shapes.pins.map((p, i) => (
+                      <line
+                        key={`l${i}`}
+                        class="pb-miss"
+                        x1={p.xy[0]}
+                        y1={p.xy[1]}
+                        x2={shapes.t![0]}
+                        y2={shapes.t![1]}
+                      />
+                    ))}
+                  {shapes.pins.map((p, i) => (
+                    <PinMark key={`p${i}`} x={p.xy[0]} y={p.xy[1]} u={u} cls={p.cls} label={p.label} />
+                  ))}
+                  {shapes.t && <PinMark x={shapes.t[0]} y={shapes.t[1]} u={u} cls="target" />}
+                </g>
+              )
+            }
+          />
+          {!reveal && !spot && !mineParsed && !locked && (
+            <div class="pin-tip">{mapBig ? 'Tap the map to place your pin' : 'Click to pin · scroll to zoom'}</div>
+          )}
+          {!mapBig && !reveal && (
+            <button type="button" class="ps-grow" aria-label="Bigger map" title="Bigger map" onClick={() => setMapBig(true)}>
+              <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">
+                <path d="M1 5V1h4M11 1h4v4M1 11v4h4M15 11v4h-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </button>
+          )}
+        </div>
       </div>
-      {!reveal && (
+      {(!reveal || actions) && (
         <div class="pin-controls">
-          <div class="pin-radii" role="radiogroup" aria-label="Circle size">
-            {PIN_RADII.map((r, i) => (
-              <button
-                key={r}
-                type="button"
-                role="radio"
-                aria-checked={(mineParsed?.km ?? km) === r}
-                class={`pin-radius${(mineParsed?.km ?? km) === r ? ' on' : ''}`}
-                disabled={blocked}
-                onClick={() => setKm(r)}
-              >
-                <strong>{r.toLocaleString('en-US')} km</strong>
-                <span>{worth(i)}</span>
+          {!reveal && (
+            <>
+              <div class="pin-radii" role="radiogroup" aria-label="Circle size">
+                {PIN_RADII.map((r, i) => (
+                  <button
+                    key={r}
+                    type="button"
+                    role="radio"
+                    aria-checked={(mineParsed?.km ?? km) === r}
+                    class={`pin-radius${(mineParsed?.km ?? km) === r ? ' on' : ''}`}
+                    disabled={blocked}
+                    onClick={() => setKm(r)}
+                  >
+                    <strong>{r.toLocaleString('en-US')} km</strong>
+                    <span>{worth(i)}</span>
+                  </button>
+                ))}
+              </div>
+              <button class="btn btn-primary pin-lock" type="button" disabled={blocked || !spot} onClick={lock}>
+                {mineParsed ? 'Locked in' : 'Lock in'}
               </button>
-            ))}
-          </div>
-          <button class="btn btn-primary pin-lock" type="button" disabled={blocked || !spot} onClick={lock}>
-            {mineParsed ? 'Locked in' : 'Lock in'}
-          </button>
+            </>
+          )}
+          {actions}
         </div>
       )}
     </div>

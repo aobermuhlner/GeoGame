@@ -25,6 +25,8 @@ interface Props {
   snug?: boolean;
   /** Write these countries' names on the map (with `nameOf`), e.g. to reveal what was missed. */
   labels?: readonly string[];
+  /** Fill the parent's box (any shape) instead of keeping the map's own aspect ratio */
+  fill?: boolean;
   /** Debug: show the hovered country's name. */
   showNames?: boolean;
   nameOf?: (code: string) => string;
@@ -94,6 +96,7 @@ export function LocateMap({
   region,
   snug = false,
   labels,
+  fill = false,
   showNames,
   nameOf,
   disabled,
@@ -114,6 +117,8 @@ export function LocateMap({
   const rotatedRef = useRef(rotated);
   rotatedRef.current = rotated;
   const anim = useRef(0);
+  /** The view is (or is gliding to) the start view */
+  const homing = useRef(true);
   const frame = useRef(0);
 
   useEffect(() => () => cancelAnimationFrame(frame.current), []);
@@ -137,6 +142,20 @@ export function LocateMap({
     return () => window.removeEventListener('resize', on);
   }, [snug]);
 
+  // Fill: the frame's width / height, measured from the box the map sits in.
+  const wrapRef = useRef<HTMLDivElement>(null);
+  const [frameAr, setFrameAr] = useState<number | null>(null);
+  useLayoutEffect(() => {
+    const el = wrapRef.current;
+    if (!fill || !el) return;
+    const ro = new ResizeObserver(([e]) => {
+      const { width, height } = e.contentRect;
+      if (width > 0 && height > 0) setFrameAr(Math.round((width / height) * 1000) / 1000);
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [map, fill]);
+
   const W = map?.width ?? 1;
   const H = map?.height ?? 1;
   /** The region's box [x0, y0, x1, y1] (map units), or null for the whole world */
@@ -149,11 +168,12 @@ export function LocateMap({
   // region's shape (a little wider), as far as the window's height allows.
   const maxPx = Math.max(280, winH - 270); // room for the page's header card above
   const VH = useMemo(() => {
+    if (fill) return frameAr ? W / frameAr : H;
     if (!snug || !regionBox) return H;
     const [x0, y0, x1, y1] = regionBox;
     const aspect = Math.min(W / H, Math.max(((x1 - x0) / (y1 - y0)) * 1.12, (unit * W) / maxPx));
     return W / aspect;
-  }, [snug, regionBox, maxPx, unit, W, H]);
+  }, [snug, fill, frameAr, regionBox, maxPx, unit, W, H]);
 
   /** Keep the map covering the frame: at least as zoomed in as the frame's height needs. */
   function clamp(v: View): View {
@@ -163,6 +183,7 @@ export function LocateMap({
 
   /** Touch screens fire several moves per frame: re-render at most once a frame. */
   function set(v: View) {
+    homing.current = false;
     cancelAnimationFrame(anim.current);
     viewRef.current = clamp(v);
     if (!frame.current) {
@@ -307,9 +328,17 @@ export function LocateMap({
     return { k, x: W / 2 - ((x0 + x1) / 2) * k, y: VH / 2 - ((y0 + y1) / 2) * k };
   }
 
-  /** Where a round starts: the selected region, or the whole world. */
+  /** Where a round starts: the selected region, or the whole world (centred when the frame's shape differs). */
   function home(): View {
-    return clamp(regionBox ? fit(regionBox, 0, MAX_ZOOM) : { k: 1, x: 0, y: 0 });
+    if (regionBox) return clamp(fit(regionBox, 0, MAX_ZOOM));
+    const k = Math.max(1, VH / H);
+    return clamp({ k, x: (W - W * k) / 2, y: (VH - H * k) / 2 });
+  }
+
+  /** Back to the start view; it stays there if the frame changes shape. */
+  function goHome(ms?: number) {
+    homing.current = true;
+    if (!atHome()) animateTo(home(), ms);
   }
 
   const atHome = () => {
@@ -320,32 +349,46 @@ export function LocateMap({
 
   // Start on the region as soon as the map has loaded (no animation).
   // Also when the frame changes shape (window resized, or measured for the first time).
+  // A filled frame that changes shape keeps its view (or what `focusBox` frames); anything else starts at home.
+  const placed = useRef(false);
   useLayoutEffect(() => {
-    if (map) setView((viewRef.current = home()));
+    if (!map || (fill && !frameAr)) return;
+    if (fill && placed.current && !homing.current) {
+      if (focusBox) animateTo(fit(focusBox, 60, 8));
+      else setView((viewRef.current = clamp(viewRef.current)));
+    } else {
+      cancelAnimationFrame(anim.current);
+      setView((viewRef.current = home()));
+    }
+    placed.current = true;
   }, [map, VH]);
 
   // Region changed (e.g. a rematch with other settings): glide there.
   const firstRegion = useRef(true);
   useEffect(() => {
     if (firstRegion.current) return void (firstRegion.current = false);
-    if (map && !atHome()) animateTo(home(), 450);
+    if (map) goHome(450);
   }, [regionKey]);
 
   // Reveal / focus a country.
   useEffect(() => {
     if (!map || !focus) return;
     const c = map.countries.find((x) => x.c === focus);
-    if (c) animateTo(fit(c.b, 90, 6));
+    if (!c) return;
+    homing.current = false;
+    animateTo(fit(c.b, 90, 6));
   }, [focus, map]);
 
   const boxKey = focusBox?.join(',');
   useEffect(() => {
-    if (map && focusBox) animateTo(fit(focusBox, 60, 8));
+    if (!map || !focusBox) return;
+    homing.current = false;
+    animateTo(fit(focusBox, 60, 8));
   }, [boxKey, map]);
 
   // New round: back to the start view.
   useEffect(() => {
-    if (map && !atHome()) animateTo(home(), 450);
+    if (map) goHome(450);
   }, [resetKey]);
 
   const hoverCode = hover?.code ?? null;
@@ -384,9 +427,14 @@ export function LocateMap({
 
   return (
     <div
-      class="locate-wrap"
+      ref={wrapRef}
+      class={`locate-wrap${fill ? ' fill' : ''}`}
       // Snug: never taller than the window allows (on a short window the map gets narrower instead).
-      style={{ aspectRatio: `${W} / ${VH}`, '--ar': W / VH, ...(snug && { maxWidth: `${(maxPx * W) / VH}px`, margin: '0 auto' }) }}
+      style={
+        fill
+          ? undefined
+          : { aspectRatio: `${W} / ${VH}`, '--ar': W / VH, ...(snug && { maxWidth: `${(maxPx * W) / VH}px`, margin: '0 auto' }) }
+      }
     >
       <svg
         ref={svgRef}
@@ -453,7 +501,7 @@ export function LocateMap({
         <button type="button" aria-label="Zoom out" onClick={() => zoomAnimated(1 / 1.8)}>
           −
         </button>
-        <button type="button" aria-label="Reset view" title="Reset view" onClick={() => animateTo(home())}>
+        <button type="button" aria-label="Reset view" title="Reset view" onClick={() => goHome()}>
           ⤢
         </button>
       </div>
@@ -468,6 +516,7 @@ export function LocateMap({
   );
 
   function zoomAnimated(f: number) {
+    homing.current = false;
     const v = viewRef.current;
     const k = Math.min(MAX_ZOOM, Math.max(1, v.k * f));
     const cx = W / 2;

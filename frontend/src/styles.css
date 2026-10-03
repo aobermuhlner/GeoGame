@@ -2080,15 +2080,136 @@ html.map-fs-open, html.map-fs-open body { overflow: hidden; overscroll-behavior:
 }
 
 /* ---------- Landmarks: pin + circle on the map ---------- */
+/* .fit (map games): the page is exactly as tall as the window, and the map (or the Landmarks stage) takes
+   what the cards leave, so a round never needs scrolling. #app pads 16px above and 40px below. */
+.stack.fit {
+  height: calc(100vh - 56px);
+  height: calc(100dvh - 56px);
+  min-height: 520px;
+}
+.stack.fit > .top-card { padding: 12px 20px; }
+.stack.fit .status-row { margin: 10px 0 6px; }
+.stack.fit > .pin-card,
+.stack.fit > .map-card {
+  flex: 1 1 0;
+  min-height: 0;
+  padding: 12px 16px 10px;
+}
+.fit .map-card { justify-content: flex-start; }
+.fit .map-card .locate-board:not(.fs) { flex: 1 1 0; min-height: 0; }
+.fit .locate-board:not(.fs) .locate-stage { flex: 1 1 0; min-height: 240px; }
+.fit .locate-board .locate-prompt { min-height: 40px; }
+.fit .map-card .btn-row { margin-top: 8px; }
+.fit .map-card .solo-note, .fit .map-card .give-up { margin-top: 6px; }
+.pin-card .status-line { min-height: 36px; margin: 0 0 8px; }
+.pin-card .give-up, .pin-card .solo-note { margin-top: 6px; }
 .pin-board {
   width: 100%;
   display: flex;
   flex-direction: column;
   gap: 10px;
-  margin-top: 6px;
+  flex: 1 1 0;
+  min-height: 0;
 }
-.pin-map {
+
+/* The stage: the photo and the map, one filling it and the other small in the bottom-right corner (same
+   shape as the stage, so the map keeps its view when it grows). Hovering the small one makes it bigger. */
+.pin-stage {
+  --mini: 30%;
+  --gap: 10px;
   position: relative;
+  flex: 1 1 0;
+  min-height: 240px;
+}
+.ps-pane {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 14px;
+  overflow: hidden;
+  transition: top 0.3s ease, left 0.3s ease, right 0.3s ease, bottom 0.3s ease;
+}
+.photo-big .ps-map,
+.map-big .ps-photo {
+  top: calc(100% - var(--mini) - var(--gap));
+  left: calc(100% - var(--mini) - var(--gap));
+  right: var(--gap);
+  bottom: var(--gap);
+  z-index: 2;
+  border-radius: 10px;
+  box-shadow: 0 0 0 3px #fffdf7, 0 8px 24px rgba(30, 25, 10, 0.35);
+}
+/* Reveal: the map with the whole photo beside it (below it on an upright stage) */
+.pin-stage { container-type: size; --side: 32%; }
+.revealed .ps-map { right: calc(var(--side) + var(--gap)); }
+.revealed .ps-photo { left: calc(100% - var(--side)); background: transparent; }
+.revealed .ps-photo .photo-frame { border-radius: 12px; }
+@container (orientation: portrait) {
+  .revealed .ps-map { right: 0; bottom: calc(var(--side) + var(--gap)); }
+  .revealed .ps-photo { left: 0; top: calc(100% - var(--side)); }
+}
+@media (hover: hover) {
+  .photo-big .ps-map:hover { --mini: 46%; }
+  .map-big .ps-photo:hover { --mini: 40%; }
+}
+/* The small map is played as it is; this button makes it the large one */
+.ps-grow {
+  position: absolute; left: 6px; top: 6px; z-index: 3;
+  width: 28px; height: 28px; display: grid; place-items: center;
+  border: 0; border-radius: 8px; cursor: pointer;
+  background: var(--card); color: var(--green); box-shadow: var(--shadow);
+}
+.ps-grow:hover { background: #f1ede1; }
+.photo-big .pin-tip { top: 6px; left: auto; right: 6px; transform: none; padding: 2px 9px; font-size: 0.72rem; }
+.ps-photo {
+  background: #24221e;
+  display: grid;
+  place-items: center;
+  container-type: size;
+}
+/* The photo keeps its 4:3 frame, as large as fits */
+.ps-photo-box {
+  width: min(100cqw, 100cqh * 4 / 3);
+  aspect-ratio: 4 / 3;
+  display: grid;
+}
+.ps-photo-box > * { grid-area: 1 / 1; }
+.ps-photo .photo-frame, .ps-photo .countdown { border-radius: 0; box-shadow: none; }
+.ps-photo .countdown.intro .intro-title { font-size: clamp(1.1rem, 6cqh, 2rem); }
+.locate-wrap.fill { width: 100%; height: 100%; border-radius: 0; }
+.ps-map .locate-map.loading { aspect-ratio: auto; height: 100%; border-radius: 0; }
+.photo-big .ps-map .lm-controls { display: none; }
+/* The small pane is one big button: click to swap */
+.ps-cover {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: flex;
+  align-items: flex-end;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+.ps-label {
+  margin: 6px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: rgba(255, 253, 247, 0.94);
+  box-shadow: var(--shadow);
+  color: var(--green);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+.ps-cover:hover .ps-label, .ps-cover:focus-visible .ps-label { background: #fff; text-decoration: underline; }
+@media (max-width: 600px) {
+  .pin-stage { --mini: 40%; --gap: 6px; }
+  .stack.fit > .pin-card { padding: 10px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ps-pane { transition: none; }
 }
 .locate-map.pin-mode {
   cursor: crosshair;
@@ -2213,9 +2334,14 @@ html.map-fs-open, html.map-fs-open body { overflow: hidden; overscroll-behavior:
   min-width: 120px;
 }
 @media (max-width: 520px) {
+  .pin-radii {
+    flex-wrap: nowrap;
+    width: 100%;
+  }
   .pin-radius {
+    flex: 1 1 0;
     min-width: 0;
-    padding: 4px 7px;
+    padding: 4px 2px;
   }
   .pin-radius strong {
     font-size: 0.8rem;
