@@ -32,7 +32,7 @@ import { PairBoard, StatHeader, TimeBar, type PickTag } from './Higher';
 import { CopyInvite, GamesCard, RegionPicker, useGameSettings } from './Lobby';
 import { LocateBoard } from './LocateBoard';
 import { PinBoard } from './PinBoard';
-import { PhotoCredit, SentenceCard, ZoomPhoto } from './RoundPrompt';
+import { LanguageFacts, PhotoCredit, SentenceCard, ZoomPhoto } from './RoundPrompt';
 import { Logo, RegionChips, StageSteps, formatClock, useNow } from './common';
 
 /** One color per seat, for the avatars. */
@@ -440,6 +440,7 @@ function StatusLine({ room, you }: { room: GroupView; you: number }) {
         {!estimate && <strong class="reveal-country">{headline}</strong>}
         {r.game === 'capitals' && <span class="reveal-of">capital of {r.countryName}</span>}
         {r.game === 'landmarks' && r.detail && <span class="reveal-of">{r.detail}</span>}
+        {r.game === 'languages' && <LanguageFacts code={r.code} />}
         <RoundResults room={room} you={you} />
       </div>
     );

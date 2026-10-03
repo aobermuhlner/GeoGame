@@ -1,6 +1,6 @@
 // Prompts and reveals of the Landmarks and Languages games (lock-in games).
 import { useEffect, useLayoutEffect, useRef, useState } from 'preact/hooks';
-import { LANDMARK_META, photoZoom, type LockView } from '@flagduel/shared';
+import { LANDMARK_META, languageFactsLine, languageOfItem, photoZoom, type LockView } from '@flagduel/shared';
 import { CREDITS_URL } from './common';
 import { LocateMap } from './LocateMap';
 
@@ -68,6 +68,12 @@ export function SentenceCard({ text, translation }: { text: string; translation?
       {translation && <figcaption>{translation}</figcaption>}
     </figure>
   );
+}
+
+/** Languages reveal: where the sentence's language is spoken most and in how many countries it is official. */
+export function LanguageFacts({ code }: { code: string }) {
+  const line = languageFactsLine(languageOfItem(code));
+  return line ? <span class="reveal-of language-facts">{line}</span> : null;
 }
 
 /** "Photo: Author · CC BY-SA 4.0", linking to the photo's Commons page. */

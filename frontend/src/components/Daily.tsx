@@ -30,7 +30,7 @@ import { CountryInput } from './CountryInput';
 import { FlagImage } from './GameScreen';
 import { LocateBoard } from './LocateBoard';
 import { PinBoard } from './PinBoard';
-import { PhotoCredit, SentenceCard, ZoomPhoto } from './RoundPrompt';
+import { LanguageFacts, PhotoCredit, SentenceCard, ZoomPhoto } from './RoundPrompt';
 import { Leaderboard } from './Leaderboard';
 import { HigherBoard, HigherCard, HigherRules } from './Higher';
 import type { GameId } from './NavBar';
@@ -395,6 +395,7 @@ function SoloScreen({
       <strong class="reveal-country">{r.answer}</strong>
       {run.mode === 'capitals' && <span class="reveal-of">capital of {r.countryName}</span>}
       {run.mode === 'landmarks' && r.detail && <span class="reveal-of">{r.detail}</span>}
+      {run.mode === 'languages' && <LanguageFacts code={r.code} />}
       {r.given && (r.end === 'wrong' || mode.input === 'pin') && (
         <span class="reveal-of">
           {mode.input === 'pin' ? 'Your pin: ' : 'You said '}

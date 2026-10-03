@@ -9,1893 +9,2166 @@ export interface Sentence {
 
 export const SENTENCES: Record<string, Sentence[]> = {
   "cmn": [
-    {
-      "id": 504940,
-      "text": "我根本不在乎我的简历。",
-      "en": "I don't give a damn about my CV."
-    },
-    {
-      "id": 10336105,
-      "text": "湯姆說了你會來的。",
-      "en": "Tom said you'd come."
-    },
-    {
-      "id": 8882024,
-      "text": "他为自己的利益行事。",
-      "en": "He is acting on his own behalf."
-    },
-    {
-      "id": 4815166,
-      "text": "你是说你放弃了吗？",
-      "en": "Are you saying that you give up?"
-    },
-    {
-      "id": 6060708,
-      "text": "她買了一雙山地靴。",
-      "en": "She bought a pair of walking boots."
-    },
-    {
-      "id": 792854,
-      "text": "这是我知道的最好的餐馆。",
-      "en": "This is the best restaurant that I know."
-    },
-    {
-      "id": 408473,
-      "text": "你是怎么认识他的？",
-      "en": "How did you get to know him?"
-    },
-    {
-      "id": 8743567,
-      "text": "如果系统工程师继续离开，公司的竞争优势将会被削弱。",
-      "en": "The company's competitive edge will be eroded if system engineers continue to leave."
-    }
+    {"id":504940,"text":"我根本不在乎我的简历。","en":"I don't give a damn about my CV."},
+    {"id":10336105,"text":"湯姆說了你會來的。","en":"Tom said you'd come."},
+    {"id":8882024,"text":"他为自己的利益行事。","en":"He is acting on his own behalf."},
+    {"id":4815166,"text":"你是说你放弃了吗？","en":"Are you saying that you give up?"},
+    {"id":6060708,"text":"她買了一雙山地靴。","en":"She bought a pair of walking boots."},
+    {"id":792854,"text":"这是我知道的最好的餐馆。","en":"This is the best restaurant that I know."},
+    {"id":408473,"text":"你是怎么认识他的？","en":"How did you get to know him?"},
+    {"id":8743567,"text":"如果系统工程师继续离开，公司的竞争优势将会被削弱。","en":"The company's competitive edge will be eroded if system engineers continue to leave."},
+    {"id":501209,"text":"明天可能會下雨，但是我們無論如何也會去的。","en":"It may rain tomorrow, but we are going in any case."},
+    {"id":813493,"text":"一个真正的德国人无法忍受法国人，但他很愿意喝他们的酒。","en":"A true German can't stand the French, yet willingly he drinks their wines."},
+    {"id":1208534,"text":"我不否认这件事发生了，可是一个例子算不上证据。","en":"I’m not denying that that happened, but one example doesn’t count as evidence."},
+    {"id":8926995,"text":"汤姆说过，如果我想要的话他可以把这本书给我。","en":"Tom told me that he'd give me that book if I wanted it."},
+    {"id":1244908,"text":"「小说啊？我就讨厌看小说。」缪斯，请原谅她的亵渎行为。","en":"\"Novels? I hate novels.\" Oh muse, forgive her blasphemy."},
+    {"id":382212,"text":"一、二、三、四、五、六、七、八、九、十。","en":"One, two, three, four, five, six, seven, eight, nine, ten."},
+    {"id":3158837,"text":"他強調了城市生活方便的一面。","en":"He stressed the convenient aspects of city life."},
+    {"id":14007083,"text":"湯姆和瑪麗去夏威夷度蜜月，度了兩個星期。","en":"Tom and Mary went on a two week honeymoon to Hawaii."},
+    {"id":3579602,"text":"由于训练迟到，杰克的教练决定把他留在替补席。","en":"Jack’s coach decided to keep him on the bench for being late to training."},
+    {"id":2511454,"text":"牛在牧地上吃草。","en":"Cows are eating grass in the meadow."},
+    {"id":3078788,"text":"他们阻止不了他。","en":"They cannot stop him."},
+    {"id":450974,"text":"严禁卖淫嫖娼，赌博，吸毒，酗酒滋事等违法犯罪活动！","en":"Prostitution, gambling, the use of narcotic substances, drunkenness, disorder, and all other illegal activities are STRICTLY FORBIDDEN."},
+    {"id":6197254,"text":"有什么事我可以做吗？","en":"Is there anything I can do?"},
+    {"id":905868,"text":"那個正在跟Fred講話的男孩是Mike。","en":"The boy talking with Fred is Mike."},
+    {"id":880321,"text":"我把她當成是我自己的女兒一樣對待。","en":"I treated her as my own daughter."},
+    {"id":9953345,"text":"一开始我妈试着帮我，但她很快就放弃了。","en":"My mom tried to help me at first, but then she gave up in no time."},
+    {"id":6630029,"text":"他們不知道正在發生甚麼。","en":"They have no idea what's going on."},
+    {"id":13850024,"text":"感謝您終於爲我說明了爲甚麼人們通通把我當傻瓜。","en":"Thanks for having explained to me at last why people take me for an idiot."},
+    {"id":457755,"text":"她住在他的隔壁。","en":"She lives next door to him."},
+    {"id":431526,"text":"這個世界上有些事物根本不能用言語形容。","en":"There are things in this world which simply cannot be expressed in the form of words."},
+    {"id":13958985,"text":"我找到你要的書了。","en":"I found the book you wanted."},
+    {"id":5684097,"text":"他们的目标和活动的主要思想是真正的四海一家和各民族的普遍公正。","en":"Their goal and activating main idea was indeed brotherhood and justice among the peoples."},
+    {"id":859101,"text":"我想買這本字典。","en":"I want to buy this dictionary."},
+    {"id":6461880,"text":"从别人的错误中学习，因为你无法所有事都亲身经历一次。","en":"Learn from the mistakes of others. You can never live long enough to make them all yourself."},
+    {"id":846009,"text":"她透過傳譯員發言。","en":"She spoke through an interpreter."},
+    {"id":13967688,"text":"粮仓充实了，百姓才会懂得礼仪规矩；衣食丰足了，人们才会知晓荣辱羞耻。","en":"When the granaries are full, people observe rules of decorum; when food and clothing are sufficient, people understand honor and disgrace."},
+    {"id":1314156,"text":"我的打字机故障了。","en":"Something is wrong with my typewriter."},
+    {"id":733164,"text":"这将会是巨大的，如果你可以挑选一些面包，然后再回家。","en":"It'd be great if you could pick up some bread before you come home."},
+    {"id":834964,"text":"媽媽快把晚餐準備好了。","en":"Mom is getting dinner ready."},
+    {"id":13573835,"text":"這位是奧克教授，他是這項實驗的負責人。","en":"This is Professor Oak, the director of this experiment."},
+    {"id":4972527,"text":"你是个乐观主义者。","en":"You're an optimist."},
+    {"id":13537239,"text":"我懷疑韓國人是練過腕力才用得好那種鐵筷。","en":"I suspect Koreans must have trained their wrist strength to use those iron chopsticks so well."},
+    {"id":728828,"text":"不冒險, 不會贏。","en":"Nothing ventured, nothing gained."},
+    {"id":1298060,"text":"我是个化妆师，每当我把一个姑娘变成大美女。","en":"I'm a make-up artist. I can turn any girl into a beautiful woman."},
+    {"id":557246,"text":"我躺了下來休息。","en":"I lay down to rest."},
+    {"id":11240798,"text":"如果蜜蜂都偷懒的话，盛开的花便不会结果了。","en":"If the bees do not work, the flowers will not bear fruit."},
+    {"id":9961285,"text":"有人把我新车的挡风玻璃砸碎了。","en":"Someone broke the windscreen of my new car."},
+    {"id":13527770,"text":"我們目前正在尋找具有客服工作經驗的人員。","en":"We are currently looking for individuals who have experience in customer service."},
+    {"id":5780600,"text":"我的银行账户里没留下钱。","en":"There's no money left in my bank account."},
+    {"id":786045,"text":"如果您移過去一點, 每個人就可以有空間了。","en":"If you would move over, there would be room for everyone."}
   ],
   "hin": [
-    {
-      "id": 443037,
-      "text": "मेरे पास एक कुत्ता है।",
-      "en": "I have a dog."
-    },
-    {
-      "id": 2083521,
-      "text": "अगर आप चाहो तो आप जा सकते हैं।",
-      "en": "If you wish, you can go."
-    },
-    {
-      "id": 9842004,
-      "text": "क्या आपको नहीं लगता कि हमें थोड़ी ज़्यादा देर रुकना चाहिए था?",
-      "en": "Don't you think that we should've stayed a little longer?"
-    },
-    {
-      "id": 3617323,
-      "text": "आपके पास एक घंटा है।",
-      "en": "You've got an hour."
-    },
-    {
-      "id": 588464,
-      "text": "आज बादल कल से ज़्यादा हैं।",
-      "en": "There are more clouds today than yesterday."
-    },
-    {
-      "id": 3617833,
-      "text": "तुम्हारी बीवी कैसी है, टॉम?",
-      "en": "How's your wife, Tom?"
-    },
-    {
-      "id": 3216575,
-      "text": "हम आपकी रक्षा करने के लिए यहाँ आए हैं।",
-      "en": "We're here to protect you."
-    },
-    {
-      "id": 588565,
-      "text": "मेरी केन से कल मुलाकात हुई थी।",
-      "en": "I met Ken yesterday."
-    }
+    {"id":443037,"text":"मेरे पास एक कुत्ता है।","en":"I have a dog."},
+    {"id":2083521,"text":"अगर आप चाहो तो आप जा सकते हैं।","en":"If you wish, you can go."},
+    {"id":9842004,"text":"क्या आपको नहीं लगता कि हमें थोड़ी ज़्यादा देर रुकना चाहिए था?","en":"Don't you think that we should've stayed a little longer?"},
+    {"id":3617323,"text":"आपके पास एक घंटा है।","en":"You've got an hour."},
+    {"id":588464,"text":"आज बादल कल से ज़्यादा हैं।","en":"There are more clouds today than yesterday."},
+    {"id":3617833,"text":"तुम्हारी बीवी कैसी है, टॉम?","en":"How's your wife, Tom?"},
+    {"id":3216575,"text":"हम आपकी रक्षा करने के लिए यहाँ आए हैं।","en":"We're here to protect you."},
+    {"id":588565,"text":"मेरी केन से कल मुलाकात हुई थी।","en":"I met Ken yesterday."},
+    {"id":450441,"text":"उन दिनों में मैं (रात में) जल्दी से सो जाया करता था।","en":"In those days, I went to bed earlier."},
+    {"id":9012776,"text":"मुझे नहीं लगता कि किसी ने भी ध्यान दिया की हमने क्या किया।","en":"I don't think that anyone noticed what we did."},
+    {"id":8889252,"text":"भोजन करते समय कृपया अपने मोबाइल फ़ोन को ना देखें।","en":"Please don't look at your mobile phone while we're eating."},
+    {"id":10965526,"text":"उन्होंने मुझे बताया कि मैं अपना वक़्त बरबाद कर रहा था।","en":"He told me I was wasting my time."},
+    {"id":3665696,"text":"बेसबॉल में गेंद फेंकने वाले को \"पिचर\" कहते है।","en":"In baseball, the pitcher is the player who throws the ball."},
+    {"id":459404,"text":"मैं उसके आने से पहले अपना होमवर्क खतम कर लूँगा।","en":"I will get through with my homework before he comes."},
+    {"id":498197,"text":"घोड़ा बड़े काम का जानवर है।","en":"The horse is a useful animal."},
+    {"id":10061748,"text":"कोई भी मेरे देश की तारीफ़ नहीं करना चाहता था।","en":"Nobody wanted to praise my country."},
+    {"id":498101,"text":"उसने लाल ड्रेस पहनी थी।","en":"She wore a red dress."},
+    {"id":491310,"text":"बच्चों ने एक-दूसरे की नकल करने की कोशिश करी।","en":"The children tried to imitate their teacher."},
+    {"id":3801919,"text":"टॉम धीरे-धीरे पीछे हटा।","en":"Tom slowly retreated."},
+    {"id":484131,"text":"मैंने एक लड़की को देखा जिसके बाल उसकी कमर तक आते थे।","en":"I saw a girl whose hair came down to her waist."},
+    {"id":476282,"text":"आप टीवी देखतें हैं क्या?","en":"Do you watch television?"},
+    {"id":483990,"text":"वह आदमी तो भला है, पर बात बहुत ज़्यादा करता है।","en":"He is a nice man, except that he talks too much."},
+    {"id":518715,"text":"योजना के बारे में कुछ ही लोगों को पता है।","en":"Few people know about the plan."},
+    {"id":3216491,"text":"आपने क्या कहा? माफ़ करें, मैं सोच में डूबा था इसलिए मैंने सुना नहीं।","en":"What did you say? I'm sorry, I was lost in thought."},
+    {"id":10047688,"text":"टॉम ने अपना आवाज़ चढ़ाया नहीं।","en":"Tom didn't raise his voice."},
+    {"id":2083152,"text":"सवाल पूछना न पसंद करने वाले विद्यार्थियों को पसंद करने वाले शिक्षक मुझे पसंद नहीं।","en":"I don't like teachers who like students who don't like asking questions."},
+    {"id":485762,"text":"जापान में आपका स्वागत है।","en":"Welcome to Japan."},
+    {"id":2655557,"text":"किसी भी नींव का सबसे मजबूत पत्थर सबसे निचला ही होता है।","en":"The most solid stone in the structure is the lowest one in the foundation."},
+    {"id":3315838,"text":"आप भूल कैसे सकते हो?","en":"How can you forget?"},
+    {"id":3786414,"text":"तुम अकसर ऐसे सवाल पूछती हो जिनका मैं जवाब नहीं दे सकता।","en":"You often ask questions I can't answer."},
+    {"id":1507820,"text":"यह काम इतना सरल है की कोई बच्चा भी इसे कर सकता है।","en":"This work is simple enough that even a child can do it."},
+    {"id":9012857,"text":"क्या मैं आपसे आगे चली जाऊं?","en":"May I go ahead of you?"},
+    {"id":13688751,"text":"आपसे सिगरेट की बू आ रही है।","en":"You stink of cigarettes."},
+    {"id":3783359,"text":"वह हर महीने १०,००० येन बैंक में जमा करती है।","en":"She deposits 10,000 yen in the bank every month."},
+    {"id":459433,"text":"वे आमने-सामने खड़े हुए।","en":"They stood face to face."},
+    {"id":585051,"text":"मैंने अपने पापा को फूलों को पानी डालने में मदद करी थी।","en":"I helped my father water the flowers."},
+    {"id":3807424,"text":"उसके हाथ-पैर लंबे हैं।","en":"Her arms and legs are long."},
+    {"id":449290,"text":"मुझे अपनी एक अटैची मिल नहीं रही है।","en":"One of my bags is missing."},
+    {"id":516786,"text":"उसने फटाफट चिट्ठी का जवाब दिया।","en":"He lost no time answering the letter."},
+    {"id":516766,"text":"उसको खुश करना बहुत मुश्किल है।","en":"He is hard to please."},
+    {"id":2079439,"text":"वे थोड़ी सी अरबी बोलती हैं।","en":"She speaks a little Arabic."},
+    {"id":10057126,"text":"मैं छह बजे तक इंतज़ार करूँगा।","en":"I'll wait until six o'clock."},
+    {"id":477689,"text":"और फिर वे लुका-छुप्पी खेलने जाया करते थे।","en":"And they would play hide and go seek."},
+    {"id":484033,"text":"मुझे एक दिन में काम खतम करना नामुमकिन लगा।","en":"I found it impossible to do the work in one day."},
+    {"id":2038857,"text":"तुम अच्छे व्यक्ति हो।","en":"You are a good person."},
+    {"id":11380928,"text":"मैरी ने टॉम के चेहरे पर अंगूठी फेंक दी।","en":"Mary threw the ring in Tom's face."},
+    {"id":487264,"text":"वह उसकी कामयाबी की खबर सुनकर खुश था।","en":"He was happy at the news of her success."},
+    {"id":3795580,"text":"उसके पास एक भी पेन नहीं था।","en":"He didn't have a single pen."}
   ],
   "spa": [
-    {
-      "id": 1371477,
-      "text": "En realidad, la tierra se está calentando.",
-      "en": "Actually, the earth is getting warmer."
-    },
-    {
-      "id": 1343167,
-      "text": "¿Quién es tu pareja de baile?",
-      "en": "Who is your dance partner?"
-    },
-    {
-      "id": 1355810,
-      "text": "Tom ya se ha inscrito para ese curso.",
-      "en": "Tom has already signed up for that class."
-    },
-    {
-      "id": 1559593,
-      "text": "Su voz suena muy bello.",
-      "en": "Her voice sounds very beautiful."
-    },
-    {
-      "id": 13521233,
-      "text": "¿Te gustan los mejillones?",
-      "en": "Do you like mussels?"
-    },
-    {
-      "id": 1355613,
-      "text": "Existen muchos factores.",
-      "en": "There are many factors."
-    },
-    {
-      "id": 9929178,
-      "text": "El anciano sentado en aquel banco es mi abuelo.",
-      "en": "The old man sitting on the bench over there is my grandfather."
-    },
-    {
-      "id": 2947044,
-      "text": "Juan partió a Francia ayer.",
-      "en": "John left for France yesterday."
-    }
+    {"id":1371477,"text":"En realidad, la tierra se está calentando.","en":"Actually, the earth is getting warmer."},
+    {"id":1343167,"text":"¿Quién es tu pareja de baile?","en":"Who is your dance partner?"},
+    {"id":1355810,"text":"Tom ya se ha inscrito para ese curso.","en":"Tom has already signed up for that class."},
+    {"id":1559593,"text":"Su voz suena muy bello.","en":"Her voice sounds very beautiful."},
+    {"id":13521233,"text":"¿Te gustan los mejillones?","en":"Do you like mussels?"},
+    {"id":1355613,"text":"Existen muchos factores.","en":"There are many factors."},
+    {"id":9929178,"text":"El anciano sentado en aquel banco es mi abuelo.","en":"The old man sitting on the bench over there is my grandfather."},
+    {"id":2947044,"text":"Juan partió a Francia ayer.","en":"John left for France yesterday."},
+    {"id":2559028,"text":"Un zorro huele su propia madriguera antes de entrar.","en":"A fox smells its own lair first."},
+    {"id":862933,"text":"Si no hubiera sido por la ayuda de su padre, él habría fracasado en los negocios.","en":"If it had not been for his father's help, he would have failed in business."},
+    {"id":1413079,"text":"Ja ja ja, de verdad que eres malo para guardar secretos.","en":"A-hahaha, you really are bad at keeping secrets."},
+    {"id":7037090,"text":"La madre de Sami lo abandonó cuando tenía seis años.","en":"Sami's mother abandoned him when he was six."},
+    {"id":8353185,"text":"Ahora que he perdido peso, quepo en este vestido.","en":"Now that I'm thinner, I can fit into this dress."},
+    {"id":1199293,"text":"No arruines mi diversión después de todo el dolor por el que he pasado.","en":"Don't ruin my fun after all the pain that I put myself through."},
+    {"id":8668575,"text":"El camino es muy traicionero.","en":"The way is very treacherous."},
+    {"id":1165303,"text":"Cuando termines de inflar esos globos, ¿podrías barrer la sala?","en":"After you blow up those balloons, could you sweep the room?"},
+    {"id":636936,"text":"En ninguna parte de la Biblia está escrito que Jesús no era un velocirraptor.","en":"Nowhere in the Bible does it state that Jesus wasn't a raptor."},
+    {"id":1726114,"text":"¡Me estoy poniendo alto!","en":"I am getting tall!"},
+    {"id":2327871,"text":"Ella va día por medio al dentista.","en":"She goes to the dentist every other day."},
+    {"id":2129587,"text":"Pensé que era innecesario que hiciéramos algo al respecto hoy.","en":"I thought it was unnecessary for us to do anything about that today."},
+    {"id":1360897,"text":"Creo que es hora de sincerarme.","en":"I think it's time for me to come clean."},
+    {"id":1308677,"text":"Esta mañana, la temperatura ha caído bajo el cero.","en":"The temperature has fallen below zero this morning."},
+    {"id":1387776,"text":"Él no estuvo de acuerdo con eso.","en":"He did not agree with it."},
+    {"id":1698806,"text":"Para mí, es más fácil escribir sobre la muerte que sobre la vida.","en":"To me, it is easier writing about death than about life."},
+    {"id":584968,"text":"Estoy esperando su llamada.","en":"I'm waiting for his telephone call."},
+    {"id":861590,"text":"Los refugiados supervivientes aspiraban a la libertad.","en":"The surviving refugees longed for freedom."},
+    {"id":8793177,"text":"La reina debe morir.","en":"The queen must die."},
+    {"id":745238,"text":"Ella me dijo que su madre lo había comprado para ella.","en":"She told me her mum bought it for her."},
+    {"id":1439154,"text":"\"Ah!\" es una interjección.","en":"\"Ah!\" is an interjection."},
+    {"id":11936860,"text":"Ellas dicen que los helechos pueden tener flores.","en":"They say that ferns can have flowers."},
+    {"id":6703396,"text":"Quiero conocer el amor.","en":"I want to know love."},
+    {"id":3037203,"text":"Tom y María estaban sentados cuando entramos.","en":"Tom and Mary were sitting when we came in."},
+    {"id":570744,"text":"Ellos tienen algo que ver con el escándalo.","en":"They have something to do with the scandal."},
+    {"id":10044352,"text":"Bebo un vaso de leche antes de irme a la cama.","en":"I drink a glass of milk before going to bed."},
+    {"id":1256497,"text":"Es difícil reemplazar a un empleado tan calificado como él.","en":"It is difficult to replace an employee that is as qualified as he is."},
+    {"id":7931178,"text":"¿Es dinero lo que quieres?","en":"Is it money you want?"},
+    {"id":5742651,"text":"No dejes que te molesten.","en":"Don't let them bother you."},
+    {"id":2445391,"text":"El jefe está pensando en despedir a un empleado.","en":"The boss is thinking of firing an employee."},
+    {"id":5706542,"text":"Voy a la tienda de juguetes con los niños.","en":"I'm going to the toy store with the children."},
+    {"id":11885466,"text":"Sami fue acusado como cómplice de un homicidio.","en":"Sami was charged as an accessory to murder."},
+    {"id":2285638,"text":"Huí del campo de entrenamiento.","en":"I ran away from the training camp."},
+    {"id":1861745,"text":"No puedo dar el último paso. Es demasiado difícil, demasiado incierto.","en":"I can't take that last step. It's too difficult, too uncertain."},
+    {"id":5566683,"text":"Tom bebió un sorbito de brandi.","en":"Tom took a sip of brandy."},
+    {"id":1801328,"text":"Cuando sonó el teléfono, él saltó de la cama.","en":"When the phone rang, he sprang out of bed."},
+    {"id":13462363,"text":"Ella se arrepiente de haber hecho lo que hizo.","en":"She regrets doing what she did."},
+    {"id":331075,"text":"Su familia se mudó a una casa nueva en las afueras de la ciudad.","en":"His family moved into a new house in the suburbs."},
+    {"id":2789784,"text":"Tom se cruzó de brazos.","en":"Tom crossed his arms."},
+    {"id":7289002,"text":"Esta es una idea tan tonta.","en":"This is such a dumb idea."}
   ],
   "ara": [
-    {
-      "id": 6994427,
-      "text": "وُلد ابن ليلى في هذه العيادة.",
-      "en": "Layla's baby was born in this clinic."
-    },
-    {
-      "id": 11248740,
-      "text": "بإمكاننا الحديث عن ذلك مرة أخرى إن شئت.",
-      "en": "We can talk about this another time if you want."
-    },
-    {
-      "id": 11984288,
-      "text": "لماذا يريدون العمل هنا؟",
-      "en": "Why do they want to work here?"
-    },
-    {
-      "id": 454738,
-      "text": "جاءت متأخرة كالعادة.",
-      "en": "She came late as usual."
-    },
-    {
-      "id": 9631417,
-      "text": "توم كان قد قتل بشكل مروع خلال الأيام الأخيرة من الحرب.",
-      "en": "Tom was horribly killed during the last days of the war."
-    },
-    {
-      "id": 11987425,
-      "text": "كارلوس هو من اختطف ريمة.",
-      "en": "Carlos was the one who kidnapped Rima."
-    },
-    {
-      "id": 6980750,
-      "text": "سيبدأ الفيلم الموسيقي قريبا.",
-      "en": "The musical is starting soon."
-    },
-    {
-      "id": 12018397,
-      "text": "كان ياني صبورا مع سكورا.",
-      "en": "Yanni was patient with Skura."
-    }
+    {"id":6994427,"text":"وُلد ابن ليلى في هذه العيادة.","en":"Layla's baby was born in this clinic."},
+    {"id":11248740,"text":"بإمكاننا الحديث عن ذلك مرة أخرى إن شئت.","en":"We can talk about this another time if you want."},
+    {"id":11984288,"text":"لماذا يريدون العمل هنا؟","en":"Why do they want to work here?"},
+    {"id":454738,"text":"جاءت متأخرة كالعادة.","en":"She came late as usual."},
+    {"id":9631417,"text":"توم كان قد قتل بشكل مروع خلال الأيام الأخيرة من الحرب.","en":"Tom was horribly killed during the last days of the war."},
+    {"id":11987425,"text":"كارلوس هو من اختطف ريمة.","en":"Carlos was the one who kidnapped Rima."},
+    {"id":6980750,"text":"سيبدأ الفيلم الموسيقي قريبا.","en":"The musical is starting soon."},
+    {"id":12018397,"text":"كان ياني صبورا مع سكورا.","en":"Yanni was patient with Skura."},
+    {"id":9840413,"text":"أفسد مكتب التحقيقات الفيدرالية محاولة لاغتيال العمدة مات براون.","en":"The FBI thwarted an assassination attempt against Mayor Matt Brown."},
+    {"id":11685386,"text":"أن كان هذا الفيديو مفيدا لكم، فاضغطوا على زر الإعجاب من فضلكم.","en":"If you found this video helpful, please give it a like."},
+    {"id":7274485,"text":"بإمكانك تعلّم العديد من اللّغات على موقع تاتوبا.","en":"On Tatoeba, you can learn various languages."},
+    {"id":3744491,"text":"كم هي عدد الساعات المستغرقة للذهاب إلى أوكيناوا بالطائرة؟","en":"How many hours does it take to go to Okinawa by plane?"},
+    {"id":10903557,"text":"القبائلية هي لهجة أمازيغية يتكلمونها في منطقة القبائل الجبلية شمال شرق الجزائر.","en":"Kabyle is a Berber dialect spoken in the mountainous region of Kabylie, in northeastern Algeria."},
+    {"id":12410710,"text":"لم يكن كارل الشخص الوحيد الذي استفاد من ذلك.","en":"Karl was not the only one who benefitted from that."},
+    {"id":624077,"text":"سأل ديما: \"هل تعرفين كود الاتصال للبنان؟\"","en":"\"Do you know the country code for Lebanon?\" Dima asked."},
+    {"id":13210851,"text":"من فضلك، اتصل بي حوالي الساعة السابعة والنصف.","en":"Please call me around 7:30."},
+    {"id":11666179,"text":"الصين مستعدة لغزو تايوان.","en":"China is ready to invade Taiwan."},
+    {"id":7833013,"text":"كانت هذه النصوص مكتوبة بالعبرية، ليس بالآرامية.","en":"These texts were written in Hebrew, not in Aramaic."},
+    {"id":12173157,"text":"في اللأخير، استسلم برونو.","en":"Bruno finally surrendered."},
+    {"id":1383113,"text":"يجب علي حساب كمية المال الذي سوف أنفقه الاسبوع المقبل.","en":"I must calculate how much money I'll spend next week."},
+    {"id":11992911,"text":"سيفهم فلافيو يوما ما.","en":"Flavio will understand one day."},
+    {"id":2994185,"text":"اخر مرة شاهدته كان يرتدي قميصاً ازرقاً وبنطالاً ابيضاً.","en":"When I last saw him, he was wearing a blue shirt and white slacks."},
+    {"id":833356,"text":"يقارن الناس أحيانًا بين الموت والنوم.","en":"People sometimes compare death to sleep."},
+    {"id":371592,"text":"الشوكة الصغيرة للسلطة والكبيرة للوجبة الرئيسية.","en":"The small fork is for your salad, and the large one is for the main course."},
+    {"id":5115608,"text":"هناك عدة طرق لقياس السرعة.","en":"There are several ways to measure speed."},
+    {"id":7237552,"text":"ليس الأمر سهلا أن تكون الطّفل الأكبر في أسرتك.","en":"It's not easy being the eldest child."},
+    {"id":11896447,"text":"توقّف سامي لأخذ نفس.","en":"Tom stopped to catch his breath."},
+    {"id":7016732,"text":"تسبّبت تلك الحادثة باكتئاب مشلّ بالنّسبة لسامي.","en":"The incident plunged Sami into a paralyzing depression."},
+    {"id":376290,"text":"أنظر إلى الولد و هو يقفز!","en":"Look at the boy jump!"},
+    {"id":8067898,"text":"كان منّاد يسوق الدّراجة إلى القاهرة متوجّها إلى منزله.","en":"Mennad was riding to Cairo to go to his house."},
+    {"id":10897983,"text":"أخشى بأن لا يعترف أبدا بذنبه.","en":"I'm afraid he will never admit his guilt."},
+    {"id":6989819,"text":"كان سامي يقضي بين ستّ و سبع ساعات يوميّا و هو يتدرّب.","en":"Sami spent about six to seven hours per day exercising."},
+    {"id":1339643,"text":"فضلاً هدئ من سرعتك عند اقترابك من تقاطع الطرق.","en":"Please slow down when getting close to the intersection."},
+    {"id":10322263,"text":"كل الأطباء كانوا مسلمين.","en":"All the doctors were Muslim."},
+    {"id":1417772,"text":"كيف تجرء على قول شيءٍ كهذا؟","en":"How dare you say such a thing!"},
+    {"id":5048983,"text":"إستنتج العلماء أن الأحماض في النبيذ تجعل طعمه سيئا.","en":"The scientists concluded that acids in wine make it taste bad."},
+    {"id":5870564,"text":"كانت ليلى تريد أن تواصل الإثبات بأنّها تحبّ رجلها.","en":"Layla wanted to continue to prove that she loved her man."},
+    {"id":11800505,"text":"نظر إلياس خارج نافذته.","en":"Elias looked outside his window."},
+    {"id":458124,"text":"ذهب براين مع كيت إلى المدرسة.","en":"Brian went to school with Kate."},
+    {"id":5834009,"text":"هل بإمكانك أن تخبرني عن متى سأحصل على نتائج الاختبار؟","en":"Can you tell me when I can have the results of the test?"},
+    {"id":376903,"text":"تأكل هذه الحيوانات العشب.","en":"These animals feed on grass."},
+    {"id":6444242,"text":"تأقلمت ليلى مع حياتها الجديدة في زنزانة سجن مصري.","en":"Layla settled in to her new life in an Egyptian prison cell."},
+    {"id":6009369,"text":"كان عليك أن تكون قد بدأت الآن.","en":"You should have started by now."},
+    {"id":13936551,"text":"“الله أكبر الله أكبر لا إله إلا الله، الله أكبر الله أكبر ولله الحمد.”","en":"\"God is the greatest, God is the greatest, there is no god but God, God is the greatest, God is the greatest, and to God goes all praise.\""},
+    {"id":1540151,"text":"يمكن استخدامه كسكين.","en":"It can be used as a knife."},
+    {"id":6982895,"text":"يبدو أنّ المحقّقين اتّبعوا الاتّجاه الخطأ في تحقيقهم.","en":"The detectives may just be barking up the wrong tree."},
+    {"id":11986362,"text":"كان ياني يعلم من تلك الفتاة.","en":"Yanni knew who that girl was."},
+    {"id":1556803,"text":"أمطرت بغزارة طوال اليوم","en":"It rained heavily all day long."}
   ],
   "fra": [
-    {
-      "id": 8703346,
-      "text": "L'accident s'est produit hier matin.",
-      "en": "The accident occurred yesterday morning."
-    },
-    {
-      "id": 11102165,
-      "text": "Je ne savais pas où tu étais.",
-      "en": "I didn't know where you were."
-    },
-    {
-      "id": 7293796,
-      "text": "Tom ne voulait rien avoir à faire avec moi.",
-      "en": "Tom didn't want to have anything to do with me."
-    },
-    {
-      "id": 7045296,
-      "text": "J'ai fait ça car on me l'a ordonné.",
-      "en": "I did that because I was ordered to."
-    },
-    {
-      "id": 3445322,
-      "text": "Elles ne virent rien.",
-      "en": "They didn't see anything."
-    },
-    {
-      "id": 4779759,
-      "text": "Nous avons été préoccupés.",
-      "en": "We were concerned."
-    },
-    {
-      "id": 10580583,
-      "text": "Tu es trop jeune pour comprendre ces choses-là.",
-      "en": "You're too young to understand such things."
-    },
-    {
-      "id": 7776425,
-      "text": "C'est exactement ce qu'on veut.",
-      "en": "That's exactly what we want."
-    }
+    {"id":8703346,"text":"L'accident s'est produit hier matin.","en":"The accident occurred yesterday morning."},
+    {"id":11102165,"text":"Je ne savais pas où tu étais.","en":"I didn't know where you were."},
+    {"id":7293796,"text":"Tom ne voulait rien avoir à faire avec moi.","en":"Tom didn't want to have anything to do with me."},
+    {"id":7045296,"text":"J'ai fait ça car on me l'a ordonné.","en":"I did that because I was ordered to."},
+    {"id":3445322,"text":"Elles ne virent rien.","en":"They didn't see anything."},
+    {"id":4779759,"text":"Nous avons été préoccupés.","en":"We were concerned."},
+    {"id":10580583,"text":"Tu es trop jeune pour comprendre ces choses-là.","en":"You're too young to understand such things."},
+    {"id":7776425,"text":"C'est exactement ce qu'on veut.","en":"That's exactly what we want."},
+    {"id":139184,"text":"« Voulez-vous une autre tasse de café ? » « Non merci. »","en":"\"Will you have another cup of coffee?\" \"No, thank you.\""},
+    {"id":14061772,"text":"Je dois partir maintenant. Au revoir, Madame Schmitt!","en":"I have to go now. Goodbye, Mrs. Anna!"},
+    {"id":3137908,"text":"Si seulement on pouvait entendre ce que dit Tom.","en":"I wish we could hear what Tom is saying."},
+    {"id":13355693,"text":"Tom a dit qu'il était content que vous ne soyez pas blessé.","en":"Tom said that he's glad that you weren't injured."},
+    {"id":11071304,"text":"Je peux passer quelques coups de fil pour toi si tu veux.","en":"I can make a few calls for you if you want me to."},
+    {"id":2468077,"text":"Je sais qui n'a pas fait ce qu'elles étaient censées faire.","en":"I know who didn't do what they were supposed to do."},
+    {"id":11553370,"text":"Personne ne se manifesta qui voulût nous venir en aide.","en":"No one appeared who wanted to come to our aid."},
+    {"id":7028928,"text":"Arrête de parler comme ça, s'il te plaît.","en":"Please stop talking like that."},
+    {"id":11181958,"text":"Je sais comment fonctionne le système.","en":"I know how the system works."},
+    {"id":8571234,"text":"Où est-ce que tu habites, si ce n'est pas un secret ?","en":"Where're you living, if it's not a secret?"},
+    {"id":1635906,"text":"Ça n'est pas ce qu'il a dit.","en":"That's not what he said."},
+    {"id":2018092,"text":"Êtes-vous sûres de vouloir partir maintenant ?","en":"Are you sure you want to leave now?"},
+    {"id":460659,"text":"Nous allons rendre visite à notre institutrice la semaine prochaine.","en":"We will visit our teacher next week."},
+    {"id":11223537,"text":"La porte a été ouverte à coups de pied.","en":"The door was kicked open."},
+    {"id":8475194,"text":"Il s'habitue à la situation.","en":"He's getting used to the situation."},
+    {"id":366858,"text":"Il est nécessaire que tu ailles voir un docteur.","en":"It is necessary that you see a doctor."},
+    {"id":10653,"text":"C'est une bonne personne.","en":"He's a good person."},
+    {"id":10137467,"text":"Il y avait une foule de bébés pleurant dans la crèche.","en":"The nursery was full of babies, all crying."},
+    {"id":450657,"text":"Cette information n'est pas aussi fraîche qu'elle le devrait.","en":"This information is not as up-to-date as it should be."},
+    {"id":12914577,"text":"Vous n'êtes pas folle.","en":"You're not crazy."},
+    {"id":5044306,"text":"Je ne voulais pas le faire.","en":"I didn't want to do it."},
+    {"id":2341993,"text":"Tout le monde se mit à parler en même temps.","en":"Everyone started talking at once."},
+    {"id":337074,"text":"Nous nous sommes rencontrés totalement par hasard.","en":"We met completely by coincidence."},
+    {"id":128551,"text":"Le dîner peut attendre.","en":"Let dinner wait."},
+    {"id":747853,"text":"C'est lui qui chapeaute la commercialisation de la gamme de parfums.","en":"He's the one who heads the marketing of the perfumes line."},
+    {"id":10629610,"text":"Il ne se tient pas bien quand il est bourré.","en":"He doesn't behave himself once he's drunk."},
+    {"id":475830,"text":"J'adore acheter sur eBay.","en":"I love buying on eBay."},
+    {"id":1970576,"text":"Je dois trouver de nouvelles amies.","en":"I must find some new friends."},
+    {"id":1741022,"text":"Vous auriez dû rejeter une proposition aussi injuste.","en":"You should've rejected such an unfair proposal."},
+    {"id":135294,"text":"J'ai pensé que j'allais étouffer dans ce train bondé.","en":"I thought I was going to suffocate on the crowded train."},
+    {"id":12783432,"text":"Après avoir couru dix kilomètres, j'avais les jambes en bouillie.","en":"After running ten kilometers, my legs felt like mush."},
+    {"id":1449918,"text":"Je suis désolé, Mohammed ! J'ai oublié ton nom !","en":"I'm sorry Mohammed, I forgot your name!"},
+    {"id":9441320,"text":"Marie aime manger de bonnes lasagnes.","en":"Mary likes to eat good lasagna."},
+    {"id":2083315,"text":"Elle n'écoute pas du tout de musique.","en":"She doesn't listen to music at all."},
+    {"id":12791026,"text":"J'ai pris l'ascenseur jusqu'au troisième niveau.","en":"I rode the elevator to the third level."},
+    {"id":553194,"text":"On entend que vous vous amusez bien.","en":"Sounds like you're having fun."},
+    {"id":1267450,"text":"Une question était : qu'allais-je être ?","en":"One question was what I was going to be."},
+    {"id":131169,"text":"Il est arrivé là par hasard.","en":"He happened to be there."},
+    {"id":11058624,"text":"Demain sera un grand jour.","en":"Tomorrow will be a big day."},
+    {"id":506566,"text":"Les ventes ont baissé au troisième trimestre.","en":"Sales fell off in the third quarter."}
   ],
   "ben": [
-    {
-      "id": 5589372,
-      "text": "তুমি কটার সময় ঘুমাতে যাও?",
-      "en": "What time do you go to bed?"
-    },
-    {
-      "id": 3195575,
-      "text": "আমি সহজেই ওর বাড়ি খুজে পেয়েছিলাম।",
-      "en": "I found his house easily."
-    },
-    {
-      "id": 11475538,
-      "text": "আপনি অস্ট্রেলিয়ায় চলে যাওয়ার সময় আপনার সন্তানদের বয়স কত ছিল?",
-      "en": "How old were your kids when you moved to Australia?"
-    },
-    {
-      "id": 3175824,
-      "text": "টম না হাসার চেষ্টা করছিলেন।",
-      "en": "Tom tried to keep from smiling."
-    },
-    {
-      "id": 5520009,
-      "text": "আপনার দুধটা খেয়ে নিন।",
-      "en": "Drink up your milk."
-    },
-    {
-      "id": 3325105,
-      "text": "আমরা খালি টমের সাথে কথা বলতে চাই।",
-      "en": "We just want to talk to Tom."
-    },
-    {
-      "id": 5556200,
-      "text": "আমার এটা প্রয়োজন ছিলো।",
-      "en": "I wanted this."
-    },
-    {
-      "id": 5582085,
-      "text": "আমি কি তোমাকে কিছু প্রশ্ন জিজ্ঞাসা করতে পারি?",
-      "en": "Can I ask you some questions?"
-    }
+    {"id":5589372,"text":"তুমি কটার সময় ঘুমাতে যাও?","en":"What time do you go to bed?"},
+    {"id":3195575,"text":"আমি সহজেই ওর বাড়ি খুজে পেয়েছিলাম।","en":"I found his house easily."},
+    {"id":11475538,"text":"আপনি অস্ট্রেলিয়ায় চলে যাওয়ার সময় আপনার সন্তানদের বয়স কত ছিল?","en":"How old were your kids when you moved to Australia?"},
+    {"id":3175824,"text":"টম না হাসার চেষ্টা করছিলেন।","en":"Tom tried to keep from smiling."},
+    {"id":5520009,"text":"আপনার দুধটা খেয়ে নিন।","en":"Drink up your milk."},
+    {"id":3325105,"text":"আমরা খালি টমের সাথে কথা বলতে চাই।","en":"We just want to talk to Tom."},
+    {"id":5556200,"text":"আমার এটা প্রয়োজন ছিলো।","en":"I wanted this."},
+    {"id":5582085,"text":"আমি কি তোমাকে কিছু প্রশ্ন জিজ্ঞাসা করতে পারি?","en":"Can I ask you some questions?"},
+    {"id":11460722,"text":"আলজেরিয়া বসবাসের জন্য একটি দুর্দান্ত জায়গা বলে মনে হচ্ছে।","en":"Algeria sounds a great place to live."},
+    {"id":11992840,"text":"তুমি আজ রাতে খাবারের জন্য আমার বাসায় আসো না কেন?","en":"Why don't you come to my place for dinner tonight?"},
+    {"id":11461595,"text":"তিনি পদার্থবিদ্যায় স্নাতক ডিগ্রি অর্জন করেন।","en":"He graduated with a degree in physics."},
+    {"id":11597054,"text":"ইয়ানি এবং স্কুরা দুজনকেই পোশাক খুলতে নির্দেশ দেওয়া হয়েছিল।","en":"Yanni and Skura were both ordered to undress."},
+    {"id":11704256,"text":"তাসমানিয়া অস্ট্রেলিয়ার অন্তর্গত।","en":"Tasmania belongs to Australia."},
+    {"id":11507524,"text":"বিটকয়েন ও ব্লকচেইন আবিষ্কার করেছেন সাতোশি নাকামোতো।","en":"Satoshi Nakamoto invented bitcoin and the blockchain."},
+    {"id":5594382,"text":"আমাকে যাওয়ার অনুমতি দিন।","en":"Allow me to go."},
+    {"id":3175967,"text":"তোমার তাকে পরামর্শের জন্য জিজ্ঞাসা করা উচিৎ।","en":"You ought to ask him for advice."},
+    {"id":11457756,"text":"তার গল্প সত্য নাও হতে পারে।","en":"His story may not be true."},
+    {"id":11465825,"text":"বাংলাদেশে ব্যবসা করা আগের চেয়ে একটু সহজ হয়েছে।","en":"Doing business in Bangladesh has become a little easier than before."},
+    {"id":11998802,"text":"আমরা সত্যটা খুঁজে বের করব।","en":"We'll find the truth."},
+    {"id":13046438,"text":"যদি তুমি গাড়ি না চালাও, তাহলে গাড়ি থেকে লাভ কী?","en":"What's the good of having a car if you don't drive?"},
+    {"id":5625325,"text":"তুমি ওখানে বসে আছো কেন?","en":"Why are you sitting there?"},
+    {"id":12870479,"text":"তাকে দেওয়া দায়িত্বটি ছিল একটি বিপজ্জনক দায়িত্ব।","en":"It was a dangerous assignment that she'd been given."},
+    {"id":3765985,"text":"এই আসনটা কি পাওয়া যাবে?","en":"Is this seat available?"},
+    {"id":2602192,"text":"তুমি তোমার টাকাটা ফেরত নেওয়ার চেষ্টা করছ না কেন?","en":"Why don't you try to get your money back?"},
+    {"id":3753824,"text":"আমি আমার টিকিটটি বাতিল করতে চাই।","en":"I'd like to cancel my ticket."},
+    {"id":6575355,"text":"আমি সরি আমি একটু দেরিতে মেসেজ করলাম, আমি একটু বাস্ত ছিলাম।","en":"Sorry I didn't reply to your message earlier, I was busy."},
+    {"id":11588428,"text":"আপনার কিছু উত্তর ভুল।","en":"Some of your answers are wrong."},
+    {"id":11651303,"text":"আপনি কি আপনার বাকি জীবন কারাগারে কাটাতে চান?","en":"Do you want to spend the rest of your life in prison?"},
+    {"id":12538172,"text":"এটা স্পষ্ট যে ব্যাটারিচালিত রিকশা বিদ্যুৎ খরচ করবে।","en":"It is obvious that battery-driven rickshaws will consume electricity."},
+    {"id":11998850,"text":"তিনি বেশিরভাগ সময় একা থাকতেন।","en":"He was alone most of the time."},
+    {"id":3084897,"text":"জীবনে চড়াই উতরাই আছে।","en":"In life there are ups and downs."},
+    {"id":5696372,"text":"টম যখন আঠারো বছরের ছিলো তখন গাড়ি চালানো শিখেছে।","en":"Tom learned to drive when he was eighteen."},
+    {"id":11653813,"text":"ইতালিতে সবাই সপ্তাহে পাঁচ দিন কাজ করে।","en":"In Italy, they work five days a week."},
+    {"id":11992394,"text":"আমি জানতে চাই কেন আপনি এখানে আর কাজ করছেন না।","en":"I want to know why you're not working here anymore."},
+    {"id":3239196,"text":"আ্যলেক্সকে জিজ্ঞাসা করুন।","en":"Ask Alex."},
+    {"id":11501513,"text":"নিলুফার ইয়াসমিন কাজ করেন বাংলাদেশ আণবিক শক্তি কমিশনে।","en":"Nilufar Yasmin works in Bangladesh Atomic Energy Commission."},
+    {"id":11997106,"text":"এটা অনেক বেশি গুরুত্বপূর্ণ।","en":"That's far more important."},
+    {"id":11460640,"text":"টম এখনও পরশু একটি পার্টি করার পরিকল্পনা করছে।","en":"Tom is still planning to have a party the day after tomorrow."},
+    {"id":12623676,"text":"এই কফি এতই গরম যে আমি খেতে পারছি না।","en":"This coffee is so hot that I can't drink it."},
+    {"id":12022400,"text":"অন্যান্য বিদেশী ভাষার চেয়ে চীনা ভাষা বেশি কঠিন।","en":"Chinese is more difficult than other foreign languages."},
+    {"id":3092080,"text":"আমি একটা টিকিট কিনলাম।","en":"I bought a ticket."},
+    {"id":11467995,"text":"অনুষ্ঠানটি অনুষ্ঠিত হবে বাংলাদেশ শিল্পকলা একাডেমিতে।","en":"The program will be held at Bangladesh Shilpakala Academy."},
+    {"id":12619352,"text":"৬৩ বছর বয়সে হযরত মুহাম্মদ (স.) ইন্তেকাল করেন।","en":"Hazrat Muhammad (pbuh) passed away at the age of 63."},
+    {"id":11507355,"text":"আমি জানি তুমি এটাকে অনেক ব্যয়বহুল মনে করো।","en":"I know you think this is too expensive."},
+    {"id":13026966,"text":"গণিত হলো তার দুর্বলতা।","en":"Mathematics is her weak point."},
+    {"id":12619302,"text":"ফিলিস্তিনীদের রক্ত কি ইসরাইলীদের রক্ত অপেক্ষা কম রক্তিম?","en":"Is the blood of the Palestinians less red than the blood of the Israelis?"},
+    {"id":12033034,"text":"আমি ভাবছি আমার বোনেরা এখন কোথায়।","en":"I wonder where my sisters are now."},
+    {"id":5637236,"text":"যারা কাঁচের ঘরে থাকে তাদের পাথর ছোড়া উচিত নয়।","en":"People who live in glass houses shouldn't throw stones."}
   ],
   "por": [
-    {
-      "id": 6793425,
-      "text": "Eu nunca mais vou cometer tal erro.",
-      "en": "I will never make such a mistake again."
-    },
-    {
-      "id": 6141782,
-      "text": "Eu desenhei uma espaçonave.",
-      "en": "I drew a picture of a spaceship."
-    },
-    {
-      "id": 12147845,
-      "text": "Quero saber por que você não estava aqui para ajudar a gente ontem.",
-      "en": "I want to know why you weren't here to help us yesterday."
-    },
-    {
-      "id": 8924659,
-      "text": "Tom disse que ele estaria aqui amanhã.",
-      "en": "Tom said that he'd be here tomorrow."
-    },
-    {
-      "id": 3489643,
-      "text": "Como estão as crianças?",
-      "en": "How are the children?"
-    },
-    {
-      "id": 8162272,
-      "text": "A escritura não é muito cara.",
-      "en": "The deed is not too expensive."
-    },
-    {
-      "id": 8632465,
-      "text": "Os dois idiomas têm muito em comum.",
-      "en": "The two languages have a lot in common."
-    },
-    {
-      "id": 4785852,
-      "text": "Ele é o homem que eu vi ontem.",
-      "en": "He is the man I saw yesterday."
-    }
+    {"id":6793425,"text":"Eu nunca mais vou cometer tal erro.","en":"I will never make such a mistake again."},
+    {"id":6141782,"text":"Eu desenhei uma espaçonave.","en":"I drew a picture of a spaceship."},
+    {"id":12147845,"text":"Quero saber por que você não estava aqui para ajudar a gente ontem.","en":"I want to know why you weren't here to help us yesterday."},
+    {"id":8924659,"text":"Tom disse que ele estaria aqui amanhã.","en":"Tom said that he'd be here tomorrow."},
+    {"id":3489643,"text":"Como estão as crianças?","en":"How are the children?"},
+    {"id":8162272,"text":"A escritura não é muito cara.","en":"The deed is not too expensive."},
+    {"id":8632465,"text":"Os dois idiomas têm muito em comum.","en":"The two languages have a lot in common."},
+    {"id":4785852,"text":"Ele é o homem que eu vi ontem.","en":"He is the man I saw yesterday."},
+    {"id":13806173,"text":"Ela está acostumada a cozinhar para si mesma.","en":"She's used to doing her own cooking."},
+    {"id":10752277,"text":"Há algo misterioso na maneira como Tom está se comportando.","en":"There is something mysterious about the way Tom is behaving."},
+    {"id":873814,"text":"Você está certo a respeito disso. Me pergunto se eles vão entender você.","en":"You're right about that. I wonder if they are going to understand you."},
+    {"id":7372491,"text":"Você deveria ter feito isso antes de ir para casa.","en":"You should've done that before you went home."},
+    {"id":6564777,"text":"Qual era o seu livro favorito quando criança?","en":"What was your favorite book when you were a child?"},
+    {"id":12340085,"text":"Qual mesa você acha que ficaria melhor em nossa sala de jantar?","en":"Which table do you think would look best in our dining room?"},
+    {"id":12340051,"text":"Em qual escritório o Tom entrou?","en":"Which office did Tom enter?"},
+    {"id":11765956,"text":"Se não fosse pela tua coragem, agora estaríamos mortos.","en":"If it weren't for your courage, we'd now be dead."},
+    {"id":4837864,"text":"Eu estou sem gasolina.","en":"I'm out of gas."},
+    {"id":1646365,"text":"Tive um sonho em que um bebê brincava com uma faca.","en":"I had a dream where a baby was playing with a knife."},
+    {"id":3001796,"text":"Em tempos como este devemos todos trabalhar em harmonia.","en":"In times like this, we should all pull together."},
+    {"id":10648568,"text":"Onde posso encontrar açúcar?","en":"Where can I find sugar?"},
+    {"id":1917306,"text":"Você quer uma aspirina?","en":"Would you like some aspirin?"},
+    {"id":13378465,"text":"Sei que o Tom vai ter dificuldade em fazer isso.","en":"I know that Tom is going to have a hard time doing that."},
+    {"id":4899216,"text":"Ela tomou o leite vencido.","en":"She drank the expired milk."},
+    {"id":950759,"text":"A bomba atômica destruiu toda a cidade de Hiroxima.","en":"The atomic bomb destroyed the entire city of Hiroshima."},
+    {"id":5218320,"text":"Não somos mais amigos de Tom.","en":"We're not friends with Tom anymore."},
+    {"id":6307130,"text":"Queira me perdoar. Eu não quis assustá-lo, senhor.","en":"I'm sorry. I didn't mean to scare you."},
+    {"id":3942755,"text":"Minhas mãos começaram a suar.","en":"My hands began to sweat."},
+    {"id":12340170,"text":"As tábuas são mantidas juntas usando apenas cola para madeira.","en":"The boards are held together using only wood glue."},
+    {"id":7105195,"text":"O Tomás está pensativo.","en":"Tomás is self-conscious."},
+    {"id":9943842,"text":"Quando dormimos, nossa temperatura corporal cai bastante.","en":"When we sleep, our body temperature drops by several degrees."},
+    {"id":9948540,"text":"Nós começaremos assim que ele chegar.","en":"We'll start as soon as he comes."},
+    {"id":6959477,"text":"Tom não deveria falar coisas assim para a Mary.","en":"Tom shouldn't say things like that to Mary."},
+    {"id":11491957,"text":"Quero trabalhar no mesmo hospital onde você trabalha.","en":"I want to work at the same hospital where you work."},
+    {"id":8826548,"text":"Eu gostava muito do meu trabalho.","en":"I liked my work a lot."},
+    {"id":11593943,"text":"Não gosto de música clássica.","en":"I don't like classical music."},
+    {"id":934640,"text":"Frequentemente você tem que gastar mais tempo do que pensava em algo.","en":"You often need to spend more time doing something than you anticipated."},
+    {"id":11435940,"text":"Eu quase esqueci meu guarda-chuva na escola.","en":"I almost forgot my umbrella at school."},
+    {"id":6133247,"text":"Eu te amo do fundo do meu coração.","en":"I love you with all my heart."},
+    {"id":1180864,"text":"Sou o mais velho dos três.","en":"I am the oldest of the three."},
+    {"id":1012013,"text":"Nos EUA, a união gay é permitida apenas em alguns estados.","en":"In the US, a gay union is permitted only in some states."},
+    {"id":8291861,"text":"Não vou negar que foi difícil.","en":"I won't deny it was difficult."},
+    {"id":8339873,"text":"Existem poucas casas de tijolos nesta cidade.","en":"There are very few brick houses in this town."},
+    {"id":9858703,"text":"Tom sabe por que você fez isso.","en":"Tom knows why you did that."},
+    {"id":5599722,"text":"Você sabia que Tom estava morando em Boston?","en":"Did you know that Tom was living in Boston?"},
+    {"id":6199602,"text":"Só sei que nada sei.","en":"The only thing I know is that I know nothing."},
+    {"id":899637,"text":"Tem dias que eu me sinto como se meu cérebro quisesse me abandonar.","en":"There are days where I feel like my brain wants to abandon me."},
+    {"id":12273615,"text":"Acho que o Tom se saiu muito bem.","en":"I think that Tom did really well."},
+    {"id":4795412,"text":"Queria que já estivéssemos nas férias de verão.","en":"I wish it were already summer vacation."}
   ],
   "rus": [
-    {
-      "id": 8452635,
-      "text": "Том, вообще-то, действительно так сказал.",
-      "en": "Tom did actually say that."
-    },
-    {
-      "id": 7310349,
-      "text": "Не могу поверить, что ты женился.",
-      "en": "I can't believe you got married."
-    },
-    {
-      "id": 4781794,
-      "text": "Он взял меня за руку и посмотрел мне в глаза.",
-      "en": "He took me by the arm and looked me in the eye."
-    },
-    {
-      "id": 10016463,
-      "text": "Вы получили мою открытку?",
-      "en": "Did you get my postcard?"
-    },
-    {
-      "id": 13799093,
-      "text": "Предложение должно начинаться с большой буквы.",
-      "en": "The sentence must start with a capital letter."
-    },
-    {
-      "id": 497527,
-      "text": "Она упала в обморок, увидев ДТП.",
-      "en": "She blacked out on seeing the scene of the accident."
-    },
-    {
-      "id": 12909749,
-      "text": "Слова бьют больнее кулаков.",
-      "en": "Words hurt more than fists."
-    },
-    {
-      "id": 2615874,
-      "text": "Я думал, что у вас свидание.",
-      "en": "I thought you had a date."
-    }
+    {"id":8452635,"text":"Том, вообще-то, действительно так сказал.","en":"Tom did actually say that."},
+    {"id":7310349,"text":"Не могу поверить, что ты женился.","en":"I can't believe you got married."},
+    {"id":4781794,"text":"Он взял меня за руку и посмотрел мне в глаза.","en":"He took me by the arm and looked me in the eye."},
+    {"id":10016463,"text":"Вы получили мою открытку?","en":"Did you get my postcard?"},
+    {"id":13799093,"text":"Предложение должно начинаться с большой буквы.","en":"The sentence must start with a capital letter."},
+    {"id":497527,"text":"Она упала в обморок, увидев ДТП.","en":"She blacked out on seeing the scene of the accident."},
+    {"id":12909749,"text":"Слова бьют больнее кулаков.","en":"Words hurt more than fists."},
+    {"id":2615874,"text":"Я думал, что у вас свидание.","en":"I thought you had a date."},
+    {"id":13799808,"text":"Пожалуйста, скажи, что ты не работаешь в морге.","en":"Please tell me you don't work in a morgue."},
+    {"id":3602763,"text":"Это не легко, переводить все твои комментарии на литературный немецкий язык.","en":"It isn't easy to translate all your comments into Standard German."},
+    {"id":6776307,"text":"Тома чуть инфаркт не хватил, когда он увидел Мэри, стоящую на краю крыши.","en":"Tom nearly had a heart attack when he saw Mary standing on the edge of the roof."},
+    {"id":6758255,"text":"Мэри не смогла найти страницу, которую искала.","en":"Mary couldn't find the page she was looking for."},
+    {"id":4034330,"text":"Тебе надо её предупредить.","en":"You've got to warn her."},
+    {"id":9329360,"text":"Думаешь, мне не всё равно, нравлюсь я ему или нет?","en":"Do you think I care if he likes me?"},
+    {"id":7929689,"text":"Она говорит, что ей тут очень нравится.","en":"She says she really likes it here."},
+    {"id":12243599,"text":"Так как он родился в Англии, он говорит на британском английском.","en":"As he was born in England, he speaks British English."},
+    {"id":6171607,"text":"Наше общество воспитано на стереотипах.","en":"Our society is built on stereotypes."},
+    {"id":3189695,"text":"Он ушёл из дома, чтобы никогда не возвращаться.","en":"He left home never to return."},
+    {"id":4634886,"text":"У бедной старушки украли деньги.","en":"The poor old woman was robbed of her money."},
+    {"id":446076,"text":"Во время Обона японцы считают, что их посещают их предки.","en":"During O-bon, Japanese people believe they receive a visit from an ancestor."},
+    {"id":13892877,"text":"Вы чего это ещё не спите?","en":"How come are you still not sleeping?"},
+    {"id":4007636,"text":"Прошлой ночью мы слышали звуки выстрелов и крики на улице за окном.","en":"Last night, we heard sounds of gunshots and screaming on the street outside our window."},
+    {"id":1677585,"text":"Боюсь, завтра будет дождь.","en":"I'm afraid it may rain tomorrow."},
+    {"id":11795259,"text":"Как бы быстро вы ни ехали, вы не успеете туда вовремя.","en":"No matter how fast you drive, you won't get there on time."},
+    {"id":8430021,"text":"Докажи мне, что у тебя нет сестры.","en":"Prove to me that you don't have a sister."},
+    {"id":12705341,"text":"Её поведение на вечеринке было далеко не идеальным.","en":"Her behavior at the party was far from perfect."},
+    {"id":3841831,"text":"Часто бывает, что у сложной с виду задачи есть простое решение.","en":"There's often a simple solution to what seems like a complicated problem."},
+    {"id":3471205,"text":"Седьмой день недели - воскресенье.","en":"The seventh day of the week is Sunday."},
+    {"id":13165609,"text":"Я не получил твоё сообщение.","en":"I didn't receive your message."},
+    {"id":3524857,"text":"Чтобы холодная вода превратилась в горячую, её нужно подогреть.","en":"To turn cold water hot, one needs to heat it."},
+    {"id":468314,"text":"Из всего фильма я больше всего запомнил последнюю сцену.","en":"What I remember most about that movie is the last scene."},
+    {"id":3286523,"text":"Я беру отгул на пару дней.","en":"I'm taking a couple of days off."},
+    {"id":4109284,"text":"Том заставляет меня это сделать.","en":"Tom is making me do this."},
+    {"id":5087316,"text":"Человек, о котором ты говорил, — моя сестра.","en":"That person you spoke about is my sister."},
+    {"id":5736784,"text":"Почему Том злится на Мэри?","en":"Why's Tom mad at Mary?"},
+    {"id":5580897,"text":"Том сказал мне, что в октябре поедет в Бостон.","en":"Tom told me that he would go to Boston in October."},
+    {"id":12004828,"text":"Какой смысл не есть?","en":"What's the point of not eating?"},
+    {"id":4007545,"text":"Том постоянно жалуется, что ему не хватает времени.","en":"Tom keeps complaining that he doesn't have enough time."},
+    {"id":5027799,"text":"Дай мне журнал, пожалуйста.","en":"Please give me a magazine."},
+    {"id":4937781,"text":"Герда, милая Герда, где ты была так долго, и где был я?","en":"Gerda, dear little Gerda, where have you been all this time, and where have I been?"},
+    {"id":2180401,"text":"У меня нет аппетита.","en":"I have no appetite."},
+    {"id":10746551,"text":"Сомневаюсь, что она полностью уяснила себе идею.","en":"I don't think she fully grasped the concept."},
+    {"id":6484398,"text":"Вы в новых ботинках?","en":"Are you wearing new shoes?"},
+    {"id":423732,"text":"Мы никогда не должны забывать о такой помощи друг другу.","en":"We shall never forget helping each other like this."},
+    {"id":1191039,"text":"А теперь рассказ окончен.","en":"Now the story is over."},
+    {"id":806110,"text":"Трудно выиграть в четырёх последовательных играх.","en":"It is hard to win four successive games."},
+    {"id":7568002,"text":"Ты знаешь, где Джим и Нэнси?","en":"Do you know where Jim and Nancy are?"},
+    {"id":8352936,"text":"Его революционный пыл пробудился, когда он уехал в Россию.","en":"When he went to Russia, his revolutionary fervor emerged."}
   ],
   "ind": [
-    {
-      "id": 11133054,
-      "text": "Tuangkan air mendidih pada kantung teh.",
-      "en": "Pour the boiling water over the teabag."
-    },
-    {
-      "id": 11666609,
-      "text": "Apakah kakek dan nenek Anda masih hidup?",
-      "en": "Are your grandparents still alive?"
-    },
-    {
-      "id": 7850511,
-      "text": "Setengah dari penduduk dunia tinggal di perkotaan.",
-      "en": "Half of the world’s population lives in cities."
-    },
-    {
-      "id": 9941649,
-      "text": "Dia ingin mengubah hidupnya.",
-      "en": "He wanted to change his life."
-    },
-    {
-      "id": 11191111,
-      "text": "Sekaranglah kesempatanmu melakukan itu.",
-      "en": "Now's your chance to do that."
-    },
-    {
-      "id": 3483976,
-      "text": "Tom berjanji padaku bahwa dia tidak akan melakukan hal itu lagi.",
-      "en": "Tom promised me he wouldn't do that again."
-    },
-    {
-      "id": 10000263,
-      "text": "Aku tinggal di Tahiti.",
-      "en": "I live in Tahiti."
-    },
-    {
-      "id": 1033737,
-      "text": "Tambahkan gula dan vanili pada krim kemudian kocok sampai krimnya mengental.",
-      "en": "Add the sugar and vanilla to the cream and beat vigorously until the cream thickens."
-    }
+    {"id":11133054,"text":"Tuangkan air mendidih pada kantung teh.","en":"Pour the boiling water over the teabag."},
+    {"id":11666609,"text":"Apakah kakek dan nenek Anda masih hidup?","en":"Are your grandparents still alive?"},
+    {"id":7850511,"text":"Setengah dari penduduk dunia tinggal di perkotaan.","en":"Half of the world’s population lives in cities."},
+    {"id":9941649,"text":"Dia ingin mengubah hidupnya.","en":"He wanted to change his life."},
+    {"id":11191111,"text":"Sekaranglah kesempatanmu melakukan itu.","en":"Now's your chance to do that."},
+    {"id":3483976,"text":"Tom berjanji padaku bahwa dia tidak akan melakukan hal itu lagi.","en":"Tom promised me he wouldn't do that again."},
+    {"id":10000263,"text":"Aku tinggal di Tahiti.","en":"I live in Tahiti."},
+    {"id":1033737,"text":"Tambahkan gula dan vanili pada krim kemudian kocok sampai krimnya mengental.","en":"Add the sugar and vanilla to the cream and beat vigorously until the cream thickens."},
+    {"id":10714346,"text":"Tom memberitahu Mary bahwa dia tidak akan datang ke pesta Mary.","en":"Tom told Mary he wouldn't be at her party."},
+    {"id":11687404,"text":"Bendera Prancis berwarna biru, putih, dan merah.","en":"The French flag is blue, white and red."},
+    {"id":1804193,"text":"Saya harap dia bisa membantuku.","en":"I hope he can help you."},
+    {"id":625965,"text":"Perkataannya telah membuat kesan yang dalam terhadap murid-murid.","en":"His speech made a deep impression on the students."},
+    {"id":13580515,"text":"Anak perempuan itu diculik.","en":"The girl was kidnapped."},
+    {"id":12663209,"text":"Tom terlihat seperti belum makan berhari-hari.","en":"Tom looks as if he hasn't eaten in days."},
+    {"id":1019365,"text":"Cinta mencintai cinta.","en":"Love loves love."},
+    {"id":7850510,"text":"Petugas pemadam itu tidak dapat menjinakkan api.","en":"The fireman could not extinguish the flames."},
+    {"id":12137888,"text":"Tom dan Mary tidak cocok.","en":"Tom and Mary are incompatible."},
+    {"id":14044824,"text":"Saya tidak melihat kontradiksi apapun di hal itu.","en":"I don't see any contradiction in that."},
+    {"id":12902211,"text":"Python adalah sebuah bahasa pemrograman.","en":"Python is a programming language."},
+    {"id":5398307,"text":"Aku tidak tahu apakah ada rumah sakit di sekitar sini.","en":"I do not know if there is a hospital around here."},
+    {"id":13706583,"text":"Para orang tua bekerja.","en":"The parents work."},
+    {"id":11160165,"text":"Tak bisa menari dikatakan lantai yang berjungkit.","en":"A bad workman always blames his tools."},
+    {"id":11516595,"text":"Tom bermain dengan putra-putranya.","en":"Tom played with his sons."},
+    {"id":4557654,"text":"Kita wajib melalui pemeriksaan bea dan cukai saat kedatangan.","en":"It's necessary to go through customs on arriving."},
+    {"id":4579824,"text":"Apa kau sudah mencuci mobilnya?","en":"Have you washed the car yet?"},
+    {"id":13197058,"text":"Dia merasakan pompa adrenalin di sekujur tubuhnya.","en":"She felt the adrenaline pump through her body."},
+    {"id":3893704,"text":"Aku harap Tom belum memberitahukan hal itu kepada Mary.","en":"I wish Tom hadn't told Mary about that."},
+    {"id":12033291,"text":"Orang-orang itu berbahaya.","en":"Those people are dangerous."},
+    {"id":10042378,"text":"Burung-burung mengepakkan sayapnya.","en":"The birds flapped their wings."},
+    {"id":10587757,"text":"Mayoritas burung memiliki dua kaki dan dua sayap.","en":"Most birds have two legs and two wings."},
+    {"id":12687086,"text":"Seharusnya aku tidak berbohong padanya.","en":"I shouldn't have lied to him."},
+    {"id":5127516,"text":"Kau bisa mengenali seekor burung dari bulunya dan seorang pria dari kawan-kawannya.","en":"You can recognize a bird by its feathers and a man by his friends."},
+    {"id":11605185,"text":"Ada sekitar empat puluh murid di kelasnya.","en":"There are about forty pupils in her class."},
+    {"id":11054281,"text":"Tom tidak puas dengan pelayanan hotel tempat dia menginap.","en":"Tom was dissatisfied with the service at the hotel where he stayed."},
+    {"id":2767445,"text":"Apakah lima huruf pertama email anda.","en":"What are the first five letters of your email?"},
+    {"id":10711437,"text":"Pasukan musuh yang lebih kuat telah mengepung tentara kami.","en":"The enemy's superior forces have encircled our army."},
+    {"id":9687273,"text":"Semua orang kenal mereka.","en":"Everybody knows them."},
+    {"id":1032080,"text":"Bayak kartu ulang tahun yang akan segera datang.","en":"A lot of birthday cards will arrive soon."},
+    {"id":4788258,"text":"Tidak ada yang bisa bergerak melalui ruang lebih cepat daripada cahaya.","en":"Nothing can move through space faster than light."},
+    {"id":11794561,"text":"Istana Mary berhantu.","en":"Mary's castle is haunted."},
+    {"id":4032381,"text":"Semua mobil yang ada di tempat parkir berwarna putih, kecuali tiga mobil.","en":"All but three of the cars in the parking lot were white."},
+    {"id":3941911,"text":"Aku tidak yakin kalau kau sadar akan apa yang kau katakan.","en":"I don't think you realize what you're saying."},
+    {"id":11160187,"text":"Diberi betis, hendak paha.","en":"Give him an inch and he will take a yard."},
+    {"id":11227872,"text":"Ada berapa siswa di sekolahmu?","en":"How many students are there in your school?"},
+    {"id":10072502,"text":"Kamu punya tiga orang anak.","en":"You have three children."},
+    {"id":3478131,"text":"Tom nampak seperti telah kehilangan teman baiknya.","en":"Tom looks as if he lost his best friend."},
+    {"id":5229282,"text":"Saya punya kakak tiri.","en":"I have a half brother."},
+    {"id":11778735,"text":"Plakat tersebut bertuliskan \"Selamat datang di Itu!\"","en":"The plaque said \"Welcome to Itu!\""}
   ],
   "urd": [
-    {
-      "id": 3561882,
-      "text": "تم مجھے خون دو ، میں تمھیں آزادی دونگا ۔",
-      "en": "Give me your blood, I will give you freedom."
-    },
-    {
-      "id": 1832868,
-      "text": "آپ نے کبھی سنیما میں چیخ ماری ہے؟",
-      "en": "Have you ever screamed in a movie theater?"
-    },
-    {
-      "id": 1474910,
-      "text": "کچھ لوگوں کے لیئے زندگی فرحت بخش ہے اور کچھ کے لیئے آزمائش۔",
-      "en": "To some life is pleasure, to others suffering."
-    },
-    {
-      "id": 4185249,
-      "text": "میں نے یہ سویٹر کل خریدا تھا۔",
-      "en": "I bought this sweater yesterday."
-    },
-    {
-      "id": 2078351,
-      "text": "زمین بارش کے بعد گیلی ہو چکی ہے۔",
-      "en": "The ground is wet after rain."
-    },
-    {
-      "id": 1733370,
-      "text": "کیا تم ڈاکٹر کو بلا سکتی ہو؟",
-      "en": "Could you call a doctor, please?"
-    },
-    {
-      "id": 1620941,
-      "text": "کرسی کھڑکی کے پاس نہیں ہے۔",
-      "en": "The chair is not near the window."
-    },
-    {
-      "id": 10823961,
-      "text": "ٹوم بین الاقوامی کونفرنس میں حاضر تھا۔",
-      "en": "Tom attended an international conference."
-    }
+    {"id":3561882,"text":"تم مجھے خون دو ، میں تمھیں آزادی دونگا ۔","en":"Give me your blood, I will give you freedom."},
+    {"id":1832868,"text":"آپ نے کبھی سنیما میں چیخ ماری ہے؟","en":"Have you ever screamed in a movie theater?"},
+    {"id":1474910,"text":"کچھ لوگوں کے لیئے زندگی فرحت بخش ہے اور کچھ کے لیئے آزمائش۔","en":"To some life is pleasure, to others suffering."},
+    {"id":4185249,"text":"میں نے یہ سویٹر کل خریدا تھا۔","en":"I bought this sweater yesterday."},
+    {"id":2078351,"text":"زمین بارش کے بعد گیلی ہو چکی ہے۔","en":"The ground is wet after rain."},
+    {"id":1733370,"text":"کیا تم ڈاکٹر کو بلا سکتی ہو؟","en":"Could you call a doctor, please?"},
+    {"id":1620941,"text":"کرسی کھڑکی کے پاس نہیں ہے۔","en":"The chair is not near the window."},
+    {"id":10823961,"text":"ٹوم بین الاقوامی کونفرنس میں حاضر تھا۔","en":"Tom attended an international conference."},
+    {"id":12486915,"text":"میں تصور ہی نہیں کر سکتی ہوں کہ وہ کیا سوچ رہا ہوگا۔","en":"I can't imagine what he is thinking."},
+    {"id":1812366,"text":"میں صبح جلدی اٹھی تاکہ میں پہلی ریل گاڑی پکڑ سکوں۔","en":"I got up early so that I might be in time for the first train."},
+    {"id":1600187,"text":"میرے علاوہ باقی کسی بھی ممبر کو اس کی بات پہ یقین نہیں ہے۔","en":"Every member but me believes what he says."},
+    {"id":1526981,"text":"وہ ایسی لڑکی ہے جس پہ بندہ بھروسہ کر سکتا ہے۔","en":"She is someone you can trust."},
+    {"id":5398085,"text":"جو مجھے معلوم ہے نارویجن کے بارے میں، میں نے خود سیکھا۔","en":"What I know of Norwegian I have learned on my own."},
+    {"id":10812615,"text":"جب رات کا کھانا تیار ہوگا میں آپ کو بلا لونگا۔","en":"I'll call you when dinner's ready."},
+    {"id":1470323,"text":"میں ریڈہو بہت کم سنتا ہوں۔","en":"I rarely listen to the radio."},
+    {"id":1445824,"text":"یہ ناول دلچسپ ہونے کے ساتھ ساتھ سبق آموز بھی ہے۔","en":"This novel is both interesting and instructive."},
+    {"id":1505865,"text":"تم دفتر میں کام نہیں کرتے۔","en":"You don't work in an office."},
+    {"id":1885136,"text":"میرے تایا ۱۹۸۳ میں میکسیکو گئے تھے اور کبھی واپس نہیں آئے۔","en":"My uncle went to Mexico in 1983, never to come back."},
+    {"id":10815012,"text":"میں نے تمہیں کسی کو مت بتانے کا کہا۔","en":"I told you not to tell that to anyone."},
+    {"id":1539342,"text":"میرے ابو پہلے تمباکونوشی کرتے تھے مگر اب نہیں۔","en":"My father used to smoke, but now he doesn't."},
+    {"id":13958807,"text":"میں یہ سن کے خوش ہوں کہ ٹام کو کوئی چوٹ نہیں لگی۔","en":"I'm glad to hear Tom didn't get hurt."},
+    {"id":2123939,"text":"یہ ظہرانے کا وقت ہے۔","en":"It's lunch time."},
+    {"id":1470297,"text":"میں اور انتظار نہیں کر سکتا۔","en":"I can't wait for it!"},
+    {"id":13387946,"text":"سمیع پر تعرض اور جنسی زیادتی کے الزامات لگے۔","en":"Sami was charged with assault and rape."},
+    {"id":1539323,"text":"مارٹن لوتھر کنگ نے اپنی زنگی انصاف کے حصول میں گزاردی۔","en":"Martin Luther King spent his life seeking justice."},
+    {"id":1600213,"text":"بل میرے سے دو سال بڑا ہے۔","en":"Bill is two years senior to me."},
+    {"id":4367318,"text":"ہمیں یہ کام کرنا ہے۔","en":"We have a job to do."},
+    {"id":1436097,"text":"ٹام نے اپنے تمام مسائل کا زمہ دار مریم کو ٹھہرایا ہے۔","en":"Tom blames Mary for all of his problems."},
+    {"id":1564752,"text":"صرف چھہ لوگ دعوت پہ آئے تھے۔","en":"There were only six people at the party."},
+    {"id":10812197,"text":"میری نے پارٹی کے لیے سٹریپ کے بغیر والی ڈریس پہنی۔","en":"Mary wore a strapless dress to the party."},
+    {"id":1465674,"text":"بلے کے ساتھ ساتھ کل گیندیں بھی چوری ہو گئی۔","en":"The bat was stolen yesterday, along with the balls."},
+    {"id":1551839,"text":"اس سے فرق نہیں پڑتا کہ کس نے کہاں ہے، بات ہی غلط ہے۔","en":"It doesn't matter who says that, it's not true."},
+    {"id":5529368,"text":"ٹام غریب ہے لیکن وہ خوش ہے۔","en":"Tom is poor, but he's happy."},
+    {"id":1448539,"text":"آپ کو اس قسم کی باتیں بچوں کے سامنے نہیں کرنی چائیے۔","en":"You shouldn't say that kind of thing when children are around."},
+    {"id":1507245,"text":"جب تم دور ہوتے ہو، مجھے زنگی میں ایک خلاء سا لگتا ہے۔","en":"When you are away, I feel lost."},
+    {"id":10814933,"text":"تو نے وعدہ کرنا ہے کہ جو میں تجھے بتانے لگا ہوں، وہ کسی اور کو کبھی نہیں پتانا ہے۔","en":"You have to promise never to tell anyone what I'm about to tell you."},
+    {"id":1450566,"text":"مجھے حیرت ہے کہ آپ نے انعام جیت لیا ۔","en":"I'm surprised that you won the prize."},
+    {"id":1460347,"text":"ٹام ایک امیر آدپی ہے۔","en":"Tom is a wealthy man."},
+    {"id":12486878,"text":"\"تمہیں آخر اس کا کہاں سے پتہ لگ گیا؟\" - \"بےشک کچھ چال بازی سے کام لےکر۔\"","en":"\"Where did you end up finding out about that from?\" - \"Well, obviously by using a few sly tricks.\""},
+    {"id":1510468,"text":"برج خلیفہ اس وقت دنیا کی سب سے لمبی فلک بوس عمارت ہے۔","en":"Burj Khalifa is currently the tallest skyscraper in the world."},
+    {"id":1448487,"text":"وہ مجھ سے تین گنا زیادہ کماتا ہے۔","en":"He earns three times more than I do."},
+    {"id":10775526,"text":"کیا آپ باقاعدگی سے شترنج کھیلتے ہیں؟","en":"Do you play chess consistently?"},
+    {"id":8230915,"text":"تم اس پر بھروسہ کیوں نہیں کرتے؟","en":"Why don't you believe him?"},
+    {"id":10815018,"text":"پورے وقت کے لیے میں بس آپ کے بہترین مفاد کا خیال رکھ رہا تھا۔","en":"I had your best interest in mind the entire time."},
+    {"id":2123959,"text":"مجھے تم پر بھروسہ ہے۔","en":"I trust you."},
+    {"id":2348073,"text":"کاش تم نے وہ کہانی میری والدہ کو نہ بتائی ہوتی۔","en":"I wish you hadn't told that story to my mother."},
+    {"id":1448493,"text":"انہوں نے کتاب کو الماری میں رکھ دیا۔","en":"He put the book on the shelf."},
+    {"id":1580441,"text":"اسے اپنی ابو کی امریکہ میں لکھی ہوئی چینی کتابیں پڑھنے کا شوق ہے۔","en":"He likes to read the Chinese books his father wrote in the United States."}
   ],
   "deu": [
-    {
-      "id": 13064219,
-      "text": "Minderjährige müssen das Formular von einem Elternteil oder Vormund unterschreiben lassen.",
-      "en": "Minors must have a parent or guardian sign the form."
-    },
-    {
-      "id": 8992757,
-      "text": "Das ist eine meiner Lieblingssendungen.",
-      "en": "That's one of my favorite shows."
-    },
-    {
-      "id": 13407981,
-      "text": "Darf man hier schwimmen?",
-      "en": "May we swim here?"
-    },
-    {
-      "id": 3246041,
-      "text": "Hier dürft ihr nicht bleiben.",
-      "en": "You must not stay here."
-    },
-    {
-      "id": 10233591,
-      "text": "Du musst dir keine Sorgen mehr um mich machen.",
-      "en": "You don't have to worry about me anymore."
-    },
-    {
-      "id": 7022456,
-      "text": "Tom hätte sich fast an seinem Kaffee verschluckt.",
-      "en": "Tom almost choked on his coffee."
-    },
-    {
-      "id": 2636836,
-      "text": "Macht euch das glücklich?",
-      "en": "Does that make you happy?"
-    },
-    {
-      "id": 13404016,
-      "text": "Dort lebt er im Winter und danach reist er nach Bahia.",
-      "en": "There he'll live during the winter, and after that time he'll travel to Bahia."
-    }
+    {"id":13064219,"text":"Minderjährige müssen das Formular von einem Elternteil oder Vormund unterschreiben lassen.","en":"Minors must have a parent or guardian sign the form."},
+    {"id":8992757,"text":"Das ist eine meiner Lieblingssendungen.","en":"That's one of my favorite shows."},
+    {"id":13407981,"text":"Darf man hier schwimmen?","en":"May we swim here?"},
+    {"id":3246041,"text":"Hier dürft ihr nicht bleiben.","en":"You must not stay here."},
+    {"id":10233591,"text":"Du musst dir keine Sorgen mehr um mich machen.","en":"You don't have to worry about me anymore."},
+    {"id":7022456,"text":"Tom hätte sich fast an seinem Kaffee verschluckt.","en":"Tom almost choked on his coffee."},
+    {"id":2636836,"text":"Macht euch das glücklich?","en":"Does that make you happy?"},
+    {"id":13404016,"text":"Dort lebt er im Winter und danach reist er nach Bahia.","en":"There he'll live during the winter, and after that time he'll travel to Bahia."},
+    {"id":1231126,"text":"Ich war am Suchen nach dir.","en":"I have been looking for you."},
+    {"id":8778892,"text":"Bis zu unserer Schule ist es weiter als bis zum Bahnhof.","en":"Our school is further away than the station."},
+    {"id":2671037,"text":"Eine süße kleine Schildkröte wurde am Strand gefunden.","en":"A cute little turtle was found on the beach."},
+    {"id":1401784,"text":"Ich gehe morgen einkaufen.","en":"I'm going shopping tomorrow."},
+    {"id":2198875,"text":"Wir wurden beste Freunde.","en":"We became best friends."},
+    {"id":1848007,"text":"Dass wir uns in Paris getroffen haben, war ein glücklicher Zufall.","en":"That we met in Paris was a fortunate accident."},
+    {"id":1367572,"text":"Das Mädchen hatte ein Teleskop in der Hand.","en":"The girl had a telescope in her hand."},
+    {"id":3327086,"text":"Meines Erachtens seid ihr diejenigen, die um Entschuldigung bitten sollten.","en":"In my opinion, you're the ones who should be apologising."},
+    {"id":450698,"text":"Warum denkst du, dass Fußball in Amerika nicht populär ist?","en":"Why do you think football isn't popular in America?"},
+    {"id":545847,"text":"Mein Familienname ist Wang.","en":"My last name is Wang."},
+    {"id":8308269,"text":"Was war dein schlechtester Job?","en":"What was your worst job?"},
+    {"id":5101544,"text":"Sie ignoriert mich nicht, sie ist schüchtern.","en":"She's not ignoring me; she's shy."},
+    {"id":1910301,"text":"Es entstand eine Auseinandersetzung darüber, was mit dem Land geschehen solle.","en":"A quarrel arose about what to do with the land."},
+    {"id":8890509,"text":"Ich entschloss mich, Tom zu verpetzen.","en":"I decided to tell on Tom."},
+    {"id":7530617,"text":"Marys Kleid ist rosa.","en":"Mary's dress is pink."},
+    {"id":13422081,"text":"Wir werden eure Großzügigkeit nie vergessen.","en":"We won't ever forget your generosity."},
+    {"id":969863,"text":"Ist das Glas halb voll oder halb leer?","en":"Is the glass half full or half empty?"},
+    {"id":5104734,"text":"Er zuckte zusammen, als die Krankenschwester ihm die Nadel in den Arm stach.","en":"He winced as the nurse pushed the needle into his arm."},
+    {"id":11825365,"text":"Wir fahren morgen früh nach Brasilien.","en":"We leave for Brazil tomorrow morning."},
+    {"id":1833847,"text":"Heutzutage wird nicht mehr viel gute Musik produziert.","en":"There aren't many good tunes coming out nowadays."},
+    {"id":1904379,"text":"Was Tom wirklich wollte, war eine neue Gitarre.","en":"What Tom really wanted was a new guitar."},
+    {"id":6050310,"text":"Wer ist deine Mutter?","en":"Who is your mother?"},
+    {"id":3748149,"text":"Es gibt einen Fehler in der Rechnung.","en":"There is a mistake in the bill."},
+    {"id":13554930,"text":"Du solltest dir nicht so viele Gedanken machen.","en":"You shouldn't worry so much."},
+    {"id":12549354,"text":"Können Sie eine andere Lösung vorschlagen?","en":"Can you suggest another solution?"},
+    {"id":2064424,"text":"In der Grundschule haben wir häufig „Reise nach Jerusalem“ gespielt.","en":"We used to play musical chairs in elementary school."},
+    {"id":10326361,"text":"Tom versteckte sich unter seinem Bett.","en":"Tom hid under his bed."},
+    {"id":1669944,"text":"Vier Leute befanden sich in dem Wagen, als sich der Unfall ereignete.","en":"Four people were in the car when the accident happened."},
+    {"id":12594514,"text":"Ich dachte, Sie würden gern Klavier spielen.","en":"I thought you loved playing the piano."},
+    {"id":1126042,"text":"Ich habe gestern zu viel Bier getrunken.","en":"I drank too much beer yesterday."},
+    {"id":7286094,"text":"Maria ist überhaupt nicht mein Typ.","en":"Mary isn't my type at all."},
+    {"id":12561482,"text":"Nächsten Monat mußt du vielleicht nach Australien.","en":"You might have to go to Australia next month."},
+    {"id":5196831,"text":"Man hat nichts übersehen.","en":"Nothing has been overlooked."},
+    {"id":399726,"text":"Luftverschmutzung ist ein ernstes globales Problem.","en":"Air pollution is a serious global problem."},
+    {"id":10166068,"text":"Ich habe gerade deine Mama getroffen.","en":"I just met your mom."},
+    {"id":1619275,"text":"Ich wünschte, den Brief gestern geschrieben zu haben.","en":"I ought to have written the letter yesterday."},
+    {"id":5474638,"text":"Sie wohnt im Haus, in dem ihre Großeltern lebten.","en":"She lives in the house where her grandparents lived."},
+    {"id":8612489,"text":"Ihr verfluchten Racker, wollt ihr denn ewig leben?","en":"You damned rascals, do you want to live forever?"},
+    {"id":12660722,"text":"Ich hole Ihnen einen Stuhl.","en":"Let me get you a chair."},
+    {"id":2193351,"text":"Ich muss meine Gedanken sortieren.","en":"I must organize my thoughts."}
   ],
   "jpn": [
-    {
-      "id": 223773,
-      "text": "このことばを君はどう考えますか。",
-      "en": "How would you take these words?"
-    },
-    {
-      "id": 1108004,
-      "text": "こないだ生まれて初めて釣りに行った。",
-      "en": "The other day I went fishing for the first time in my life."
-    },
-    {
-      "id": 10040706,
-      "text": "私の文を翻訳してくれてありがとう！",
-      "en": "Thanks for translating my sentences!"
-    },
-    {
-      "id": 106445,
-      "text": "彼は私がうそつきであるかのように言った。",
-      "en": "He made me out to be a liar."
-    },
-    {
-      "id": 170775,
-      "text": "最悪でも平均点は取れるだろう。",
-      "en": "At worst, I will get an average mark."
-    },
-    {
-      "id": 154607,
-      "text": "私は犯人と疑われた。",
-      "en": "I was suspected to be the criminal."
-    },
-    {
-      "id": 3320353,
-      "text": "世界で一番愛してる。",
-      "en": "I love you more than anything in the world."
-    },
-    {
-      "id": 11124419,
-      "text": "何故私を責めるのですか。",
-      "en": "Why are you blaming me for what happened?"
-    }
+    {"id":223773,"text":"このことばを君はどう考えますか。","en":"How would you take these words?"},
+    {"id":1108004,"text":"こないだ生まれて初めて釣りに行った。","en":"The other day I went fishing for the first time in my life."},
+    {"id":10040706,"text":"私の文を翻訳してくれてありがとう！","en":"Thanks for translating my sentences!"},
+    {"id":106445,"text":"彼は私がうそつきであるかのように言った。","en":"He made me out to be a liar."},
+    {"id":170775,"text":"最悪でも平均点は取れるだろう。","en":"At worst, I will get an average mark."},
+    {"id":154607,"text":"私は犯人と疑われた。","en":"I was suspected to be the criminal."},
+    {"id":3320353,"text":"世界で一番愛してる。","en":"I love you more than anything in the world."},
+    {"id":11124419,"text":"何故私を責めるのですか。","en":"Why are you blaming me for what happened?"},
+    {"id":101530,"text":"彼は二度とそれを繰り返すまいとかたい決心をした。","en":"He made a firm resolution never to repeat it."},
+    {"id":196114,"text":"ほとんど全ての社会が今日では、何らかの硬貨と紙幣に基づいた貨幣経済を持っている。","en":"Almost all societies now have a money economy based on coins and paper bills of one kind or another."},
+    {"id":1171176,"text":"最初、彼をあなたのお兄さんだと勘違いしていました。","en":"At first, I mistook him for your brother."},
+    {"id":224391,"text":"ここに彼の書き置きがある。これはここに来たに違いない。","en":"Here is a note he left. He must have been here."},
+    {"id":199840,"text":"トムは彼にその中古車を買わないよう忠告した。","en":"Tom advised him not to buy the secondhand car."},
+    {"id":97613,"text":"彼らはもっと一生懸命に働こうと決心した。","en":"They resolved to work harder."},
+    {"id":105606,"text":"彼は私をつついて先に行けと合図した。","en":"He nudged me to go ahead."},
+    {"id":12168196,"text":"岩と石って何が違うんだろうって、いつも不思議だった。","en":"I've always wondered what's the difference between rock and stone."},
+    {"id":203317,"text":"たまたまその日、彼は学校を休んでいた。","en":"It so happened that he was absent from school that day."},
+    {"id":224660,"text":"ここでタクシーを拾おうとするぐらいなら、歩いて家に帰った方がよい。","en":"We might as well walk home as try to catch a taxi here."},
+    {"id":190791,"text":"医者は痛みを取り除くため彼に薬を与えた。","en":"The doctor gave him some drugs to relieve the pain."},
+    {"id":147769,"text":"出ようとしていたら不意にメアリーが姿を現した。","en":"I was about to leave when Mary appeared out of the blue."},
+    {"id":140615,"text":"組合は１０パーセントの賃上げを迫っている。","en":"The union is pressing for a ten-percent pay hike."},
+    {"id":146588,"text":"少年はゴールに向かって走りまくった。","en":"The boy ran and ran toward the goal."},
+    {"id":210275,"text":"その子は、何時間も泣き続けた。","en":"That kid kept crying for hours."},
+    {"id":92315,"text":"彼女はその秘密を胸に秘めておいた。","en":"She kept the secret in her bosom."},
+    {"id":185343,"text":"会議は来週開かれることになっています。","en":"The meeting is to be held next week."},
+    {"id":159683,"text":"私はそれを認めない。","en":"I'm not having any of that."},
+    {"id":195226,"text":"マユコはおかしな夢をみた。","en":"Mayuko dreamed a strange dream."},
+    {"id":109319,"text":"彼は何日間も食べてないように見えた。","en":"He looked as if he hadn't eaten for days."},
+    {"id":114178,"text":"彼はお調子者だ。","en":"He is easily flattered."},
+    {"id":171556,"text":"今日は体調が悪い。あの井戸水が原因だ。","en":"I don't feel well today. That well water is the reason."},
+    {"id":92722,"text":"彼女はすぐに良くなりますか？","en":"Will she get well soon?"},
+    {"id":402554,"text":"世の中、捨て猫がいっぱいいるようです。","en":"There are many abandoned cats in the world."},
+    {"id":218852,"text":"これが店では特に値段の高い車です。","en":"This is much the most expensive car in the shop."},
+    {"id":91361,"text":"彼女はもっと他人の言うことを聞くべきだ。","en":"She should listen more to other people."},
+    {"id":182722,"text":"久しく会っていませんね。","en":"I haven't seen you for a long time."},
+    {"id":196130,"text":"ほとんどの発展途上国の都会の人口は非常に急激に増加している。","en":"The urban population in most developing countries is increasing very fast."},
+    {"id":217853,"text":"これらの食べ物は、さまざまな民族の集団を連想させる。","en":"These foods are associated with ethnic groups."},
+    {"id":2759336,"text":"献血の前日は十分な睡眠をとってください。","en":"Please get plenty of sleep the day before donating blood."},
+    {"id":184899,"text":"外が暑い時に料理するのは好きではない。","en":"I don't like to cook when it's hot outside."},
+    {"id":202942,"text":"チューリップはまもなく咲く。","en":"Tulips come into bloom soon."},
+    {"id":174004,"text":"公共の福祉のために働く。","en":"I work for public welfare."},
+    {"id":8960354,"text":"最近、メアリーは青いドレスをよく着てるんだ。","en":"Mary has been wearing blue dresses a lot recently."},
+    {"id":10642164,"text":"時間のある時にやってくれればいいよ。","en":"You can do it at your leisure."},
+    {"id":100674,"text":"彼は飛行機に乗る前に私の方を振り返って見た。","en":"He looked back at me before he went on board the plane."},
+    {"id":2110702,"text":"トムは未来を変えた。","en":"Tom changed the future."},
+    {"id":11559576,"text":"ちょっと小腹が空いてきた。","en":"I'm getting a little hungry."},
+    {"id":11853539,"text":"あちらはトムの義理のお姉さんですよ。","en":"That's Tom's step-sister."},
+    {"id":109135,"text":"彼は我々に必要なものすべてを与えてくれた。","en":"He provided us with everything we needed."}
   ],
   "mar": [
-    {
-      "id": 13694266,
-      "text": "मला फक्त तू हवा आहेस.",
-      "en": "I only want you."
-    },
-    {
-      "id": 8684544,
-      "text": "मेन्नादची मुलगी लेस्बियन असल्याकारणाने त्याने तिला बाहेर काढून टाकलं.",
-      "en": "Mennad kicked his daughter out because she was a lesbian."
-    },
-    {
-      "id": 2087775,
-      "text": "तुमचा वाढदिवस कधी आहे?",
-      "en": "When is your birthday?"
-    },
-    {
-      "id": 13336501,
-      "text": "तू कुठे होतास हे मी टॉमला सांगितलं नाही.",
-      "en": "I didn't tell Tom where you were."
-    },
-    {
-      "id": 9195182,
-      "text": "यान्नी स्वयंपाकघरात आला.",
-      "en": "Yanni entered the kitchen."
-    },
-    {
-      "id": 7958887,
-      "text": "कोणीतरी तुम्हाला वाचवेल.",
-      "en": "Someone will save you."
-    },
-    {
-      "id": 6895447,
-      "text": "मला माझ्या प्रश्नाचं उत्तर कधीच मिळालं नाही.",
-      "en": "I never got an answer to my question."
-    },
-    {
-      "id": 4728868,
-      "text": "तिने स्पॅगेटी बनवली.",
-      "en": "She made spaghetti."
-    }
+    {"id":13694266,"text":"मला फक्त तू हवा आहेस.","en":"I only want you."},
+    {"id":8684544,"text":"मेन्नादची मुलगी लेस्बियन असल्याकारणाने त्याने तिला बाहेर काढून टाकलं.","en":"Mennad kicked his daughter out because she was a lesbian."},
+    {"id":2087775,"text":"तुमचा वाढदिवस कधी आहे?","en":"When is your birthday?"},
+    {"id":13336501,"text":"तू कुठे होतास हे मी टॉमला सांगितलं नाही.","en":"I didn't tell Tom where you were."},
+    {"id":9195182,"text":"यान्नी स्वयंपाकघरात आला.","en":"Yanni entered the kitchen."},
+    {"id":7958887,"text":"कोणीतरी तुम्हाला वाचवेल.","en":"Someone will save you."},
+    {"id":6895447,"text":"मला माझ्या प्रश्नाचं उत्तर कधीच मिळालं नाही.","en":"I never got an answer to my question."},
+    {"id":4728868,"text":"तिने स्पॅगेटी बनवली.","en":"She made spaghetti."},
+    {"id":2502403,"text":"त्या काळी मी किनारपट्टीवर एका झोपडीत रहायचो.","en":"I lived those days in a hut on the beach."},
+    {"id":13358724,"text":"दुरून कुत्रे भुंकण्याचा आवाज आम्हाला ऐकू येत होता.","en":"We could hear the sound of dogs barking far away."},
+    {"id":13133365,"text":"या पुस्तकानुसार तमिळ ही एक प्राचीन भाषा आहे.","en":"Tamil is an ancient language, according to this book."},
+    {"id":2271249,"text":"त्यांना वाचवायला त्याने आपलं आयुष्याची बळी दिली.","en":"He sacrificed his own life to save them."},
+    {"id":2654071,"text":"तिने मला मैत्रीची विनंती पाठवली.","en":"She sent me a friend request."},
+    {"id":8684226,"text":"अल्जेरियाची भविष्यातली राजधानी म्हणजे बूघझूल.","en":"Algeria's future capital is Boughezoul."},
+    {"id":11173066,"text":"टॉमने मेरीला एक कप कॉफी दिली.","en":"Tom gave Mary a cup of coffee."},
+    {"id":2328447,"text":"त्याची आवडती बेसबॉल टीम जायंट्स आहे, पण त्याला लायन्ससुद्धा आवडतात.","en":"His favorite baseball team is the Giants, but he likes the Lions, too."},
+    {"id":10628926,"text":"ते या लग्नाचा सत्यानाश करणार आहेत.","en":"He's going to ruin the wedding."},
+    {"id":9936215,"text":"तुम्ही आमच्या शाळेतल्या एकमात्र कॅनेडियन आहात.","en":"You're the only Canadian in our school."},
+    {"id":7255399,"text":"आपण एक खेळ खेळत आहोत.","en":"We're playing a game."},
+    {"id":2085451,"text":"मी कधीही कोणत्याही प्रकारचं बक्षीस जिंकलो नाही आहे.","en":"I have never won any kind of prize."},
+    {"id":8681959,"text":"टॉम शर्टांना इस्त्री मारत आहे.","en":"Tom is ironing shirts."},
+    {"id":4341869,"text":"१९३३ पर्यंत अमेरिकन सैन्य निकाराग्वामध्ये राहिलं.","en":"American troops stayed in Nicaragua until 1933."},
+    {"id":13666309,"text":"झिरी आणि रिमा दोघेही सेक्सी आहेत.","en":"Ziri and Rima are both sexy."},
+    {"id":13114571,"text":"माझे बाबा शक्यतो सहा वाजता उठायचे, हिवाळ्यातही.","en":"My dad usually got up at six, even in the winter."},
+    {"id":10483827,"text":"रस्ता अतिशय अरुंद आहे.","en":"The street is very narrow."},
+    {"id":13114501,"text":"त्या म्हणतात की त्यांना अजूनही भूक लागली आहे.","en":"She says that she's still hungry."},
+    {"id":10189954,"text":"ती इथे तिच्या बहिणीची वाट बघणार आहे.","en":"She is going to wait for her sister here."},
+    {"id":2299634,"text":"एक आई दहा मुलांना भरवू शकते, पण दहा मुलं एका आईला भरवू शकत नाहीत.","en":"A mother can feed ten children, but ten children can't feed a mother."},
+    {"id":13306549,"text":"ती लिफ्ट आज चालत नाहीये.","en":"That elevator isn't working today."},
+    {"id":4346321,"text":"टॉमने आपल्या नवीन डायरीच्या कव्हरवर आपलं नाव लिहिलं.","en":"Tom wrote his name on the cover of his new diary."},
+    {"id":4718302,"text":"माझी त्याच्याबरोबर चांगली मैत्री आहे.","en":"I'm good friends with him."},
+    {"id":3140294,"text":"भित्रा नेहमी स्वतः सुरक्षित असतानाच धमकी देतो.","en":"The coward only threatens when he is safe."},
+    {"id":8411196,"text":"माझा योगायोगांवर विश्वास नाहीये.","en":"I don't believe in coincidences."},
+    {"id":8647508,"text":"टॉमने ते पत्र फ्रेंचमधून जर्मनमध्ये भाषांतरित केलं.","en":"Tom translated the letter from French into German."},
+    {"id":10390394,"text":"परिस्थिती अतिशय वाईट आहे.","en":"The situation is very bad."},
+    {"id":10611209,"text":"त्या दिवशी तिने तिच्या बहिणीला किमान शंभरदा फोन केला.","en":"She made at least a hundred phone calls to her sister that day."},
+    {"id":6867493,"text":"अख्ख्या देशाला धक्का बसला.","en":"The entire country was shocked."},
+    {"id":11040226,"text":"टॉम आपली सायकल दुरुस्त करतो.","en":"Tom repairs his bicycle."},
+    {"id":3351775,"text":"मी तुझ्याबद्दल बोलत होतो.","en":"I was talking about you."},
+    {"id":2653343,"text":"आम्ही शेवटी डोंगराच्या टोकाला पोहोचलो.","en":"We finally reached the top of the mountain."},
+    {"id":5690317,"text":"ग्लेनकडे दोन गर्लफ्रेंड आहेत.","en":"Glenn has two girlfriends."},
+    {"id":2570326,"text":"वाघ म्हटले तरी खातो, वाघोबा म्हटले तरी खातो.","en":"Call him a tiger and he will eat you, call him Mr. Tiger and he will still eat you."},
+    {"id":2928299,"text":"मोझिला फायरफॉक्स उघड.","en":"Open Mozilla Firefox."},
+    {"id":6976628,"text":"तुमची जर्मन चांगली आहे.","en":"Your German is good."},
+    {"id":8698097,"text":"आम्ही जनतेकडून मदत मागत आहोत.","en":"We're asking the public for help."},
+    {"id":9741010,"text":"म्हणून आम्हाला मदतीची गरज आहे.","en":"That's why we need help."},
+    {"id":7333708,"text":"आपण त्यांना थांबवायचा प्रयत्न केला.","en":"We tried to stop them."},
+    {"id":4590388,"text":"आधीच टॉमला वाटतं मी वेडा आहे.","en":"Tom already thinks I'm crazy."}
   ],
   "vie": [
-    {
-      "id": 8981796,
-      "text": "Bạn đã bao giờ trốn học chưa?",
-      "en": "Have you ever skipped school?"
-    },
-    {
-      "id": 11385011,
-      "text": "Lẽ ra bạn nên gọi điện thoại cho tôi khi bạn đến.",
-      "en": "You should have called me when you arrived."
-    },
-    {
-      "id": 620651,
-      "text": "Tôi cũng biết cưỡi ngựa.",
-      "en": "I also know how to ride a horse."
-    },
-    {
-      "id": 510400,
-      "text": "Xin đừng nói nhanh như vậy.",
-      "en": "Please don't speak so fast."
-    },
-    {
-      "id": 9011023,
-      "text": "Hôm nay tôi có nhiều bài tập phải làm.",
-      "en": "I have a lot of assignments to do today."
-    },
-    {
-      "id": 563068,
-      "text": "Tôi cảm thấy cô đơn.",
-      "en": "I'm lonely."
-    },
-    {
-      "id": 1567301,
-      "text": "Chúng tôi không thể hưởng thụ những điều đó.",
-      "en": "It should not be possible for us to enjoy them."
-    },
-    {
-      "id": 12006955,
-      "text": "Nhớ cho kỹ rằng đây không phải là trò chơi đâu đấy nhé.",
-      "en": "Remember that this isn't a game."
-    }
+    {"id":8981796,"text":"Bạn đã bao giờ trốn học chưa?","en":"Have you ever skipped school?"},
+    {"id":11385011,"text":"Lẽ ra bạn nên gọi điện thoại cho tôi khi bạn đến.","en":"You should have called me when you arrived."},
+    {"id":620651,"text":"Tôi cũng biết cưỡi ngựa.","en":"I also know how to ride a horse."},
+    {"id":510400,"text":"Xin đừng nói nhanh như vậy.","en":"Please don't speak so fast."},
+    {"id":9011023,"text":"Hôm nay tôi có nhiều bài tập phải làm.","en":"I have a lot of assignments to do today."},
+    {"id":563068,"text":"Tôi cảm thấy cô đơn.","en":"I'm lonely."},
+    {"id":1567301,"text":"Chúng tôi không thể hưởng thụ những điều đó.","en":"It should not be possible for us to enjoy them."},
+    {"id":12006955,"text":"Nhớ cho kỹ rằng đây không phải là trò chơi đâu đấy nhé.","en":"Remember that this isn't a game."},
+    {"id":13840963,"text":"Tàu đến đúng giờ, nên chúng tôi không cần phải chờ chút nào.","en":"The train arrived on time, so we didn't have to wait at all."},
+    {"id":9035528,"text":"Bằng chứng duy nhất là dấu vết tinh trùng ở cái quần lót.","en":"The only evidence was the traces of semen stuck to the underwear."},
+    {"id":13485416,"text":"Tôi đã tưới cây trong vườn.","en":"I watered the garden."},
+    {"id":1542939,"text":"Bài luận của bạn có vài lỗi, nhưng tổng thể thì làm rất tốt.","en":"Your essay has some mistakes, but as a whole it is very good."},
+    {"id":9559482,"text":"Nó không nhiều ngạc nhiên, đúng không?","en":"It's not much of a surprise, is it?"},
+    {"id":13740732,"text":"Quả táo là trái cây, và kim cương là hòn đá quý giá.","en":"An apple is a fruit, and a diamond is a precious stone."},
+    {"id":9739485,"text":"Chú tôi đã tặng cho bạn một món quà.","en":"My uncle gave you a present."},
+    {"id":11402430,"text":"Tôi nghĩ rằng bạn có thể đoán được điều gì đã xảy ra tiếp theo.","en":"I think that you can guess what happened next."},
+    {"id":13426490,"text":"Học máy có thể được dùng để dự báo và giảm thiểu thiệt hại của thảm hoạ tự nhiên.","en":"Machine learning can be used to predict and mitigate natural disasters."},
+    {"id":3460396,"text":"Tom nói rằng anh ta đã mệt.","en":"Tom says that he's tired."},
+    {"id":5146454,"text":"Tom thức dậy sớm vào buổi sáng.","en":"Tom gets up early in the morning."},
+    {"id":11266535,"text":"Tôi xin lỗi tôi đã áp đặt quá nhiều lên bạn.","en":"I'm sorry I've imposed on you so much."},
+    {"id":9505242,"text":"Tom ngã gục xuống sàn.","en":"Tom collapsed on the floor."},
+    {"id":13841041,"text":"Đến nay tôi đã đặt chân đến hơn mười quốc gia rồi.","en":"I have been to more than ten foreign countries so far."},
+    {"id":1552929,"text":"Giữ yên tay của bạn nào.","en":"Keep your hand still."},
+    {"id":9704850,"text":"Sản phẩm của Tom đã trở nên còn tệ hơn trước.","en":"Tom's work has gone from bad to worse."},
+    {"id":9733750,"text":"Ước gì tôi có thể cai thuốc lá nhỉ.","en":"I wish I could give up smoking."},
+    {"id":11274314,"text":"Tôi tưởng hôm nay chúng ta sẽ không gặp lại nhau nữa.","en":"I thought we wouldn't see each other again today."},
+    {"id":5666,"text":"Chúc mừng sinh nhật, Muiriel!","en":"Happy birthday, Muiriel!"},
+    {"id":1548738,"text":"Có nhiều điểm dừng dọc đường tạo sự thuận lợi cho khách du lịch.","en":"There are many rest stops along the freeway for the convenience of travelers."},
+    {"id":11277760,"text":"Chúng ta hãy kiểm tra các hồ sơ kinh doanh của họ.","en":"Let's check their business records."},
+    {"id":13510862,"text":"Algeria sản xuất điện thoại thông minh.","en":"Algeria produces smartphones."},
+    {"id":11456000,"text":"Tom đã cố gắng hết mình để làm bố mẹ hài lòng.","en":"Tom tried his best to please his parents."},
+    {"id":13769797,"text":"Tôi sống trong một căn hộ.","en":"I live in an apartment."},
+    {"id":1542164,"text":"Anh ta đành cam chịu một buổi tối chán nản.","en":"He resigned himself to spending a boring evening."},
+    {"id":9004405,"text":"Chúng tôi có thể hiểu mọi điều mà cô ấy đang nói.","en":"We can understand everything she's saying."},
+    {"id":9734045,"text":"Tất cả mọi người đều đã đợi.","en":"Everyone waited."},
+    {"id":1570313,"text":"Không cần biết bạn lái xe nhanh hay chậm, chỉ cần lái xe cẩn thận.","en":"Whether you drive fast or slow, drive carefully."},
+    {"id":11377692,"text":"Tôi đâu có bảo anh ấy rời đi, tôi chỉ gợi ý thôi.","en":"I didn't tell him to leave, I only suggested it."},
+    {"id":13522887,"text":"Thời gian trôi qua sẽ không bao giờ quay trở lại.","en":"The time that has passed will never come back."},
+    {"id":8997668,"text":"Elvis' là một nơi tuyệt vời để nhảy múa.","en":"Elvis' is a great place to go dancing."},
+    {"id":11265047,"text":"Cái này không tốt chút nào cả.","en":"This isn't good at all."},
+    {"id":1547608,"text":"Tất cả chúng ta đã học thuốc bài thơ này.","en":"We all learned the poem by heart."},
+    {"id":13581072,"text":"DeepL cũng dịch được văn bản tiếng Latin sang tiếng Thổ Nhĩ Kì!","en":"DeepL also translates what's written in Latin into Turkish!"},
+    {"id":893112,"text":"Tôi không quan tâm đến chính trị.","en":"I'm not concerned with politics."},
+    {"id":13842685,"text":"Ruồi là một loài côn trùng phổ biến toàn cầu.","en":"Flies are a common insect worldwide."},
+    {"id":9739088,"text":"Hai má của cô đỏ rực lên.","en":"Her cheeks were bright red."},
+    {"id":9685630,"text":"Hôm qua lâu lắm mới có thời gian, nên tôi đã đi bơi.","en":"Yesterday I had some free time for the first time in a long time, so I went swimming."},
+    {"id":9726052,"text":"Chị cho em xem cái khác được không ạ?","en":"Could you show me another one?"},
+    {"id":11333177,"text":"Người Hồi giáo nhịn ăn trong suốt tháng Ramadan.","en":"Muslims fast during Ramadan."}
   ],
   "tel": [
-    {
-      "id": 7204906,
-      "text": "ఇది నన్ను చాలా బాధ పెట్టింది",
-      "en": "This made me very sad."
-    },
-    {
-      "id": 3717202,
-      "text": "సముద్రంలో ద్వీపాలు ఉన్నాయి.",
-      "en": "There are islands in the sea."
-    },
-    {
-      "id": 13350003,
-      "text": "నేను టామ్‌ను చూడాలి.",
-      "en": "I've got to see Tom."
-    },
-    {
-      "id": 13348846,
-      "text": "టామ్ గుహలోకి వెళ్ళాడు.",
-      "en": "Tom went into the cave."
-    },
-    {
-      "id": 7210928,
-      "text": "ఆమెకి అబద్దం ఎందుకు చెప్పావు ?",
-      "en": "Why did you lie to her?"
-    },
-    {
-      "id": 13348814,
-      "text": "వాళ్ళు నా గురించి మాట్లాడుతున్నారనుకుంట.",
-      "en": "I think they were talking about me."
-    },
-    {
-      "id": 7207700,
-      "text": "నేను అతన్ని ఎప్పుడూ చూడలేదు",
-      "en": "I never actually saw him."
-    },
-    {
-      "id": 7207611,
-      "text": "మేము రోజుల తరబడి నిద్రపోలేదు",
-      "en": "We haven't slept in days."
-    }
+    {"id":7204906,"text":"ఇది నన్ను చాలా బాధ పెట్టింది","en":"This made me very sad."},
+    {"id":3717202,"text":"సముద్రంలో ద్వీపాలు ఉన్నాయి.","en":"There are islands in the sea."},
+    {"id":13350003,"text":"నేను టామ్‌ను చూడాలి.","en":"I've got to see Tom."},
+    {"id":13348846,"text":"టామ్ గుహలోకి వెళ్ళాడు.","en":"Tom went into the cave."},
+    {"id":7210928,"text":"ఆమెకి అబద్దం ఎందుకు చెప్పావు ?","en":"Why did you lie to her?"},
+    {"id":13348814,"text":"వాళ్ళు నా గురించి మాట్లాడుతున్నారనుకుంట.","en":"I think they were talking about me."},
+    {"id":7207700,"text":"నేను అతన్ని ఎప్పుడూ చూడలేదు","en":"I never actually saw him."},
+    {"id":7207611,"text":"మేము రోజుల తరబడి నిద్రపోలేదు","en":"We haven't slept in days."},
+    {"id":13350024,"text":"మీరు దేని గురించి ఆలోచిస్తున్నారో చెప్పగలరా?","en":"Can you tell me what you're thinking about?"},
+    {"id":7204372,"text":"దగ్గరలో వున్న బస్ స్టాప్ ఎక్కడో కొంచెం చెప్తావా","en":"Can you tell me where the nearest bus stop is?"},
+    {"id":7204364,"text":"ఇంగ్లీషు బాగా మట్లాడటం కష్టం","en":"It's difficult to speak English well."},
+    {"id":1098705,"text":"సీత ఏలూరు ఎప్పుడు వెళ్తుంది?","en":"When will Sita go to Eluru?"},
+    {"id":1098753,"text":"ఈ పుస్తకం రాముకి ఇవ్వు.","en":"Give this book to Ramu."},
+    {"id":7210896,"text":"నీకు ఏ రంగు అంటే ఇష్టం , నీలమా లేక పచ్ఛా ?","en":"Which color do you prefer, blue or green?"},
+    {"id":3543087,"text":"ఇది నేను అరటిపండు తింటూ ఉండగా.","en":"This is me eating a banana."},
+    {"id":1098767,"text":"శభాష్! బొమ్మ బాగుంది!","en":"The picture is nice, well done!"},
+    {"id":7216835,"text":"నువ్వు బొద్దుగా వున్నావు","en":"You are chubby."},
+    {"id":7204343,"text":"సాయంత్రం భోజనానికి మైక వస్తున్నాడు","en":"Mike is coming to dinner this evening."},
+    {"id":13348829,"text":"మనం అంత కష్టపడనక్కరలేదు.","en":"We won't have to work very hard."},
+    {"id":10775016,"text":"అతడొక ప్రతిభావంతుడైన యువ దర్శకుడు.","en":"He is a talented young director."},
+    {"id":7207859,"text":"వాళ్ళని అని ఏం లాభం లేదు","en":"It's hard to blame them."},
+    {"id":10568752,"text":"నేను ఇంటికి వెళ్లి పరీక్ష కోసం చదవాలి","en":"I have to get back home and study for a test."},
+    {"id":7216930,"text":"నేను ఒక ఫోన్ చేసుకోవచ్చా ?","en":"Can I make a phone call?"},
+    {"id":3543113,"text":"నన్ను పలకరించినందుకు కృతజ్ఞతలు.","en":"Thank you for greeting me."},
+    {"id":7207696,"text":"ఏమైనా అవుతుందని ఇంకా భయపడుతున్నావా ?","en":"Are you still afraid something might happen?"},
+    {"id":13350964,"text":"మరింకొకసారి చెయ్యాలని లేదని మేరీ చెప్పినది.","en":"Mary says she never wants to do that again."},
+    {"id":1098764,"text":"ఆహా! తాజ్ మహల్ ఎంత బాగుంది!","en":"Ah! How beautiful the Taj Mahal is!"},
+    {"id":13348850,"text":"\"నాకు తెలియలేదు.\" \"ఇప్పుడు నీకు తెలుసు.\"","en":"\"I didn't know.\" \"Now you know.\""},
+    {"id":10775021,"text":"అతడు ఆమెకు ఒక పిక్చర్ పోస్ట్ కార్డ్ పంపాడు.","en":"He sent a picture postcard to her."},
+    {"id":7210901,"text":"మాకు ఫ్రెంచి అర్ధం కాదు","en":"We don't understand French."},
+    {"id":4639457,"text":"అతడు స్త్రీలాగా వస్త్రాలను ధరించాడు.","en":"He dressed up as a woman."},
+    {"id":7207785,"text":"ఇది చాలా తెలివితక్కువ ప్రశ్న","en":"This is a pretty stupid question."},
+    {"id":7204845,"text":"వేరే దారి లేదని స్పష్టంగా తెలుస్తుంది","en":"It was apparent that there was no way out."},
+    {"id":7204133,"text":"పొగ తాగడం ఎప్పుడు ఆపేశావ్?","en":"When did you quit smoking?"},
+    {"id":13350013,"text":"టామ్‌కు ఆకలి వేస్తోందేమోనని అనుకున్నాను.","en":"I thought Tom might be hungry."},
+    {"id":7204353,"text":"తనని ఒంటరిగా వదిలెయ్యడం మంచిది","en":"We'd better leave her alone."},
+    {"id":7217088,"text":"అతన్ని అక్కడ ఉండనివ్వు","en":"Let him stay there."},
+    {"id":10568751,"text":"డబ్బాలు అక్కడ పెట్టు","en":"Put the boxes over there."},
+    {"id":7204209,"text":"నన్ను సహాయం అడగడానికి ఏం సందేహ పడొద్దు","en":"Don't hesitate to ask me for help."},
+    {"id":7204896,"text":"ఆమె చల్ల గాలి పీల్చింది .","en":"She breathed in the cold air."},
+    {"id":3543111,"text":"అరటిపళ్ళు రుచికరంగా ఉంటాయి.","en":"Bananas are delicious."},
+    {"id":7204262,"text":"స్కూలుకి బయలుదేరే సమయం అయ్యింది, కాదా","en":"It's high time you left for school, isn't it?"},
+    {"id":7204349,"text":"నేను ఎన్ని భాషలు మట్లాడుతానని తను అడిగింది","en":"She asked me how many languages I spoke."},
+    {"id":13348848,"text":"నాకు బెర్బర్ భాష రాదు.","en":"I don't know Berber."},
+    {"id":7207694,"text":"అది నిజంగా అంత చెడ్డదా ?","en":"Was it really that bad?"},
+    {"id":13348801,"text":"మధ్యతరగతి అవస్థపడుతుంది.","en":"The middle class is struggling."},
+    {"id":3543074,"text":"నా కంప్యూటర్ ఖరీదైనది.","en":"My computer is expensive."},
+    {"id":7207661,"text":"చలనచిత్రం మొదలు అవ్వబోతుంది","en":"The movie's about to start."}
   ],
   "hau": [
-    {
-      "id": 10895824,
-      "text": "Sun yi min alƙawarin za su yi.",
-      "en": "They promised me they'd do it."
-    },
-    {
-      "id": 10842519,
-      "text": "Wani mugun abu na faruwa.",
-      "en": "Something has gone terribly wrong."
-    },
-    {
-      "id": 10884180,
-      "text": "Yesu Kristi, shi ke nan mai nadar mai kyau a nan wajen.",
-      "en": "Jesus Christ, that's some next-level nightmare fuel right there."
-    },
-    {
-      "id": 10896131,
-      "text": "Shin za ku iya haƙura da ci gaba da tafiya cikin jirgin ruwan nan na ci da wuta?",
-      "en": "Did everyone manage to flee the burning ship?"
-    },
-    {
-      "id": 10889584,
-      "text": "Idan kana so ka rayu, kuma kana son mutuwa; idan ba haka ba, ba ka fahimci menene rayuwa.",
-      "en": "If you want to live, you also want to die; otherwise you don't understand what life is."
-    },
-    {
-      "id": 10811438,
-      "text": "Hoton ya nuna siffar kyakkyawar mace.",
-      "en": "The portrait shows the profile of a beautiful woman."
-    },
-    {
-      "id": 10898158,
-      "text": "Juan dan ƙasar Mexico ne.",
-      "en": "Juan is a Mexican citizen."
-    },
-    {
-      "id": 10852784,
-      "text": "Yaushe kuka fahimci hakan?",
-      "en": "When did you realize that?"
-    }
+    {"id":10895824,"text":"Sun yi min alƙawarin za su yi.","en":"They promised me they'd do it."},
+    {"id":10842519,"text":"Wani mugun abu na faruwa.","en":"Something has gone terribly wrong."},
+    {"id":10884180,"text":"Yesu Kristi, shi ke nan mai nadar mai kyau a nan wajen.","en":"Jesus Christ, that's some next-level nightmare fuel right there."},
+    {"id":10896131,"text":"Shin za ku iya haƙura da ci gaba da tafiya cikin jirgin ruwan nan na ci da wuta?","en":"Did everyone manage to flee the burning ship?"},
+    {"id":10889584,"text":"Idan kana so ka rayu, kuma kana son mutuwa; idan ba haka ba, ba ka fahimci menene rayuwa.","en":"If you want to live, you also want to die; otherwise you don't understand what life is."},
+    {"id":10811438,"text":"Hoton ya nuna siffar kyakkyawar mace.","en":"The portrait shows the profile of a beautiful woman."},
+    {"id":10898158,"text":"Juan dan ƙasar Mexico ne.","en":"Juan is a Mexican citizen."},
+    {"id":10852784,"text":"Yaushe kuka fahimci hakan?","en":"When did you realize that?"},
+    {"id":10853178,"text":"Shin kun san cewa tauraron mafi kusa da Duniya shine Rana?","en":"Did you know that the star nearest to Earth is the Sun?"},
+    {"id":10887101,"text":"Yawancin tsuntsaye na iya mutuwa saboda zafi.","en":"Many birds are dying due to the heat wave."},
+    {"id":10875275,"text":"Zai yarda da tayinku.","en":"He will accept your offer."},
+    {"id":10821444,"text":"Ya daina gudu don ya mai da hankali kan tsalle mai tsayi.","en":"He has given up running in order to focus on the long jump."},
+    {"id":10848073,"text":"Sanya rigarka a ciki.","en":"Tuck your shirt in."},
+    {"id":10893704,"text":"Ba na jin cewa wani ya gan mu muna yin hakan.","en":"I don't think that anyone saw us doing that."},
+    {"id":10888882,"text":"Ina zubar da jini! A murza min ciwon da karfi.","en":"I'm bleeding! Apply direct pressure to my wound."},
+    {"id":10825472,"text":"Wannan ɓeran, har zuwa yanzu ya kasance abokin tarayya na kuma yanzu ya tafi ya juya ni.","en":"This rat, up until just now he was my partner and now he's gone and turned on me."},
+    {"id":10848484,"text":"Idan aka janye labule, filin a duhu yake.","en":"When the curtain went up, the stage was dark."},
+    {"id":10807164,"text":"Rashin motsa jiki na iya cutar da lafiyar ka.","en":"Lack of exercise may harm your health."},
+    {"id":10896512,"text":"Hikima ƙungiya ce ta kimiyyar ɗabi'a da fasaha.","en":"Wisdom is a union of moral science and art."},
+    {"id":10838078,"text":"Muna da labari maka.","en":"We've got news for you."},
+    {"id":10845212,"text":"Yayin duk darasin, ya lissafa kudaje.","en":"During the entire lesson, he counted flies."},
+    {"id":10869338,"text":"Ina mai martaba ta tafi?","en":"Where is her royal highness?"},
+    {"id":10820984,"text":"Yaron shi dan shekaru takwas ne da haihuwa.","en":"His son is eight years old."},
+    {"id":10820556,"text":"Na kwashe jaka masu nauyi daga shagon suna rera yo-hee-ho har zuwa gida.","en":"I carried the heavy bags back from the store chanting yo-hee-ho all the way home."},
+    {"id":10811425,"text":"Kada ku bar shukin ya fuskanci rana kai tsaye.","en":"Don't expose the plant to direct sunlight."},
+    {"id":10895714,"text":"Wannan shagon na sayar da kwamfuta a farashi mai sauƙi.","en":"They sell computers at very reasonable prices at that store."},
+    {"id":10807173,"text":"Sararin samaniya bai da iyaka.","en":"There is no limit to the universe."},
+    {"id":10894517,"text":"Ba amfanin musu game da shi.","en":"It's no use arguing about it."},
+    {"id":10830797,"text":"Wannan duniyar tana da nisan shekaru miliyan ɗari uku nesa da duniyar da kuke zaune.","en":"This world is a distant three hundred million light years away from the world where you live."},
+    {"id":10853052,"text":"Meyasa yan yawon buɗe ido daga ƙasar Sin nada fitsara?","en":"Why are Chinese tourists so rude?"},
+    {"id":10877483,"text":"Ka'idojin na cikin fakitin.","en":"The instructions are on the package."},
+    {"id":10852959,"text":"Ba zan iya fahimtar hanyar tunaninta ba sam.","en":"I can't understand her way of thinking at all."},
+    {"id":10881028,"text":"Barka da zuwa duniya ta wasan tsere.","en":"Welcome to the world of drag racing."},
+    {"id":10863353,"text":"Za mu lalata makaman nukiliyarmu tare da Amurka.","en":"We will destroy our nuclear weapons with America."},
+    {"id":10863499,"text":"\"Ku yi haƙuri, ina ne wajen da ake shiga kogon dragon?\" \"Bai kamata ki je wajen ba.\"","en":"\"Pardon me, where is the entrance to the dragon's cave?\" \"You don't want to go there.\""},
+    {"id":10872580,"text":"An buga binciken a cikin mujallar kimiyya.","en":"The study was published in the journal Science."},
+    {"id":10892380,"text":"Mun ɗauka ana maraba da zuwanmu a nan.","en":"I thought that we were welcome here."},
+    {"id":10813732,"text":"Mu goma sha biyu ne gaba ɗaya a taron haduwarmu.","en":"There were twelve of us in all at our class reunion."},
+    {"id":10838107,"text":"Bazan je makaranta ranar Asabar ba.","en":"I'm not going to school on Saturday."},
+    {"id":10814247,"text":"Da fatan za a ba shi wani magani na kowane bayan awa shida.","en":"Please give him a dose of medicine every six hours."},
+    {"id":10883937,"text":"Sun munayen masu aikata laifi ne.","en":"They are violent criminals."},
+    {"id":10850169,"text":"Naji an kore ka daga aiki.","en":"I heard you got fired."},
+    {"id":10856040,"text":"Gasan jiya daddadare an samu maki ɗaya.","en":"The match last night was a tie."},
+    {"id":10807496,"text":"Batun farko da ya ja hankalina shi ne falsafa.","en":"The first subject that attracted my attention was philosophy."},
+    {"id":10835209,"text":"Shugaban ya ci bashin albashin watanni da yawa ga ma'aikatan ginin.","en":"The boss owes several months' salary to the construction workers."},
+    {"id":10845493,"text":"Ina fatan wani abu zai faru kafin ƙarshen ranar yau.","en":"I hope something good happens before the day is over."},
+    {"id":10835118,"text":"Yana shiri sosai da Mr. Brown.","en":"He gets on well with Mr. Brown."},
+    {"id":10855558,"text":"Mun kama ɗaya daga cikin masu leken asirin su.","en":"We have captured one of their spies."}
   ],
   "tur": [
-    {
-      "id": 1463366,
-      "text": "O, ayda iki ya da üç kez golf oynar.",
-      "en": "He plays golf two or three times a month."
-    },
-    {
-      "id": 4179722,
-      "text": "İskambil oynamak bir hobidir.",
-      "en": "Playing cards is a hobby."
-    },
-    {
-      "id": 4269890,
-      "text": "Senden çocuğum olacak.",
-      "en": "I'll have your baby."
-    },
-    {
-      "id": 4073213,
-      "text": "Komşu hiçbir şey görmemiş.",
-      "en": "The neighbor didn't see anything."
-    },
-    {
-      "id": 4765145,
-      "text": "Dan oraya gitmek bile istemiyordu.",
-      "en": "Dan didn't even want to go there."
-    },
-    {
-      "id": 6209537,
-      "text": "Beni iki saat beklettin.",
-      "en": "You've kept me waiting for two hours."
-    },
-    {
-      "id": 4976424,
-      "text": "Zaten yeni bir tane almak istiyordum.",
-      "en": "I wanted to buy a new one anyway."
-    },
-    {
-      "id": 5249785,
-      "text": "Birçok sınıf arkadaşım benim aptal olduğumu düşünürler.",
-      "en": "A lot of my classmates think that I'm dumb."
-    }
+    {"id":1463366,"text":"O, ayda iki ya da üç kez golf oynar.","en":"He plays golf two or three times a month."},
+    {"id":4179722,"text":"İskambil oynamak bir hobidir.","en":"Playing cards is a hobby."},
+    {"id":4269890,"text":"Senden çocuğum olacak.","en":"I'll have your baby."},
+    {"id":4073213,"text":"Komşu hiçbir şey görmemiş.","en":"The neighbor didn't see anything."},
+    {"id":4765145,"text":"Dan oraya gitmek bile istemiyordu.","en":"Dan didn't even want to go there."},
+    {"id":6209537,"text":"Beni iki saat beklettin.","en":"You've kept me waiting for two hours."},
+    {"id":4976424,"text":"Zaten yeni bir tane almak istiyordum.","en":"I wanted to buy a new one anyway."},
+    {"id":5249785,"text":"Birçok sınıf arkadaşım benim aptal olduğumu düşünürler.","en":"A lot of my classmates think that I'm dumb."},
+    {"id":4268678,"text":"Tom Mary'nin gerçeği öğrenmeyeceğini umuyor.","en":"Tom hopes that Mary won't find out the truth."},
+    {"id":5274975,"text":"Ben birkaç gündür Paris'teyim. Louvre müzesini ziyaret etme fırsatını kullanıyorum.","en":"I'm in Paris for a few days. I'm taking advantage of that to visit the Louvre."},
+    {"id":6942254,"text":"Üzgünüm, bir daha sana asla yalan söylemeyeceğim.","en":"I'm sorry. I'll never lie to you again."},
+    {"id":4357433,"text":"Bugün \"Ruslar geliyor! Ruslar geliyor!\" denilen bir film olduğunu keşfettim.","en":"Today I found that there's a movie called \"The Russians Are Coming! The Russians Are Coming!\""},
+    {"id":1193524,"text":"Tom tavanı boyamanın gerekli olmadığına karar verdi.","en":"Tom decided that it wasn't necessary to paint the ceiling."},
+    {"id":5260849,"text":"Çoğu dilde ölüm ve ölmeyi açıklamak için örtülü ifadeler vardır.","en":"Most languages have euphemistic expressions to describe death and dying."},
+    {"id":2018006,"text":"Çorba istiyor musun?","en":"Do you want soup?"},
+    {"id":5840919,"text":"Fadıl, Dania için büyük fedakarlık yapmak istedi.","en":"Fadil wanted to make a huge sacrifice for Dania."},
+    {"id":6012378,"text":"Gerçekten orada değildim.","en":"I haven't really been there."},
+    {"id":6329470,"text":"Tom muhtemelen bunu yapacağını Mary'ye söylemeyecektir.","en":"Tom won't likely tell Mary he'll do that."},
+    {"id":5035662,"text":"Asla onlara sormadım.","en":"I never asked them."},
+    {"id":4482179,"text":"Onun şıngırdadığını duymak için para kutusunu sallarım.","en":"I shake the money box to hear it jingle."},
+    {"id":2778661,"text":"Bir otelde kalmayı planlıyorum.","en":"I'm planning to stay at a hotel."},
+    {"id":12739759,"text":"Tom artık bir üniversite öğrencisi, değil mi?","en":"Tom is a university student now, isn't he?"},
+    {"id":3565624,"text":"Bunu bana kaç kez daha söyleyeceksin? Seni kaç kere uyandırmaya çalıştığımı biliyor musun?","en":"How many times are you going to make me say it? Do you know how many times I've tried to wake you up?"},
+    {"id":5385227,"text":"Amerika Birleşik Devletleri dünyanın önde gelen pamuk ihracatçısıdır.","en":"The United States is the world's leading cotton exporter."},
+    {"id":5457569,"text":"Hangisini öğrenmek daha kolaydır, Lehçe mi yoksa Çekçe mi?","en":"Which is easier to learn, Polish or Czech?"},
+    {"id":9000239,"text":"Elimden ne geleceğini görmek istiyorum.","en":"I want to see what I'm capable of."},
+    {"id":5544272,"text":"Ben onun adını çok beğeniyorum.","en":"I like his name very much."},
+    {"id":9031947,"text":"Sana olan sevgim gitgide azalıyor.","en":"I like you less and less."},
+    {"id":5368780,"text":"Satış temsilcileri sık sık beni kazıklıyorlar.","en":"The salespeople often overcharge me."},
+    {"id":6397832,"text":"Tom ve Mary asla birlikte seyahat etmeyi denememeliydi.","en":"Tom and Mary never should've tried traveling together."},
+    {"id":13962756,"text":"Artık iki aydır vegan değil.","en":"She hasn't been a vegan anymore for two months."},
+    {"id":4869455,"text":"Burası belediye binasıdır.","en":"This is the Town Hall."},
+    {"id":2741672,"text":"Bence bir şeyi gözden kaçırıyorsunuz.","en":"I think you're missing something."},
+    {"id":4776626,"text":"Esperanto hareketi her zaman 'ebedi başlayanlar' sorunu ile uğraşmak zorunda kalmıştır.","en":"The Esperanto movement has always had to grapple with the problem of 'eternal beginners'."},
+    {"id":10623592,"text":"Duyduğuma göre film iyiymiş.","en":"I heard that this movie is good."},
+    {"id":4860885,"text":"Tom patronuyla o şekilde konuşarak işini kaybetmeyi göze alıyordu.","en":"Tom was risking losing his job by talking to his boss that way."},
+    {"id":3136980,"text":"Anne babanıza yalan söylediniz mi?","en":"Did you lie to your parents?"},
+    {"id":6798773,"text":"Sami, Leyla'nın suç mahallinden kaçtığını gördü.","en":"Sami saw Layla fleeing from the scene."},
+    {"id":12947638,"text":"Coğrafya bilgisi yeterli değildir.","en":"His knowledge of geography is not sufficient."},
+    {"id":5381921,"text":"Bu şapkayı beğenmiyorum. Ben gri olanı tercih ederim.","en":"I don't like this hat. I prefer the gray one."},
+    {"id":6178154,"text":"Bunun olmasını planlamadım.","en":"I didn't plan on this happening."},
+    {"id":4518043,"text":"Tom'un neden yardımımı istemediğini merak ediyorum.","en":"I wonder why Tom didn't ask for my help."},
+    {"id":863012,"text":"Aşçılığını özleyeceğim.","en":"I'll miss your cooking."},
+    {"id":1106276,"text":"Ona yapmasını söylediğim şeyi tam olarak yaptı.","en":"He did exactly what I told him to do."},
+    {"id":4451941,"text":"Her şeye rağmen, dünya hâlâ güzel.","en":"Despite everything, the world is still beautiful."},
+    {"id":4885271,"text":"Bütün bunu yalnız yapmak zorunda kalabilirsiniz.","en":"You might have to do this all by yourself."},
+    {"id":4575082,"text":"Asla çocuk sahibi olmak istemiyorum.","en":"I never want to have kids."},
+    {"id":1705745,"text":"Yürümektense bir taksiye binmeyi tercih ederim.","en":"I'd rather take a taxi than walk."}
   ],
   "pan": [
-    {
-      "id": 2057552,
-      "text": "ਮੈਂ ਇਹ ਕਹ ਰਿਹਾ ਸੀ ਕੇ ਮੈਨੂੰ ਓਹ ਅਜੀਬ ਨਹੀ ਲਗਾ।",
-      "en": "I was saying that I didn't think that it was weird at all."
-    },
-    {
-      "id": 3790689,
-      "text": "ਜੇ ਮੈਂ ਕਦੇ ਸ਼ਰਾਬ ਦਾ ਅਾਦੀ ਹੋੲਿਅਾ ਤਾਂ ਲਾਜ਼ਮੀ ਛੁੱਟੀਅਾਂ ਤੇ ਅੰਤਾਲਿਅਾ ਜਾਵਾਂਗਾ ।",
-      "en": "If I ever turn into an alcoholic, I'll surely go on vacation to Antalya."
-    },
-    {
-      "id": 3880080,
-      "text": "ਮੇਰਾ ੳੁਸ ਨਾਲ ਹੁਣ ਕੋੲੀ ਰਾਬਤਾ ਨਹੀਂ ।",
-      "en": "I have no contact with her."
-    },
-    {
-      "id": 3786248,
-      "text": "ਅਸਵੀਕਾਰ ਕਰਨਾ ਇਨਸਾਨ ਦਾ ਬਚਾਓ ਕਰਨ ਦੇ ਸਬ ਤੋ ਤਕੜੇ ਤਰੀਕਿਆਂ ਵਿਚੋਂ ਇਕ ਹੈ।",
-      "en": "Denial is one of the strongest human defence mechanisms."
-    },
-    {
-      "id": 3081406,
-      "text": "ਮੇਰੇ ਕੋਲ ਦੋ ਬਿੱਲੀਆਂ ਹਨ|",
-      "en": "I have two cats."
-    },
-    {
-      "id": 3788586,
-      "text": "ਝਟਕੇ ਲੲੀ ਤਿਅਾਰ ਹੋ ਜਾੳੁ।",
-      "en": "Get ready for a shock."
-    },
-    {
-      "id": 2066044,
-      "text": "ਜਦੋਂ ਓਹ ਆਏਗਾ ਤਾ ਮੈਂ ਉਸਨੂੰ ਦੱਸ ਦੇਵਾਂਗੀ।",
-      "en": "I'll tell him so when he comes."
-    },
-    {
-      "id": 3788105,
-      "text": "ਖੈਰ, ਮੈਂ ਤਾ ਸਿਰਫ਼ ਟੋਸਟ ਅਤੇ ਕਾਫ਼ੀ ਲਵਾਂਗਾ।",
-      "en": "Well, I'll only take toast and coffee."
-    }
+    {"id":2057552,"text":"ਮੈਂ ਇਹ ਕਹ ਰਿਹਾ ਸੀ ਕੇ ਮੈਨੂੰ ਓਹ ਅਜੀਬ ਨਹੀ ਲਗਾ।","en":"I was saying that I didn't think that it was weird at all."},
+    {"id":3790689,"text":"ਜੇ ਮੈਂ ਕਦੇ ਸ਼ਰਾਬ ਦਾ ਅਾਦੀ ਹੋੲਿਅਾ ਤਾਂ ਲਾਜ਼ਮੀ ਛੁੱਟੀਅਾਂ ਤੇ ਅੰਤਾਲਿਅਾ ਜਾਵਾਂਗਾ ।","en":"If I ever turn into an alcoholic, I'll surely go on vacation to Antalya."},
+    {"id":3880080,"text":"ਮੇਰਾ ੳੁਸ ਨਾਲ ਹੁਣ ਕੋੲੀ ਰਾਬਤਾ ਨਹੀਂ ।","en":"I have no contact with her."},
+    {"id":3786248,"text":"ਅਸਵੀਕਾਰ ਕਰਨਾ ਇਨਸਾਨ ਦਾ ਬਚਾਓ ਕਰਨ ਦੇ ਸਬ ਤੋ ਤਕੜੇ ਤਰੀਕਿਆਂ ਵਿਚੋਂ ਇਕ ਹੈ।","en":"Denial is one of the strongest human defence mechanisms."},
+    {"id":3081406,"text":"ਮੇਰੇ ਕੋਲ ਦੋ ਬਿੱਲੀਆਂ ਹਨ|","en":"I have two cats."},
+    {"id":3788586,"text":"ਝਟਕੇ ਲੲੀ ਤਿਅਾਰ ਹੋ ਜਾੳੁ।","en":"Get ready for a shock."},
+    {"id":2066044,"text":"ਜਦੋਂ ਓਹ ਆਏਗਾ ਤਾ ਮੈਂ ਉਸਨੂੰ ਦੱਸ ਦੇਵਾਂਗੀ।","en":"I'll tell him so when he comes."},
+    {"id":3788105,"text":"ਖੈਰ, ਮੈਂ ਤਾ ਸਿਰਫ਼ ਟੋਸਟ ਅਤੇ ਕਾਫ਼ੀ ਲਵਾਂਗਾ।","en":"Well, I'll only take toast and coffee."},
+    {"id":2056605,"text":"ਇੱਕ ਟਰਕ ਵਾਲਾ ਤਾਂ ਸੜਕ ਤੇ ਠੰਡ ਨਾਲ ਮਰਦਾ ਮਰਦਾ ਬਚਇਆ।","en":"A trucker nearly froze to death on the road."},
+    {"id":2066065,"text":"ਮੈਂ ਕਦੇ ਨਹੀਂ ਸੀ ਸੋਚੇਆ ਕੇ ਓਹ ਮੈਨੂੰ ਪਰਵਾਨ ਕਰ ਲੈਣਗੇ।","en":"I never thought they would accept me."},
+    {"id":3827708,"text":"ਕੀ ਤੁਹਾਨੂੰ ਪਤਾ ਹੈ ਕਿ ਫ਼ਿਲਿਪੀਨਸ ਦੀ ਮੁਦਰਾ ਕੀ ਹੈ?","en":"Do you know what the Philippine currency is called?"},
+    {"id":13224749,"text":"ਯਾਨੀ ਕੁੱਝ ਘਰੀਟਾਂ ਮਿਟਾਉਣ ਲਈ ਆਪਣੀ ਵਿੰਡਸ਼ੀਲਡ ਲਿਸ਼ਕਾ ਰਹੀ ਹੈ।","en":"Yanni is polishing his windshield to remove some scratches."},
+    {"id":3786185,"text":"ਤੁਸੀੰ ਮੈਨੂੰ ਪਿਹਲਾਂ ਆਣ ਕੇ ਕਯੋੰ ਨਹੀਂ ਪੁਛਿਆ?","en":"Why didn't you come to ask me earlier?"},
+    {"id":3786251,"text":"ਜੇ ਤੁਸੀੰ ਹਮੇਸ਼ਾ ਆਪਣੇ ਦਿਲ ਦੀ ਗੱਲ ਕਹੋਂਗੇ ਤਾਂ ਹੋ ਸਕਦਾ ਹੈ ਬਹੁਤ ਸਾਰੇ ਲੋਕਾਂ ਨੂੰ ਨਰਾਜ਼ ਕਰੋਗੇ।","en":"If you say exactly what's on your mind all the time, you're likely to upset a lot of people."},
+    {"id":3794009,"text":"ਇਹ ਤਾਂ ਕਦੀ ਖਤਮ ਨਹੀਂ ਹੋਣਾ।","en":"This is never going to end."},
+    {"id":2066083,"text":"ਮੱਧਕਾਲੀਨ ਸਮੇਂ ਵਿਚ ਦੁੱਧ ਦਵਾਈ ਜਿਨਾ ਹੀ ਮਸ਼ਹੂਰ ਸੀ।","en":"In the Middle Ages, milk was still popular as a medicine."},
+    {"id":3788630,"text":"ਮੈਨੂੰ ਟੌਮ ਨੂੰ ਸਾਰਾ ਕੁਛ ਦਸ ਦੇਣਾ ਚਾਹੀਦਾ ਸੀ।","en":"I should've told Tom everything."},
+    {"id":3788544,"text":"ਮੈਂ ਓਦਾਂ ਦਾ ਅਾਦਮੀ ਨਹੀਂ ਹਾਂ ।","en":"I'm not that kind of guy."},
+    {"id":3801897,"text":"ਟੌਮ ਇੱਕ ਛੋਟੀ ਕੰਪਨੀ ਲੲੀ ਕੰਮ ਕਰਦਾ ਹੈ ।","en":"Tom works for a small company."},
+    {"id":2058465,"text":"ਓਹ, ਇਹ ਬਹੁਤ ਵਧਿਆ ਹੈ।","en":"Ah, that's much better."},
+    {"id":3788050,"text":"ਕਿਰਪਾ ਕਰਕੇ ਦੋ ਸੇਬ ਰਸ ਦੇ ਗਲਾਸ ਦੇਣਾ।","en":"Two glasses of apple juice, please."},
+    {"id":3788520,"text":"ਕਲ ਮੈਨੂੰ ਅੰਗ੍ਰੇਜ਼ੀ ਵਿੱਚ ਇਕ ਖਤ ਮਿਲਿਅਾ ।","en":"I received a letter in English yesterday."},
+    {"id":3793892,"text":"ਪਾਸਵਰਡ \"ਮਿਯੂਰੀਅਲ\" ਹੈ।","en":"The password is \"Muiriel\"."},
+    {"id":3788519,"text":"ਮੈਂ ੳੁਸ ਨੂੰ ਵਿਅਾਕਰਣ ਦੀ ਇਕ ਕਿਤਾਬ ਦਿੱਤੀ ।","en":"I gave him a grammar book."},
+    {"id":2057550,"text":"ਤੁਹਾਡਾ ਨਜ਼ਰਿਆ ਬਹੁਤ ਆਸ਼ਾਵਾਦੀ ਹੈ।","en":"Your view is too optimistic."},
+    {"id":3786059,"text":"ਟੋਮ ਕੋਕਣੀ ਲਿਹਜ਼ੇ ਨਾਲ ਬੋਲਦਾ ਹੈ।","en":"Tom speaks with a Cockney accent."},
+    {"id":3788674,"text":"ਜਦੋਂ ਵੀ ਕੁਝ ਹੋਵੇ ਤਾਂ ਮੈਂ ਜਾਨਣਾ ਚਾਹਾਂਗੀ।","en":"I want to know as soon as anything happens."},
+    {"id":3840308,"text":"ਪੰਛੀ ਅਸਮਾਨ ਵਿੱਚ ਹੈ ।","en":"The bird is in the sky."},
+    {"id":3788723,"text":"ਅਜ ਅਸੀਂ ਕੁਝ ਨਹੀਂ ਖਰੀਦ ਰਹੇ।","en":"We're not buying anything today."},
+    {"id":3788755,"text":"ਦੁੱਧ ਕੱਚ ਦੀਅਾਂ ਬੋਤਲਾਂ ਵਿਚ ਵੇਚਿਅਾ ਗਿਅਾ ।","en":"Milk was sold in glass bottles."},
+    {"id":3788114,"text":"ਧਾਰਮਿਕ ਫਿਰਕ਼ਾ ਕੀ ਹੁੰਦਾ ਹੈ?","en":"What is a religious sect?"},
+    {"id":2066051,"text":"ਉਸ ਦੀ ਆਂਟੀ ਜਵਾਨ ਲਗਦੀ ਹੈ।","en":"His aunt looks young."},
+    {"id":3801933,"text":"ੳੁਸ ਨੇ ਗੁਲਾਬ ਦੀ ਝਾੜ ਨੁੰ ਪਾਣੀ ਦਿੱਤਾ ।","en":"He watered the rose bush."},
+    {"id":13224738,"text":"ਮੈਂ ਆਪਣੀ ਘੜੀ ਦੀ ਮੁਰੰਮਤ ਕਰਵਾਈ।","en":"I had my watch mended."},
+    {"id":13224757,"text":"ਜ਼ਿਰੀ ਨੇ ਮੇਅਰ ਤੋਂ ਬਹੁਤ ਸਵਾਲ ਪੁੱਛੇ।","en":"Ziri gave the mayor many questions."},
+    {"id":3788123,"text":"ਟੋਮ ਨੂੰ ਵਿਆਹ ਕਰਵਾਣ ਦੀ ਕੋਈ ਕਾਹਲ ਨਹੀ ਸੀ।","en":"Tom was in no hurry to get married."},
+    {"id":3788613,"text":"ਅਾਹ ਖੌਰੂ ਕਾਹਦੇ ਲੲੀ ਅਾ?","en":"What is all this rumpus about?"},
+    {"id":3788120,"text":"ਮੈਨੂ ਉਸ ਦੇ ਨਾਲ ਬੜੀ ਮੁਸ਼ਕਿਲ ਆਈ।","en":"I had a hard time of it."},
+    {"id":13224781,"text":"ਉਹ, ਉਹਦੇ ਲਈ ਬੂਹਾ ਖੋਲ੍ਹਣ ਲਈ ਇਨਕਾਰ ਕਰ ਰਹੀ ਹੈ।","en":"She refuses to unlock the entrance for him."},
+    {"id":3786045,"text":"ਹੁਣ ਉੱਪਰ ਜਾਣ ਦਾ ਸਮਾਂ ਹੋ ਗਿਆ ਹੈ।","en":"It's time to go up."},
+    {"id":13224744,"text":"ਅੱਜ ਮੌਸਮ ਨਿੱਘਾ ਅਤੇ ਸੂਰਜਮਈ ਹੈ।","en":"The weather is warm and sunny today."},
+    {"id":3786221,"text":"ਪਿੰਡ ਵਾਸੀਆਂ ਨੇ ਸਾਡੇ ਨਾਲ ਬਦਸਲੂਕੀ ਕੀਤੀ।","en":"The villagers were offhand with us."}
   ],
   "swh": [
-    {
-      "id": 10848069,
-      "text": "Mbona usiingie ili tunywe chai?",
-      "en": "Why don't you come in and have a cup of coffee?"
-    },
-    {
-      "id": 10896473,
-      "text": "Ni mimi, Shangazi Wong.",
-      "en": "This is me, Aunt Wong."
-    },
-    {
-      "id": 10811957,
-      "text": "Ndege ya jeti ilitua kufuatia maagizo ya mnara wa kudhibiti.",
-      "en": "The jet plane landed following the instructions of the control tower."
-    },
-    {
-      "id": 10807185,
-      "text": "Sherehe hufanyika wakati wa mazao ya mchele.",
-      "en": "A festival is held at the rice harvest."
-    },
-    {
-      "id": 10889257,
-      "text": "Kuna uwezako mkubwa sana kwamba bei zetu zitapanda mwezi ujao.",
-      "en": "There's a good chance that our prices will be going up next month."
-    },
-    {
-      "id": 10814056,
-      "text": "Alikuwa ni mtu wa mwisho nilitarajia kumwona leo.",
-      "en": "She was the last person I expected to meet that day."
-    },
-    {
-      "id": 10826702,
-      "text": "Mapato ya kijumla ya mwaka uliopita yalikuwa aje?",
-      "en": "What was the gross income in the previous calendar year?"
-    },
-    {
-      "id": 10825430,
-      "text": "\"Uko sahihi, hakika unaonekana haikuingia leo.\" \"Eh! Unaweza kusema kitu kama hicho? \"",
-      "en": "\"You're right, certainly you don't seem to have been into it today.\" \"Eh! You can tell that sort of thing?\""
-    }
+    {"id":10848069,"text":"Mbona usiingie ili tunywe chai?","en":"Why don't you come in and have a cup of coffee?"},
+    {"id":10896473,"text":"Ni mimi, Shangazi Wong.","en":"This is me, Aunt Wong."},
+    {"id":10811957,"text":"Ndege ya jeti ilitua kufuatia maagizo ya mnara wa kudhibiti.","en":"The jet plane landed following the instructions of the control tower."},
+    {"id":10807185,"text":"Sherehe hufanyika wakati wa mazao ya mchele.","en":"A festival is held at the rice harvest."},
+    {"id":10889257,"text":"Kuna uwezako mkubwa sana kwamba bei zetu zitapanda mwezi ujao.","en":"There's a good chance that our prices will be going up next month."},
+    {"id":10814056,"text":"Alikuwa ni mtu wa mwisho nilitarajia kumwona leo.","en":"She was the last person I expected to meet that day."},
+    {"id":10826702,"text":"Mapato ya kijumla ya mwaka uliopita yalikuwa aje?","en":"What was the gross income in the previous calendar year?"},
+    {"id":10825430,"text":"\"Uko sahihi, hakika unaonekana haikuingia leo.\" \"Eh! Unaweza kusema kitu kama hicho? \"","en":"\"You're right, certainly you don't seem to have been into it today.\" \"Eh! You can tell that sort of thing?\""},
+    {"id":10884176,"text":"Ninaelewa Kiyunani, lakini siwezi kuongea.","en":"I can understand Greek, but I can't speak it."},
+    {"id":10816247,"text":"Sisi watu wazima hatupaswi kuharibu uwezo wa akili na ubunifu wa watoto.","en":"We adults shouldn't destroy the intelligent and creative capacity of children."},
+    {"id":10889065,"text":"Jana nilikuwa na mambo mengi ya kufanya.","en":"I had a lot of things to do yesterday."},
+    {"id":10855139,"text":"Asidi hii ni muhimu sana katika sekta na maabara.","en":"This acid is extremely important in the industry and the laboratory."},
+    {"id":10889606,"text":"Hicho sio kitu najua kufanya.","en":"That isn't something I know how to do."},
+    {"id":10804750,"text":"Kusudi letu la mwisho ni kuanzisha amani ulimwenguni.","en":"Our ultimate goal is to establish world peace."},
+    {"id":10818822,"text":"Sijamwona Karen tangu tuachane mwezi uliopita.","en":"I haven't seen Karen since we fell out last month."},
+    {"id":3172264,"text":"Yeye ni ndani ya nyumba hii.","en":"He is inside this house."},
+    {"id":10848574,"text":"Hujisikii unafurahi na kupumzika?","en":"Don't you feel happy and relaxed?"},
+    {"id":10811128,"text":"Majeshi ya Soviet yalianza kujiondoa kutoka Afghanistan.","en":"The Soviet troops started to withdraw from Afghanistan."},
+    {"id":10853513,"text":"Hakuna kitu kibaya zaidi kuliko mpumbavu aliye na kiburi.","en":"Not many things are more pathetic than an arrogant fool."},
+    {"id":10896347,"text":"Toleo lao la tukio hilo linatuhumiwa. Nadhani jambo hili linapaswa kuzingatiwa zaidi.","en":"Their version of the event is suspicious. I think this matter should be looked into further."},
+    {"id":10812059,"text":"Katika kazi yangu yote kama wakala wa kusafiri, sikuwahi kutembelea Afrika.","en":"In all my career as a travel agent, I never visited Africa."},
+    {"id":10881077,"text":"Nafasi hii inanifanya nihisi hatari zaidi.","en":"This position makes me feel extremely vulnerable."},
+    {"id":10826804,"text":"Alipiga kura kuamua ni nani atakayekwenda kwanza kwenye dawati la mapokezi ya asubuhi.","en":"We drew lots to decide who would go first at the early morning reception desk."},
+    {"id":10889020,"text":"Tulisimama huko Boston kwa usiku tatu njiani tukielekea Chicago.","en":"We stopped over in Boston for three nights on the way to Chicago."},
+    {"id":10827790,"text":"Nimefunga mbwa wangu kwenye mti bustanini.","en":"I tied my dog to a tree in the garden."},
+    {"id":10869424,"text":"Mahojiano yalirekodiwa kwenye video na kuenezwa kwenye mtandao.","en":"The interview was recorded on video and shared all over the Internet."},
+    {"id":10850995,"text":"Kutunza farasi ni jukumu kubwa.","en":"Keeping a horse is a big responsibility."},
+    {"id":10816242,"text":"Tulikula matunda freshi baada ya chajio.","en":"We ate fresh fruit after dinner."},
+    {"id":10898360,"text":"\"Yik, betri yangu imekaribia kuisha.\" \"Ungeitia kwenye moto usiku kucha wakati umelala.\"","en":"“Yikes, my battery’s nearly dead.” “You should have charged it overnight while you were sleeping.”"},
+    {"id":10858703,"text":"Kila mtu katika kijiji hicho alimwita Hood Little Riding Hood.","en":"Everyone in the village called her Little Green Riding Hood."},
+    {"id":10818795,"text":"Kusafiri kwa meli hutupendeza sana.","en":"Traveling by ship gives us great pleasure."},
+    {"id":10813610,"text":"Mada hii inapaswa kushughulikiwa kwa undani zaidi.","en":"This theme should be treated in more detail."},
+    {"id":10807162,"text":"Ningependa kuona mwisho wa filamu, lakini ilibidi nitoke nje ya thieta.","en":"I would have liked to see the ending of the film, but I had to leave the theater."},
+    {"id":10820990,"text":"Kuendesha mashua, kazi anayoipenda, inamgharimu mshahara wake.","en":"Sailing a boat, his chief hobby, costs him most of his salary."},
+    {"id":10818432,"text":"Je, unaweza kusonga mbele kidogo, tafadhali?","en":"Would you just move along a bit, please?"},
+    {"id":10835231,"text":"Pedro ana pikipiki na anapenda kuiendesha.","en":"Pedro has a motorcycle and loves to ride it."},
+    {"id":10813435,"text":"Mvulana huyu ana mwili thabiti na yenye afya.","en":"This boy has a strong and healthy body."},
+    {"id":10856147,"text":"Hakuna meli yeyote iliyoweza kuwasili Cuba.","en":"No ship could arrive in Cuba."},
+    {"id":10864049,"text":"Unahitaji kunyamaza kimya.","en":"You need to shut your pie hole."},
+    {"id":1057982,"text":"Kama angekaa nyumbani, asingepata taabu.","en":"If he had stayed at home that day, he would not have met with disaster."},
+    {"id":10853110,"text":"Mabenki ya Ujerumani ni miongoni mwa ya Ulaya yenye shida zaidi.","en":"German banks are among Europe's most troubled."},
+    {"id":10815939,"text":"Ulimwona kwenye kituo asubuhi ya leo?","en":"Did you see him at the station this morning?"},
+    {"id":10831137,"text":"Jaji alitoa hukumu ya miaka kumi na ngazi ngumu.","en":"The judge handed down a sentence of five years hard labor."},
+    {"id":10826680,"text":"Kwa hivyo ni wakati wa kumlipa mchezaji -zumari.","en":"So it's finally time to pay the piper."},
+    {"id":10818769,"text":"Mwalimu wetu alisogeza mbele tarehe ya mtihani.","en":"Our teacher advanced the date of the exam."},
+    {"id":10811497,"text":"Mtu mkatili alimpiga mbwa kwa mjeledi.","en":"The cruel man beat the dog with a whip."},
+    {"id":10881057,"text":"Hospitali ya koloni ya Mirihi iko chini ya ardhi.","en":"The hospital for this Mars colony is underground."},
+    {"id":10833835,"text":"Miungano iliendelea kujenga wanajeshi wao nchini Ufaransa.","en":"The Allies continued to build up their forces in France."}
   ],
   "tgl": [
-    {
-      "id": 11655508,
-      "text": "May matibay na alibay si Tom.",
-      "en": "Tom has a solid alibi."
-    },
-    {
-      "id": 11737924,
-      "text": "May kakayahan po ang agham na baguhin ang mundo.",
-      "en": "Science has the power to change the world."
-    },
-    {
-      "id": 11476704,
-      "text": "Patapos na ang kontrata.",
-      "en": "The contract will expire soon."
-    },
-    {
-      "id": 11805781,
-      "text": "Wala po akong ibang pinagsabihan.",
-      "en": "I didn't tell anyone else."
-    },
-    {
-      "id": 11538116,
-      "text": "Ang ganitong halaman ay matatagpuan lang sa Brasil.",
-      "en": "Such a plant can only be found in Brazil."
-    },
-    {
-      "id": 11588677,
-      "text": "May tinutugis na nakawalang bilanggo ang mga pulis.",
-      "en": "The police are pursuing an escaped prisoner."
-    },
-    {
-      "id": 11612232,
-      "text": "Nag-aalaga po ako ng baka.",
-      "en": "I raise cattle."
-    },
-    {
-      "id": 11768432,
-      "text": "Hindi ko maaaring ibahin ang mga plano.",
-      "en": "I can't alter the plans."
-    }
+    {"id":11655508,"text":"May matibay na alibay si Tom.","en":"Tom has a solid alibi."},
+    {"id":11737924,"text":"May kakayahan po ang agham na baguhin ang mundo.","en":"Science has the power to change the world."},
+    {"id":11476704,"text":"Patapos na ang kontrata.","en":"The contract will expire soon."},
+    {"id":11805781,"text":"Wala po akong ibang pinagsabihan.","en":"I didn't tell anyone else."},
+    {"id":11538116,"text":"Ang ganitong halaman ay matatagpuan lang sa Brasil.","en":"Such a plant can only be found in Brazil."},
+    {"id":11588677,"text":"May tinutugis na nakawalang bilanggo ang mga pulis.","en":"The police are pursuing an escaped prisoner."},
+    {"id":11612232,"text":"Nag-aalaga po ako ng baka.","en":"I raise cattle."},
+    {"id":11768432,"text":"Hindi ko maaaring ibahin ang mga plano.","en":"I can't alter the plans."},
+    {"id":11806104,"text":"Manganganak po ang pusa ko sa susunod na buwan.","en":"My cat is going to have kittens next month."},
+    {"id":8638208,"text":"Hindi talaga ako nakatulog dahil humihilik si Tom.","en":"I didn't sleep a wink because of Tom's snoring."},
+    {"id":11601221,"text":"Naglakad po ako ng nakayapak sa mga nagbabagang uling.","en":"I walked barefoot over burning coals."},
+    {"id":11447112,"text":"Sumasakit pa rin ang leeg ko.","en":"My neck still hurts."},
+    {"id":12988970,"text":"Gaano karami ang langis na ginagamit ng Australia?","en":"How much oil does Australia use?"},
+    {"id":12149658,"text":"May nakita po akong usa.","en":"I saw a deer."},
+    {"id":11536186,"text":"Ang sabi sa amin ni Tom ay uulitin daw niya iyan.","en":"Tom told us he would do that again."},
+    {"id":11473855,"text":"May pakpak ang ibon.","en":"A bird has wings."},
+    {"id":1677548,"text":"\"Dapat makita ko siya.\" \"Bakit ba?\"","en":"\"I have to see him.\" \"What for?\""},
+    {"id":11829831,"text":"Tumitigas po ang bakal sa loob ng isang segundo.","en":"Steel hardens in one second."},
+    {"id":8653037,"text":"Bakit hindi ka umiyak?","en":"Why don't you cry?"},
+    {"id":11586240,"text":"Hindi mo dapat tinatrato nang ganyan ang tauhan mo.","en":"You shouldn't treat your staff like that."},
+    {"id":11788499,"text":"Inaalagaan ko ang sarili ko.","en":"I'm looking after myself."},
+    {"id":12417459,"text":"Sinabi sa akin nina Tom at Mary na galít sila.","en":"Tom and Mary told me that they were angry."},
+    {"id":11463451,"text":"Siya ang nagdadala ng keso.","en":"She brings the cheese."},
+    {"id":10170330,"text":"Manghingi at ika'y bibigyan; maghanap at ika'y makahahanap; kumatok at ika'y pagbubuksan.","en":"Ask, and it shall be given you; seek, and ye shall find; knock, and it shall be opened unto you."},
+    {"id":11871019,"text":"Ang linis ni Tom, 'no?","en":"Tom is tidy, isn't he?"},
+    {"id":11578621,"text":"Sa ganitong paraan nawala ang lahat ng pera niya.","en":"Thus he lost all of his money."},
+    {"id":11646747,"text":"Gusto ko po sanang itabi ito para sa isang espesyal na okasyon.","en":"I wanted to save this for a special occasion."},
+    {"id":10170595,"text":"Sabi ng guro na ibabagsak niya siya.","en":"The teacher said he was going to fail her."},
+    {"id":11570182,"text":"Bakit kaya nakanganga ang mga babae kapag mine-make-upan nila ang mga mata nila?","en":"Why do women open their mouths when they apply makeup to their eyes?"},
+    {"id":3897838,"text":"Masaya ba ang lahat?","en":"Is everybody happy?"},
+    {"id":11861559,"text":"Isa si Tom sa mga pamangkin ni Mary.","en":"Tom is one of Mary's nephews."},
+    {"id":11501271,"text":"Ano na po ang natatapos ninyo ngayong linggo?","en":"What have you accomplished so far this week?"},
+    {"id":11788778,"text":"Hindi po namin inaasahang mangyayari iyon.","en":"We don't anticipate that happening."},
+    {"id":11805874,"text":"Mangangaso ako bukas nang umaga. Gusto mo bang sumama sa akin?","en":"Tomorrow morning I'm going hunting. Do you want to come with me?"},
+    {"id":2911925,"text":"Hindi kailangang mag-alala ni Tom. Walang masamang magaganap.","en":"Tom doesn't have to worry. Nothing bad's going to happen."},
+    {"id":11474572,"text":"Nahirapan akong gawin iyon.","en":"I struggled to do it."},
+    {"id":11743336,"text":"Ibalik mo ang mga librong iyon sa estante.","en":"Put those books back on the shelf."},
+    {"id":11834195,"text":"Huwag po ninyong kalimutang magsuot ng seatbelt.","en":"Don't forget to fasten your seatbelts."},
+    {"id":11597352,"text":"Nakahanap na po ba kayo ng lunas?","en":"Have you found a cure?"},
+    {"id":12994920,"text":"Palaging nakakalimutan ni Yanni ang kaarawan ni Skura.","en":"Yanni always forgets Skura's birthday."},
+    {"id":2948412,"text":"Alam niya ang kanyang sariling kasalanan.","en":"He's aware of his own faults."},
+    {"id":11811314,"text":"Tatlumpu't tatlong aklat po ang nabasa niya ngayong taon.","en":"He's read thirty-three books this year."},
+    {"id":2283139,"text":"Tinanong ko siya kung sasama ka sa akin, pero ni hindi siya sumagot.","en":"I asked him if you will come with me, but he didn't even answer."},
+    {"id":10170073,"text":"Hindi ako hinintay ni Tom.","en":"Tom wasn't waiting for me."},
+    {"id":11805468,"text":"Hindi pantay ang mga gulong mo. Kailangan mong dalhin ang sasakyan mo para ipagawa.","en":"Your wheels are out of alignment. You need to take the car in for service."},
+    {"id":747001,"text":"Tumingin ka sa magandang panig ng mga bagay.","en":"Look at the sunny side of things."},
+    {"id":13887702,"text":"Buksan mo ang mga kurtina.","en":"Open the curtains."},
+    {"id":11834354,"text":"Hindi ako umaasa ng espesyal na pagtrato.","en":"I'm not expecting special treatment."}
   ],
   "tam": [
-    {
-      "id": 4157506,
-      "text": "அவள் போகத் தீர்மானித்தாள்",
-      "en": "She decided to go."
-    },
-    {
-      "id": 4155262,
-      "text": "அவர்கள் எல்லோரும் அங்கே சென்றார்கள்",
-      "en": "All of them went there."
-    },
-    {
-      "id": 3425839,
-      "text": "டோம் அதைப் பற்றி பள்ளி செய்தித்தாளில் ஒரு கட்டுரை எழுதினான்.",
-      "en": "Tom wrote an article about it in the school newspaper."
-    },
-    {
-      "id": 4159902,
-      "text": "அவன் வழி காட்டப் பட்டுக் கொண்டு இருக்கிறான்",
-      "en": "He is being guided."
-    },
-    {
-      "id": 3425716,
-      "text": "\"நீ ஏன் தூங்கவில்லை?\" \"எனக்குத் தூக்கம் வராததால் நான் தூங்கவில்லை.\"",
-      "en": "\"Why didn't you sleep?\" \"I didn't sleep because I wasn't sleepy.\""
-    },
-    {
-      "id": 10722055,
-      "text": "அவள் குழந்தையை முத்தமிட்டாள்.",
-      "en": "She kissed her baby."
-    },
-    {
-      "id": 4165446,
-      "text": "அவள் அவனுக்கு நிச்சயிக்கப் பட்டாள்",
-      "en": "She got engaged to him."
-    },
-    {
-      "id": 10720894,
-      "text": "மெதுவாக சாப்பிடுங்கள்",
-      "en": "Eat slowly."
-    }
+    {"id":4157506,"text":"அவள் போகத் தீர்மானித்தாள்","en":"She decided to go."},
+    {"id":4155262,"text":"அவர்கள் எல்லோரும் அங்கே சென்றார்கள்","en":"All of them went there."},
+    {"id":3425839,"text":"டோம் அதைப் பற்றி பள்ளி செய்தித்தாளில் ஒரு கட்டுரை எழுதினான்.","en":"Tom wrote an article about it in the school newspaper."},
+    {"id":4159902,"text":"அவன் வழி காட்டப் பட்டுக் கொண்டு இருக்கிறான்","en":"He is being guided."},
+    {"id":3425716,"text":"\"நீ ஏன் தூங்கவில்லை?\" \"எனக்குத் தூக்கம் வராததால் நான் தூங்கவில்லை.\"","en":"\"Why didn't you sleep?\" \"I didn't sleep because I wasn't sleepy.\""},
+    {"id":10722055,"text":"அவள் குழந்தையை முத்தமிட்டாள்.","en":"She kissed her baby."},
+    {"id":4165446,"text":"அவள் அவனுக்கு நிச்சயிக்கப் பட்டாள்","en":"She got engaged to him."},
+    {"id":10720894,"text":"மெதுவாக சாப்பிடுங்கள்","en":"Eat slowly."},
+    {"id":12410482,"text":"இதுபோன்ற செயல்களைச் செய்வதில் நான் நிறைய நேரம் செலவிடுகிறேன்.","en":"I spend a lot of time doing things like this."},
+    {"id":7157122,"text":"டாம் மதியம் முழுவதும் அழுதுகொண்டேயிருக்கிறான்.","en":"Tom has been crying all afternoon."},
+    {"id":7157288,"text":"கடல் மட்டம் உயர்வதற்கு தட்பவெப்ப மாற்றம் காரணமாக இருக்கிறது.","en":"Climate change causes sea levels to rise."},
+    {"id":4268050,"text":"அவனுக்கு உடல் நிலை சரியில்லாததனால் அவனால் வர இயலாது","en":"Because he's sick, he can't come."},
+    {"id":4157840,"text":"வயோதிகர்களிடம் அன்பாக இரு","en":"Be kind to old people."},
+    {"id":4272111,"text":"இன்று மாலை ஆறு மணிக்கு அவன் என்னை சந்திக்கிறான்.","en":"He meets me today evening at six o'clock."},
+    {"id":4267961,"text":"டாம் ரொம்ப வேகமாக ஓடுகிறான்","en":"Tom runs very fast."},
+    {"id":4268463,"text":"இரயிலில் என்னிடம் ஜேப்படி அடிக்கப் பட்டிருந்தது","en":"I had my pocket picked on the train."},
+    {"id":10722080,"text":"இன்னும் கொஞ்சம் பெரியதைக் காட்டு.","en":"Show me something a little larger."},
+    {"id":3425832,"text":"அவ்வேளையில் அது என்ன என்று நான் அறிந்திருக்கவில்லை.","en":"I didn't know what it was at the time."},
+    {"id":4268465,"text":"கல்யாணம் எப்பொழுது நடைப் பெற்றது","en":"When did the wedding take place?"},
+    {"id":4269397,"text":"மலர்மிசை ஏகினான் மாணடி சேர்ந்தார் நிலமிசை நீடுவாழ் வார்.","en":"If you worshipped God, who is in your flower-like mind, you would live longer."},
+    {"id":13012242,"text":"அது எனக்கு சுவாரஸ்யமாகத் தெரிகிறது!","en":"That seems interesting to me!"},
+    {"id":3174739,"text":"ஒரு விசித்திரமான ஒன்று இன்று காலை எனக்கு நடந்தது.","en":"Something extraordinary happened to me this morning."},
+    {"id":7241253,"text":"ஒரு சதுரத்திற்கு நான்கு சமமான பக்கங்கள் உள்ளன","en":"A square has four equal sides."},
+    {"id":4155579,"text":"அவர் உங்களுடைய நண்பரா?","en":"Is he a friend of yours?"},
+    {"id":4165476,"text":"இந்த சீடி அவளுக்குச் சொந்தமானது","en":"This CD belongs to her."},
+    {"id":3425808,"text":"நான் என்ன நடக்கும் எனப் பார்க்க விரும்பினேன்.","en":"I wanted to see what would happen."},
+    {"id":4157570,"text":"நீங்கள் போகத் தயாராக இருக்கிறீர்களா?","en":"Are you ready to go?"},
+    {"id":8792535,"text":"டாம் ஓடிவிட்டால், அவரால் எங்கு செல்ல முடியும்?","en":"If Tom ran away, where could he go?"},
+    {"id":7098239,"text":"அவன் அமைதியாக இருக்கட்டும்.","en":"Let him be calm."},
+    {"id":3425750,"text":"நீ தேடிக்கொண்டிருந்த புகைப்படத்தை நான் கண்டுபிடித்தேன்.","en":"I found the photo you were looking for."},
+    {"id":4240351,"text":"டாமும் நானும் நண்பர்கள்","en":"Tom and I are friends."},
+    {"id":4268471,"text":"கண்ணாடி வீட்டில் வசிப்பவகள் கல்லை எறியக் கூடாது","en":"People who live in glass houses shouldn't throw stones."},
+    {"id":4155251,"text":"இது உங்களுக்கு சம்பந்தமில்லாத விஷயம்","en":"None of your business."},
+    {"id":4271996,"text":"என் தங்கை இள வயதிலேய கல்யாணம் செய்து கொண்டாள்","en":"My younger sister got married in her teens."},
+    {"id":4268043,"text":"தங்களுடைய தந்தையார் எப்படி இருக்கிறார்கள்?","en":"How is your dad?"},
+    {"id":10722115,"text":"எனக்கு ஒரு அக்கா இல்லை, எனக்கு இரண்டு அக்காக்கள் இருக்கிறார்கள்.","en":"I don't have one sister, I've got two."},
+    {"id":4154964,"text":"எங்களுக்கு உணவு தட்டுப்பாடு ஏற்பட்டது","en":"We ran out of food."},
+    {"id":4271105,"text":"தானம் தவமிரண்டும் தங்கா வியனுலகம் வானம் வழங்கா தெனின்","en":"If rain fails there will be neither charity nor penance."},
+    {"id":4268470,"text":"இந்த ஆப்பிள் இனிப்பாக இருக்கிறது","en":"This apple is sweet."},
+    {"id":13012269,"text":"இருவருடங்களுக்கு பிறகு உங்களை பார்க்கிறேன் .","en":"See you in two years."},
+    {"id":4157471,"text":"அவன் ஓட ஆரம்பித்தான்","en":"He began to run."},
+    {"id":10720868,"text":"உங்களுக்கு எத்தனை குழந்தைகள்?","en":"How many children do you have?"},
+    {"id":12410485,"text":"நகரம் எதிரிகளால் சுற்றி வளைக்கப்பட்டுள்ளது.","en":"The town is encircled by the enemy."},
+    {"id":3425713,"text":"இறப்பு மட்டும்தான் விடுதலையா?","en":"Is death the only liberation?"},
+    {"id":13012235,"text":"உங்கள் பாசம் அமிழ்தம் போன்றுள்ளது .","en":"Your affection is like nectar to me."},
+    {"id":7156600,"text":"அவர்களில்லாமல் நான் என்ன செய்வேன்?","en":"What would I do without them?"},
+    {"id":4155152,"text":"ஜேப்படிகாரர்களிடம் ஜாக்கிரதையாக இருக்கவும்","en":"Beware of pickpockets."},
+    {"id":4157542,"text":"அவள் அவனிடம் அன்பாக இருக்கிறாள்","en":"She is kind to him."}
   ],
   "yue": [
-    {
-      "id": 12112188,
-      "text": "狗屋係畀狗住嘅屋。",
-      "en": "A doghouse is a house for a dog."
-    },
-    {
-      "id": 3499717,
-      "text": "睇吓！廚房到有一隻貓。",
-      "en": "Look! There is a cat in the kitchen."
-    },
-    {
-      "id": 2217692,
-      "text": "請問去京都站點行呀？",
-      "en": "May I ask how can I go to Kyoto from here?"
-    },
-    {
-      "id": 3364478,
-      "text": "柒少陣當幫忙啦。",
-      "en": "Do me a favour; just stop being so fucking dumb for a minute."
-    },
-    {
-      "id": 10650633,
-      "text": "我哋一齊飲咗杯茶。",
-      "en": "We had a cup of tea together."
-    },
-    {
-      "id": 392965,
-      "text": "佢出盡力噉嗌話：「呢場仗，我哋唔可以輸！」",
-      "en": "He shouted at the top of his voice, \"This is a battle we cannot lose.\""
-    },
-    {
-      "id": 417779,
-      "text": "三嘅三次方係廿七。",
-      "en": "3 cubed is 27."
-    },
-    {
-      "id": 5355345,
-      "text": "我哋盡量聽朝嚟啦。",
-      "en": "We'll try to stop by sometime tomorrow morning."
-    }
+    {"id":12112188,"text":"狗屋係畀狗住嘅屋。","en":"A doghouse is a house for a dog."},
+    {"id":3499717,"text":"睇吓！廚房到有一隻貓。","en":"Look! There is a cat in the kitchen."},
+    {"id":2217692,"text":"請問去京都站點行呀？","en":"May I ask how can I go to Kyoto from here?"},
+    {"id":3364478,"text":"柒少陣當幫忙啦。","en":"Do me a favour; just stop being so fucking dumb for a minute."},
+    {"id":10650633,"text":"我哋一齊飲咗杯茶。","en":"We had a cup of tea together."},
+    {"id":392965,"text":"佢出盡力噉嗌話：「呢場仗，我哋唔可以輸！」","en":"He shouted at the top of his voice, \"This is a battle we cannot lose.\""},
+    {"id":417779,"text":"三嘅三次方係廿七。","en":"3 cubed is 27."},
+    {"id":5355345,"text":"我哋盡量聽朝嚟啦。","en":"We'll try to stop by sometime tomorrow morning."},
+    {"id":6108448,"text":"你咁鍾意阿Tom，你咪飛咗我然後去同佢拍拖囉。","en":"If you like Tom so much, why not break up with me and date him?"},
+    {"id":12154498,"text":"今朝地震棟樓冧咗，居然無人畀瓦礫掩埋。","en":"It's hard to believe that no one was covered by the building's debris in the earthquake this morning."},
+    {"id":5375354,"text":"我諗喺語言呢個咁和平嘅領域入面都會有基本教義派同埋激進分子⋯⋯","en":"I guess that there are fundamentalists and radicals even in the relatively peaceful domain of language..."},
+    {"id":12856853,"text":"有一個煙囪，下面有一缸水，缸水下面有個大火爐煲緊啲水","en":"There was a chimney with a tank of water underneath which was boiling some water in a large stove"},
+    {"id":6487611,"text":"我自問唔係啲咩感性嘅人，但係都睇到眼濕濕。","en":"I wouldn't call myself a sentimental person, but it brought tears to my eyes."},
+    {"id":402835,"text":"我嗰個年代啲學生好多都唔讀書，但係考試就唔會唔合格。","en":"In our time, there were many students who passed the graduation exam without studying."},
+    {"id":5794859,"text":"同阿Tom做嘢真係好正。","en":"It was great working with Tom."},
+    {"id":604500,"text":"佢去到個巴士站嗰陣，已經見唔到架巴士喇。","en":"When he arrived at the bus stop, the bus was already out of sight."},
+    {"id":557827,"text":"我同我阿爸得閒就會去釣吓魚。","en":"My father and I go fishing once in a while."},
+    {"id":10738265,"text":"一位嚟自怡保嘅華人女，佢嘅母語係廣東話，而唔係廣東話。","en":"A Chinese girl from Ipoh who is fluent in Kadazan rather than Cantonese as her native speaker."},
+    {"id":5359896,"text":"我以為阿Tom玩音樂嘅添。","en":"I thought Tom was a musician."},
+    {"id":6479931,"text":"係。噉就即係唯有即係辛苦各位聽眾呢，聽埋哩隻歌先。","en":"Yes, that's just the hard stuff. Listen to this song."},
+    {"id":9955498,"text":"我高過你三英寸。","en":"I'm three inches taller than you."},
+    {"id":554600,"text":"阿 Chris 係咪發生咗啲咩事呀？呢排都冇見過佢嘅。","en":"What happened to Chris? We don't see her these days."},
+    {"id":8326222,"text":"我唔知你本書喺邊度。","en":"I don't know where your book is."},
+    {"id":422010,"text":"喺條咁急嘅急流裏面游水，一定會好危險㗎。","en":"It must be dangerous to swim in this rapid stream."},
+    {"id":1879934,"text":"哥倫布之所以成為探險家，並唔係因為佢熱愛大海，而係因為佢憎西班牙嘅監獄。","en":"Christopher Columbus wasn't an explorer because he loved the sea. He was an explorer because he hated Spanish jails."},
+    {"id":11073321,"text":"我鍾意食辣，但係唔鍾意食太辣。","en":"I like it spicy, but I don't like it too spicy."},
+    {"id":1385489,"text":"如果我識飛就好喇！","en":"If only I could fly!"},
+    {"id":6082063,"text":"我可唔可以坐順風車呀？我個銀包俾人偷咗呀。","en":"Can I have a free ride, please? My wallet was stolen."},
+    {"id":12278578,"text":"而家，佢哋知道我哋喺度。","en":"Now, they know we are here."},
+    {"id":458873,"text":"英式英文嘅「to get the sack」啫係俾人炒魷魚噉解。","en":"In British English, \"to get the sack\" means to be fired from your job."},
+    {"id":2087082,"text":"該女子實係處女，尚未破身。","en":"This lady for sure is a virgin; she never did lose her virginity."},
+    {"id":403496,"text":"唔該你四點叫我起身吖。我一定要搭到架頭班火車。","en":"Call me at four; I must take the first train."},
+    {"id":868352,"text":"好呀，不過唔好去太耐喎。","en":"Sure, but don't take your time."},
+    {"id":422054,"text":"如果你下個禮拜還到俾我嘅話，呢本書就借俾你啦。","en":"I'll lend you the book, provided you return it next week."},
+    {"id":1920726,"text":"棵樹生得好高喎。","en":"The tree grew very tall."},
+    {"id":6829966,"text":"參考書目寫到鬼咁長，冇人會覺得你好勁。","en":"Long bibliographies don't impress anyone."},
+    {"id":692077,"text":"老實講吖，其實我真係唔係好想同佢一齊做嘢。","en":"Frankly speaking, I don't want to work with him."},
+    {"id":422040,"text":"呢部收音機幾多錢呀？","en":"What is the price of this radio?"},
+    {"id":5777478,"text":"我夜晚瞓唔著覺。","en":"I can't sleep at night."},
+    {"id":6474249,"text":"「喂，點解個窗開咗嘅？」「哦，我諗住通吓風吖嘛。你凍就閂咗佢啦。」","en":"\"Hey, why is the window open?\" \"I just opened it to let in a little air. If you're cold, feel free to close it.\""},
+    {"id":392327,"text":"你星期二得唔得閒呀？","en":"Are you free on Tuesday?"},
+    {"id":393392,"text":"佢喺道門前面行嚟行去，唔知入去好定唔入去好。","en":"He walked back and forth in front of the door, hesitating to enter."},
+    {"id":619704,"text":"我鍾意嗰個男仔唔鍾意我。","en":"The boy I love doesn't love me."},
+    {"id":472928,"text":"老實講，我其實想留喺屋企，唔想出街㗎。","en":"To tell the truth, I would rather stay at home than go out."},
+    {"id":8875144,"text":"條金魚喺魚缸裏面游嚟游去。","en":"The goldfish is swimming in the aquarium."},
+    {"id":12574699,"text":"你陰我，你知道老細喺我後面，你特登引我講佢嘅衰嘢！","en":"You tricked me. You knew that the boss was behind me and you led me to speak ill of him."},
+    {"id":7988288,"text":"你決定咗論文寫咩未呀？","en":"Have you decided on the subject of your thesis?"},
+    {"id":515542,"text":"呢個鐘數啲隔籬鄰舍介唔介意我哋開到啲音樂好大聲㗎？","en":"Is loud music OK with the neighbors at this hour?"}
   ],
   "pes": [
-    {
-      "id": 12643410,
-      "text": "وقتی تام را بوسیدی چندساله بودی؟",
-      "en": "How old were you when you first kissed Tom?"
-    },
-    {
-      "id": 1883266,
-      "text": "او دانشجوی دانشگاه است.",
-      "en": "He is a university student."
-    },
-    {
-      "id": 12123788,
-      "text": "الآن از پستخانه برگشته‌ام.",
-      "en": "I have just returned from the post office."
-    },
-    {
-      "id": 12232275,
-      "text": "تام هیچی حالیش نیست.",
-      "en": "Tom is a dummy."
-    },
-    {
-      "id": 10601885,
-      "text": "بفرمایین اینم کلیدتون.",
-      "en": "Here is your key."
-    },
-    {
-      "id": 11120103,
-      "text": "آیا تو یک میز را در رستوران رزرو کردی؟",
-      "en": "Did you reserve a table at the restaurant?"
-    },
-    {
-      "id": 773724,
-      "text": "باید در مبارزه با گرم شدن کره‌ی زمین نقش فعال‌تری ایفا کنیم.",
-      "en": "We should play a more active role in combating global warming."
-    },
-    {
-      "id": 1674334,
-      "text": "یک چای با لیمو، لطفاً.",
-      "en": "A tea with lemon, please."
-    }
+    {"id":12643410,"text":"وقتی تام را بوسیدی چندساله بودی؟","en":"How old were you when you first kissed Tom?"},
+    {"id":1883266,"text":"او دانشجوی دانشگاه است.","en":"He is a university student."},
+    {"id":12123788,"text":"الآن از پستخانه برگشته‌ام.","en":"I have just returned from the post office."},
+    {"id":12232275,"text":"تام هیچی حالیش نیست.","en":"Tom is a dummy."},
+    {"id":10601885,"text":"بفرمایین اینم کلیدتون.","en":"Here is your key."},
+    {"id":11120103,"text":"آیا تو یک میز را در رستوران رزرو کردی؟","en":"Did you reserve a table at the restaurant?"},
+    {"id":773724,"text":"باید در مبارزه با گرم شدن کره‌ی زمین نقش فعال‌تری ایفا کنیم.","en":"We should play a more active role in combating global warming."},
+    {"id":1674334,"text":"یک چای با لیمو، لطفاً.","en":"A tea with lemon, please."},
+    {"id":12881865,"text":"مخاطبان بازیگران را به خاطر عملکردشان تحسین کردند.","en":"The audience acclaimed the actors for their performance."},
+    {"id":1518111,"text":"من مواد اولیه برای کاری را روز یکشنبه خریدم.","en":"I bought ingredients for curry on Sunday."},
+    {"id":1527078,"text":"این کولا گاز خود را از دست داده است و طعم خوبی ندارد.","en":"This cola has lost its fizz and doesn't taste any good."},
+    {"id":1558392,"text":"تام باید فوراً تصمیم بگیرد که چه کاری باید انجام دهد.","en":"Tom must decide what to do right away."},
+    {"id":888529,"text":"دو سال پیش من اصلا نمی توانستم بسکتبال بازی کنم.","en":"Two years ago I could not play basketball at all."},
+    {"id":9868512,"text":"صبر یک شکل فرعی از نومیدی است که در نقاب فضیلت ظاهر می‌شود.","en":"Patience is a minor form of despair, disguised as a virtue."},
+    {"id":7831971,"text":"من مطالعه دربارهٔ گیاهان خوراکی که بومی محلتان هستند را توصیه می‌کنم.","en":"I recommend learning about edible plants that are native to your area."},
+    {"id":1601765,"text":"او در یک خانه بزرگ زندگی می کند.","en":"He lives in an enormous house."},
+    {"id":2761238,"text":"عادت دارم که قبل از صبحانه برم قدم بزنم.","en":"It's my custom to go for a walk before breakfast."},
+    {"id":10164730,"text":"باران شروع شد، بنابراین زیر چترِ دوستم رفتم.","en":"It started raining, so I got under my friend's umbrella."},
+    {"id":12785386,"text":"تام فراتر از انتظار برتری یافته است.","en":"Tom has surpassed expectations."},
+    {"id":4575151,"text":"بی عداالتی در هر جا که باشد، تهدیدی برای عدالت در همه جاست.","en":"Injustice anywhere is a threat to justice everywhere."},
+    {"id":3839833,"text":"من به دوستانم خیانت نمی کنم.","en":"I don't betray my friends."},
+    {"id":9005781,"text":"من تام را متقاعد کردم که آن کار را انجام دهد.","en":"I've persuaded Tom to do that."},
+    {"id":912542,"text":"کمابیش می‌دانم کجا است.","en":"I have a rough idea where it is."},
+    {"id":1558378,"text":"او به حدی گیج شده بود که جوابش به هیچ وجه عاقلانه نبود.","en":"He was so confused that his answer did not make any sense."},
+    {"id":10250195,"text":"آیا دولت الجزایر از این کار چشم‌پوشی می‌کند؟","en":"Is the Algerian government turning a blind eye to this?"},
+    {"id":13556778,"text":"شما یک لوت‌خوار واقعی هستید.","en":"You're a real glutton."},
+    {"id":7535951,"text":"زندگی از علوم دقیقه نیست، یک هنر است.","en":"Life is not an exact science, it is an art."},
+    {"id":9891159,"text":"هنگامی که تلفن زنگ می‌خورد، تو باید فوراً پاسخ بدهی.","en":"When the telephone rings, you must answer right away."},
+    {"id":12240216,"text":"کاری به کار تام نداشته باش.","en":"Leave Tom alone."},
+    {"id":2174742,"text":"همه‌ی داوطلبان نمی‌توانند در امتحان قبول شوند.","en":"Not all the candidates can pass the examination."},
+    {"id":2300992,"text":"برات کمی آب آوردم. (.Barāt kami āb āvordam)","en":"I brought you some water."},
+    {"id":7523412,"text":"یک سفیر یک فرد درستکار است که برای دروغ گفتن به خاطر مصلحت کشورش، به خارج فرستاده می‌شود.","en":"An ambassador is an honest man sent to lie abroad for the good of his country."},
+    {"id":733465,"text":"پدرم عادت دارند قبل از صبحانه روزنامه بخوانند.","en":"My father has a habit of reading the newspaper before breakfast."},
+    {"id":2758029,"text":"من هیچگاه دلیلی برای صدمه زدن به تام نداشتم.","en":"I never had any reason to hurt Tom."},
+    {"id":1997544,"text":"نگذار او آدرس آن خانم را بفهمد.","en":"Don't let him know her address."},
+    {"id":8176029,"text":"خرچنگهای ساحل زیر صخره‌ها پنهان می‌شوند.","en":"Shore crabs hide under rocks."},
+    {"id":1074710,"text":"من کمی نمک در سوپ خواهم ریخت.","en":"I'll put some salt in the soup."},
+    {"id":7527081,"text":"اگر هیچ چیز برای گفتن ندارید، هیچ چیز نگویید.","en":"If you have nothing to say, say nothing."},
+    {"id":11122454,"text":"من نمی‌توانم قهوه بنوشم.","en":"I can't drink coffee."},
+    {"id":7836483,"text":"بعضی از رانندگان رفتار چهارپا سواری نسبت به قوانین جاده دارند.","en":"Many drivers have a cavalier attitude towards the rules of the road."},
+    {"id":848109,"text":"آن پسر بچه با چشمانی باز به آن فیل بزرگ خیره شد.","en":"The little boy gazed at the huge elephant, eyes wide open."},
+    {"id":5117968,"text":"درمورد من فکر بد نکن.","en":"Don't get me wrong."},
+    {"id":3858296,"text":"خیلی وقت است چنین کاری نکرده‌ام.","en":"I haven't done anything like this in a long time."},
+    {"id":11560999,"text":"غارتگران عتیقه‌های قدیمی را از آرامگاه دزدیدند.","en":"Looters stole ancient artifacts from the tomb."},
+    {"id":12760480,"text":"شما حواس پرت به نظر می رسید.","en":"You seem distracted."},
+    {"id":9970231,"text":"مرد ندار آنقدر طولانی زندگی نکرد تا خوشبتی پسرش را ببیند.","en":"The poor man didn't live long enough to see his son's happiness."},
+    {"id":12647477,"text":"همچنانکه سیم و زر در کوره آزموده می‌شوند، دلهای برگزیده هم توسط خداوند آزموده می‌شوند.","en":"As silver and gold are tried in a furnace, so are choice hearts with the Lord."},
+    {"id":4461344,"text":"نمی‌توانم از اینجا ترک کنم.","en":"I can't leave here."}
   ],
   "kor": [
-    {
-      "id": 11107601,
-      "text": "우리는 항상 어떠한 위험 속에 처해 있다.",
-      "en": "We're always in some kind of danger."
-    },
-    {
-      "id": 4748446,
-      "text": "걔가 보스턴으로 이사하고 나서는 못봤어.",
-      "en": "I haven't seen her since she moved to Boston."
-    },
-    {
-      "id": 11106083,
-      "text": "나는 방 안으로 들어가는 어떤 남자를 보았다.",
-      "en": "I saw a man enter the room."
-    },
-    {
-      "id": 13187823,
-      "text": "봄을 좋아해요, 아니면 가을을 좋아해요?",
-      "en": "Do you like spring or autumn?"
-    },
-    {
-      "id": 11110633,
-      "text": "나는 톰이 오후에 뭘 할 건지 궁금하다.",
-      "en": "I wonder what Tom is going to do this afternoon."
-    },
-    {
-      "id": 6295632,
-      "text": "독서는 더 이상 소수의 전유물이 아니게 되었다.",
-      "en": "Reading books ceased to be the privilege of a minority."
-    },
-    {
-      "id": 9803420,
-      "text": "그것을 오늘 안해도 될것같다는 걸 알아",
-      "en": "I know that I might not have to do that today."
-    },
-    {
-      "id": 13118498,
-      "text": "나는 볼리비아에서 왔어. 나는 볼리비아 사람이고 스페인어를 해.",
-      "en": "I come from Bolivia. I'm Bolivian, and I speak Spanish."
-    }
+    {"id":11107601,"text":"우리는 항상 어떠한 위험 속에 처해 있다.","en":"We're always in some kind of danger."},
+    {"id":4748446,"text":"걔가 보스턴으로 이사하고 나서는 못봤어.","en":"I haven't seen her since she moved to Boston."},
+    {"id":11106083,"text":"나는 방 안으로 들어가는 어떤 남자를 보았다.","en":"I saw a man enter the room."},
+    {"id":13187823,"text":"봄을 좋아해요, 아니면 가을을 좋아해요?","en":"Do you like spring or autumn?"},
+    {"id":11110633,"text":"나는 톰이 오후에 뭘 할 건지 궁금하다.","en":"I wonder what Tom is going to do this afternoon."},
+    {"id":6295632,"text":"독서는 더 이상 소수의 전유물이 아니게 되었다.","en":"Reading books ceased to be the privilege of a minority."},
+    {"id":9803420,"text":"그것을 오늘 안해도 될것같다는 걸 알아","en":"I know that I might not have to do that today."},
+    {"id":13118498,"text":"나는 볼리비아에서 왔어. 나는 볼리비아 사람이고 스페인어를 해.","en":"I come from Bolivia. I'm Bolivian, and I speak Spanish."},
+    {"id":13756459,"text":"무엇보다도 우리를 지치게 하는 건 이해하는 일이야. 사는 건 생각하는 게 아니야.","en":"What tires us, above all, is understanding. Living is not thinking."},
+    {"id":8423018,"text":"우리 그냥 하드 디스크를 새로 포맷하는 건 어때? 너무 그걸로 스트레스 많이 받고 있잖아.","en":"Why don't we just reformat the hard disk? You've been having a lot of trouble with it."},
+    {"id":3674967,"text":"톰과의 데이트 후에 메리는 하루종일 정신이 산란했어, 수업에서 집중도 못하고 배고픔도 느끼지 못했어.","en":"After her first date with Tom, Mary was distracted all day, couldn't concentrate on her classes and didn't feel hungry."},
+    {"id":8363793,"text":"프랑스어 배우는 것은 그다지 관심 없어.","en":"I'm not very interested in learning French."},
+    {"id":13692031,"text":"그가 도착하자마자, 내가 그에게 말할거야.","en":"As soon as he arrives, I'll tell him."},
+    {"id":8358627,"text":"난 톰이 저런걸 할 수 있으리라고 생각하지 않아.","en":"I don't think Tom is able to do that."},
+    {"id":8363649,"text":"낮잠자는 도중에 나는 이상한 꿈을 꿨어.","en":"While napping, I had a strange dream."},
+    {"id":9803432,"text":"그들은 아주 특별한 곳에 숨겨둔 것이 틀림없어","en":"They must've hidden it somewhere very special."},
+    {"id":8363809,"text":"일주일에 세 시간을 공부하는 것은 언어를 배우기에 충분하지 않아.","en":"Studying three hours a week wouldn't be enough to learn a language well."},
+    {"id":1533053,"text":"중요한 건 누구도 맡겨진 일에서 게으름을 피울수 있게 허락되지 않았다는 것이다.","en":"It is important that no one is allowed to slack off on their assigned work."},
+    {"id":8472733,"text":"회사 규칙에 따르면 근로자가 보호 안경을 쓰도록 되어 있어.","en":"Company regulations mandate that workers use protective eyewear."},
+    {"id":8361448,"text":"메리가 보스턴에 세 번이나 갔다고 톰이 말하더라.","en":"Tom said Mary has been to Boston three times."},
+    {"id":8360725,"text":"톰이 자기 아내랑 올까, 아니면 혼자 올까?","en":"Will Tom come with his wife, or alone?"},
+    {"id":13755239,"text":"누군가는 톰에게 그걸 잘못된 방식으로 하고 있다고 말했어야 했다.","en":"Someone should have told Tom that he was doing that the wrong way."},
+    {"id":8368437,"text":"거기에 갈 수 있는 가장 좋은 방법이 뭐야?","en":"What's the best way to get there?"},
+    {"id":13118818,"text":"메리는 진짜 아픈 게 아니다. 그녀는 단지 그런 척하는 것이다.","en":"Mary isn't really sick. She's only pretending to be."},
+    {"id":10618450,"text":"그 여자가 그 남자한테 시계를 줬어요","en":"She gave him a clock."},
+    {"id":13206415,"text":"칼만은 자기 고슴도치를 조심스레 집어올렸다.","en":"Kalman picked his hedgehog up gently."},
+    {"id":1587157,"text":"나는 네 고양이가 좋은데, 네 고양이는 나를 싫어하네.","en":"I like your cat, but she doesn't like me."},
+    {"id":13137948,"text":"이 거리에는 두 개의 교회가 있습니다.","en":"There are two churches on this street."},
+    {"id":13118434,"text":"나는 톰에게 나와 메리의 관계에 대해 상관하지 말라고 말했다.","en":"I told Tom that my relationship with Mary was none of his business."},
+    {"id":11107528,"text":"좋은 번역가가 되려면 톰은 기술을 좀 더 연마할 필요가 있다고 생각한다.","en":"To be a good translator, I think Tom needs to hone his skills a bit more."},
+    {"id":3668438,"text":"톰이 원한다면, 내 비디오 카메라를 쓸 수 있다.","en":"Tom may use my video camera if he wants to."},
+    {"id":8550637,"text":"톰은 메리에게 왜 그가 늦게까지 일해야 했는지 알려주지 않았다.","en":"Tom didn't tell Mary why he had to work late."},
+    {"id":7965240,"text":"톰이 그렇게 어리지 않았다면 그걸 함으로써 용서받지 못했을 거야.","en":"I think Tom wouldn't be forgiven for doing that if he weren't so young."},
+    {"id":13118813,"text":"당신의 호주 여행에 대해 제게 이야기 해줄래요?","en":"Could you tell me about your trip to Australia?"},
+    {"id":8358457,"text":"훗, 금단의 마법따위는 나에겐 안통한다!","en":"Hah, your 'forbidden magics' aren't going to work with me!"},
+    {"id":6305471,"text":"너의 얇고, 곱슬곱슬한 머리카락은 당면만큼 식욕을 돋우어.","en":"Your fine, curly hair looks as appetizing as glass noodles."},
+    {"id":13905811,"text":"내리는 문이 오른쪽인데 왼쪽이라고 표시해 놨다.","en":"The exit door is on the right, but it’s marked as being on the left."},
+    {"id":5269601,"text":"나는 인터넷에 들어가 서핑하기를 좋아한다.","en":"I like to surf the internet."},
+    {"id":13118412,"text":"나는 처음에는 그녀에게 매력을 느끼지 않았다.","en":"I wasn't attracted to her at first."},
+    {"id":937392,"text":"조선왕조의 당쟁사가 문화적으로 외국 독자에게 이해되게 하기는 어려운 과제이다.","en":"It is a difficult task to make the history of political power struggles during the Joseon Dynasty culturally understandable to foreign readers."},
+    {"id":8365012,"text":"우린 강아지와 고양이를 가지고 있어.","en":"We own a dog and a cat."},
+    {"id":8421413,"text":"나는 여러가지를 기억하는 게 힘들어.","en":"I have a hard time remembering things."},
+    {"id":13756484,"text":"톰이랑 메리는 그 일에 꽤 들떠 있어.","en":"Tom and Mary are pretty excited about that."},
+    {"id":11110772,"text":"오랫동안 기억에 남을 수업을 하겠습니다.","en":"I'll give you a lesson that you'll remember for a long time."},
+    {"id":13192001,"text":"name@email.com 으로 이메일 보내 주세요.","en":"Please write me at name@email.com."},
+    {"id":13250551,"text":"지금까지 한 번 도 그런 걸 들어본 적이 없어.","en":"Never in my life have I heard such a thing."},
+    {"id":8363888,"text":"열심히 공부하지 않으면 앞으로도 낮은 점수를 받게 될 거야.","en":"If you don't study hard, you'll continue to get poor scores."},
+    {"id":7965208,"text":"나는 학생일 때 영어로 일기를 쓰곤 했다.","en":"I used to keep a diary in English when I was a student."}
   ],
   "tha": [
-    {
-      "id": 7789805,
-      "text": "ฉันกำลังมองหาคนซักเสื้อผ้าสำหรับฉัน",
-      "en": "I'm looking for someone to do my laundry for me."
-    },
-    {
-      "id": 10202185,
-      "text": "คุณชอบบ้านหลังนี้ไหม",
-      "en": "Do you like this house?"
-    },
-    {
-      "id": 7878380,
-      "text": "นั่นเป็นเพราะว่าคุณเป็นผู้หญิง",
-      "en": "That's because you're a girl."
-    },
-    {
-      "id": 8669318,
-      "text": "ปัญหาคือคุณยังเด็กเกินไป",
-      "en": "The trouble is that you are too young."
-    },
-    {
-      "id": 10615164,
-      "text": "ผมคิดว่าทอมไม่รู้อะไรเลย",
-      "en": "I don't think Tom knows anything."
-    },
-    {
-      "id": 2866385,
-      "text": "พวกเราต้องไปอย่างระมัดระวัง",
-      "en": "We'll have to go about it with care."
-    },
-    {
-      "id": 10681040,
-      "text": "คุณเคยได้รับการถ่ายเลือดหรือไม่",
-      "en": "Have you ever received a blood transfusion?"
-    },
-    {
-      "id": 8720110,
-      "text": "กรุณาให้นมฉันหนึ่งถ้วย",
-      "en": "Please give me a cup of milk."
-    }
+    {"id":7789805,"text":"ฉันกำลังมองหาคนซักเสื้อผ้าสำหรับฉัน","en":"I'm looking for someone to do my laundry for me."},
+    {"id":10202185,"text":"คุณชอบบ้านหลังนี้ไหม","en":"Do you like this house?"},
+    {"id":7878380,"text":"นั่นเป็นเพราะว่าคุณเป็นผู้หญิง","en":"That's because you're a girl."},
+    {"id":8669318,"text":"ปัญหาคือคุณยังเด็กเกินไป","en":"The trouble is that you are too young."},
+    {"id":10615164,"text":"ผมคิดว่าทอมไม่รู้อะไรเลย","en":"I don't think Tom knows anything."},
+    {"id":2866385,"text":"พวกเราต้องไปอย่างระมัดระวัง","en":"We'll have to go about it with care."},
+    {"id":10681040,"text":"คุณเคยได้รับการถ่ายเลือดหรือไม่","en":"Have you ever received a blood transfusion?"},
+    {"id":8720110,"text":"กรุณาให้นมฉันหนึ่งถ้วย","en":"Please give me a cup of milk."},
+    {"id":10103696,"text":"ผมจะหาโต๊ะอื่นให้คุณ","en":"I'll find you another table."},
+    {"id":11115670,"text":"คุณจะสนุกกับการทำงานที่นี่","en":"You'll enjoy working here."},
+    {"id":8692084,"text":"ฉันเชื่อว่าทอมพูดถูก","en":"I believe Tom is right."},
+    {"id":10202132,"text":"ดูเหมือนฝนจะตกแน่นอน","en":"It certainly looks like rain."},
+    {"id":4287201,"text":"แทบจะไม่มีนักเรียนที่ได้คะแนนเต็มในวิชาภาษาจีนดั้งเดิมเลย","en":"Almost no students get full marks in Chinese classics."},
+    {"id":3239812,"text":"ในประเทศญี่ปุ่น ประชาชนบรรลุนิติภาวะเมื่ออายุยี่สิบปี","en":"In Japan, people become legally of age at twenty."},
+    {"id":4287195,"text":"ระหว่างที่พวกเราไปเที่ยววันหยุดกัน มีเพื่อนบ้านคนหนึ่งช่วยดูแลแมวของพวกเราให้","en":"While we were on holiday, a neighbor took care of our cat."},
+    {"id":2848000,"text":"ภูมิอากาศของประเทศญี่ปุ่นอ่อนกว่าประเทศอังกฤษ","en":"The climate of Japan is milder than that of England."},
+    {"id":5021465,"text":"วัฒนธรรมทางสังคมมีการแปรเปลี่ยนไปในแต่ละประเทศ","en":"Social customs vary from country to country."},
+    {"id":10777048,"text":"ทอมและแมรีนึกขึ้นได้ว่าพวกเขาไม่ได้อยู่แค่สองคน","en":"Tom and Mary realized they weren't alone."},
+    {"id":3239807,"text":"คุณกำลังรีบร้อนไปไหน? เรามีเวลาอีกมาก ดังนั้นขับรถอย่างปลอดภัย","en":"Where are you going in such a hurry? We've got plenty of time, so drive safely."},
+    {"id":4287168,"text":"ยอมรับในสิ่งที่เธอพูดเถอะ ยังไงฉันก็คิดว่าเธอผิด","en":"Admitting what you say, I still think you are wrong."},
+    {"id":2866274,"text":"ถ้าพรุ่งนี้คุณไม่ไปตกปลา ผมก็จะไม่ไปเหมือนกัน","en":"If you do not go fishing tomorrow, I will not either."},
+    {"id":8714363,"text":"ฉันไม่รู้จักชื่อจริงของเธอ","en":"I don't know her real name."},
+    {"id":11115688,"text":"โตเกียวเป็นหนึ่งในเมืองที่ใหญ่ที่สุด","en":"Tokyo is one of the biggest cities."},
+    {"id":10202170,"text":"ผมอยากให้คุณเก็บมันไว้","en":"I wanted you to keep that."},
+    {"id":7920743,"text":"ทอมต้องการทำอย่างนั้นไม่ใช่เหรอ?","en":"Doesn't Tom want to do that?"},
+    {"id":8717344,"text":"อาจารย์ของเราไม่ค่อยหัวเราะ","en":"Our teacher seldom laughs."},
+    {"id":10321231,"text":"หนี้ของผมมีจํานวนเท่าไหร่","en":"How much does my debt amount to?"},
+    {"id":10669196,"text":"ทอมชี้รีโมทไปที่ทีวี","en":"Tom pointed the remote at the TV."},
+    {"id":8669030,"text":"ทอมถูกจับเช้าวันจันทร์นี้","en":"Tom got arrested Monday morning."},
+    {"id":10351173,"text":"อุปกรณ์นี้ทำงานอย่างไร","en":"How does this device work?"},
+    {"id":8692217,"text":"คุณสามารถเชื่อเขาได้","en":"You can trust him."},
+    {"id":8718058,"text":"อะไรใหญ่กว่ากัน ญี่ปุ่นหรืออังกฤษ?","en":"Which is larger, Japan or England?"},
+    {"id":7784369,"text":"คุณคิดว่าทอมชอบสีอะไร?","en":"What color do you think Tom likes?"},
+    {"id":10615151,"text":"ทางเลือกของเรามีจำกัด","en":"Our options are limited."},
+    {"id":8669097,"text":"ฉันเสียใจที่ได้ทานหอยนางรมนั่น","en":"I regret eating those oysters."},
+    {"id":8720169,"text":"ชายชราพูดกับฉันเป็นภาษาฝรั่งเศส","en":"The old man spoke to me in French."},
+    {"id":7784205,"text":"ฉันบอกว่ามันไม่ใช่ความคิดที่ดี","en":"I said it wasn't a very good idea."},
+    {"id":8717341,"text":"ฉันชอบแอปเปิ้ลด้วยเช่นกัน","en":"I also like apples."},
+    {"id":8688285,"text":"ภาษาไทยเป็นภาษาของประเทศไทย","en":"Thai is the language of Thailand."},
+    {"id":8679071,"text":"บ้านญี่ปุ่นมีขนาดเล็ก","en":"Japanese houses are small."},
+    {"id":8722702,"text":"มันทำจากไม้หรือโลหะ?","en":"Is it made of wood or metal?"},
+    {"id":10517738,"text":"อย่าเสียเวลากับสิ่งเหล่านี้","en":"Don't waste your time on these."},
+    {"id":10777056,"text":"เราจำไม่ได้ว่าพูดอะไรไป","en":"I can't remember what I said."},
+    {"id":8670325,"text":"ฉันยกมือขึ้นเพื่อถามคำถาม","en":"I raised my hand to ask a question."},
+    {"id":8679095,"text":"นวนิยายเรื่องนี้ประกอบด้วยสามส่วน","en":"This novel consists of three parts."},
+    {"id":10202143,"text":"ผมกำลังรอคำตอบจากคุณ","en":"I'm waiting for your answer."},
+    {"id":10116490,"text":"ตอนนี้ไข้หวัดใหญ่กำลังระบาด","en":"The flu is going around now."},
+    {"id":8669021,"text":"ฉันคิดว่าทอมมาจากออสเตรเลีย แต่ฉันอาจจะผิดก็ได้","en":"I think Tom is from Australia, but I may be wrong."}
   ],
   "jav": [
-    {
-      "id": 3939832,
-      "text": "Gendérané wis munggah.",
-      "en": "The flag is up."
-    },
-    {
-      "id": 3939835,
-      "text": "Bètèng iki diadegaké supaya wong-wong ora bisa mlebu apa ora bisa metu?",
-      "en": "Was this wall built to keep people out or to keep them in?"
-    },
-    {
-      "id": 10125794,
-      "text": "Asu iku lanang ta wadon?",
-      "en": "Is that dog male or female?"
-    },
-    {
-      "id": 3984085,
-      "text": "Tak pikir Tom kuwi nèng omah turu.",
-      "en": "I thought Tom was home asleep."
-    },
-    {
-      "id": 9665265,
-      "text": "ꦄꦗꦭꦭꦶꦔꦶꦫꦶꦩꦏꦺꦭꦪꦁꦏꦸꦮꦶ꧉",
-      "en": "Don't forget to send that letter."
-    },
-    {
-      "id": 3960185,
-      "text": "Kowe ra bisa meksa Tom nulungi Mary",
-      "en": "You can't force Tom to help Mary."
-    },
-    {
-      "id": 12028029,
-      "text": "Saben dina Kemis, awak dhéwé ngombé bir.",
-      "en": "On Thursdays, we drink beer."
-    },
-    {
-      "id": 8864873,
-      "text": "Bojo anyarmu ya wong Kanada ora?",
-      "en": "Is your new wife Canadian, too?"
-    }
+    {"id":3939832,"text":"Gendérané wis munggah.","en":"The flag is up."},
+    {"id":3939835,"text":"Bètèng iki diadegaké supaya wong-wong ora bisa mlebu apa ora bisa metu?","en":"Was this wall built to keep people out or to keep them in?"},
+    {"id":10125794,"text":"Asu iku lanang ta wadon?","en":"Is that dog male or female?"},
+    {"id":3984085,"text":"Tak pikir Tom kuwi nèng omah turu.","en":"I thought Tom was home asleep."},
+    {"id":9665265,"text":"ꦄꦗꦭꦭꦶꦔꦶꦫꦶꦩꦏꦺꦭꦪꦁꦏꦸꦮꦶ꧉","en":"Don't forget to send that letter."},
+    {"id":3960185,"text":"Kowe ra bisa meksa Tom nulungi Mary","en":"You can't force Tom to help Mary."},
+    {"id":12028029,"text":"Saben dina Kemis, awak dhéwé ngombé bir.","en":"On Thursdays, we drink beer."},
+    {"id":8864873,"text":"Bojo anyarmu ya wong Kanada ora?","en":"Is your new wife Canadian, too?"},
+    {"id":3949911,"text":"Ngapa kowé ora nggolèk panggon liya kanggo tinggal?","en":"Why don't you just find another place to live?"},
+    {"id":9975480,"text":"Jam pinten panjenengan tindak dhateng peken?","en":"What time do you go to the market?"},
+    {"id":3989000,"text":"Dhèwèké mbukak cendhélané, sanadyan aku wis nglarang.","en":"She opened the window, even though I told her not to."},
+    {"id":3949921,"text":"Bu guru mbukak kerdusé banjur ngetokaké bal.","en":"The teacher opened the box and took out a ball."},
+    {"id":3945464,"text":"Aku nyumbang kanggo paguyuban iki amèh saben dina.","en":"I contribute to this forum almost every day."},
+    {"id":9849927,"text":"Malah akeh uwong sing ketularan nanging ora ngrasake lara.","en":"Many infected people don't even feel sick."},
+    {"id":3988977,"text":"Dhèwèké tak kandhani kapan olèhku mangkat.","en":"I informed her of my departure."},
+    {"id":3941256,"text":"Mangga sepatu dicopot lan didèlèhaké ana ing rak sepatu.","en":"Please put your shoes in the getabako when you take them off."},
+    {"id":12395808,"text":"Dhèwèké bisa basa Itali.","en":"She can speak Italian."},
+    {"id":4546290,"text":"Awakdhéwé ora bisa mbédakaké dhèké karo adhiné.","en":"We cannot distinguish her from her younger sister."},
+    {"id":9973799,"text":"Iki dudu kucing, iki asu.","en":"This is not a cat. This is a dog."},
+    {"id":4568187,"text":"Nalika dhèké krungu wartané, dhèké malih pucet.","en":"The moment she heard the news, she turned pale."},
+    {"id":3978453,"text":"Kowé sarujuk apa ora marang panemuné?","en":"Are you for or against his idea?"},
+    {"id":7546086,"text":"Siji, loro, telu, papat, lima, enem, pitu, wolu, sanga, sapuluh.","en":"One, two, three, four, five, six, seven, eight, nine, ten."},
+    {"id":9666038,"text":"Aku kepengin dadi dhokter.","en":"I want to be a doctor."},
+    {"id":8864749,"text":"ꦲꦏꦸꦲꦺꦴꦫꦮꦼꦫꦸꦃꦪꦺꦤ꧀ꦏꦺꦴꦮꦺꦲꦉꦥ꧀ꦲꦚ꧀ꦗꦭꦸꦏ꧀ꦠꦸꦭꦸꦁꦠꦺꦴꦩ꧀ꦲꦁꦭꦏꦺꦴꦏꦏꦺꦲꦶꦏꦸ꧉","en":"I didn't know that you were going to ask Tom to do that."},
+    {"id":13668313,"text":"Kowé gelem ora, manggon ning Ostrali?","en":"Would you like to live in Australia?"},
+    {"id":11160013,"text":"Ora kabèh sing kowaca nang Internèt iku bener.","en":"Not everything that you read on the Internet is true."},
+    {"id":9998297,"text":"Aku manggon ana ing Indhonésia.","en":"I live in Indonesia."},
+    {"id":3938553,"text":"Yèn sira muni, \"Aku tresna marang sira,\" mangka aku uga bakal muni ngono marang sliramu.","en":"If you say, \"I love you,\" then I will also say that to you."},
+    {"id":3988910,"text":"Dhèwèké goroh bab kuwi.","en":"He lied about it."},
+    {"id":3988917,"text":"Tom ngandhani Mary yèn dhèwèké ora seneng ngrembug perkarané karo dhèwèké.","en":"Tom told Mary he wasn't interested in discussing his problems with her."},
+    {"id":9666122,"text":"Kedutaan Landa ana ing ngendi?","en":"Where is the Dutch embassy?"},
+    {"id":8864762,"text":"ꦝꦺꦮꦺꦏꦺꦔꦺꦴꦩꦺꦴꦁꦤꦁꦲꦏꦸꦪꦺꦤ꧀ꦲꦉꦥ꧀ꦭꦸꦔꦩꦼꦚꦁꦥꦫꦶꦱ꧀ꦮꦸꦭꦤ꧀ꦄꦒꦸꦱ꧀ꦠꦸꦱ꧀꧈","en":"She told me that she would go to Paris in August."},
+    {"id":3938569,"text":"Anggona jus limun katimbang werak.","en":"Use lemon juice instead of vinegar."},
+    {"id":8891804,"text":"Kapan wayah terakir kowé nggunakaké garisan?","en":"When was the last time you used a ruler?"},
+    {"id":3988906,"text":"Lalèn karo kesèd kuwi duluran.","en":"Forgetfulness and laziness are siblings."},
+    {"id":3991855,"text":"Kasunyatané isih kaya ngono nganti pirang-pirang dina sabanjuré wartané tekan.","en":"It was not until a few days later that the news arrived."},
+    {"id":9993237,"text":"Biyèn aku bocahé isinan.","en":"I was a shy child."},
+    {"id":3991889,"text":"Tom minebaké banjur ngunci lawangan lemariné.","en":"Tom closed the closet door and locked it."},
+    {"id":13801297,"text":"Saben dina aku sinau basa Turki.","en":"I study Turkish every day."},
+    {"id":3937473,"text":"Iwaké dhongé aja diguwak, isa dienggo pakan kucing.","en":"The fish isn't supposed to be thrown away. It can be used to feed cats."},
+    {"id":9649135,"text":"ꦠꦺꦴꦩ꧀ꦏꦼꦉꦥ꧀ꦩꦝꦁꦏꦫꦺꦴꦩꦺꦫꦶ꧉","en":"Tom often eats lunch with Mary."},
+    {"id":4560187,"text":"Aku mendhing mlaku tinimbang ngentèni bis sabanjuré.","en":"I would rather walk than wait for the next bus."},
+    {"id":3955826,"text":"Ann nduwé kanca akèh.","en":"Ann has lots of friends."},
+    {"id":4549784,"text":"Tom mungkasi sesorahé sarana tembang kang éndah.","en":"Tom closed his speech with a beautiful song."},
+    {"id":3984086,"text":"Tom wis lunga, durung?","en":"Has Tom left?"},
+    {"id":3991850,"text":"Saka adoh, padhas karang gedhé kaé katon kaya gedhong tuwa.","en":"Seen from a distance, the big rock looks like an old castle."},
+    {"id":3988950,"text":"Kapan olèhé kadadèn?","en":"When did that happen?"},
+    {"id":4261318,"text":"Burj Khalifa saiki gedung paling dhuwur neng donya.","en":"Burj Khalifa is currently the tallest skyscraper in the world."}
   ],
   "ita": [
-    {
-      "id": 3783690,
-      "text": "Io ho dormito fino all'alba.",
-      "en": "I slept till dawn."
-    },
-    {
-      "id": 4551510,
-      "text": "Non sono uscito con lei per la sua intelligenza.",
-      "en": "I didn't date her for her brains."
-    },
-    {
-      "id": 6683411,
-      "text": "Gli dissi quale era il piano.",
-      "en": "I told him what the plan was."
-    },
-    {
-      "id": 2617912,
-      "text": "Tom non è mai in ritardo.",
-      "en": "Tom is never late."
-    },
-    {
-      "id": 5537274,
-      "text": "Mary non ascolterà i consigli del suo amico.",
-      "en": "Mary won't listen to her friend's advice."
-    },
-    {
-      "id": 1953220,
-      "text": "Io non sono così stupida!",
-      "en": "I'm not that stupid!"
-    },
-    {
-      "id": 2925441,
-      "text": "Voi siete liberi di usare il mio yacht.",
-      "en": "You are welcome to the use of my yacht."
-    },
-    {
-      "id": 1106734,
-      "text": "Potresti svegliarmi tutte le mattine?",
-      "en": "Would you wake me up every morning?"
-    }
+    {"id":3783690,"text":"Io ho dormito fino all'alba.","en":"I slept till dawn."},
+    {"id":4551510,"text":"Non sono uscito con lei per la sua intelligenza.","en":"I didn't date her for her brains."},
+    {"id":6683411,"text":"Gli dissi quale era il piano.","en":"I told him what the plan was."},
+    {"id":2617912,"text":"Tom non è mai in ritardo.","en":"Tom is never late."},
+    {"id":5537274,"text":"Mary non ascolterà i consigli del suo amico.","en":"Mary won't listen to her friend's advice."},
+    {"id":1953220,"text":"Io non sono così stupida!","en":"I'm not that stupid!"},
+    {"id":2925441,"text":"Voi siete liberi di usare il mio yacht.","en":"You are welcome to the use of my yacht."},
+    {"id":1106734,"text":"Potresti svegliarmi tutte le mattine?","en":"Would you wake me up every morning?"},
+    {"id":3978920,"text":"Il fatto è che non ha neanche letto la lettera.","en":"The fact is that she didn't even read the letter."},
+    {"id":1642533,"text":"Il rombo dei loro stessi cannoni era estremamente forte.","en":"The roar of their own cannons was extremely loud."},
+    {"id":6159231,"text":"Per piacere, fai tre copie di questa pagina.","en":"Please make three copies of this page."},
+    {"id":11668473,"text":"Non mi sono immischiato nei loro affari familiari.","en":"I didn't meddle with their family affairs."},
+    {"id":12516724,"text":"Sono molto interessato alla musica.","en":"I am very interested in music."},
+    {"id":6939271,"text":"Sapevi che Tom e John erano i fratelli di Mary?","en":"Did you know Tom and John were Mary's brothers?"},
+    {"id":2395269,"text":"Lei è il mio problema.","en":"You're my problem."},
+    {"id":4845115,"text":"Ricordo di avere sentito un rumore simile nei miei sogni.","en":"I remember having heard a similar sound in my dreams."},
+    {"id":9265279,"text":"Dovete essere divertenti alle feste.","en":"You must be fun at parties."},
+    {"id":12757918,"text":"Sono stato felicissimo quando ho potuto fare amicizia con lei!","en":"I was overjoyed when I was able to make friends with her!"},
+    {"id":10796306,"text":"Tom e Mary si sono divertiti alla festa.","en":"Tom and Mary enjoyed themselves at the party."},
+    {"id":3019214,"text":"Loro non mi crederanno neanche se giuro che è vero.","en":"They won't believe me even if I swear it is true."},
+    {"id":11550961,"text":"Ci miglioriamo a vicenda.","en":"We enhance each other."},
+    {"id":3177480,"text":"Il mio insegnante di francese ha la mia stessa età.","en":"My French teacher is the same age as me."},
+    {"id":5750605,"text":"Non voglio che siate nervosi.","en":"I don't want you to be nervous."},
+    {"id":7843869,"text":"I francesi hanno perso la battaglia di Waterloo.","en":"The French lost the battle of Waterloo."},
+    {"id":5081004,"text":"Spero che l'autobus arrivi presto.","en":"I hope the bus comes soon."},
+    {"id":7247617,"text":"Dovreste vergognarvi della vostra ignoranza.","en":"You should be ashamed of your ignorance."},
+    {"id":12568014,"text":"Come possiamo ridurre questo divario?","en":"How can we reduce this gap?"},
+    {"id":6065302,"text":"Noi abbiamo solo delle informazioni di seconda mano sul golpe.","en":"We only have secondhand information of the coup."},
+    {"id":3106276,"text":"Ve l'ho detto che era una truffa.","en":"I told you it was a scam."},
+    {"id":13018188,"text":"Accetta il mio consiglio: metti fine alla tua abitudine al fumo.","en":"Take my advice: end your smoking habit."},
+    {"id":7049335,"text":"I vostri genitori non lo sanno?","en":"Your parents don't know?"},
+    {"id":13351313,"text":"Potreste dirmi la password del Wi-Fi, per piacere?","en":"Could you please tell me the Wi-Fi password?"},
+    {"id":2786030,"text":"Io non riesco a trovare le mie scarpe.","en":"I can't find my shoes."},
+    {"id":2706748,"text":"Voglio comprare questo materiale per un nuovo vestito. Quanto viene?","en":"I want to buy this material for a new dress. How much does it cost?"},
+    {"id":5056991,"text":"Per prima cosa, cos'è successo?","en":"What happened first?"},
+    {"id":7489737,"text":"Io ascolto questa canzone quando sono triste.","en":"I listen to this song when I'm sad."},
+    {"id":3532739,"text":"Io amo le arti marziali!","en":"I love martial arts!"},
+    {"id":13630838,"text":"Perché Mary dovrebbe chiedere a Tom di farlo per lei?","en":"Why should Mary ask Tom to do that for her?"},
+    {"id":8030037,"text":"Perché hai bisogno di due biciclette?","en":"Why do you need two bicycles?"},
+    {"id":12117185,"text":"Ho raggiunto il mio limite di sopportazione del dolore.","en":"I've reached my limit in enduring pain."},
+    {"id":13347390,"text":"Avete mai mangiato il pesce?","en":"Have you ever eaten fish?"},
+    {"id":11631121,"text":"Non mi piace che mio figlio giochi con le carrozzine.","en":"I don't like my son playing with prams."},
+    {"id":1341836,"text":"Grazie mille! Sono viva.","en":"Thank you so much! I am alive."},
+    {"id":2003293,"text":"L'uccello ha il nido, il ragno la tela, l'uomo ha l'amicizia.","en":"Birds have nests, spiders have webs, and humans have friendship."},
+    {"id":12081884,"text":"Ha visto l'espressione di Tom?","en":"Did you see Tom's expression?"},
+    {"id":4605831,"text":"Questo giovane assomiglia moltissimo a mio fratello.","en":"This young man very much resembles my brother."},
+    {"id":2365421,"text":"Non va bene discutere con te.","en":"It is no good arguing with you."},
+    {"id":13227370,"text":"Nei dibattiti, la saggezza risiede nella via di mezzo.","en":"In debates, the middle ground holds wisdom."}
   ],
   "guj": [
-    {
-      "id": 5688479,
-      "text": "માલિક ને મસકા મારે છે.",
-      "en": "He is buttering up to his boss."
-    },
-    {
-      "id": 3268750,
-      "text": "મારે બોસ્ટન જવું છે.",
-      "en": "I want to go to Boston."
-    },
-    {
-      "id": 6171981,
-      "text": "તેણીએ પોતાની બહેનને બચાવવા લોહી આપ્યું",
-      "en": "She gave blood in order to save her sister."
-    },
-    {
-      "id": 5683540,
-      "text": "હુ ફરિયાદ ને ધિક્કારુ છું.",
-      "en": "I hate to complain."
-    },
-    {
-      "id": 5683587,
-      "text": "કોની પાછળ આંઘળો થ્યો છે.",
-      "en": "What are you driving at?"
-    },
-    {
-      "id": 6171978,
-      "text": "તેણીએ પોતાના ભાઈને બચાવવા લોહી આપ્યું",
-      "en": "She gave blood in order to save her sibling."
-    },
-    {
-      "id": 3244338,
-      "text": "અમદાવાદ ગુજરાતનું સૌથી મોટુ શહેર છે.",
-      "en": "Ahmedabad is the largest city in Gujarat."
-    },
-    {
-      "id": 6171310,
-      "text": "તે મને વધારે હેરાન નહીં કરે",
-      "en": "It doesn't bother me anymore."
-    }
+    {"id":5688479,"text":"માલિક ને મસકા મારે છે.","en":"He is buttering up to his boss."},
+    {"id":3268750,"text":"મારે બોસ્ટન જવું છે.","en":"I want to go to Boston."},
+    {"id":6171981,"text":"તેણીએ પોતાની બહેનને બચાવવા લોહી આપ્યું","en":"She gave blood in order to save her sister."},
+    {"id":5683540,"text":"હુ ફરિયાદ ને ધિક્કારુ છું.","en":"I hate to complain."},
+    {"id":5683587,"text":"કોની પાછળ આંઘળો થ્યો છે.","en":"What are you driving at?"},
+    {"id":6171978,"text":"તેણીએ પોતાના ભાઈને બચાવવા લોહી આપ્યું","en":"She gave blood in order to save her sibling."},
+    {"id":3244338,"text":"અમદાવાદ ગુજરાતનું સૌથી મોટુ શહેર છે.","en":"Ahmedabad is the largest city in Gujarat."},
+    {"id":6171310,"text":"તે મને વધારે હેરાન નહીં કરે","en":"It doesn't bother me anymore."},
+    {"id":5688485,"text":"તે કોઇને ગમતો નથી, હંમેશા પોતાની ડીંગ હાકે છે.","en":"Nobody likes him, because he is always blowing his own horn."},
+    {"id":3238310,"text":"રાજેન્દ્ર પ્રસાદ ભારતનાં પ્રથમ રાષ્ટ્રપતિ હતા.","en":"Rajendra Prasad was the first president of India."},
+    {"id":3238316,"text":"મુંબઈ ભારતનાં મહારાષ્ટ્ર રાજ્યનું પાટનગર છે.","en":"Mumbai is the capital of the Indian state of Maharashtra."},
+    {"id":3242698,"text":"દસ, વીસ, ત્રીસ, ચાલીસ, પચાસ, સાઇઠ, સિત્તેર, એંસી, નેવું, સો.","en":"Ten, twenty, thirty, forty, fifty, sixty, seventy, eighty, ninety, hundred."},
+    {"id":3238179,"text":"શૂન્ય, એક, બે, ત્રણ, ચાર, પાંચ, છ, સાત, આઠ, નવ, દસ.","en":"Zero, one, two, three, four, five, six, seven, eight, nine, ten."},
+    {"id":6171985,"text":"આ અહીંયા જ રહેવું જોઈએ; આ તેની જગ્યા છે. તને તે સમજાણું ?","en":"This must always be here; this is the place for it. Have you understood it?"},
+    {"id":4639431,"text":"તમે નાના હતા ત્યારે તમારા પિતા સાથે તમારો સંબંધ કેવો હતો?","en":"What was your relationship with your father like when you were a kid?"},
+    {"id":2047560,"text":"ઉદજન અને પ્રાણવાયુ મિશ્રણ કરીને પાણી બને છે।","en":"Hydrogen and oxygen combine to form water."},
+    {"id":5683577,"text":"તારા કિધે જગ નથી હાલતુ.","en":"The world doesn't revolve around you."},
+    {"id":6171300,"text":"તે તેનો આધાર આમ પણ રાખતો નથી","en":"It doesn't belong there either."},
+    {"id":5688467,"text":"પારકા ખંભે બંદુક ફોડે","en":"You are treading on her corns."},
+    {"id":5683528,"text":"મે થોડા ફેરફાર કર્યા છે.","en":"I made a few changes."},
+    {"id":3186031,"text":"હું મારા ભવિષ્ય વિષે ખૂબ ચિંતિત છું.","en":"I am very worried about my future."},
+    {"id":3242672,"text":"મારું નામ હોપકિન્સ છે.","en":"My name is Hopkins."},
+    {"id":5683550,"text":"મે ટોમ ને આવો ખુસ કયારેય જોયો નથી.","en":"I've never seen Tom so happy."},
+    {"id":6171289,"text":"હું બી ગયો છું, મને ખબર નથી.","en":"I'm afraid I don't know."},
+    {"id":3238338,"text":"ઉત્તર આફ્રિકામાં અલજીર્યા એક દેશ છે.","en":"Algeria is a country in North Africa."},
+    {"id":6171299,"text":"તે એટલું મહત્વનું ન દેખાયું","en":"It didn't seem that important."},
+    {"id":3570657,"text":"પૃથ્વી સૂર્યની આજુબાજુ ફરે છે.","en":"The earth goes around the sun."},
+    {"id":6171311,"text":"અમે મશ્કરી કરતા હતાં","en":"We're joking."},
+    {"id":5683552,"text":"હવે થી હુ મને ખુસ બનાવીશ.","en":"I'm going to make myself happy."},
+    {"id":6171291,"text":"મને તે લૂખો મળ્યો નથી.","en":"It didn't get that bad."},
+    {"id":5688549,"text":"મારા માટે કાળા અક્ષર કુવાડે માર્યા બરાબર.","en":"That was all Chinese to me."},
+    {"id":5683603,"text":"ઘાંસના ગંજ માં સોય શોધાવા જેવું","en":"It is like looking for a needle in a haystack."},
+    {"id":6171317,"text":"ભાઈ કે બહેનની પુત્રી ને ભત્રીજી ક્હેવાય","en":"A niece is the daughter of a sibling."},
+    {"id":3238313,"text":"જવાહરલાલ નેહરુ ભારતના પ્રથમ વડાપ્રધાન હતા.","en":"Jawaharlal Nehru was the first prime minister of India."},
+    {"id":3238180,"text":"શું તું અંગ્રેજી બોલી શકે છે?","en":"Can you speak English?"},
+    {"id":6171987,"text":"કોઈ પણ એક તારા માટે તે કરે તે શોધવું અઘરું નથી","en":"It won't be hard to find someone to do that for you."},
+    {"id":5683599,"text":"આંધળુ અનુકરણ નહિ કરું.","en":"I don't quite follow you."},
+    {"id":5680940,"text":"ટોમ અને મેરી પુરો સમય વાતો કરી હતી.","en":"Tom and Mary talked the whole time."},
+    {"id":6171984,"text":"હું સ્વભાવથી થોડો આળશું છું","en":"I am by nature majorly pessimistic."},
+    {"id":5680947,"text":"મારા વર્તન માટે હુ ખુબ દિલગીર છું.","en":"I'm so sorry for what I've done."}
   ],
   "amh": [
-    {
-      "id": 12975489,
-      "text": "ሁሉም ሰው እንግሊዝኛ ይናገራል።",
-      "en": "Everyone speaks English."
-    },
-    {
-      "id": 3642774,
-      "text": "ወደ ትምሕርት ቤት እየሄድኩ ነው።",
-      "en": "I'm going to school."
-    },
-    {
-      "id": 12975503,
-      "text": "እህቶቼ ስለ ሳይንስ ማውራት ይወዳሉ።",
-      "en": "My sisters love to talk about science."
-    },
-    {
-      "id": 3783762,
-      "text": "እኔም ወደ ትምህርት ቤት እየሄድኩ ነው።",
-      "en": "I'm also going to school."
-    },
-    {
-      "id": 3316135,
-      "text": "አነጋግሬ ለየት ያለ ሊሆን ይችላል።",
-      "en": "My accent is probably strange."
-    },
-    {
-      "id": 2722289,
-      "text": "ባለፈው ሳምንት ከአሜሪካ አንዳንድ ማስታወሻ ላኩለት።",
-      "en": "Last week, I mailed him some souvenirs from the U.S."
-    },
-    {
-      "id": 6804707,
-      "text": "እንኳን ለአለም አቀፍ የሴቶች ቀን አደረሰን",
-      "en": "Happy International Women's Day!"
-    },
-    {
-      "id": 3085366,
-      "text": "በሳምንት ከሁለት እስካስር ብር ነው።",
-      "en": "It is from two to ten birrs a week."
-    }
+    {"id":12975489,"text":"ሁሉም ሰው እንግሊዝኛ ይናገራል።","en":"Everyone speaks English."},
+    {"id":3642774,"text":"ወደ ትምሕርት ቤት እየሄድኩ ነው።","en":"I'm going to school."},
+    {"id":12975503,"text":"እህቶቼ ስለ ሳይንስ ማውራት ይወዳሉ።","en":"My sisters love to talk about science."},
+    {"id":3783762,"text":"እኔም ወደ ትምህርት ቤት እየሄድኩ ነው።","en":"I'm also going to school."},
+    {"id":3316135,"text":"አነጋግሬ ለየት ያለ ሊሆን ይችላል።","en":"My accent is probably strange."},
+    {"id":2722289,"text":"ባለፈው ሳምንት ከአሜሪካ አንዳንድ ማስታወሻ ላኩለት።","en":"Last week, I mailed him some souvenirs from the U.S."},
+    {"id":6804707,"text":"እንኳን ለአለም አቀፍ የሴቶች ቀን አደረሰን","en":"Happy International Women's Day!"},
+    {"id":3085366,"text":"በሳምንት ከሁለት እስካስር ብር ነው።","en":"It is from two to ten birrs a week."},
+    {"id":4451457,"text":"የእናት ቋንቋዬ ከእናቴ የተቀበልኩት በጣም ደጉ በረከት ነው።","en":"My native language is the most beautiful gift from my mother."},
+    {"id":3085371,"text":"ከቤቱ እስከ ባቡር ጣቢያ ድረስ ሄደ።","en":"He went from his house up to the railroad station."},
+    {"id":3085600,"text":"እርስዎ ወደ አዲስ አበባ መቸ ይሄዳሉ?","en":"When are you going to Addis Ababa?"},
+    {"id":3206724,"text":"ልጆች የሕይወታችን አበባዎች ናቸው።","en":"Children are the flowers of our lives."},
+    {"id":12119908,"text":"ለንደን ውስጥ ለሁለት ሳምንታት ቆየን።","en":"We stayed in London for a fortnight."},
+    {"id":13192426,"text":"Endemin aderk /እንደ ምን አደርክ/","en":"Good morning."},
+    {"id":3783759,"text":"አንተ ትደክማለህ። እኔም እደክማለሁ።","en":"You're tired. I'm also tired."},
+    {"id":3085606,"text":"በሁለት ሰኣት ውስጥ፣ ወደ ቤት እንመጣለን።","en":"We'll come home in two hours."},
+    {"id":12405456,"text":"ሴቶቹ በቤት ውስጥ ይሰሩ ነበር።","en":"Women worked at home."},
+    {"id":3085375,"text":"በዚህ ሆቴል ውስጥ ባዶ ክፍል አለዎት?","en":"Do you have an empty room in this hotel?"},
+    {"id":4451453,"text":"ቦስቶን ውስጥ ለመጉብኘት ብዙ ቦታዎች አሉ።","en":"There are a lot of places to visit in Boston."},
+    {"id":3143562,"text":"ልጁ ይህች ቆንጆ ልጃገረድን ይወዳል።","en":"The boy loves this beautiful girl."},
+    {"id":9145954,"text":"ወደፊት ይህዱና ወደ ግራ ይዙሩ።","en":"Go straight ahead and turn to the left."},
+    {"id":2722320,"text":"ዘግይቼ እትምሀርት ቤት ምን ጊዜም አልደርስም።","en":"I'm never late for school."},
+    {"id":3466632,"text":"ወደ ትምህርት ቤት መሄድ አልፈልግም።","en":"I don't want to go to school."},
+    {"id":3642370,"text":"እሱም አማርኛን እየተመርኩ ነው።","en":"I'm also learning Amharic."}
   ],
   "kan": [
-    {
-      "id": 4776847,
-      "text": "ನನ್ನ ತಂದೆ ಹಾಗು ನನ್ನ ಅಣ್ಣ ಈ ಕಾರ್ಖಾನೆಯಲ್ಲಿ ಕೆಲಸ ಮಾಡುತ್ತಾರೆ.",
-      "en": "My father and my brother work in this factory."
-    },
-    {
-      "id": 8903002,
-      "text": "ನಿಮಗೆ ಏನು ಅನ್ನಿಸುತ್ತೆ",
-      "en": "What do you think about it?"
-    },
-    {
-      "id": 4774595,
-      "text": "ಯಾವಾಗ ನಿನಗೆ ದುಡ್ಡು ಬೇಕಾದರೆ ಮಾತ್ರ ನೀನು ನನ್ನ ಜೊತೆ ಮಾತನಾಡುತ್ತೇಯ.",
-      "en": "The only time you talk to me is when you need some money."
-    },
-    {
-      "id": 4784782,
-      "text": "ನಮ್ಮಲ್ಲಿ ಒಬ್ಬರು ಹೋಗಲೇ ಬೇಕಾಗುತ್ತದೆ.",
-      "en": "One of us will have to go."
-    },
-    {
-      "id": 13223989,
-      "text": "ನಾನು ಒಬ್ಬಳೇ ಹೋಗುತ್ತೇನೆ.",
-      "en": "I'll go alone."
-    },
-    {
-      "id": 4783912,
-      "text": "ಅದನ್ನು ಎಂದಿಗೂ ಮಾಡಬೇಡವೆಂದು ನಂಬೋಣ.",
-      "en": "Let's hope we never have to do that."
-    },
-    {
-      "id": 12484463,
-      "text": "ಬೈಡನ್ ಕುಟುಂಬ ಭ್ರಷ್ಟ ಕುಟುಂಬವಾಗಿದೆ.",
-      "en": "The Biden family is corrupt."
-    },
-    {
-      "id": 13224122,
-      "text": "ನನಗೆ ಮಸಾಲೆ ದೋಸೆ ಬೇಕು.",
-      "en": "I want a masala dosa."
-    }
+    {"id":4776847,"text":"ನನ್ನ ತಂದೆ ಹಾಗು ನನ್ನ ಅಣ್ಣ ಈ ಕಾರ್ಖಾನೆಯಲ್ಲಿ ಕೆಲಸ ಮಾಡುತ್ತಾರೆ.","en":"My father and my brother work in this factory."},
+    {"id":8903002,"text":"ನಿಮಗೆ ಏನು ಅನ್ನಿಸುತ್ತೆ","en":"What do you think about it?"},
+    {"id":4774595,"text":"ಯಾವಾಗ ನಿನಗೆ ದುಡ್ಡು ಬೇಕಾದರೆ ಮಾತ್ರ ನೀನು ನನ್ನ ಜೊತೆ ಮಾತನಾಡುತ್ತೇಯ.","en":"The only time you talk to me is when you need some money."},
+    {"id":4784782,"text":"ನಮ್ಮಲ್ಲಿ ಒಬ್ಬರು ಹೋಗಲೇ ಬೇಕಾಗುತ್ತದೆ.","en":"One of us will have to go."},
+    {"id":13223989,"text":"ನಾನು ಒಬ್ಬಳೇ ಹೋಗುತ್ತೇನೆ.","en":"I'll go alone."},
+    {"id":4783912,"text":"ಅದನ್ನು ಎಂದಿಗೂ ಮಾಡಬೇಡವೆಂದು ನಂಬೋಣ.","en":"Let's hope we never have to do that."},
+    {"id":12484463,"text":"ಬೈಡನ್ ಕುಟುಂಬ ಭ್ರಷ್ಟ ಕುಟುಂಬವಾಗಿದೆ.","en":"The Biden family is corrupt."},
+    {"id":13224122,"text":"ನನಗೆ ಮಸಾಲೆ ದೋಸೆ ಬೇಕು.","en":"I want a masala dosa."},
+    {"id":4784785,"text":"ನಾನು ಸ್ವಲ್ಪ ದುಡ್ಡನ್ನು ತೆಗೆದುಕೊಂಡು ಬರಬೇಕಾಗಿತ್ತು.","en":"I had to get some money."},
+    {"id":4776858,"text":"ನಾವು ಎಷ್ಟು ನಿರೀಕ್ಷಿಸುತ್ತಾ ಇದ್ದವೋ ಅದಕ್ಕಿಂತ ಎರಡರಷ್ಟು ಬೆಲೆ ಆಯಿತು.","en":"It cost twice as much as we expected."},
+    {"id":12480077,"text":"ಅವನು ಜೇನುತುಪ್ಪದ ಸಿಹಿ ರುಚಿಯನ್ನು ಆನಂದಿಸುತ್ತಾನೆ.","en":"He enjoys the sweet taste of honey."},
+    {"id":8909658,"text":"ಈ ಊರಿನಲ್ಲಿ ಕೊಳಚೆ ನೀರಿನ ಶುದ್ದೀಕರಣ ನಡೆಯುತ್ತೆ .","en":"Sewage water is being treated in this town."},
+    {"id":4776866,"text":"ನಿಮ್ಮ ಕುಟುಂಬಕ್ಕೆ ನನ್ನ ಪರವಾಗಿ ಶುಭಾಕಾಂಕ್ಷೆಗಳನ್ನು ನೀಡಿ.","en":"Give my regards to your family."},
+    {"id":4776870,"text":"ಅವಳು ಹದಿವಯಸ್ಸಿನಲ್ಲಿ ಮದುವೆಯಾಗಿದಳು.","en":"She got married in her teens."},
+    {"id":4784823,"text":"ಬಹಳ ತರಕಾರಿಗಳು ತಿನ್ನು.","en":"Eat a lot of vegetables."},
+    {"id":4774754,"text":"ನೀನು ಇದನ್ನು ಮಾಡಕ್ಕೆ ಆಗುವುದಿಲ್ಲವೆಂದು ನಂಬಿದ್ದೀಯಾ ಅಲ್ವ?","en":"You don't think I can do this, do you?"},
+    {"id":4774665,"text":"ನಾವು ಪ್ರಯತ್ನಿಸದೇ ಬೇಡ ಅಂತ ಸೂಚಿಸುತ್ತೇನೆ.","en":"I suggest we don't even try."},
+    {"id":4776851,"text":"ನಾನು ಏನನ್ನು ಮಾಡಬೇಕೆಂದು ಸರಿಯಾಗಿ ನೀವು ಹೇಳಬೇಕು.","en":"You have to tell me exactly what I need to do."},
+    {"id":13224101,"text":"ಅವಳಿಗೆ ಕನ್ನಡ ಗೊತ್ತು.","en":"She understands Kannada."},
+    {"id":4774691,"text":"ಯಾರೋ ಯಾರೊಬ್ಬರ ದೃಷ್ಟಿಕೋನವನ್ನು ಬದಲಾಯಿಸುವುದಕ್ಕೆ ತುಂಬಾನೆ ಕಷ್ಟ.","en":"One can hardly change one's point of view."},
+    {"id":4774669,"text":"ಅವಳು ಅವಳ ಕೈಯಲ್ಲಿ ಏನೋ ಇಟ್ಟುಕೊಂಡಿದ್ದಾಳೆ.","en":"She has something in her hand."},
+    {"id":4774644,"text":"ಬ್ರಸಿಲು ಅರ್ಜೆಂಟೀನದ ಮೇಲೆ ಯುದ್ಧವನ್ನು ಪ್ರಕಟಿಸಿದರು.","en":"Brazil declared war on Argentina in 1825."},
+    {"id":4775544,"text":"ಅವನ ತಂದೆಯ ಮರಣಾನಂತರ ಅವನು ಸಂಸ್ಥೆಯ ಅಧಿಕಾರ ವಹಿಸಿಕೊಂಡಿದನು.","en":"He took charge of the firm after his father's death."},
+    {"id":4774193,"text":"ಅಪಾಯ ಇರುವುದಕ್ಕೆ ಬಹಳ ಸಾಧ್ಯತೆ ಇದೆ.","en":"It very likely is going to be dangerous."},
+    {"id":8909666,"text":"ಈ ಚಕ್ರ ಓಡೋವಾಗ ಅಲ್ಲಾಡುತ್ತೆ","en":"This wheel wobbles when it turns."},
+    {"id":4774192,"text":"ನಿಮಗೆ ಒಂದೇ ಬಾರಿ ಎರಡು ಜಾಗದಲ್ಲಿ ಇರುವುದಕ್ಕೆ ಆಗಲ್ಲ.","en":"You can't be in two places at once."},
+    {"id":12482926,"text":"ಅವಳಿಗೆ ಬಾತುಕೋಳಿಗಳು ಇಷ್ಟ.","en":"She likes ducks."},
+    {"id":4774186,"text":"ಅವಳು ನಾಚಿಕೆಪಡುತ್ತಾಳೆ ಅಂತ ಕಾಣಿಸುತ್ತೆ ಆದರೆ ನಿಜವಾಗಲು ಅವಳಿಗೆ ಜಾಸ್ತಿ ಸಂಕಲ್ಪ ಶಕ್ತಿ ಇದೆ.","en":"She seems shy, but has a strong will in practice."},
+    {"id":4775518,"text":"ನನಗೆ ಟಾಮ್ ಫ್ರೆಂಚ್ ಮಾತಾಡುತ್ತಾನೆ ಅಂತ ಗೊತ್ತೇ ಇರಲಿಲ್ಲ.","en":"I didn't know that Tom spoke French."},
+    {"id":4774755,"text":"ಅವನು ನದಿ ಅಡ್ಡಲಾಗಿ ಈಜಿದನು.","en":"He swam across the river."},
+    {"id":4784797,"text":"ಬಾದಲಿಯಲ್ಲಿ ಏನೂ ಇಲ್ಲ.","en":"There's nothing in the bucket."},
+    {"id":4776833,"text":"ನಿನ್ನನ್ನು ಕೆಲಸದಿಂದ ತೆಗೆದಿರುವುದಕ್ಕೆ ನಾನೇ ಕರಣ ಮತ್ತು ನಂದೇ ತಪ್ಪು.","en":"It's my fault that you were fired."},
+    {"id":8909646,"text":"ನಿನ್ನ ಮಗನನ್ನು ನೋಡಲು ನನಗೆ ತುಂಬಾ ಇಷ್ಟ","en":"I would love to see your son!"},
+    {"id":4774645,"text":"ಜಾಸ್ತಿ ಹೊತ್ತು ಅವನಿಗೆ ಅವನ ಕೋಪ ತಡೆಯುವುದಕ್ಕೆ ಆಗಲಿಲ್ಲ.","en":"He couldn't keep his temper any longer."},
+    {"id":4775458,"text":"ನೀವು ಯಾಕೆ ನನಗೆ ಧನ್ಯವಾದ ಹೇಳುತ್ತೀರಾ?","en":"Why are you thanking me?"},
+    {"id":4783913,"text":"ಬರುವ ವಸಂತಕಾಲದಲ್ಲಿ ನೋಡುವುದಕ್ಕೆ ಹಲವರು ಕಾರ್ಯಕ್ರಮಗಳು ಇವೆ.","en":"There are many new programs to watch this spring."},
+    {"id":12480078,"text":"ಇಲ್ಲಿ ಐದು ಪೆನ್ನುಗಳಿವೆ.","en":"Here there are five pens."},
+    {"id":11791428,"text":"ನಾನು ಅವನನ್ನು ಸಮಾಧಾನಪಡಿಸುವುದು ಅವನಿಗೆ ಇಷ್ಟವಿರಲಿಲ್ಲ.","en":"He didn't want me to comfort him."},
+    {"id":13224410,"text":"ನಾನು ಎಷ್ಟು ದಿನಗಳಿಂದ ಬಿಸಿಬೇಳೆಬಾತ್ ಮಾಡಿಲ್ಲ.","en":"I haven't made bisi bele bath in many days."},
+    {"id":4784821,"text":"ಪ್ರವಚನ ನಡೆಯುತ್ತಿರುವಾಗ ನನಗೆ ತುಂಬಾ ಬೇಸರವಾಗಿತ್ತು.","en":"She was very bored during the lecture."},
+    {"id":4776823,"text":"ಅವರು ಜನಸಮೊಹದ ನಡುವೆ ಅವನನ್ನು ಕಂಡಿದರು.","en":"They caught sight of the man among the crowd of people."},
+    {"id":4776865,"text":"ಟಾಮ್ ಕಿಟಕಿಯ ಹೊರಗೆ ದುಃಖದಿಂದ ನೋಡುತ್ತಲಿರುತ್ತಿದ್ದನು.","en":"Tom stared sadly out the window."},
+    {"id":5387094,"text":"ಕೆಲವೊಂದು ಅಗ್ನಿಶಾಮಕರು ಗಾಯ ಪಟ್ಟರು.","en":"A few firefighters suffered minor injuries."},
+    {"id":4784819,"text":"ನೀವು ಇಲ್ಲಿ ಈಗ ಇರಬಾರದು.","en":"You shouldn't be here now."},
+    {"id":12479964,"text":"ಆ ಎರಡು ಪದಗಳಿಗೆ ಒಂದೇ ಅರ್ಥವಿದೆ.","en":"Those two words have the same meaning."},
+    {"id":13247005,"text":"ನೀವು ಕನ್ನಡ ಓದಬಹುದುವಾ?","en":"Can you read Kannada?"},
+    {"id":12487641,"text":"ನನಗೆ ಸ್ವಲ್ಪ ಚಹಾ ಮಾಡಿಕೊಡುತ್ತೀಯ?","en":"Could you make me some tea?"},
+    {"id":4775511,"text":"ನಿಮ್ಮನ್ನು ಸಹಾಯ ಮಾಡುವುದಕ್ಕೆ ಆಶಿಸುತ್ತೇನೆ.","en":"I only wish to help you."}
   ],
   "nld": [
-    {
-      "id": 6090343,
-      "text": "Mijn huis is jouw huis.",
-      "en": "My home is your home."
-    },
-    {
-      "id": 10891129,
-      "text": "Waarom zou Ziri dat doen?",
-      "en": "Why would Ziri do that?"
-    },
-    {
-      "id": 8234587,
-      "text": "Tom zette zijn leven op het spel om de verdrinkende jongen te redden.",
-      "en": "Tom risked his life to save the drowning boy."
-    },
-    {
-      "id": 7694333,
-      "text": "Is er iemand in deze kamer?",
-      "en": "Is there anyone in this room?"
-    },
-    {
-      "id": 9526112,
-      "text": "Doe de kerstboomlichten uit als u het huis verlaat.",
-      "en": "Turn the Christmas tree lights off when you leave the house."
-    },
-    {
-      "id": 10215596,
-      "text": "Hoe had je het kunnen weten?",
-      "en": "How could you have known?"
-    },
-    {
-      "id": 3872360,
-      "text": "Ik voel me verloren.",
-      "en": "I feel lost."
-    },
-    {
-      "id": 7536292,
-      "text": "De meeste spinnen weven webben.",
-      "en": "Most spiders weave webs."
-    }
+    {"id":6090343,"text":"Mijn huis is jouw huis.","en":"My home is your home."},
+    {"id":10891129,"text":"Waarom zou Ziri dat doen?","en":"Why would Ziri do that?"},
+    {"id":8234587,"text":"Tom zette zijn leven op het spel om de verdrinkende jongen te redden.","en":"Tom risked his life to save the drowning boy."},
+    {"id":7694333,"text":"Is er iemand in deze kamer?","en":"Is there anyone in this room?"},
+    {"id":9526112,"text":"Doe de kerstboomlichten uit als u het huis verlaat.","en":"Turn the Christmas tree lights off when you leave the house."},
+    {"id":10215596,"text":"Hoe had je het kunnen weten?","en":"How could you have known?"},
+    {"id":3872360,"text":"Ik voel me verloren.","en":"I feel lost."},
+    {"id":7536292,"text":"De meeste spinnen weven webben.","en":"Most spiders weave webs."},
+    {"id":12331950,"text":"Wie zulke vrienden heeft, heeft geen vijanden nodig.","en":"With friends like that, you don't need any enemies."},
+    {"id":4585896,"text":"Muziek en geluiden spelen een belangrijke rol in films.","en":"Music and sounds are very important in movies."},
+    {"id":685758,"text":"Alle dieren zijn gelijk, maar sommige dieren zijn gelijker dan andere.","en":"All animals are equal, but some animals are more equal than others."},
+    {"id":11140142,"text":"Er is geen groot verschil tussen de twee meningen.","en":"There is not much difference between the two opinions."},
+    {"id":8571479,"text":"We weten wat we zijn, maar niet wat we kunnen zijn.","en":"We know what we are, but know not what we may be."},
+    {"id":7058001,"text":"Waar leidt dit pad naartoe?","en":"Where does this path go?"},
+    {"id":5188563,"text":"Heb je enig idee wie dit zou doen?","en":"Do you have any idea who would do this?"},
+    {"id":12743294,"text":"Tom heeft je niet het volledige verhaal verteld.","en":"Tom didn't tell you the whole story."},
+    {"id":4567187,"text":"Ik ben er. Wil je chatten?","en":"I'm here. Do you want to chat?"},
+    {"id":4448578,"text":"Vooraleer de auto in de stad aankwam, viel hij zonder benzine.","en":"The car ran out of gas before reaching the city."},
+    {"id":10753939,"text":"Noemt u mij een idioot?","en":"Are you calling me an idiot?"},
+    {"id":3120196,"text":"Laat ons het probleem vanuit een ander standpunt zien.","en":"Let's look at the problem from a different point of view."},
+    {"id":10637134,"text":"Ik hoop dat Tom opslag krijgt.","en":"I hope that Tom gets a raise."},
+    {"id":8128806,"text":"Ben je van plan aan de vergadering deel te nemen?","en":"Are you planning to take part in the meeting?"},
+    {"id":7644036,"text":"Tom is allergisch voor meisjes.","en":"Tom is allergic to girls."},
+    {"id":10341923,"text":"Misschien is het gewoon een kwestie van tijd.","en":"It may just be a matter of time."},
+    {"id":7037381,"text":"De kerk is handicaptoegankelijk.","en":"The church is handicap accessible."},
+    {"id":12353147,"text":"Kun je me precies uitleggen hoe dat gebeurd is?","en":"Can you explain to me exactly how that happened?"},
+    {"id":10788745,"text":"Daar kan maar beter een goede reden voor zijn.","en":"There had better be a good reason for this."},
+    {"id":814134,"text":"Zij is niet in de keuken en ook niet in de zitkamer.","en":"She is neither in the kitchen nor in the living room."},
+    {"id":6480023,"text":"De vogels hadden honger.","en":"The birds were hungry."},
+    {"id":9698687,"text":"Het is belangrijk dat hij de waarheid weet.","en":"It's important that he knows the truth."},
+    {"id":4521449,"text":"Ik verdien veel meer dan hij.","en":"I make a lot more money than he does."},
+    {"id":387634,"text":"Op de vierde verdieping is er geen warm water, maar op de begane grond wel.","en":"There's no hot water on the fifth floor, but there is on the ground floor."},
+    {"id":1968961,"text":"De twee honden vochten voor het been.","en":"The two dogs quarreled over the bone."},
+    {"id":12935024,"text":"De tanden aan de voorkant worden de snijtanden genoemd.","en":"The teeth in front are called the incisors."},
+    {"id":4558142,"text":"Ik was jong en onschuldig.","en":"I was young and innocent."},
+    {"id":9436520,"text":"India is een van de meest bevolkte landen ter wereld.","en":"India is one of the most populated countries in the world."},
+    {"id":1474916,"text":"Heb je gezien hoeveel deze telefoon kost? Dat is een rib uit mijn lijf!","en":"Did you see how much this phone costs? It costs an arm and a leg!"},
+    {"id":12316186,"text":"Tom wacht op je bij de stallen.","en":"Tom is waiting for you at the stables."},
+    {"id":13871800,"text":"Ik wist niet dat je zo goed kon zingen.","en":"I didn't know you could sing so well."},
+    {"id":3037169,"text":"De tijd ging erg langzaam voorbij deze week.","en":"Time passed very slowly this week."},
+    {"id":423618,"text":"De wedstrijd werd afgelast vanwege regen.","en":"The game was called off on account of the rain."},
+    {"id":10677180,"text":"Van alle talen die ik heb geleerd, was Frans het moeilijkst.","en":"Of all the languages I've studied, French was the hardest."},
+    {"id":10694999,"text":"Als ik u ergens mee kan helpen, zeg het dan.","en":"If I can help you with something, just say so."},
+    {"id":11476053,"text":"Ik vind het raar dat ze niks gezegd heeft.","en":"I think it strange that she didn't say anything."},
+    {"id":7462317,"text":"Er waren geen vorken.","en":"There were no forks."},
+    {"id":10015345,"text":"Ik wil jullie hartelijk danken voor jullie speciale steun.","en":"I would like to thank you very much for your special support."},
+    {"id":11145570,"text":"Waar zijn de gevangenen?","en":"Where are the prisoners?"},
+    {"id":5211412,"text":"Deze nacht was het heel warm en vochtig; daarom heb ik niet al te goed geslapen.","en":"Last night was very hot and muggy, so I didn't sleep so well."}
   ],
   "pol": [
-    {
-      "id": 998691,
-      "text": "Trzeba ci wiedzieć, że jestem obsesyjnie punktualny.",
-      "en": "One thing you should know about me is that I'm obsessed with punctuality."
-    },
-    {
-      "id": 3607040,
-      "text": "Ona uczy się esperanta.",
-      "en": "She's learning Esperanto."
-    },
-    {
-      "id": 7610484,
-      "text": "Czy Tom na prawdę myśli, że to się wydarzy?",
-      "en": "Does Tom really think that'll happen?"
-    },
-    {
-      "id": 11267774,
-      "text": "Przeszliśmy już większość drogi.",
-      "en": "We've already gone most of the way."
-    },
-    {
-      "id": 12036990,
-      "text": "Przejdź do rzeczy, proszę.",
-      "en": "Get to the point, please."
-    },
-    {
-      "id": 11284921,
-      "text": "Mam pewność, że jego nauczyciel chemii by go oblał, gdyby przeżyli tragiczny wybuch.",
-      "en": "I'm sure his chemistry teacher would have failed him had they survived the tragic explosion."
-    },
-    {
-      "id": 3584607,
-      "text": "Zawołaj mnie, gdy będziesz gotowa.",
-      "en": "Call me when you're ready."
-    },
-    {
-      "id": 1359755,
-      "text": "Jego torba jest tutaj, to nie mógł on jeszcze pójść do szkoły.",
-      "en": "His bag is right here, so he cannot have gone to school yet."
-    }
+    {"id":998691,"text":"Trzeba ci wiedzieć, że jestem obsesyjnie punktualny.","en":"One thing you should know about me is that I'm obsessed with punctuality."},
+    {"id":3607040,"text":"Ona uczy się esperanta.","en":"She's learning Esperanto."},
+    {"id":7610484,"text":"Czy Tom na prawdę myśli, że to się wydarzy?","en":"Does Tom really think that'll happen?"},
+    {"id":11267774,"text":"Przeszliśmy już większość drogi.","en":"We've already gone most of the way."},
+    {"id":12036990,"text":"Przejdź do rzeczy, proszę.","en":"Get to the point, please."},
+    {"id":11284921,"text":"Mam pewność, że jego nauczyciel chemii by go oblał, gdyby przeżyli tragiczny wybuch.","en":"I'm sure his chemistry teacher would have failed him had they survived the tragic explosion."},
+    {"id":3584607,"text":"Zawołaj mnie, gdy będziesz gotowa.","en":"Call me when you're ready."},
+    {"id":1359755,"text":"Jego torba jest tutaj, to nie mógł on jeszcze pójść do szkoły.","en":"His bag is right here, so he cannot have gone to school yet."},
+    {"id":3931499,"text":"Nie miałem pojęcia, że sytuacja się tak pogorszyła.","en":"I had no idea things had gotten this bad."},
+    {"id":12359896,"text":"Kiedy Tom odzyskał przytomność, był przywiązany do krzesła w piwnicy.","en":"When Tom came to, he was tied to a chair in the basement."},
+    {"id":11261038,"text":"Co jest łatwiejsze? Przebaczyć czy zapomnieć?","en":"What is easier, to forgive or forget?"},
+    {"id":1930434,"text":"Nie krępuj się skontaktować ze mną.","en":"Feel free to contact me."},
+    {"id":966969,"text":"Uwielbiam włoską kuchnię.","en":"I love Italian food."},
+    {"id":1354025,"text":"Nasza drużyna piłkarska pokonała wszystkie inne drużyny w mieście.","en":"Our soccer team beat all the other teams in the town."},
+    {"id":10473537,"text":"Boston jest względnie bogatym miastem.","en":"Boston is a relatively opulent city."},
+    {"id":12302167,"text":"Nie jestem tak szczupła jak moja starsza siostra.","en":"I'm not as slim as my older sister."},
+    {"id":3869232,"text":"Minęło sporo czasu, odkąd widziałem Toma tak szczęśliwego.","en":"It's been a long time since I've seen Tom this happy."},
+    {"id":8529734,"text":"Prosze daj mi miękki ręcznik.","en":"Please give me a soft towel."},
+    {"id":10571059,"text":"Tom zrezygnował z kandydowania na przewodniczącego klasy.","en":"Tom gave up running for class president."},
+    {"id":1626349,"text":"Miasto pulsowało życiem.","en":"The town was humming with activity."},
+    {"id":357368,"text":"Gdzie jest ten bank?","en":"Where is the bank?"},
+    {"id":6935800,"text":"W wieku siedemnastu lat uciekł z rodzinnej wioski.","en":"At the age of seventeen, he fled his native village."},
+    {"id":3410207,"text":"Nie pozwoliłbym aby to się stało.","en":"I wouldn't allow that to happen."},
+    {"id":365285,"text":"Nasz pociąg się spóźnił o godzinę z powodu śnieżycy.","en":"Our train was an hour late because of the heavy snow."},
+    {"id":3682678,"text":"Powinieneś był powiedzieć mi o tym wcześniej.","en":"You ought to have told me that before."},
+    {"id":3656241,"text":"Tomek chciał wykrzyczeć całemu światu, że kocha się w Marii.","en":"Tom wanted to shout his love for Mary from the rooftops."},
+    {"id":9686494,"text":"Wydaje mi się, że zostawiłem swój telefon w twoim domu.","en":"I think I left my phone at your house."},
+    {"id":13659545,"text":"Dostałem to za pół darmo.","en":"I got this for a song."},
+    {"id":8482810,"text":"Wniosek został odrzucony.","en":"The application was rejected."},
+    {"id":2282535,"text":"Mamy pół tuzina jajek.","en":"We have a half-dozen eggs."},
+    {"id":2247327,"text":"W latach sześćdziesiątych i siedemdziesiątych opublikowała swoje najsłynniejsze książki.","en":"During the 60s and 70s, she published her most famous books."},
+    {"id":3856301,"text":"Tom miał na twarzy wyraz determinacji.","en":"Tom had a look of determination on his face."},
+    {"id":2423611,"text":"Nikt mi nie powiedział, że tu jesteś.","en":"Nobody told me you were here."},
+    {"id":10464306,"text":"Bez buziaka na dobranoc nie będę miał słodkich snów.","en":"Without a goodnight kiss I won't have sweet dreams."},
+    {"id":5370659,"text":"Mój brat jest studentem.","en":"My brother is a college student."},
+    {"id":11215632,"text":"Pomoc twojemu podopiecznemu w kąpieli jest częścią twojej pracy w opiece społecznej.","en":"Helping your client take a bath is part of your social care work."},
+    {"id":12950854,"text":"To jest wielbłąd Toma.","en":"This is Tom's camel."},
+    {"id":3716119,"text":"Może powinieneś spróbować skupić się na robieniu jednej rzeczy.","en":"Perhaps you should try doing one thing at a time."},
+    {"id":8809479,"text":"Byłoby lepiej gdyby Tom został z swoją babcią.","en":"It would be better if Tom stayed with his grandmother."},
+    {"id":416375,"text":"Dla Boga nie ma niczego niemożliwego.","en":"There is nothing God cannot do."},
+    {"id":3884250,"text":"Tajfun uderzył w wyspę.","en":"The island was struck by the typhoon."},
+    {"id":13336003,"text":"David poprosił Amandę, żeby dała Walidowi ten list.","en":"David asked Amanda to give Walid that letter."},
+    {"id":348679,"text":"Czy mówi pan po angielsku?","en":"Do you speak English?"},
+    {"id":4837875,"text":"Tom i Mary są oboje bardzo kompetentnymi nauczycielami.","en":"Tom and Mary are both very competent teachers."},
+    {"id":1350406,"text":"Pracowałem tutaj przez dziesięć lat.","en":"I've worked here for ten years."},
+    {"id":3294980,"text":"Miejmy nadzieję, że nie wiedzą, że przyjdziemy.","en":"Let's hope they don't know we're coming."},
+    {"id":13081653,"text":"Ten namiot jest idealny dla dwóch osób.","en":"This tent is perfect for two people."},
+    {"id":1351198,"text":"Parę lotów zostało opóźnionych z powodu trzęsienia ziemi.","en":"A couple of flights were delayed on account of the earthquake."}
   ],
   "ukr": [
-    {
-      "id": 6312794,
-      "text": "Можливо, вже час сказати Тому.",
-      "en": "Maybe it's time to tell Tom."
-    },
-    {
-      "id": 512302,
-      "text": "Я спробую зробити це.",
-      "en": "I will give it a try."
-    },
-    {
-      "id": 7118171,
-      "text": "Я знаю, що ти намагаєшся допомогти Тому.",
-      "en": "I know you're trying to help Tom."
-    },
-    {
-      "id": 6362228,
-      "text": "Будь-хто може визватися добровольцем.",
-      "en": "Anyone can volunteer."
-    },
-    {
-      "id": 6038791,
-      "text": "Ти не мусиш робити того, що каже Том.",
-      "en": "You don't have to do what Tom says."
-    },
-    {
-      "id": 7806673,
-      "text": "Що ви знаєте про Ізраїль?",
-      "en": "What do you know about Israel?"
-    },
-    {
-      "id": 6556606,
-      "text": "Я люблю свою країну.",
-      "en": "I love my country."
-    },
-    {
-      "id": 9108292,
-      "text": "Тут іде дощ, і я бачу твою машину.",
-      "en": "It’s raining where I am, and I’m looking at your car."
-    }
+    {"id":6312794,"text":"Можливо, вже час сказати Тому.","en":"Maybe it's time to tell Tom."},
+    {"id":512302,"text":"Я спробую зробити це.","en":"I will give it a try."},
+    {"id":7118171,"text":"Я знаю, що ти намагаєшся допомогти Тому.","en":"I know you're trying to help Tom."},
+    {"id":6362228,"text":"Будь-хто може визватися добровольцем.","en":"Anyone can volunteer."},
+    {"id":6038791,"text":"Ти не мусиш робити того, що каже Том.","en":"You don't have to do what Tom says."},
+    {"id":7806673,"text":"Що ви знаєте про Ізраїль?","en":"What do you know about Israel?"},
+    {"id":6556606,"text":"Я люблю свою країну.","en":"I love my country."},
+    {"id":9108292,"text":"Тут іде дощ, і я бачу твою машину.","en":"It’s raining where I am, and I’m looking at your car."},
+    {"id":414825,"text":"Водій автобуса несе відповідальність за безпеку пасажирів.","en":"A bus driver is responsible for the safety of the passengers."},
+    {"id":6831926,"text":"Наполегливість — найкоротший шлях до успіху.","en":"Persistence is the shortest path to success."},
+    {"id":5128447,"text":"Вважається, що ефекти ноцебо та плацебо - психогенні.","en":"Both nocebo and placebo effects are presumably psychogenic."},
+    {"id":5035131,"text":"Мікрофон з якоїсь причини до цього не працював.","en":"For some reason the microphone didn't work earlier."},
+    {"id":2827998,"text":"Моя дружина здригнулася, побачивши одноокого кота.","en":"My wife shuddered at the sight of a one-eyed cat."},
+    {"id":413703,"text":"Ця картина не варта тих грошей, які ви просите.","en":"The painting is not worth the price you are asking."},
+    {"id":6627969,"text":"Дай-но допоможу тобі. Твої сумки важкі на вигляд.","en":"Let me help you. Your bags look very heavy."},
+    {"id":6488069,"text":"Я попросив її, щоб вона тобі зателефонувала.","en":"I asked her to call you."},
+    {"id":7816057,"text":"Хіба це була не ти, хто цього хотів?","en":"Aren't you the person who wanted this?"},
+    {"id":10171259,"text":"Я не маю консервного ножа, тому я не зможу відкрити цю бляшанку.","en":"I don't have a can opener, so I can't get this can open."},
+    {"id":6134778,"text":"Том не говорить ані французькою, ані англійською.","en":"Tom can speak neither French nor English."},
+    {"id":6891407,"text":"Де сьогоднішня газета?","en":"Where is today's paper?"},
+    {"id":7053547,"text":"Мені вдалося врятуватися.","en":"I managed to escape."},
+    {"id":6281599,"text":"Вам краще дозволити мені це зробити для вас.","en":"You'd better let me do that for you."},
+    {"id":5727088,"text":"У Тома є зайві гроші.","en":"Tom has money to spare."},
+    {"id":5948393,"text":"На якій висоті над рівнем моря ти зараз знаходишся?","en":"How high above sea level are you right now?"},
+    {"id":8736011,"text":"Чим ви будете займатися цього літа?","en":"What'll you be doing this summer?"},
+    {"id":584811,"text":"Чи ви граєте на якомусь музичному інструменті?","en":"Do you play a musical instrument?"},
+    {"id":5817355,"text":"Том одружений та має сина.","en":"Tom is married and has a son."},
+    {"id":6326319,"text":"Ти не міг би подати мені он той гайковий ключ?","en":"Could you hand me that wrench?"},
+    {"id":5897555,"text":"Цікаво, що нам робити далі.","en":"I wonder what we should do next."},
+    {"id":6956216,"text":"Світ дуже змінився за останні тридцять років.","en":"The world has changed a lot in the last thirty years."},
+    {"id":3984008,"text":"Ти любиш свою неньку?","en":"Do you love your mother?"},
+    {"id":3016365,"text":"Я не можу знайти Тома. Він вже пішов, чи не так?","en":"I can't find Tom. He hasn't already gone and left, has he?"},
+    {"id":5187940,"text":"Я хочу написати книгу.","en":"I want to write a book."},
+    {"id":5814186,"text":"Можете сказати, що за тварини зображені на малюнках?","en":"Can you identify the animals in the pictures?"},
+    {"id":7809348,"text":"Що б він тобі не казав, не вір.","en":"Whatever he tells you, don't believe him."},
+    {"id":5908413,"text":"Я, як правило, йду додому відразу по п'ятій.","en":"I usually go home soon after five o'clock."},
+    {"id":7654013,"text":"Він вийшов заміж заради грошей.","en":"He married for money."},
+    {"id":5877106,"text":"Я показав Тому, де саме я знайшов його гаманець.","en":"I showed Tom exactly where I found his wallet."},
+    {"id":9769130,"text":"Я зробила вигляд, що сплю.","en":"I pretended to be sleeping."},
+    {"id":9583891,"text":"Хліб дозволяв формувати ранні людські суспільства.","en":"Bread allowed the formation of early human societies."},
+    {"id":11061094,"text":"Це занадто пізно для мене.","en":"It's too late for me."},
+    {"id":5913398,"text":"Дівчина, яку ми бачили, як вона на когось чекала біля будинку Тома, — це Мері.","en":"The girl we saw waiting in front of Tom's house was Mary."},
+    {"id":471116,"text":"Ти для мене єдине дзеркало.","en":"You're the only mirror for me."},
+    {"id":11661498,"text":"Він дуже розсердився, коли я йому сказала, що спізнюся.","en":"He got really angry when I told him I would be late."},
+    {"id":7754511,"text":"Я мала купити більше їжі.","en":"I should've bought more food."},
+    {"id":8741956,"text":"Ти ніколи не здогадаєшся, що я щойно знайшла.","en":"You'll never guess what I just found."},
+    {"id":5823773,"text":"Мені сподобалася ваша історія.","en":"I liked your story."},
+    {"id":6138492,"text":"Шкода, що ми нічого не можемо зробити, щоб допомогти Тому.","en":"I wish there was something we could do to help Tom."}
   ],
   "ell": [
-    {
-      "id": 5565229,
-      "text": "Ο Τομ δεν μπόρεσε να κρύψει τον θυμό του.",
-      "en": "Tom couldn't hide his anger."
-    },
-    {
-      "id": 3179363,
-      "text": "Πείτε μου το όνομά σας.",
-      "en": "Tell me your name."
-    },
-    {
-      "id": 11527761,
-      "text": "Πότε γίνονται οι εθνικές εκλογές;",
-      "en": "When do the national elections take place?"
-    },
-    {
-      "id": 10165172,
-      "text": "Δεν ήξερα ότι ήσουν ομοφυλόφιλος.",
-      "en": "I didn't know you were gay."
-    },
-    {
-      "id": 3513035,
-      "text": "Τα παπούτσια μου είναι πάρα πολύ μικρά.",
-      "en": "My shoes are too small."
-    },
-    {
-      "id": 3513034,
-      "text": "Δεν υπάρχει σχέδιο Β, καθότι δεν υπάρχει πλανήτης Β.",
-      "en": "There is no Plan B because there is no Planet B."
-    },
-    {
-      "id": 5639404,
-      "text": "Όλοι τους μιλάνε Γαλλικά.",
-      "en": "They all speak French."
-    },
-    {
-      "id": 5365761,
-      "text": "Ευχαριστώ για τα εισιτήρια!",
-      "en": "Thanks for the tickets!"
-    }
+    {"id":5565229,"text":"Ο Τομ δεν μπόρεσε να κρύψει τον θυμό του.","en":"Tom couldn't hide his anger."},
+    {"id":3179363,"text":"Πείτε μου το όνομά σας.","en":"Tell me your name."},
+    {"id":11527761,"text":"Πότε γίνονται οι εθνικές εκλογές;","en":"When do the national elections take place?"},
+    {"id":10165172,"text":"Δεν ήξερα ότι ήσουν ομοφυλόφιλος.","en":"I didn't know you were gay."},
+    {"id":3513035,"text":"Τα παπούτσια μου είναι πάρα πολύ μικρά.","en":"My shoes are too small."},
+    {"id":3513034,"text":"Δεν υπάρχει σχέδιο Β, καθότι δεν υπάρχει πλανήτης Β.","en":"There is no Plan B because there is no Planet B."},
+    {"id":5639404,"text":"Όλοι τους μιλάνε Γαλλικά.","en":"They all speak French."},
+    {"id":5365761,"text":"Ευχαριστώ για τα εισιτήρια!","en":"Thanks for the tickets!"},
+    {"id":9954389,"text":"Μας γοήτευσε όλους με την δραματοποιημένη αφήγηση του ταξιδιού του.","en":"He mesmerized us all with the dramatized narration of his journey."},
+    {"id":9498775,"text":"Ο πατέρας μου πηγαίνει στη δουλειά µε αυτοκίνητο.","en":"My father drives to work."},
+    {"id":2850095,"text":"Το καλοκαίρι στο νότο της Ισπανίας κάνει πολύ ζέστη.","en":"In summer it's very hot in the south of Spain."},
+    {"id":7777151,"text":"Να το εξηγήσω ακόμα μια φορά για να πιάσεις τι εννοώ.","en":"Let me explain it once more, so you understand what I mean."},
+    {"id":5544717,"text":"Πότε ήταν η τελευταία φορά που έκανες κάτι για πρώτη φορά; Σκέψου το.","en":"When was the last time you did something for the first time? Think about it."},
+    {"id":9992069,"text":"Για να μιλήσετε σε κάποιον υπάλληλο, πιέστε τον αστερίσκο.","en":"To speak to one of the employees, press star."},
+    {"id":5607081,"text":"Μου αρέσει να μιλώ στα Γαλλικά.","en":"I like speaking in French."},
+    {"id":7806572,"text":"Χρειάζεται να απαντήσεις μόνο την πρώτη ερώτηση.","en":"You only have to answer the first question."},
+    {"id":5612145,"text":"Ποιος είν' ο πλουσιότερος άνθρωπος στην Αυστραλία;","en":"Who's the richest person in Australia?"},
+    {"id":2364717,"text":"Μη βάζεις βιβλία πάνω στο τραπέζι.","en":"Don't put books on the table."},
+    {"id":7766350,"text":"Ο Τομ είναι καλό παιδί.","en":"Tom is a decent guy."},
+    {"id":2414331,"text":"Ο σκύλος της προτιμά να κοιμάται στον καναπέ μου.","en":"Her dog prefers to sleep on my couch."},
+    {"id":5629159,"text":"Έχεις τρία μηνύματα.","en":"You have three messages."},
+    {"id":1289937,"text":"Ο μισθός δεν του φτάνει να αντιμετωπίσει ούτε τα τρέχοντα έξοδα.","en":"The salary isn't enough for him to deal with even the running costs."},
+    {"id":11277412,"text":"\"Δεν καταλαβαίνετε;\" \"Φυσικά.\"","en":"\"Don't you see?\" \"Of course.\""},
+    {"id":9226332,"text":"Άκου να δεις τελευταία έχω χάσει τον ύπνο μου.","en":"Listen, I've been losing sleep lately."},
+    {"id":6159300,"text":"Μην ξεχάσεις να υπογράψεις.","en":"Don't forget to sign your name."},
+    {"id":1503762,"text":"Αυτό είναι νέο κατάστημα, το οποία άνοιξε την περασμένη εβδομάδα.","en":"This is a new store that opened last week."},
+    {"id":7766285,"text":"Είδες την αυγή σήμερα το πρωί;","en":"Did you see the sunrise this morning?"},
+    {"id":5343890,"text":"Θα πρέπει να απομνημονεύσεις όλες αυτές τις ημερομηνίες.","en":"You'll have to learn all these dates by rote."},
+    {"id":5565415,"text":"Είσαι εξυπνότερος απ' αυτούς.","en":"You're smarter than them."},
+    {"id":1543854,"text":"Αυτή είναι καλύτερη από οποιαδήποτε άλλη τσάντα σε αυτό το κατάστημα.","en":"This is better than any other bag in this store."},
+    {"id":5602451,"text":"Το μήνυμα ήταν στα Γαλλικά.","en":"The message was in French."},
+    {"id":3437486,"text":"Σήμερα ο καιρός είναι λίγο καλύτερος από χθες.","en":"The weather today is a bit better than yesterday."},
+    {"id":9102729,"text":"Πιστεύω στην ελευθερία της έκφρασης με οποιονδήποτε τρόπο.","en":"I believe in freedom of expression in any way."},
+    {"id":5561046,"text":"Ο Τομ μας πληρώνει κάθε Παρασκευή.","en":"Tom pays us every Friday."},
+    {"id":2632609,"text":"Πρέπει να πληρώσω το ενοίκιο.","en":"I need to pay the rent."},
+    {"id":7844819,"text":"Το τμήμα αποτελείται από πολλές ομάδες, και θα είμαι μέλος μίας από αυτές.","en":"The department is made up of many teams, and I will be a member of one of them."},
+    {"id":1341013,"text":"Σε λίγο θα 'μαστε εκεί.","en":"We're almost there."},
+    {"id":9147595,"text":"Μόνο η σωτηρία των ζωών θα σώσει τα προς το ζην.","en":"Only saving lives will save livelihoods."},
+    {"id":3249366,"text":"Πόσο συχνά βγαίνει αυτή η εφημερίδα;","en":"How often does this newspaper come out?"},
+    {"id":7780595,"text":"Ήταν τόσοι πολλοί άνθρωποι στο δωμάτιο που μετά βίας μπορούσα να κινηθώ.","en":"There were so many people in the room that I could barely move."},
+    {"id":5541350,"text":"Ο Τομ είν' ο ήρωάς μας.","en":"Tom is our hero."},
+    {"id":12289375,"text":"Πηγαίνουμε στο κέντρο της πόλης για να φάμε πίτσα.","en":"We are going downtown to eat pizza."},
+    {"id":13632013,"text":"Είναι σαφές ότι έχετε επείγοντα προβλήματα στο μυαλό σας.","en":"It’s clear that you have some pressing problems on your mind."},
+    {"id":5582058,"text":"Δεν τις έχω δώσει ακόμη στον Τομ.","en":"I haven't given them to Tom yet."},
+    {"id":8457305,"text":"Σου αρέσει το σχολείο;","en":"Do you like school?"},
+    {"id":9746007,"text":"Ποια είναι η ομορφούλα με το μπλε μπλουζάκι;","en":"Who's the cutie in the blue shirt?"},
+    {"id":11941781,"text":"Ελευθερία ή θάνατος.","en":"Freedom or death."},
+    {"id":3017074,"text":"Ποιό είναι το αγαπημένο σου επιτραπέζιο παιχνίδι;","en":"What's your favorite board game?"}
   ],
   "swe": [
-    {
-      "id": 926250,
-      "text": "Vem röstade du på i valet?",
-      "en": "Who did you vote for in the election?"
-    },
-    {
-      "id": 2786289,
-      "text": "De allierade kontrollerade alla större irakiska städer.",
-      "en": "The allies controlled all major Iraqi cities."
-    },
-    {
-      "id": 10713170,
-      "text": "Varför hjälpte du inte dem?",
-      "en": "Why didn't you help them?"
-    },
-    {
-      "id": 3068789,
-      "text": "Bakteriekultur är den enda kultur somliga besitter.",
-      "en": "Bacteria are the only culture some people have."
-    },
-    {
-      "id": 4344286,
-      "text": "Jag gjorde det redan.",
-      "en": "I already did it."
-    },
-    {
-      "id": 3745322,
-      "text": "Det här är deras hus.",
-      "en": "This is their house."
-    },
-    {
-      "id": 3739442,
-      "text": "Tom kan inte ställa sig upp.",
-      "en": "Tom can't stand up."
-    },
-    {
-      "id": 11163929,
-      "text": "Tom gillar majschips.",
-      "en": "Tom likes corn chips."
-    }
+    {"id":926250,"text":"Vem röstade du på i valet?","en":"Who did you vote for in the election?"},
+    {"id":2786289,"text":"De allierade kontrollerade alla större irakiska städer.","en":"The allies controlled all major Iraqi cities."},
+    {"id":10713170,"text":"Varför hjälpte du inte dem?","en":"Why didn't you help them?"},
+    {"id":3068789,"text":"Bakteriekultur är den enda kultur somliga besitter.","en":"Bacteria are the only culture some people have."},
+    {"id":4344286,"text":"Jag gjorde det redan.","en":"I already did it."},
+    {"id":3745322,"text":"Det här är deras hus.","en":"This is their house."},
+    {"id":3739442,"text":"Tom kan inte ställa sig upp.","en":"Tom can't stand up."},
+    {"id":11163929,"text":"Tom gillar majschips.","en":"Tom likes corn chips."},
+    {"id":4457336,"text":"Jag kommer att behöva lite hjälp med det här.","en":"I'll need some help with this."},
+    {"id":9083441,"text":"Hon är min sons dotter. Hon är mitt barnbarn.","en":"She's my son's daughter. She's my granddaughter."},
+    {"id":3830767,"text":"Regeringen har gjort kraftansträngningar för att utrota analfabetismen.","en":"The government has made joint efforts to eradicate illiteracy."},
+    {"id":4338184,"text":"Hon höll honom som gorillamammor håller sina ungar.","en":"She held him like mother gorillas hold their babies."},
+    {"id":6371053,"text":"Sami slutade dejta Layla.","en":"Sami stopped seeing Layla."},
+    {"id":2228238,"text":"Ingen vet säkert hur många människor som dog.","en":"No one is sure how many people died."},
+    {"id":3993401,"text":"Det här formuläret ser rätt komplicerat ut. Hjälp mig att fylla i det.","en":"This form looks kind of complicated. Help me fill it out."},
+    {"id":1971651,"text":"Han fjällade en fisk.","en":"He scaled a fish."},
+    {"id":11913281,"text":"Tom ställer sällan frågor.","en":"Tom rarely asks questions."},
+    {"id":6390912,"text":"Han är ingen vetenskapsman, men han är vår vän.","en":"He's not a scientist, but he is our friend."},
+    {"id":11907197,"text":"Jag var van vid värme.","en":"I was accustomed to heat."},
+    {"id":891081,"text":"Han verkade trivas med sitt liv och sitt arbete.","en":"He seemed to enjoy his life and his work."},
+    {"id":2466652,"text":"Det var trevligt att göra ingenting.","en":"It was nice to do nothing."},
+    {"id":12346294,"text":"Dimman var så tät att jag inte kunde se var jag gick.","en":"The fog was so thick that I couldn't see where I was going."},
+    {"id":2414775,"text":"Hon är gift med en tandläkare.","en":"She's married to a dentist."},
+    {"id":1972094,"text":"I Europa och Amerika ser de hunden som en familjemedlem.","en":"In Europe and America they regard the dog as a member of the family."},
+    {"id":2085589,"text":"Jag kan inte ta några risker.","en":"I can't take chances."},
+    {"id":3720848,"text":"Den lilla egentid jag har brukar jag tillbringa i en fåtölj med en god bok.","en":"I usually spend the little free time I have in an easy chair with a good book."},
+    {"id":1960935,"text":"Jag vill inte vara rik.","en":"I don't want to be rich."},
+    {"id":2151257,"text":"Väl inne på akutmottagningen sa de att han bara hade inbillat sig allting.","en":"When he got into the emergency department, they said he just imagined everything."},
+    {"id":12218968,"text":"Jag pratar inte bosniska.","en":"I don't speak Bosnian."},
+    {"id":11655820,"text":"Vilket är det enklaste språket att lära sig?","en":"What is the easiest language to learn?"},
+    {"id":1967989,"text":"Din bror ber om hjälp.","en":"Your brother is asking for help."},
+    {"id":6392165,"text":"Om du tycker om den kan jag ge dig receptet.","en":"If you like it, I'll give you the recipe."},
+    {"id":12105383,"text":"Tom köpte en större bil.","en":"Tom bought a larger car."},
+    {"id":1125888,"text":"Tom och Mary vaknade tidigt för att se årets första soluppgång.","en":"Tom and Mary woke up early to see the first sunrise of the year."},
+    {"id":12646921,"text":"Jag har bara ögon för dig.","en":"I only have eyes for you."},
+    {"id":4434218,"text":"Hans föräldrar har jobbat till sjöss i många år.","en":"His parents have worked at sea for many years."},
+    {"id":9084196,"text":"Vem är den där gumman?","en":"Who's that old woman?"},
+    {"id":9571628,"text":"Jag tror att Tom kommer göra det men jag vet inte.","en":"I think Tom will do that, but I'm not sure."},
+    {"id":4338405,"text":"Människorna bodde i byar.","en":"People lived in villages."},
+    {"id":10914965,"text":"Det hade funnits judar i Algeriet sedan första århundradet e.Kr.","en":"Jews had been in Algeria since the first century CE."},
+    {"id":8913143,"text":"Mary sa att hon skulle komma tillbaks senare.","en":"Mary said she'd come back later."},
+    {"id":10689528,"text":"Boken är skriven på franska.","en":"The book is written in French."},
+    {"id":4320697,"text":"Har vi råd med det här?","en":"Can we afford this?"},
+    {"id":1405784,"text":"Det är upp till dig att bestämma om vi skall gå eller inte.","en":"It's up to you to decide whether we'll go there or not."},
+    {"id":1499461,"text":"Han valdes till president.","en":"He was elected president."},
+    {"id":10713183,"text":"Tom vägrar att berätta för oss vad som hände.","en":"Tom is refusing to tell us what happened."},
+    {"id":4335639,"text":"Vad hände med sfinxens näsa?","en":"What happened to the Sphinx's nose?"},
+    {"id":12107207,"text":"Jag beundrar verkligen Toms förmåga att få folk att arbeta tillsammans.","en":"I really admire Tom's ability to get people to work together."}
   ],
   "nob": [
-    {
-      "id": 9211121,
-      "text": "Jeg lar deg bestemme.",
-      "en": "I'll let you decide."
-    },
-    {
-      "id": 1865891,
-      "text": "Det er gjemt under sengen.",
-      "en": "It's hidden under the bed."
-    },
-    {
-      "id": 3503709,
-      "text": "De tjente penger ved å selge narkotika til det enorme markedet.",
-      "en": "They made money by selling drugs into the huge market."
-    },
-    {
-      "id": 8807798,
-      "text": "Av og til, bruker jeg saks som boksåpner.",
-      "en": "I sometimes use scissors as a can opener."
-    },
-    {
-      "id": 6364705,
-      "text": "Det var det jeg hadde lovet.",
-      "en": "That was my promise."
-    },
-    {
-      "id": 3306749,
-      "text": "Tom lyttes til på grunn av sin overbevisningskraft.",
-      "en": "Tom is listened to because of his persuasive power."
-    },
-    {
-      "id": 2925592,
-      "text": "Jeg er ihvertfall eldre enn deg.",
-      "en": "At least I'm older than you."
-    },
-    {
-      "id": 815853,
-      "text": "Han bor i en leilighet for tiden.",
-      "en": "He is living in an apartment at present."
-    }
+    {"id":9211121,"text":"Jeg lar deg bestemme.","en":"I'll let you decide."},
+    {"id":1865891,"text":"Det er gjemt under sengen.","en":"It's hidden under the bed."},
+    {"id":3503709,"text":"De tjente penger ved å selge narkotika til det enorme markedet.","en":"They made money by selling drugs into the huge market."},
+    {"id":8807798,"text":"Av og til, bruker jeg saks som boksåpner.","en":"I sometimes use scissors as a can opener."},
+    {"id":6364705,"text":"Det var det jeg hadde lovet.","en":"That was my promise."},
+    {"id":3306749,"text":"Tom lyttes til på grunn av sin overbevisningskraft.","en":"Tom is listened to because of his persuasive power."},
+    {"id":2925592,"text":"Jeg er ihvertfall eldre enn deg.","en":"At least I'm older than you."},
+    {"id":815853,"text":"Han bor i en leilighet for tiden.","en":"He is living in an apartment at present."},
+    {"id":11805819,"text":"Kan noen anbefale meg en ordbok som er passende for begynnere?","en":"Can someone recommend to me a good dictionary suitable for beginners?"},
+    {"id":2927881,"text":"De eksporterer mye frukt, som appelsiner, grapefruit og sitroner.","en":"They export a lot of fruit, such as oranges, grapefruits and lemons."},
+    {"id":2875578,"text":"Jeg advarer deg mot å gjøre det igjen, ellers får du bot.","en":"I warn you against doing that again, or you'll be fined."},
+    {"id":2943271,"text":"Han innså til slutt at Mary hadde gjort ham til latter.","en":"He finally realized that Mary had made a fool of him."},
+    {"id":2895911,"text":"Kan jeg få noen rene håndklær?","en":"Can I get some clean towels?"},
+    {"id":14047594,"text":"Når tror du at du kommer til å være hjemme i dag?","en":"What time do you think you'll be home today?"},
+    {"id":5005784,"text":"Dette er litt urettferdig.","en":"This is a bit unfair."},
+    {"id":6146255,"text":"Er det mange av dere som har sommerferie nå ?","en":"Do many of you have summer vacation now?"},
+    {"id":2568698,"text":"Jeg tar tannkrem på tannbørsten og pusser tennene.","en":"I put toothpaste on my toothbrush and brush my teeth."},
+    {"id":2943764,"text":"Mange mennesker lider av lav selvfølelse.","en":"Many people suffer from low self-esteem."},
+    {"id":14047493,"text":"Er det greit å gjøre dette?","en":"Is it OK to be doing this?"},
+    {"id":5154170,"text":"Tom kommer ikke til å være der på møtet i dag.","en":"Tom isn't going to be at today's meeting."},
+    {"id":7195802,"text":"Jeg visste ikke hvordan jeg skulle svare Tom.","en":"I didn't know how to answer Tom."},
+    {"id":2798287,"text":"Det er nedverdigende for henne.","en":"It is degrading for her."},
+    {"id":2932280,"text":"Denne boken er veldig tynn.","en":"This book is very thin."},
+    {"id":1683490,"text":"Han er begavet med uvanlige evner i matematikk.","en":"He is endowed with unusual ability in mathematics."},
+    {"id":10942634,"text":"Han visste aldri det.","en":"He never knew that."},
+    {"id":815919,"text":"Det bør noteres at Dole ikke mente å endre konfigureringen av kommunikasjonsprotokollen.","en":"It should be noted that Dole did not intend to change the configuration of the communication protocol."},
+    {"id":3485285,"text":"Jeg elsker deg høyere enn noe annet i verden.","en":"I love you more than anything in the entire world."},
+    {"id":5169456,"text":"Jeg skulle ønske jeg kunne finne ut hvordan jeg vinner over systemet.","en":"I wish I could figure out how to beat the system."},
+    {"id":2883625,"text":"Du kan gå dit du vil.","en":"You may go anywhere you like."},
+    {"id":2950195,"text":"Jeg er helt enig med deg.","en":"I agree with you absolutely."},
+    {"id":3458433,"text":"Vinden blåser fra vest.","en":"The wind is blowing from the west."},
+    {"id":6378387,"text":"Jeg har mer enn nok tid, men ikke nok penger.","en":"I have plenty of time, but not enough money."},
+    {"id":4784651,"text":"Stedet var helt tomt.","en":"The place was completely empty."},
+    {"id":368639,"text":"Jeg har litt vanskeligheter med å få kompilert denne programvaren.","en":"I'm having some problems compiling this software."},
+    {"id":10958134,"text":"Dere kan ikke klatre!","en":"You cannot climb!"},
+    {"id":6331284,"text":"Når jeg var liten, pleide moren min å fortelle meg eventyr.","en":"When I was a child, my mother would often read fairy tales to me."},
+    {"id":2947435,"text":"Han sluttet å røyke.","en":"He quit smoking."},
+    {"id":8800270,"text":"Det er koselig å sitte inne med pledd og varm kakao når det regner og blåser ute.","en":"It's nice to stay inside wrapped in blankets and drinking hot chocolate when it's rainy and windy outside."},
+    {"id":11802662,"text":"Du forventer ikke at jeg skal tro det, gjør du?","en":"You don't really expect me to believe that, do you?"},
+    {"id":11063956,"text":"Du er den beste broren i hele verden!","en":"You're the best brother in the whole world!"},
+    {"id":2331481,"text":"Tom klarte ikke å finne et sted å parkere.","en":"Tom wasn't able to find a place to park."},
+    {"id":2932237,"text":"Jeg har vært tilbake i en uke, men jeg lider ennå av jetlag.","en":"I've been back for a week, but I'm still suffering from jet lag."},
+    {"id":14047619,"text":"Det var akkurat det jeg trengte i dag.","en":"That was exactly what I needed today."},
+    {"id":5342148,"text":"Det hjelper kanskje hvis det er du som sier til Tom at han ikke skal gjøre det.","en":"It might help if you were the one who told Tom not to do that."},
+    {"id":4452503,"text":"Jeg kommer helt klart til å savne dem.","en":"I will surely miss them."},
+    {"id":13373887,"text":"Purseren fungerer som en privat kjøpmann for mannskapet ombord på skipet.","en":"The purser acts as the crew's private merchant aboard the ship."},
+    {"id":4901136,"text":"Å finne arbeid er vanskelig.","en":"To find a job is difficult."},
+    {"id":2941319,"text":"Jeg trodde ikke jeg noensinne ville se deg igjen.","en":"I didn't think I'd ever see you again."}
   ],
   "dan": [
-    {
-      "id": 3315356,
-      "text": "Spanien lammetæver Holland.",
-      "en": "Spain wallops Netherlands."
-    },
-    {
-      "id": 6944267,
-      "text": "Jeg skal have gjort badeværelset rent.",
-      "en": "I have to clean the bathroom."
-    },
-    {
-      "id": 8172441,
-      "text": "Denne verden styres af ondsindede kræfter.",
-      "en": "This world is controlled by malevolent forces."
-    },
-    {
-      "id": 12307524,
-      "text": "En sygeplejerske tog min temperatur.",
-      "en": "A nurse took my temperature."
-    },
-    {
-      "id": 3116455,
-      "text": "De stod af ved det følgende busstoppested.",
-      "en": "They got off at the next bus stop."
-    },
-    {
-      "id": 4407792,
-      "text": "Det er en af livets realiteter.",
-      "en": "It's a fact of life."
-    },
-    {
-      "id": 12120975,
-      "text": "Denne atlet er stærk og adræt.",
-      "en": "This athlete is strong and agile."
-    },
-    {
-      "id": 10485151,
-      "text": "Det kan jeg ikke leve med.",
-      "en": "I can't live with it."
-    }
+    {"id":3315356,"text":"Spanien lammetæver Holland.","en":"Spain wallops Netherlands."},
+    {"id":6944267,"text":"Jeg skal have gjort badeværelset rent.","en":"I have to clean the bathroom."},
+    {"id":8172441,"text":"Denne verden styres af ondsindede kræfter.","en":"This world is controlled by malevolent forces."},
+    {"id":12307524,"text":"En sygeplejerske tog min temperatur.","en":"A nurse took my temperature."},
+    {"id":3116455,"text":"De stod af ved det følgende busstoppested.","en":"They got off at the next bus stop."},
+    {"id":4407792,"text":"Det er en af livets realiteter.","en":"It's a fact of life."},
+    {"id":12120975,"text":"Denne atlet er stærk og adræt.","en":"This athlete is strong and agile."},
+    {"id":10485151,"text":"Det kan jeg ikke leve med.","en":"I can't live with it."},
+    {"id":7842880,"text":"MDIR ligger bogstavelig taget i min baghave.","en":"MDIR is literally in my back yard."},
+    {"id":12014193,"text":"Min svigerinde har fået fire børn på fem år.","en":"My sister-in-law had four children in five years."},
+    {"id":7792794,"text":"Jeg kan ikke huske om Tom trådte tilbage eller ej.","en":"I can't remember if Tom resigned or not."},
+    {"id":13070059,"text":"Vi gik rettens vej, da de nægtede at betale for skaderne.","en":"We went to court when they refused to pay for the damage."},
+    {"id":12960003,"text":"Julius går hen til døren, som portneren åbner.","en":"Julius goes to the door, which the gatekeeper opens."},
+    {"id":5064367,"text":"Jeg ønsker at mine børn skal have dobbelt statsborgerskab.","en":"I want my children to have dual citizenship."},
+    {"id":6930671,"text":"Jeg tør vædde på at det har ingen tænkt på før.","en":"I bet you no one's thought of this before."},
+    {"id":5028590,"text":"Heste har tre gangarter: Skridt, trav og galop.","en":"Horses have three modes of locomotion: Walk, trot and gallop."},
+    {"id":12561877,"text":"Toget kommer rettidigt, men ingen kører med det, fordi det ikke standser.","en":"The train is on time, but nobody rides in it because it doesn't stop."},
+    {"id":7020692,"text":"Oh her var så dejligt, så forårsfriskt!","en":"Everything looked beautiful, in the freshness of early spring."},
+    {"id":1987721,"text":"En sætning er aldrig uskyldig.","en":"A sentence is never innocent."},
+    {"id":2334915,"text":"Atomer består af protoner, neutroner og elektroner.","en":"Atoms are composed of protons, neutrons, and electrons."},
+    {"id":7794535,"text":"Tom har ikke et pas.","en":"Tom doesn't have a passport."},
+    {"id":7015384,"text":"De ønskede begge at gifte sig med kongens datter.","en":"They both wanted to marry the King’s daughter."},
+    {"id":4218709,"text":"Denne omstændighed beviser hans uskyld.","en":"This fact proves his innocence."},
+    {"id":1995788,"text":"Vores lærer er ikke altid venlig overfor os.","en":"Our teacher is not always kind to us."},
+    {"id":4562614,"text":"Hvor mange måner har Mars?","en":"How many moons does Mars have?"},
+    {"id":2482904,"text":"Der var en større menneskemængde ved koncerten, end vi havde forventet.","en":"There was a larger crowd at the concert than we had anticipated."},
+    {"id":8811438,"text":"Vi har drukket al vinen.","en":"We've drunk all the wine."},
+    {"id":7821981,"text":"Jeg spiller ikke backgammon så tit som jeg plejede.","en":"I don't play backgammon as often as I used to."},
+    {"id":3376031,"text":"Hey, hvor har du lagt brugervejledningen til bilens navigationssystem?","en":"Hey, where did you put the car navigation system's user's manual?"},
+    {"id":1877992,"text":"Tom ringede på dørklokken et par gange.","en":"Tom rang the doorbell a couple of times."},
+    {"id":12467289,"text":"De kommer næsten aldrig for sent.","en":"They're almost never late."},
+    {"id":6119136,"text":"Tom kunne ikke tro, at Mary faktisk kyssede ham.","en":"Tom couldn't believe that Mary had actually kissed him."},
+    {"id":4202184,"text":"Vi festede hele natten.","en":"We partied all night long."},
+    {"id":10711347,"text":"Hun har i dag fortalt mig at hun elsker mig.","en":"She told me today that she loved me."},
+    {"id":13015762,"text":"For mig er I stadig børn.","en":"You're still kids to me."},
+    {"id":1900597,"text":"Bare hent appen, installer den og kør den. Så let er det!","en":"Just download the app, install it, and run it. It's as easy as that!"},
+    {"id":5591252,"text":"Tom og Mary mundhugges.","en":"Tom and Mary are bickering with each other."},
+    {"id":10208995,"text":"Undskyld jeg afbryder, men vi har et problem.","en":"I'm sorry to interrupt, but we have a problem."},
+    {"id":12321798,"text":"Fik du et lift hjem?","en":"Did you get a ride home?"},
+    {"id":8142073,"text":"Olga og hendes mand solgte segle og leer i Volyn.","en":"Olga and her husband sold sickles and scythes in Volyn."},
+    {"id":6589146,"text":"Der er mange elever i gymnastiksalen.","en":"There are a lot of students in the gym."},
+    {"id":1881474,"text":"Hvorfor stiller du mig alle disse spørgsmål?","en":"Why are you asking me all these questions?"},
+    {"id":4455224,"text":"Han har hjulpet mig med at flytte.","en":"He helped me to move."},
+    {"id":3560998,"text":"To små kaniner, en hvid kanin og en sort kanin, boede i en stor skov.","en":"Two small rabbits, a white rabbit and a black rabbit, lived in a large forest."},
+    {"id":7063330,"text":"Hun er varm på sin lærer.","en":"She has a crush on her teacher."},
+    {"id":474981,"text":"Her til morgen skar jeg mig under barberingen.","en":"I cut myself shaving this morning."},
+    {"id":10188494,"text":"Det er varmt i Boston nu.","en":"It's hot in Boston now."},
+    {"id":4289685,"text":"Hvorfor fortalte du os ikke at der var et vidne?","en":"Why didn't you tell us there was a witness?"}
   ],
   "fin": [
-    {
-      "id": 3781745,
-      "text": "Minulla on tässä vähän muuta tekemistä.",
-      "en": "I'm kind of busy."
-    },
-    {
-      "id": 7889914,
-      "text": "Eilen oli todella kuuma päivä.",
-      "en": "Yesterday was a very hot day."
-    },
-    {
-      "id": 9781622,
-      "text": "Lensimme Atlantin yli.",
-      "en": "We flew across the Atlantic."
-    },
-    {
-      "id": 3276646,
-      "text": "Voisitko sanoa sen kirjain kirjaimelta, kiitos!",
-      "en": "Could you spell it, please?"
-    },
-    {
-      "id": 10053279,
-      "text": "Tomilla oli vain pyyhe yllään.",
-      "en": "Tom was only wearing a towel."
-    },
-    {
-      "id": 3349123,
-      "text": "Flunssa iski suurkapunkialueelle.",
-      "en": "The flu struck the metropolitan area."
-    },
-    {
-      "id": 10037559,
-      "text": "Tomia on puukotettu.",
-      "en": "Tom has been stabbed."
-    },
-    {
-      "id": 4143968,
-      "text": "Tom huomasi, että Mari itki.",
-      "en": "Tom could see that Mary was crying."
-    }
+    {"id":3781745,"text":"Minulla on tässä vähän muuta tekemistä.","en":"I'm kind of busy."},
+    {"id":7889914,"text":"Eilen oli todella kuuma päivä.","en":"Yesterday was a very hot day."},
+    {"id":9781622,"text":"Lensimme Atlantin yli.","en":"We flew across the Atlantic."},
+    {"id":3276646,"text":"Voisitko sanoa sen kirjain kirjaimelta, kiitos!","en":"Could you spell it, please?"},
+    {"id":10053279,"text":"Tomilla oli vain pyyhe yllään.","en":"Tom was only wearing a towel."},
+    {"id":3349123,"text":"Flunssa iski suurkapunkialueelle.","en":"The flu struck the metropolitan area."},
+    {"id":10037559,"text":"Tomia on puukotettu.","en":"Tom has been stabbed."},
+    {"id":4143968,"text":"Tom huomasi, että Mari itki.","en":"Tom could see that Mary was crying."},
+    {"id":3112796,"text":"Uusi kansainvälinen lentokenttä todella sijoitti Naritan kartalle.","en":"The new international airport really put Narita on the map."},
+    {"id":7202488,"text":"Minun syntymäpäiväni on perjantaina tänä vuonna.","en":"My birthday falls on Friday this year."},
+    {"id":2960006,"text":"Hallitus yrittää päästä eroon saastuttamisesta.","en":"The government is trying to get rid of pollution."},
+    {"id":10087716,"text":"Minä tavallaan lykkään asioita tuonnemmaksi.","en":"I kind of procrastinate."},
+    {"id":7759832,"text":"Me tiedämme molemmat, että tämä ei ole oikein.","en":"We both know this isn't right."},
+    {"id":2671737,"text":"Hän ei saanut mitään palkkioksi ystävällisyydestään.","en":"She got nothing in reward for her kindness."},
+    {"id":10827877,"text":"Hän ei tiedä mitään kukista ja mehiläisistä.","en":"She knows nothing about the birds and the bees."},
+    {"id":3225798,"text":"Tämä on ensisijainen kohteemme.","en":"This is our primary target."},
+    {"id":8057082,"text":"Tiedän, että Tomi ei tiennyt, että en ollut koskaan tehnyt tuota aiemmin.","en":"I know that Tom didn't know I'd never done that before."},
+    {"id":3333387,"text":"Olemme täällä jumissa toistaiseksi.","en":"We're stuck here for now."},
+    {"id":11532102,"text":"Ranska kouluttaa kotkia torjumaan lennokkeja.","en":"France is training eagles to intercept drones."},
+    {"id":13610045,"text":"Saammeko ihmisiä laskeutumaan Marsiin?","en":"Can we land humans on Mars?"},
+    {"id":2664127,"text":"Miksi haluaisit tehdä jotain sellaista?","en":"Why would you want to do something like that?"},
+    {"id":10020577,"text":"Oletko sinä kiinnostunut tähdistäennustamisesta?","en":"Are you interested in astrology?"},
+    {"id":3742905,"text":"Kävin yleensä leffassa sunnuntaina.","en":"I usually went to the movies on Sunday."},
+    {"id":6160114,"text":"Tomi rakastuu jokaiseen kauniiseen naiseen, jonka hän tapaa.","en":"Tom falls in love with every beautiful girl he meets."},
+    {"id":4952865,"text":"Minä rakastan perhettäni.","en":"I love my family."},
+    {"id":12725729,"text":"Et saavuta koskaan mitään, jos et opiskele ahkerammin.","en":"You'll never achieve anything if you don't study harder."},
+    {"id":5394163,"text":"Hän on ollut Japanissa kolmen vuoden ajan.","en":"He has been in Japan for three years."},
+    {"id":3413930,"text":"Kaupassamme on laaja valikoima erilaisia kirjoja.","en":"We have a wide choice of books."},
+    {"id":3331861,"text":"Minusta tuo peli ei ole kovin hauska.","en":"I don't think that game's much fun."},
+    {"id":3116002,"text":"Piditkö hänen kuvansa koska yhä rakastat häntä?","en":"Did you keep her picture because you still love her?"},
+    {"id":3216530,"text":"Nyt kun minulla on tarpeeksi rahaa, voin hankkia sen kameran.","en":"Now that I have enough money, I can get that camera."},
+    {"id":4117958,"text":"Hän on sivistynyt tyttö.","en":"She is an educated girl."},
+    {"id":7032771,"text":"Mies soitti minulle tänä iltana.","en":"A man telephoned me this evening."},
+    {"id":7259583,"text":"Tinkimättä yleisyydestä voimme sanoa, että jono suppenee kohti nollaa.","en":"Without loss of generality, we can say that the sequence converges to zero."},
+    {"id":3774419,"text":"Olen odottanut tätä vuosia.","en":"I've been waiting years for this."},
+    {"id":9846263,"text":"Pääministeri piti lehdistötilaisuuden eilen.","en":"The Prime Minister held a press conference yesterday."},
+    {"id":7330137,"text":"Lisää suola ja ruokasooda veteen.","en":"Add salt and baking soda to the water."},
+    {"id":2602975,"text":"Toivon että kaikki ihmiset olisivat rakastaneet rauhaa.","en":"I wish all people had loved peace."},
+    {"id":13434443,"text":"Ne hukkasivat pelin.","en":"They lost the game."},
+    {"id":7259156,"text":"Fréchet-avaruudessa tiheiden avointen joukkojen numeroituva leikkaus pysyy tiheänä.","en":"In a Fréchet space, the countable intersection of open dense sets is itself dense."},
+    {"id":11543040,"text":"Tomi etuili jonossa.","en":"Tom jumped the queue."},
+    {"id":3220530,"text":"Tom siirtyi niin, että Mari pääsi istumaan hänen viereensä.","en":"Tom moved over so that Mary could sit next to him."},
+    {"id":3796601,"text":"Voisitko antaa sähköpostiosoitteesi?","en":"May I have your email, please?"},
+    {"id":5572565,"text":"Jäätiköt ovat jäisiä jokia. Ne virtaavat kuten joet, mutta paljon hitaammin.","en":"Glaciers are frozen rivers. They flow like rivers, only much slower."},
+    {"id":2735540,"text":"Järjestimme auton tulemaan vastaan sinua asemalle.","en":"We arranged that a car meet you at the station."},
+    {"id":4954853,"text":"Suurin osa ihmisistä pitää lapsista.","en":"Most people like chicken."},
+    {"id":3747033,"text":"Minä vain haluan tietää mitä todella tapahtui.","en":"I just want to know what actually happened."},
+    {"id":10073958,"text":"Oletko koskaan paistatellut Saharan autiomaan auringossa?","en":"Have you ever basked in the sun of the Sahara desert?"}
   ],
   "hun": [
-    {
-      "id": 7291232,
-      "text": "Te tényleg Tomra akarsz szavazni?",
-      "en": "Do you really want to vote for Tom?"
-    },
-    {
-      "id": 10672726,
-      "text": "Portugáliába megyünk idén a lakóautóval.",
-      "en": "We're taking the camper van to Portugal this year."
-    },
-    {
-      "id": 2579925,
-      "text": "Önök mégis tévednek.",
-      "en": "You are wrong, however."
-    },
-    {
-      "id": 6330081,
-      "text": "- Tomi megkérte a kezem. - Na végre!",
-      "en": "\"Tom made me an offer of marriage.\" \"At long last!\""
-    },
-    {
-      "id": 4747873,
-      "text": "A nevelés otthon kezdődik.",
-      "en": "Education starts at home."
-    },
-    {
-      "id": 7527105,
-      "text": "Tamás ma nem jön iskolába.",
-      "en": "Tom won't come to school today."
-    },
-    {
-      "id": 5367609,
-      "text": "Hazánkban ő jól ismert.",
-      "en": "He is well known in our country."
-    },
-    {
-      "id": 10555245,
-      "text": "Rájuk csörgötök ti majd?",
-      "en": "Are you going to call them?"
-    }
+    {"id":7291232,"text":"Te tényleg Tomra akarsz szavazni?","en":"Do you really want to vote for Tom?"},
+    {"id":10672726,"text":"Portugáliába megyünk idén a lakóautóval.","en":"We're taking the camper van to Portugal this year."},
+    {"id":2579925,"text":"Önök mégis tévednek.","en":"You are wrong, however."},
+    {"id":6330081,"text":"- Tomi megkérte a kezem. - Na végre!","en":"\"Tom made me an offer of marriage.\" \"At long last!\""},
+    {"id":4747873,"text":"A nevelés otthon kezdődik.","en":"Education starts at home."},
+    {"id":7527105,"text":"Tamás ma nem jön iskolába.","en":"Tom won't come to school today."},
+    {"id":5367609,"text":"Hazánkban ő jól ismert.","en":"He is well known in our country."},
+    {"id":10555245,"text":"Rájuk csörgötök ti majd?","en":"Are you going to call them?"},
+    {"id":7853291,"text":"Jackson úr a legnépszerűbb tanár az iskolánkban.","en":"Mr. Jackson is the most popular teacher at our school."},
+    {"id":4185989,"text":"A munkanélküliség eddig ismeretlen mélységbe süllyedt.","en":"The number of jobless is at an all time high."},
+    {"id":7654525,"text":"Rávettem a családom, hogy menjenek el itthonról.","en":"I made my whole family leave home."},
+    {"id":3975170,"text":"Az újgörög nyelv sok szót kölcsönzött a franciából.","en":"Modern Greek borrowed many words from French."},
+    {"id":10620195,"text":"Biztos vagy, hogy nem akarod, hogy elkísérjelek?","en":"Are you sure that you don't want me to go with you?"},
+    {"id":4394305,"text":"Feladták a tervüket, hogy megmásszák a Fuji hegyet.","en":"They gave up their plan to climb Mt. Fuji."},
+    {"id":977022,"text":"A műszerfalnak nagyon ergonómikus a kialakítása.","en":"The instrument panel has a very ergonomic layout."},
+    {"id":3626946,"text":"Az apám, a nagyapám, a dédapám és az ükapám mind ugyanazt a nevet viselték, mint én.","en":"My father, grandfather, great-grandfather and great-great-grandfather all had the same name as I have."},
+    {"id":8214464,"text":"Megtaláltam a kulcsot.","en":"I've found the key."},
+    {"id":3110416,"text":"London után Zürichben van a második legnagyobb aranypiac a világon.","en":"Zurich is the second largest gold market in the world after London."},
+    {"id":4913537,"text":"Kérem, adjon tanácsot, hogy mit kellene tenni.","en":"Please advise me on what to do."},
+    {"id":12260531,"text":"Nem várhatunk tovább, hogy elálljon az eső, mert besötétedik.","en":"We can wait no longer for the rain to stop, because it will grow dark."},
+    {"id":4430055,"text":"Én írtam azt a könyvet.","en":"I wrote that book."},
+    {"id":9689956,"text":"Miért élnek az emberek vidéken?","en":"Why are people leaving rural areas?"},
+    {"id":6957167,"text":"Az egyetlen dolog, amit az asztalon láttam, egy alma volt.","en":"The only thing I saw on the table was an apple."},
+    {"id":7956998,"text":"Alig várom, hogy megtudjam, hogy teljesítettem a teszten.","en":"I can't wait to find out how I did on the test."},
+    {"id":11550602,"text":"Tom nem egy sikeres üzletember.","en":"Tom isn't a successful businessman."},
+    {"id":4635699,"text":"Nem véled úgy, hogy az általános iskolások magasabbak, mint azelőtt?","en":"Don't you think elementary schoolers are taller these days?"},
+    {"id":4423590,"text":"Azt mondtam, hogy jól érzem magam.","en":"I said I was fine."},
+    {"id":3881376,"text":"Azelőtt soha senki nem csinálta még ezt.","en":"Nobody had ever done this before."},
+    {"id":4453230,"text":"Segítségért kiáltottam.","en":"I yelled for help."},
+    {"id":6069680,"text":"Azt hallottam, hogy az a csoki nem hizlal. Kíváncsi vagyok, hogy igaz-e.","en":"I've heard that chocolate doesn't make fat. I wonder if that's true."},
+    {"id":5886017,"text":"Válassz azokból egyet.","en":"Choose one from among these."},
+    {"id":11038166,"text":"Tom többször is nekifutott, de mindannyiszor kudarcot vallott.","en":"Tom made several tries, but failed each time."},
+    {"id":7446289,"text":"Le kell vágatnom a hajam.","en":"I need to get a haircut."},
+    {"id":11014976,"text":"Aszályos időszakokban a gazdáknak maguknak kell megetetniük az állataikat.","en":"In periods of drought, farmers have to hand-feed their stock."},
+    {"id":11523673,"text":"Kövi héten kezdődik a suli.","en":"School starts next week."},
+    {"id":4389348,"text":"Elnézést a zavarásért, de elromlott az autóm. Tudna nekem segíteni?","en":"Sorry to trouble you, but my car is broken, can you help me?"},
+    {"id":7037778,"text":"Ezúttal valószínűleg Bob nyer.","en":"This time Bob is likely to win."},
+    {"id":9375321,"text":"Mit csináltok, amikor Tomival együtt lógtok?","en":"What kind of things do you do when you and Tom hang out together?"},
+    {"id":5309440,"text":"Srácok, ti dohányoztok?","en":"Do you guys smoke?"},
+    {"id":3130472,"text":"Ma délben Olaszországból hozott cseresznyét eszünk.","en":"Today at noon we'll eat cherries from Italy."},
+    {"id":7008954,"text":"Remélem szépeket álmodsz.","en":"I hope you have sweet dreams."},
+    {"id":7057502,"text":"Függetlenül attól, hogy mennyi mindent elért, soha nem elégedett saját magával.","en":"He's never satisfied with himself no matter how much he's accomplished."},
+    {"id":2626867,"text":"Szeretnél még egy csésze kávét?","en":"Would you like another cup of coffee?"},
+    {"id":11179234,"text":"Felajánlottak egy angoltanári állást egy nyelviskolában.","en":"They offered me a job teaching English at a language school."},
+    {"id":4360446,"text":"A lakásom az állomástól öt percre van gyalog.","en":"My apartment is located a five minute walk away from the station."},
+    {"id":11010902,"text":"A rendőrség szerint szándékos gyújtogatás volt.","en":"Police think the fire was deliberately lit."},
+    {"id":7057394,"text":"Tom úgy tett, mintha megsértődött volna.","en":"Tom pretended to be insulted."},
+    {"id":9701059,"text":"Tomnak két szobás háza van.","en":"Tom owns a house with two rooms."}
   ],
   "ces": [
-    {
-      "id": 7793634,
-      "text": "Je mu dvanáct. Na svůj věk je velký.",
-      "en": "He is twelve. He is tall for his age."
-    },
-    {
-      "id": 12831603,
-      "text": "Nechci, aby to místo mě dělal Tom.",
-      "en": "I don't want Tom to do it instead of me."
-    },
-    {
-      "id": 13050378,
-      "text": "Jak o tom mohl Tom vědět?",
-      "en": "How could Tom have known about it?"
-    },
-    {
-      "id": 10204020,
-      "text": "Tom ztratil veškerou svoji důstojnost.",
-      "en": "Tom lost all his dignity."
-    },
-    {
-      "id": 8979735,
-      "text": "Nevím jistě, jestli to Tom tak řekl.",
-      "en": "I'm not sure that was what Tom said."
-    },
-    {
-      "id": 1761598,
-      "text": "Otázkou je, co udělat dále.",
-      "en": "What to do next is our question."
-    },
-    {
-      "id": 13508851,
-      "text": "Mělo by se to ihned odstranit.",
-      "en": "It should be removed immediately."
-    },
-    {
-      "id": 3018063,
-      "text": "Tom neví jistě, kdy Mary přijde.",
-      "en": "Tom doesn't know for sure when Mary will come."
-    }
+    {"id":7793634,"text":"Je mu dvanáct. Na svůj věk je velký.","en":"He is twelve. He is tall for his age."},
+    {"id":12831603,"text":"Nechci, aby to místo mě dělal Tom.","en":"I don't want Tom to do it instead of me."},
+    {"id":13050378,"text":"Jak o tom mohl Tom vědět?","en":"How could Tom have known about it?"},
+    {"id":10204020,"text":"Tom ztratil veškerou svoji důstojnost.","en":"Tom lost all his dignity."},
+    {"id":8979735,"text":"Nevím jistě, jestli to Tom tak řekl.","en":"I'm not sure that was what Tom said."},
+    {"id":1761598,"text":"Otázkou je, co udělat dále.","en":"What to do next is our question."},
+    {"id":13508851,"text":"Mělo by se to ihned odstranit.","en":"It should be removed immediately."},
+    {"id":3018063,"text":"Tom neví jistě, kdy Mary přijde.","en":"Tom doesn't know for sure when Mary will come."},
+    {"id":9964897,"text":"Nevěřím nikomu. Nevěřím dokonce ani sám sobě. Jsem beznadějný případ.","en":"I trust nobody. I don't even trust myself. I'm hopeless."},
+    {"id":6949493,"text":"Byla to dlouhá válka, protože žádná ze stran nechtěla ustoupit.","en":"It was a long war because neither side would give in."},
+    {"id":11843005,"text":"Společnost ABC je znovu v červených číslech.","en":"The ABC company is in the red again."},
+    {"id":12437290,"text":"Jak často se za den podíváte na sebe do zrcadla?","en":"How many times a day do you look at yourself in the mirror?"},
+    {"id":3542928,"text":"Vlajka České republiky je téměř shodná s vlajkou Filipín.","en":"The flag of the Czech Republic is almost the same as that of the Philippines."},
+    {"id":8876266,"text":"Nebylo by zábavné, navštívit Boston společně?","en":"Wouldn't it be fun to visit Boston together?"},
+    {"id":11974991,"text":"Zdraví a inteligence jsou dvě požehnání v životě.","en":"Health and intellect are the two blessings of life."},
+    {"id":8790627,"text":"Chtěli vědět, jak vychovávat bilingvní dítě.","en":"They wanted to know how to raise a bilingual child."},
+    {"id":8734379,"text":"Přeprava povozem taženým koňmi je už zastaralá.","en":"Transport with horse-drawn carriages became obsolete."},
+    {"id":9551052,"text":"Jezdí do školy autobusem.","en":"He goes to school by bus."},
+    {"id":12714321,"text":"Zahrajme si dneska fotbal.","en":"Let's play football today."},
+    {"id":11322488,"text":"Můžeš mi vysvětlit, jak tenhle přístroj funguje?","en":"Can you explain how this machine works?"},
+    {"id":8091703,"text":"Lidé, přestaňte se zabíjet.","en":"People, stop killing each other."},
+    {"id":3489799,"text":"Měl jsem za nemožné, že by ten problém vyřešil on.","en":"I thought it impossible for him to solve the problem."},
+    {"id":10018273,"text":"Byl vsazen do vězení.","en":"He was put in prison."},
+    {"id":10618551,"text":"Stále si pamatuje ten den, kdy jeho matka zjistila, že kouří.","en":"He still remembers the day his mother found out he was smoking."},
+    {"id":4709828,"text":"Viděl jsi moje pero?","en":"Have you seen my pen?"},
+    {"id":13736512,"text":"Dívka kreslila světle modrou květinu ve žluté váze.","en":"The girl was drawing a light blue flower in a yellow vase."},
+    {"id":13308712,"text":"Jak je to dlouho, co zemřel?","en":"How long ago did he die?"},
+    {"id":7758283,"text":"Být tebou bych Tomovi zavolal v pondělí večer.","en":"I'd call Tom Monday evening if I were you."},
+    {"id":12218433,"text":"Mohl bych pracovat na částečný úvazek?","en":"Could I work part-time?"},
+    {"id":6811326,"text":"Myslel jsem si, že se to děje jenom v pohádkách.","en":"I thought that only happened in fairytales."},
+    {"id":8556333,"text":"Proč se na nás všichni dívají?","en":"Why is everyone looking at us?"},
+    {"id":5218999,"text":"Nemohu uvěřit, že Tom po tobě pojmenoval své dítě.","en":"I can't believe Tom named his kid after you."},
+    {"id":463645,"text":"Ukaž mi, co máš v levé ruce.","en":"Show me what you have in your left hand."},
+    {"id":8171262,"text":"Jediný člověk, na kterého se můžeš spolehnout, jsi ty sám.","en":"The only person you can rely on is yourself."},
+    {"id":10041589,"text":"Pojďme raději dovnitř.","en":"We'd better get inside."},
+    {"id":8214825,"text":"Jedna mladá žena se mě zeptala, kde je mateřská školka.","en":"A young woman asked me where the kindergarten was."},
+    {"id":9715972,"text":"Udělal bys to býval?","en":"Would you have done it?"},
+    {"id":9828889,"text":"Tom odhodil cigaretový nedopalek na chodník.","en":"Tom threw a cigarette butt on the sidewalk."},
+    {"id":2193387,"text":"Uvidíš úžasnější věci než tohle.","en":"You shall see greater things than that."},
+    {"id":7654100,"text":"Když už je řeč o cizích jazycích, mluvíš francouzsky?","en":"Speaking of foreign languages, do you speak French?"},
+    {"id":12458559,"text":"Jsem přihlášen k odběru dvou novin.","en":"I subscribe to two newspapers."},
+    {"id":9826973,"text":"Lidé si nemohou koupit to co chtějí, nebo potřebují.","en":"People cannot buy what they want or need."},
+    {"id":13483979,"text":"Tom nechce, aby se prováděly žádné změny.","en":"Tom doesn't want any changes to be made."},
+    {"id":3483113,"text":"Kdybych byl věděl o tvé nemoci, byl bych tě mohl navštívit v nemocnici.","en":"If I had known about your illness, I could have visited you in the hospital."},
+    {"id":10007551,"text":"Dokonce i dítě to umí přečíst.","en":"Even a child can read this."},
+    {"id":11011174,"text":"Tato krabice je asi třikrát větší, než tamta krabice.","en":"This box is about three times as large as that one."},
+    {"id":3963457,"text":"Jsi v tom velmi dobrý.","en":"You are very good at it."},
+    {"id":8149162,"text":"Přijdu pozdě na schůzi, jestli si nepospíším.","en":"I'll be late for the meeting if I don't hurry."}
   ],
   "ron": [
-    {
-      "id": 8636592,
-      "text": "Nu avea nimic de a face cu asta.",
-      "en": "It had nothing to do with this."
-    },
-    {
-      "id": 1185103,
-      "text": "N-am spus nimic care să-i rănească sentimentele.",
-      "en": "I didn't say anything to hurt his feelings."
-    },
-    {
-      "id": 405844,
-      "text": "L-am văzut pe Ion la bibliotecă.",
-      "en": "I saw John at the library."
-    },
-    {
-      "id": 12360372,
-      "text": "Cunoști pe cineva care vorbește franceza?",
-      "en": "Do you know anyone who speaks French?"
-    },
-    {
-      "id": 10792980,
-      "text": "Sami i-a trimis separat un mesaj lui Layla.",
-      "en": "Sami separately texted Layla."
-    },
-    {
-      "id": 14047338,
-      "text": "Băiașul supraveghează piscina.",
-      "en": "The pool attendant supervises the swimming pool."
-    },
-    {
-      "id": 10787662,
-      "text": "Ce vrea să facă mâine?",
-      "en": "What does she want to do tomorrow?"
-    },
-    {
-      "id": 8269440,
-      "text": "Am încercat să-mi fac datoria.",
-      "en": "I've tried to do my duty."
-    }
+    {"id":8636592,"text":"Nu avea nimic de a face cu asta.","en":"It had nothing to do with this."},
+    {"id":1185103,"text":"N-am spus nimic care să-i rănească sentimentele.","en":"I didn't say anything to hurt his feelings."},
+    {"id":405844,"text":"L-am văzut pe Ion la bibliotecă.","en":"I saw John at the library."},
+    {"id":12360372,"text":"Cunoști pe cineva care vorbește franceza?","en":"Do you know anyone who speaks French?"},
+    {"id":10792980,"text":"Sami i-a trimis separat un mesaj lui Layla.","en":"Sami separately texted Layla."},
+    {"id":14047338,"text":"Băiașul supraveghează piscina.","en":"The pool attendant supervises the swimming pool."},
+    {"id":10787662,"text":"Ce vrea să facă mâine?","en":"What does she want to do tomorrow?"},
+    {"id":8269440,"text":"Am încercat să-mi fac datoria.","en":"I've tried to do my duty."},
+    {"id":1059610,"text":"Nu te îngrijora. Poți avea încredere în mine.","en":"Don't worry. You can confide in me."},
+    {"id":13771866,"text":"Bunicii mei au o capră căreia îi place să se cațere.","en":"My grandparents have a goat that likes to climb."},
+    {"id":5177770,"text":"Care e cel mai prostesc lucru pe care l-ai făcut în ultima vreme?","en":"What's the craziest thing you've done lately?"},
+    {"id":6857414,"text":"Nu i-am văzut pe Tom și pe Mary făcând asta.","en":"I didn't see Tom and Mary doing that."},
+    {"id":12193485,"text":"Dacă nu respectați regulile clubului, veți fi exclus.","en":"If you do not obey the club rules, you will be expelled."},
+    {"id":13712099,"text":"Avem nevoie de un scaun pentru copii pentru fata noastră.","en":"We need a highchair for our daughter."},
+    {"id":9813163,"text":"Îmi pare rău. A fost greșeala mea.","en":"I'm sorry. It was my mistake."},
+    {"id":5079874,"text":"Ceilalți polițiști au început să tragă în mulțime.","en":"The other policemen began shooting at the crowd."},
+    {"id":5229195,"text":"Sub nicio formă va putea Tom vreodată să jongleze.","en":"There's no way that Tom will ever be able to juggle."},
+    {"id":11645666,"text":"Am scris adresa greșită pe plic.","en":"I wrote the wrong address on the envelope."},
+    {"id":12114127,"text":"Am intrat în cinematograf pe gratis.","en":"We entered the cinema for free."},
+    {"id":1138167,"text":"Sunt de acord cu tine că avem nevoie de mai multe femei în această firmă.","en":"I agree with you that we need more women in this company."},
+    {"id":1138132,"text":"M-am eliberat de vinovăția trecută.","en":"I am free of past guilt."},
+    {"id":10741767,"text":"Cred că ar fi dificil să termini atâta muncă într-o singură zi.","en":"I think it would be difficult to finish this much work in one day."},
+    {"id":13907328,"text":"Copiilor, treziți-vă! Trebuie să mergeți la școală acum!","en":"Kids, wake up! You have to go to school now!"},
+    {"id":10253780,"text":"Cât timp vei fi plecat?","en":"How long will you be away?"},
+    {"id":5141438,"text":"Viața lui e în pericol.","en":"His life is in danger."},
+    {"id":13934517,"text":"Porta Nigra fu folosită mai întâi ca poartă de oraș, apoi ca biserică.","en":"The Porta Nigra was used as a city gate first, then as a church."},
+    {"id":8741625,"text":"Cineva a sunat la ușă.","en":"Someone rang the bell."},
+    {"id":12292775,"text":"Mi-aș dori ca oamenii să fie mai drăguți unul cu celălalt.","en":"I wish people were nicer to each other."},
+    {"id":6063873,"text":"Fratele meu mai mare știe să conducă mașina.","en":"My older brother knows how to drive."},
+    {"id":10784953,"text":"Tom își simțea genunchii tremurând.","en":"Tom could feel his knees shaking."},
+    {"id":1136950,"text":"Câinele, văzând că nu mă poate ajunge, a început să latre.","en":"The dog, seeing me beyond his reach, began barking."},
+    {"id":13728328,"text":"Nu vreau să vorbesc despre acest subiect cu dumneavoastră.","en":"I don't want to discuss this topic with you."},
+    {"id":6688122,"text":"Vino la cină cândva.","en":"Come over for dinner sometime."},
+    {"id":10788644,"text":"Tom și-a dat seama că Mary leșinase.","en":"Tom realized Mary had fainted."},
+    {"id":6555397,"text":"Îți place ploaia, nu-i așa?","en":"You like rain, don't you?"},
+    {"id":13302035,"text":"Nimeni nu se aștepta să se întâmple așa ceva.","en":"Nobody expected something like that to happen."},
+    {"id":10790290,"text":"Tom cânta la trompetă.","en":"Tom was a trumpet player."},
+    {"id":6578259,"text":"Poate ar trebui să facem ceva în legătură cu asta.","en":"Maybe we should do something about that."},
+    {"id":2635784,"text":"Am mers la școală ieri.","en":"I went to school yesterday."},
+    {"id":1056793,"text":"Înainte de toate aș vrea să îmi expun punctul de vedere.","en":"First of all I'd like to make my position clear."},
+    {"id":4989851,"text":"Rebelii au sabotat calea ferată.","en":"The rebels sabotaged the railroad."},
+    {"id":8948960,"text":"Ne-am petrecut toată ziua la grădina zoologică.","en":"We spent the entire day at the zoo."},
+    {"id":6690895,"text":"Voi veni în câteva minute.","en":"I'll be along in a few minutes."},
+    {"id":5060301,"text":"Păcat că a murit Vasile, era un muncitor bun.","en":"What a pity that Vasile died, he was a good worker."},
+    {"id":6578372,"text":"Să călătorești este obositor.","en":"Travel is exhausting."},
+    {"id":9952605,"text":"Tom a spus că este dispus să ne împrumute trei mii de dolari.","en":"Tom said he was willing to lend us three thousand dollars."},
+    {"id":6857400,"text":"Tu pari a fi terminat.","en":"You seemed to be exhausted."},
+    {"id":2705307,"text":"Aparatul lui foto este de trei ori mai scump decât al meu.","en":"His camera is three times as expensive as mine."}
   ],
   "heb": [
-    {
-      "id": 12653825,
-      "text": "הוא שינה את מסלול הכדור בחבטה קלה.",
-      "en": "He redirected the ball with a flick."
-    },
-    {
-      "id": 5758729,
-      "text": "היא נזפה בו שלא הכין את שיעורי הבית.",
-      "en": "She scolded him for not doing his homework."
-    },
-    {
-      "id": 5492480,
-      "text": "לקח לי זמן רב למצוא עבודה כלבבי.",
-      "en": "It took me a long time to find a job I like."
-    },
-    {
-      "id": 1075777,
-      "text": "יש חנות בגן החיות הזה?",
-      "en": "Is there a shop at this zoo?"
-    },
-    {
-      "id": 8124775,
-      "text": "מרי הבטיחה לתום שתעזור לו.",
-      "en": "Mary promised Tom that she'd help him."
-    },
-    {
-      "id": 6116962,
-      "text": "אני שונאת שיעורי בית.",
-      "en": "I hate homework."
-    },
-    {
-      "id": 6001304,
-      "text": "לא אסבול שום רשלנות.",
-      "en": "I won't tolerate any sloppiness."
-    },
-    {
-      "id": 5965429,
-      "text": "כמה עולות שתי סופגניות הדבש האלה?",
-      "en": "How much do these two honey doughnuts cost?"
-    }
+    {"id":12653825,"text":"הוא שינה את מסלול הכדור בחבטה קלה.","en":"He redirected the ball with a flick."},
+    {"id":5758729,"text":"היא נזפה בו שלא הכין את שיעורי הבית.","en":"She scolded him for not doing his homework."},
+    {"id":5492480,"text":"לקח לי זמן רב למצוא עבודה כלבבי.","en":"It took me a long time to find a job I like."},
+    {"id":1075777,"text":"יש חנות בגן החיות הזה?","en":"Is there a shop at this zoo?"},
+    {"id":8124775,"text":"מרי הבטיחה לתום שתעזור לו.","en":"Mary promised Tom that she'd help him."},
+    {"id":6116962,"text":"אני שונאת שיעורי בית.","en":"I hate homework."},
+    {"id":6001304,"text":"לא אסבול שום רשלנות.","en":"I won't tolerate any sloppiness."},
+    {"id":5965429,"text":"כמה עולות שתי סופגניות הדבש האלה?","en":"How much do these two honey doughnuts cost?"},
+    {"id":13061253,"text":"היות שהתנור הזה כנראה לא תקין, אצטרך לבקש אותו לתקן אותו.","en":"Since this heater seems to be out of order, I'll have him repair it."},
+    {"id":1459685,"text":"נימוסיו הם ללא דופי, מה שאומר שאף פעם אינך יכול לדעת בביטחון מה הוא באמת חושב!","en":"He has impeccable manners, which means you can never be sure what he actually thinks!"},
+    {"id":2515535,"text":"הייתי רוצה שיהיה לי יותר זמן לבלות עם המשפחה.","en":"I wish I could spend more time with my family."},
+    {"id":3252908,"text":"אני מכיר כמה מילים בצרפתית, בדיוק מספיק כדי שיבינו אותי.","en":"I know a few words of French, just enough to be understood."},
+    {"id":6042897,"text":"חיינו תלויים בעיקר בנפט המיובא מארצות אחרות.","en":"Our life depends largely on oil imported from other countries."},
+    {"id":2155309,"text":"לעולם אל תכתוב את המילים \"מרק לפת\" ו\"מרק כרוב\" בגרמנית!","en":"Never write the words \"bortsch\" and \"shchi\" in German!"},
+    {"id":5758601,"text":"אם יש לך פנאי, תשתמש בו להכין את שיעורי הבית.","en":"If you have any free time, use it and do your homework."},
+    {"id":6004852,"text":"תום אמר לי שהוא מתכנן לצאת לטיול אופנים בקיץ הבא.","en":"Tom told me he was planning to go on a cycling trip next summer."},
+    {"id":1530851,"text":"לטום אין כרטיסי אשראי כלשהם.","en":"Tom doesn't have any credit cards."},
+    {"id":1392200,"text":"אני מודה, שבלעדיו, אותן עשר שנים מחיי היו ריקות וחסרות תכלית.","en":"I admit that, without him, those ten years of my life would have been empty and without goals."},
+    {"id":13046075,"text":"ידעתי שאל לנו להישאר באוסטרליה.","en":"I knew that we should've stayed in Australia."},
+    {"id":5631576,"text":"בוא נדבר על דרכים בהם ניתן למנוע הישנות דברים כאלה בעתיד.","en":"Let's talk about ways that we might prevent this from happening again in the future."},
+    {"id":1414189,"text":"זה מאד לא סביר שהילדים של טום ירשו ממנו משהו.","en":"It's very unlikely that Tom's children inherited anything from him."},
+    {"id":2785928,"text":"הֲבֵל הֲבָלִים אָמַר קֹהֶלֶת הֲבֵל הֲבָלִים הַכֹּל הָבֶל.","en":"\"Vanity of vanities,\" says the Preacher; \"Vanity of vanities, all is vanity.\""},
+    {"id":2304287,"text":"מה אתה אוהב יותר: אביב או סתיו?","en":"Which do you like better, spring or fall?"},
+    {"id":2279752,"text":"ישנתי טוב יותר מאשר אתמול בלילה.","en":"I slept better than I did last night."},
+    {"id":5596053,"text":"למה תום נשאר בסביבה?","en":"Why did Tom stick around?"},
+    {"id":2054677,"text":"אף שסופות הסתיו פחות נעימות מצפרירי הקיץ, הן מרגשות יותר.","en":"Though autumn gales are less clement than summer zephyrs, they are more exciting."},
+    {"id":2575749,"text":"אתמול חלמתי חלום מתוק.","en":"I had a sweet dream yesterday."},
+    {"id":6035328,"text":"זה לא מה שהוא אמר אלא הדרך בה הוא אמר את זה.","en":"It's not what he said, but the way he said it."},
+    {"id":1777275,"text":"תפנה בבקשה לדלפק המודיעין.","en":"Please ask at the information desk."},
+    {"id":1918960,"text":"הלכתי למכירה עם אמי אתמול והפצרתי בה ללא הרף לרכוש לי שמלה.","en":"I went to a sale with my mother yesterday and kept hounding her to buy me a dress."},
+    {"id":6012809,"text":"אנחנו כולנו מדברים ספרדית.","en":"We all speak Spanish."},
+    {"id":2401638,"text":"כולנו נקטנו יוזמה וקנינו לתום שובר מתנה ליום ההולדת שלו.","en":"We all got together and bought Tom a gift certificate for his birthday."},
+    {"id":5588570,"text":"דומה שתום די התחבב על הכלב שלך.","en":"It seems that your dog has taken quite a liking to Tom."},
+    {"id":12300123,"text":"תום איננו בדיוק תלמיד למופת.","en":"Tom isn't exactly a model student."},
+    {"id":6063393,"text":"אני אוהב לקרוא בדיחות.","en":"I like to read jokes."},
+    {"id":586805,"text":"המילה הזאת היא מיוונית.","en":"This word comes from Greek."},
+    {"id":5811621,"text":"זאת מתנת יום האם מושלמת.","en":"This is the perfect Mother's Day gift."},
+    {"id":4673226,"text":"רק תגידי לי במה מדובר.","en":"Just tell me what it is."},
+    {"id":5369576,"text":"אינני יודע מה להכין לערב.","en":"I don't know what to do for dinner."},
+    {"id":3775537,"text":"הניחוח שבקע מהחדר הזה הגעיל.","en":"The odor in that room was vile."},
+    {"id":6054351,"text":"היא בטח הייתה עשירה באותם ימים.","en":"She must have been rich in those days."},
+    {"id":580733,"text":"הגעתי לשם מבעוד מועד.","en":"I got there ahead of time."},
+    {"id":1768054,"text":"הרגשתי צורך לשוחח עם מישהו.","en":"I felt like talking to someone."},
+    {"id":2032782,"text":"תום היה צריך לטפל בבעיה אחרת.","en":"Tom should have handled the situation differently."},
+    {"id":5451486,"text":"הצוות שלנו עשוי לנצח.","en":"Our team may win."},
+    {"id":741895,"text":"הבן שלנו נפל בפעולה מבצעית.","en":"Our son was killed in action."},
+    {"id":5790823,"text":"איזה צבע המשאית שלך?","en":"What color is your truck?"},
+    {"id":13012804,"text":"המעיל היה גדול מדי לתום.","en":"The coat was too big for Tom."}
   ],
   "zul": [
-    {
-      "id": 9210316,
-      "text": "Ngabe izingane zakho lezi?",
-      "en": "Are these your children?"
-    },
-    {
-      "id": 9208691,
-      "text": "Sinifisela uKhisimusi omuhle nonyaka omusha omuhle.",
-      "en": "We wish you a happy Christmas and a happy New Year."
-    },
-    {
-      "id": 2887179,
-      "text": "Ngingumfundi enyunivesini.",
-      "en": "I'm a student in a university."
-    },
-    {
-      "id": 4805150,
-      "text": "Burj Khalifa yibhilidi elide kwengca wonkhe emhlabeni.",
-      "en": "Burj Khalifa is currently the tallest skyscraper in the world."
-    },
-    {
-      "id": 9210329,
-      "text": "Uma imoto yakho yephuka ngokushesha, into yokuqala oyenzayo ukungenwa ingebhe.",
-      "en": "When your car suddenly breaks down, your first reaction is often to panic."
-    },
-    {
-      "id": 9208695,
-      "text": "Nina zingane ningabangi umsindo ongaka!",
-      "en": "You children mustn’t make so much noise!"
-    },
-    {
-      "id": 9204394,
-      "text": "Iseduzane noxhaxha lwezitolo.",
-      "en": "It’s next to the shopping mall."
-    },
-    {
-      "id": 2887234,
-      "text": "Ngiyabhukuda olwandle.",
-      "en": "I'm swimming in the ocean."
-    }
+    {"id":9210316,"text":"Ngabe izingane zakho lezi?","en":"Are these your children?"},
+    {"id":9208691,"text":"Sinifisela uKhisimusi omuhle nonyaka omusha omuhle.","en":"We wish you a happy Christmas and a happy New Year."},
+    {"id":2887179,"text":"Ngingumfundi enyunivesini.","en":"I'm a student in a university."},
+    {"id":4805150,"text":"Burj Khalifa yibhilidi elide kwengca wonkhe emhlabeni.","en":"Burj Khalifa is currently the tallest skyscraper in the world."},
+    {"id":9210329,"text":"Uma imoto yakho yephuka ngokushesha, into yokuqala oyenzayo ukungenwa ingebhe.","en":"When your car suddenly breaks down, your first reaction is often to panic."},
+    {"id":9208695,"text":"Nina zingane ningabangi umsindo ongaka!","en":"You children mustn’t make so much noise!"},
+    {"id":9204394,"text":"Iseduzane noxhaxha lwezitolo.","en":"It’s next to the shopping mall."},
+    {"id":2887234,"text":"Ngiyabhukuda olwandle.","en":"I'm swimming in the ocean."},
+    {"id":9204545,"text":"Ungazithola izimpawu zesonto lamaSulumani, isonto kanye nesinagogo?","en":"Can you find the signs for the mosque, the church and the synagogue?"},
+    {"id":9210382,"text":"Izindiza azivamile ukuvunyelwa ukundiza endaweni engaphezu kwenkaba yedolobha.","en":"Aeroplanes are not usually allowed to fly through the zone above a city centre."},
+    {"id":3633485,"text":"Angifuni ukuya esikoleni.","en":"I don't want to go to school."},
+    {"id":9210371,"text":"Uthe ebusheni bakhe, abantu abancane babesukumela abantu abadala ebhasini ukuze bahlale.","en":"He said that in his youth youngsters gave up their bus seats for the elderly."},
+    {"id":9204343,"text":"Sawubona. Igama lami nginguJabu.","en":"Hello. My name is Jabu."},
+    {"id":9210374,"text":"Umhlambi wamadube uqale ukubaleka ngesikhathi ubona kuza amabhubesi.","en":"The herd of zebras started fleeing when they saw the lions approaching."},
+    {"id":11491706,"text":"Wanquma ukuthuthela eBelgium.","en":"She decided to move to Belgium."},
+    {"id":9204765,"text":"Emuva kwesikhashana uqala ukufunda ngokucophelela okukhulu bese ubona okuqondwe umbhali.","en":"After a while you start reading with greater care and you realize the author’s true meaning."},
+    {"id":10946793,"text":"Imithetho yethu iqinile kakhulu.","en":"Our laws are very strict."},
+    {"id":9210350,"text":"Ngabe le ndishi uzenzele wena?","en":"Did you make this dish yourself?"},
+    {"id":9204339,"text":"Nali igumbi lokuphekela.","en":"Here's the kitchen."},
+    {"id":9204382,"text":"Likuphi ikepisi likaJabu?","en":"Where is Jabu’s cap?"},
+    {"id":2887158,"text":"Ngifuna ukuhlala enqabeni.","en":"I want to live in a castle."},
+    {"id":2888674,"text":"Emily ubhale umusho.","en":"Emily wrote the sentence."},
+    {"id":2887389,"text":"Usebenzela isibhedlela.","en":"She works for a hospital."},
+    {"id":9210322,"text":"Ngihlangane nomyeni wakho ezitolo.","en":"I met your husband at the shops."},
+    {"id":9208664,"text":"Nginifisela amnandi amaphupho.","en":"I wish you pleasant dreams."},
+    {"id":9210345,"text":"Ummese ubukhali – ungazisiki!","en":"The knife is sharp – don’t cut yourself!"},
+    {"id":9210380,"text":"Imitha ibekwe eqandeni.","en":"The meter is set at zero."},
+    {"id":9204337,"text":"Ungazithola zonke izincwadi zikaNiki?","en":"Can you find all of Niki’s books?"},
+    {"id":9204387,"text":"Lapha kulapho sihlala khona.","en":"This is where we live."},
+    {"id":3715536,"text":"Zikhona iziqhingi olwandle.","en":"There are islands in the sea."},
+    {"id":9204557,"text":"Sidinga ufulawa noshukela.","en":"We need flour and sugar."},
+    {"id":3180923,"text":"Ngifuna ukuthenga incwadi.","en":"I want to buy a book."},
+    {"id":9204366,"text":"Bangaki abantu abafunda iphephandaba?","en":"How many people are reading the newspaper?"},
+    {"id":9208671,"text":"Wena ukhulumisa okwesilima.","en":"You are talking like a fool."},
+    {"id":9210361,"text":"Uhulumeni kufanele abheke izidingo zentsha.","en":"The government should pay attention to the needs of the youth."}
   ],
   "yor": [
-    {
-      "id": 3143486,
-      "text": "Ẹṣin yìí kìí ṣe funfun.",
-      "en": "This horse is not white."
-    },
-    {
-      "id": 3154939,
-      "text": "Owó rẹ̀ wà ní bánkì.",
-      "en": "His money is in the bank."
-    },
-    {
-      "id": 3352030,
-      "text": "Ẹni tó bá ńjẹ nínú ọlà ẹnìkan nií pèé ní anímáṣaun.",
-      "en": "It's one who shares in another's wealth that hails him as a generous person."
-    },
-    {
-      "id": 3714005,
-      "text": "Mo ní àwọn arákunrin.",
-      "en": "I have brothers."
-    },
-    {
-      "id": 11984165,
-      "text": "Ó jẹ́ ọmọ ilẹ̀ Potogí.",
-      "en": "He is Portuguese."
-    },
-    {
-      "id": 3713991,
-      "text": "Àwọn erékùṣù wà ní òkun.",
-      "en": "There are islands in the sea."
-    },
-    {
-      "id": 4536795,
-      "text": "Ṣé o lọ sọjà ni àna?",
-      "en": "Did you go to the market yesterday?"
-    },
-    {
-      "id": 3143483,
-      "text": "Ẹṣin yìí jẹ́ funfun.",
-      "en": "This horse is white."
-    }
+    {"id":3143486,"text":"Ẹṣin yìí kìí ṣe funfun.","en":"This horse is not white."},
+    {"id":3154939,"text":"Owó rẹ̀ wà ní bánkì.","en":"His money is in the bank."},
+    {"id":3352030,"text":"Ẹni tó bá ńjẹ nínú ọlà ẹnìkan nií pèé ní anímáṣaun.","en":"It's one who shares in another's wealth that hails him as a generous person."},
+    {"id":3714005,"text":"Mo ní àwọn arákunrin.","en":"I have brothers."},
+    {"id":11984165,"text":"Ó jẹ́ ọmọ ilẹ̀ Potogí.","en":"He is Portuguese."},
+    {"id":3713991,"text":"Àwọn erékùṣù wà ní òkun.","en":"There are islands in the sea."},
+    {"id":4536795,"text":"Ṣé o lọ sọjà ni àna?","en":"Did you go to the market yesterday?"},
+    {"id":3143483,"text":"Ẹṣin yìí jẹ́ funfun.","en":"This horse is white."},
+    {"id":3352025,"text":"Ẹ̀gbẹ́ táa máa fi sùn lálẹ́, kò yẹ ká fi gbọgbẹ́ lọ́ọ̀sán.","en":"One shouldn't injure during the day, the body side on which one will lie at night."},
+    {"id":4266589,"text":"Burj Khalifa je agbar tó ga ju ni gbògbó ayè.","en":"Burj Khalifa is currently the tallest skyscraper in the world."},
+    {"id":3633484,"text":"Mi ò fẹ́ lọ sí ilé-ẹ́kọ́.","en":"I don't want to go to school."},
+    {"id":8773821,"text":"A fẹ́ àwọn ọ̀rọ̀ ní gbólóhùn pípé.","en":"We want complete sentences."}
   ],
   "lat": [
-    {
-      "id": 6909834,
-      "text": "Thomas ex consuetudine caffeam sine saccharo sumit.",
-      "en": "Tom usually drinks coffee without sugar."
-    },
-    {
-      "id": 7031061,
-      "text": "Non dubito quin Maria Thomae non placeat.",
-      "en": "I'm sure Tom doesn't like Mary."
-    },
-    {
-      "id": 3977135,
-      "text": "Didymus Mariam expectavit.",
-      "en": "Tom has been expecting Mary."
-    },
-    {
-      "id": 11139538,
-      "text": "Ubi eōs minātī estis?",
-      "en": "Where did you threaten them?"
-    },
-    {
-      "id": 8505324,
-      "text": "In Brasilia natus sum.",
-      "en": "I was born in Brazil."
-    },
-    {
-      "id": 4103189,
-      "text": "Didymus pedulia non gerit.",
-      "en": "Tom isn't wearing socks."
-    },
-    {
-      "id": 1915744,
-      "text": "Fructum nostrum videt.",
-      "en": "He sees our fruit."
-    },
-    {
-      "id": 8889942,
-      "text": "Librum, quem mihi commodavisti, perlegi.",
-      "en": "I've finished reading the book you lent me."
-    }
+    {"id":6909834,"text":"Thomas ex consuetudine caffeam sine saccharo sumit.","en":"Tom usually drinks coffee without sugar."},
+    {"id":7031061,"text":"Non dubito quin Maria Thomae non placeat.","en":"I'm sure Tom doesn't like Mary."},
+    {"id":3977135,"text":"Didymus Mariam expectavit.","en":"Tom has been expecting Mary."},
+    {"id":11139538,"text":"Ubi eōs minātī estis?","en":"Where did you threaten them?"},
+    {"id":8505324,"text":"In Brasilia natus sum.","en":"I was born in Brazil."},
+    {"id":4103189,"text":"Didymus pedulia non gerit.","en":"Tom isn't wearing socks."},
+    {"id":1915744,"text":"Fructum nostrum videt.","en":"He sees our fruit."},
+    {"id":8889942,"text":"Librum, quem mihi commodavisti, perlegi.","en":"I've finished reading the book you lent me."},
+    {"id":7030480,"text":"In foribus propriis canis est audacior omnis.","en":"Every dog is a lion at home."},
+    {"id":10128258,"text":"Litterae eam de morte eius certiorem fecerunt.","en":"The letter informed her of his death."},
+    {"id":11211085,"text":"In mundo erat, et mundus per ipsum factus est, et mundus eum non cognovit.","en":"He was in the world, and though the world was made through him, the world did not recognize him."},
+    {"id":12947694,"text":"Senescere potest solum corpus, animae autem aetas non est.","en":"Only the body can age; the soul has no age."},
+    {"id":9764133,"text":"Hoc flumen quingenta milia passuum in longitudinem est.","en":"This river is 500 miles in length."},
+    {"id":11664632,"text":"Cultrum durum est, cocta solana tuberosa mollis est.","en":"The knife is hard, the boiled potato is soft."},
+    {"id":12869998,"text":"Sine inquisitione non licet loqui.","en":"No investigation, no right to speak."},
+    {"id":639956,"text":"Arma civīs non occidunt. Civēs civīs occidunt.","en":"Guns don't kill people. People kill people."},
+    {"id":7016414,"text":"Vultisne mecum piscatum ire?","en":"Do you want to go fishing with me?"},
+    {"id":7845849,"text":"Ortusque est ei sol, cum transgrederetur Phanuel; ipse vero claudicabat propter femur.","en":"And immediately the sun rose upon him, after he was past Phanuel; but he halted on his foot."},
+    {"id":404648,"text":"Africa Australis submota est.","en":"South Africa is far away."},
+    {"id":2927345,"text":"Si cadere necesse est, occurrendum discrimini.","en":"If the danger is unavoidable, let it be faced."},
+    {"id":5045817,"text":"Multae urbs bombis deletae sunt.","en":"Many cities were destroyed by bombs."},
+    {"id":7814881,"text":"Respondit Laban: Melius est, ut tibi eam dem quam alteri viro; mane apud me.","en":"Laban answered: It is better that I give her to thee than to another man; stay with me."},
+    {"id":1308254,"text":"Cave cum in mari natas.","en":"You must be careful when swimming in the sea."},
+    {"id":10969556,"text":"Et celebremus nomen nostrum antequam dividamur in universas terras.","en":"And let us make us a name, lest we be scattered abroad upon the face of the whole earth."},
+    {"id":11833838,"text":"Multae nubes in caelo sunt quod tempestas venit.","en":"There are many clouds in the sky because the storm is coming."},
+    {"id":2656936,"text":"An discipulus lycei es?","en":"Are you a high school student?"},
+    {"id":8670960,"text":"Didymus in valetudinario operatur.","en":"Tom works in a hospital."},
+    {"id":10317332,"text":"Ieiunitatem et famem quam ubertatem et copiam malunt.","en":"They prefer meagerness and hunger to abundance and riches."},
+    {"id":9178263,"text":"Campanicum bibere volo.","en":"I want to drink champagne."},
+    {"id":9120578,"text":"Dixit mihi etiamnunc me amat, sed ei omnino non credo.","en":"He says he still loves me, but I don't believe him at all."},
+    {"id":7791299,"text":"Si non manducas, morieris.","en":"If you don't eat, you die."},
+    {"id":1793735,"text":"\"Estne pater tuus negotiosus?\" \"Id non credo.\"","en":"\"Is your father busy?\" \"No, I don't think he is.\""},
+    {"id":6681333,"text":"Parentes mei inter se altercantur.","en":"My parents are quarrelling."},
+    {"id":6388889,"text":"Pater indigenus locutor francus est mater etiam locutrix anglica.","en":"My father is a native French speaker and my mother is a native English speaker."},
+    {"id":8505300,"text":"Anno millesimo nongentesimo sexagesimo nata est.","en":"She was born in 1960."},
+    {"id":8807735,"text":"Thomas ut ignoraret Mariam hortatus sum.","en":"I tried to get Tom to ignore Mary."},
+    {"id":2905702,"text":"Puella in schola est.","en":"The girl is in school."},
+    {"id":7308207,"text":"Sede nunc ad mensam, et mane in cubiculo donec rediero.","en":"Sit now at the table, and wait in the room until I come back."},
+    {"id":11725965,"text":"Quot homines in illa erant navi?","en":"How many people were aboard that ship?"},
+    {"id":9130094,"text":"Libri mentionem fecit cuius titulus mihi nunc in mentem non venit","en":"He mentioned a book the title of which I can't remember now."},
+    {"id":7084781,"text":"Quando illud telephonum emisti?","en":"When did you buy that phone?"},
+    {"id":8090472,"text":"Si tria ista non fecerit ei, egredietur gratis absque pretio.","en":"If he do not these three things, she shall go out free without money."},
+    {"id":8557690,"text":"Ego numquam cannula oxhydrica usus sum.","en":"I've never used a blowtorch."},
+    {"id":6979470,"text":"\"Nondum Ilium et arces / Pergameæ steterant; habitabant vallibus imis.\"","en":"\"Nor yet proud Ilion nor her towers had stood; / in lowly vales sequestered they abode.\""},
+    {"id":13227465,"text":"Appetitus est desiderium edendi.","en":"Appetite is the desire to eat."},
+    {"id":5031170,"text":"Haec femina plus quam octoginta annos nata est.","en":"This woman is more than eighty years old."},
+    {"id":7037323,"text":"Non semper felix est.","en":"She is not always happy."},
+    {"id":10967169,"text":"Eramus pictores et pingabamus picturas pulchras.","en":"We were painters and we painted beautiful pictures."}
   ]
 };

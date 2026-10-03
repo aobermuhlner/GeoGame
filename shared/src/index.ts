@@ -10,6 +10,7 @@ export * from './pin';
 export * from './languages';
 export * from './sentencesData';
 export * from './languageRules';
+export * from './languageFacts';
 export * from './normalize';
 export * from './suggest';
 export * from './game';

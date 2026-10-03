@@ -5,7 +5,7 @@ import { CountryInput } from './CountryInput';
 import { EstimateLines, NumberInput, QuestionCard, formatEstimate, questionOf, useUnits } from './Guess';
 import { LocateBoard } from './LocateBoard';
 import { PinBoard } from './PinBoard';
-import { LockLines, PhotoCredit, SentenceCard, ZoomPhoto } from './RoundPrompt';
+import { LockLines, LanguageFacts, PhotoCredit, SentenceCard, ZoomPhoto } from './RoundPrompt';
 import { Logo, RegionChips, StageSteps, formatClock, useNow } from './common';
 import { VsIntro } from './VsIntro';
 
@@ -188,6 +188,7 @@ function StatusLine({ vm }: { vm: GameVM }) {
       <div class={`status-line reveal ${mine === theirs ? 'none' : mine > theirs ? 'win' : 'lose'}`}>
         <strong class="reveal-country">{answer}</strong>
         {mode === 'landmarks' && detail && <span class="reveal-of">{detail}</span>}
+        {mode === 'languages' && <LanguageFacts code={code} />}
         {locks ? (
           <LockLines
             locks={locks}

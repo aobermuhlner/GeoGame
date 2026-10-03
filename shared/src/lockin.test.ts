@@ -6,6 +6,8 @@ import { LANDMARK_META } from './landmarkMeta';
 import { landmarksInRegions, photoZoom, PHOTO_START_ZOOM } from './landmarkRules';
 import { PLAYED_LANGUAGES, SENTENCE_ITEMS, languageOfItem, resolveLanguage } from './languageRules';
 import { MODES } from './modes';
+import { COUNTRY_BY_CODE } from './countries';
+import { LANGUAGE_FACTS, languageFactsLine } from './languageFacts';
 import { distanceKm, formatPin, parsePin, pinMissKm } from './pin';
 import { REGION_IDS } from './regions';
 
@@ -212,5 +214,18 @@ describe('solo lock-in', () => {
     const item = SENTENCE_ITEMS[0];
     const lang = newDailyRun('', 'languages', [item], T0, 't');
     expect(dailyView(lang, lang.rounds[0].startsAt).prompt).toBe(MODES.languages.promptText!(item));
+  });
+});
+
+describe('language facts', () => {
+  it('every played language has up to five known places and a country count', () => {
+    for (const l of PLAYED_LANGUAGES) {
+      const f = LANGUAGE_FACTS[l.id];
+      expect(f, l.id).toBeTruthy();
+      expect(f.spokenIn.length).toBeGreaterThan(0);
+      expect(f.spokenIn.length).toBeLessThanOrEqual(5);
+      for (const p of f.spokenIn) if (/^[A-Z]{2}$/.test(p)) expect(COUNTRY_BY_CODE[p], `${l.id} ${p}`).toBeTruthy();
+    }
+    expect(languageFactsLine('spa')).toBe('Spoken in Mexico, United States, Colombia, Spain, Argentina (official in 20 countries)');
   });
 });
