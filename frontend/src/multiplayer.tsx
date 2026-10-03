@@ -3,14 +3,24 @@ import { MODES, MODE_IDS, REGION_IDS, ROOM_CODE_RE, type ModeId, type RankedMode
 import type { GameActions, GameVM } from './types';
 import { api } from './api';
 import { Home } from './components/Home';
-import { DivisionBadge, RankedBoard, RankedCard, type Searching } from './components/Ranked';
+import { DivisionBadge, RANKED_ENABLED, RankedBoard, RankedCard, type Searching } from './components/Ranked';
 import { Lobby } from './components/Lobby';
 import { GameScreen } from './components/GameScreen';
 import { Results } from './components/Results';
 import { SoloGame, placementSource } from './components/Daily';
 import { HigherDuelResults, HigherDuelScreen, type DuelActions } from './components/HigherDuel';
 import { GroupPlay } from './components/Group';
-import { RankedQueue, RoomConnection, createGroup, createRoom, flagSrc, getSessionId, roomKind, type ConnStatus } from './net';
+import {
+  RankedQueue,
+  RoomConnection,
+  createGroup,
+  createRoom,
+  flagSrc,
+  getSessionId,
+  quickGroup,
+  roomKind,
+  type ConnStatus,
+} from './net';
 
 // The current room is remembered per tab.
 const LAST_ROOM_KEY = 'flagduel.lastRoom';
@@ -132,10 +142,19 @@ function toVM(o: Online): GameVM | null {
 }
 
 /**
- * The 1 vs 1 part: create/join screen, lobby, match and results. The player's name is their
- * account display name. `onImmersive(true)` while in a room or bot match (the app hides its menu).
+ * Multiplayer: "Find a game" (a public group game), 1 vs 1 duels and group lobbies with friends. The player's
+ * name is their account display name. `onImmersive(true)` while in a room or bot match (the app hides its menu).
+ * `quick`: look for a public game right away (the main screen's "Find a game").
  */
-export function Multiplayer({ name, onImmersive }: { name: string; onImmersive: (on: boolean) => void }) {
+export function Multiplayer({
+  name,
+  onImmersive,
+  quick = false,
+}: {
+  name: string;
+  onImmersive: (on: boolean) => void;
+  quick?: boolean;
+}) {
   const params = new URLSearchParams(location.search);
   const urlRoom = (params.get('room') ?? '').toUpperCase();
   const [online, setOnline] = useState<Online | null>(null);
@@ -220,6 +239,18 @@ export function Multiplayer({ name, onImmersive }: { name: string; onImmersive: 
     setError(message);
   }
 
+  async function onQuick() {
+    setBusy(true);
+    setError(null);
+    try {
+      openGroup(await quickGroup());
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Could not reach the server.');
+    } finally {
+      setBusy(false);
+    }
+  }
+
   async function onCreateGroup() {
     setBusy(true);
     setError(null);
@@ -290,6 +321,7 @@ export function Multiplayer({ name, onImmersive }: { name: string; onImmersive: 
   useEffect(() => {
     if (ROOM_CODE_RE.test(urlRoom) && urlRoom === loadLastRoom()) connect(urlRoom, loadTicket(urlRoom));
     else if (ROOM_CODE_RE.test(urlRoom) && urlRoom === loadLastGroup()) setGroup(urlRoom);
+    else if (quick) onQuick();
     return () => {
       // Another menu tab was opened: leave the room for good (a reload doesn't unmount, so it still rejoins).
       queueRef.current?.stop();
@@ -385,7 +417,17 @@ export function Multiplayer({ name, onImmersive }: { name: string; onImmersive: 
     );
   }
 
-  if (group) return <GroupPlay key={group} code={group} name={name} onLeave={leaveGroup} onPlaying={setGroupPlaying} />;
+  if (group)
+    return (
+      <GroupPlay
+        key={group}
+        code={group}
+        name={name}
+        onLeave={leaveGroup}
+        onPlaying={setGroupPlaying}
+        onPlayAgain={onQuick}
+      />
+    );
 
   if (online) {
     const banner =
@@ -474,12 +516,23 @@ export function Multiplayer({ name, onImmersive }: { name: string; onImmersive: 
       initialCode={ROOM_CODE_RE.test(urlRoom) ? urlRoom : ''}
       busy={busy || !!searching}
       error={error}
+      onQuick={onQuick}
       onCreate={onCreate}
       onCreateGroup={onCreateGroup}
       onJoin={onJoin}
       onDemo={startDemo}
-      ranked={<RankedCard searching={searching} error={rankedError} onFind={findMatch} onCancel={cancelSearch} onPlacement={setPlacement} />}
-      below={<RankedBoard />}
+      ranked={
+        RANKED_ENABLED && (
+          <RankedCard
+            searching={searching}
+            error={rankedError}
+            onFind={findMatch}
+            onCancel={cancelSearch}
+            onPlacement={setPlacement}
+          />
+        )
+      }
+      below={RANKED_ENABLED && <RankedBoard />}
     />
   );
 }

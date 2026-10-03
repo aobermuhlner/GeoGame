@@ -328,6 +328,13 @@ export default {
       return withCors(new Response('Could not allocate a room', { status: 503 }), origin);
     }
 
+    // POST /quick → { code } of the public group lobby to join ("Find a game"). How many are waiting is never exposed.
+    if (url.pathname === '/quick' && request.method === 'POST') {
+      if (!origin) return new Response('Forbidden origin', { status: 403 });
+      const code = await env.MATCHMAKER.getByName('main').quickGroup();
+      return withCors(code ? Response.json({ code }) : new Response('Could not allocate a room', { status: 503 }), origin);
+    }
+
     // GET /rooms/:code → { code, kind, phase, players } (lets the join screen say "not found", and which kind it is)
     const info = /^\/rooms\/([^/]+)$/.exec(url.pathname);
     if (info && request.method === 'GET') {

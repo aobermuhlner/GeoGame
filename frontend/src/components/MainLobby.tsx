@@ -7,15 +7,14 @@ import {
   type DailySummary,
   type MeResponse,
   type ModeId,
-  type RankedModeId,
   type UserView,
 } from '@flagduel/shared';
 import { api } from '../api';
 import { formatDuration } from './common';
 import { NextDaily } from './Daily';
-import { DuelGlyph, GameIcon, PracticeGlyph, type TileIcon } from './GameIcons';
+import { GameIcon, PracticeGlyph, type TileIcon } from './GameIcons';
 import { GEO_KNOWLEDGE_LABEL, GEO_SPEED_LABEL, HIGHER_LABEL } from './Higher';
-import { storeRankedMode } from './Ranked';
+import { QuickCard } from './Quick';
 import type { GameId, Tab } from './NavBar';
 
 /** The lock-in games sit with Higher or Lower: one answer each, being right is what counts. */
@@ -60,7 +59,7 @@ function GameTile({
       ) : (
         <div class="gt-main">{body}</div>
       )}
-      <div class="gt-actions">{actions}</div>
+      {actions && <div class="gt-actions">{actions}</div>}
     </div>
   );
 }
@@ -84,13 +83,16 @@ function TileButton({
   );
 }
 
-/** The start screen: quick access to every game — daily (the big tile), practice and duels. */
+/** The start screen: "Find a game" (multiplayer), then every game's daily (the big tile) and practice. */
 export function MainLobby({
   user,
   onNavigate,
+  onQuick,
 }: {
   user: UserView;
   onNavigate: (t: Tab, mode?: GameId | null) => void;
+  /** Look for a public multiplayer game */
+  onQuick: () => void;
 }) {
   const [today, setToday] = useState<DailySummary | null>(null);
   const [me, setMe] = useState<MeResponse | null>(null);
@@ -105,11 +107,6 @@ export function MainLobby({
     ? MODE_IDS.filter((m) => today.modes[m].status === 'finished').length + (today.higher.status === 'finished' ? 1 : 0)
     : 0;
   const streak = me?.stats.streak ?? 0;
-
-  function duel(m: RankedModeId) {
-    storeRankedMode(m); // the ranked card opens on this game
-    onNavigate('multi');
-  }
 
   return (
     <main class="stack lobby">
@@ -128,6 +125,8 @@ export function MainLobby({
         {today && <NextDaily at={today.nextAt} />}
       </header>
 
+      <QuickCard busy={false} onFind={onQuick} />
+
       <section class="game-group" aria-labelledby="g-speed">
         <div class="group-head">
           <h2 id="g-speed">{GEO_SPEED_LABEL}</h2>
@@ -144,12 +143,7 @@ export function MainLobby({
                 status={info?.status ?? null}
                 result={info ? `${info.score} pts${info.timeMs !== null ? ` · ${formatDuration(info.timeMs)}` : ''}` : ''}
                 onDaily={() => onNavigate('daily', m)}
-                actions={
-                  <>
-                    <TileButton icon={<PracticeGlyph />} label="Practice" onClick={() => onNavigate('practice', m)} />
-                    <TileButton icon={<DuelGlyph />} label="Duel" onClick={() => duel(m)} />
-                  </>
-                }
+                actions={<TileButton icon={<PracticeGlyph />} label="Practice" onClick={() => onNavigate('practice', m)} />}
               />
             );
           })}
@@ -168,7 +162,7 @@ export function MainLobby({
             status={today?.higher.status ?? null}
             result={today ? `${today.higher.flawless} flawless` : ''}
             onDaily={() => onNavigate('daily', 'higher')}
-            actions={<TileButton icon={<DuelGlyph />} label="Duel a friend" onClick={() => onNavigate('multi')} />}
+            actions={null}
           />
           {KNOWLEDGE_MODES.map((m) => {
             const info = today?.modes[m];
@@ -180,12 +174,7 @@ export function MainLobby({
                 status={info?.status ?? null}
                 result={info ? `${info.score} pts${info.timeMs !== null ? ` · ${formatDuration(info.timeMs)}` : ''}` : ''}
                 onDaily={() => onNavigate('daily', m)}
-                actions={
-                  <>
-                    <TileButton icon={<PracticeGlyph />} label="Practice" onClick={() => onNavigate('practice', m)} />
-                    <TileButton icon={<DuelGlyph />} label="Duel a friend" onClick={() => onNavigate('multi')} />
-                  </>
-                }
+                actions={<TileButton icon={<PracticeGlyph />} label="Practice" onClick={() => onNavigate('practice', m)} />}
               />
             );
           })}

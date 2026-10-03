@@ -2,6 +2,7 @@ import type { ComponentChildren } from 'preact';
 import { useState } from 'preact/hooks';
 import { GROUP_MAX_PLAYERS, ROOM_CODE_LENGTH } from '@flagduel/shared';
 import { Logo } from './common';
+import { QuickCard } from './Quick';
 
 interface Props {
   /** Account display name, used as the in-game name */
@@ -9,6 +10,9 @@ interface Props {
   initialCode: string;
   busy: boolean;
   error: string | null;
+  /** Find a public game */
+  onQuick: () => void;
+  /** Create a 1 vs 1 lobby */
   onCreate: () => void;
   /** Create a group lobby (up to 8 players) */
   onCreateGroup: () => void;
@@ -22,7 +26,7 @@ interface Props {
 
 const NOT_CODE_CHARS = /[^ABCDEFGHJKLMNPQRSTUVWXYZ23456789]/g;
 
-export function Home({ name, initialCode, busy, error, onCreate, onCreateGroup, onJoin, onDemo, ranked, below }: Props) {
+export function Home({ name, initialCode, busy, error, onQuick, onCreate, onCreateGroup, onJoin, onDemo, ranked, below }: Props) {
   const [code, setCode] = useState(initialCode);
   const codeOk = code.length === ROOM_CODE_LENGTH;
 
@@ -41,10 +45,28 @@ export function Home({ name, initialCode, busy, error, onCreate, onCreateGroup, 
         </p>
       </section>
 
+      <QuickCard busy={busy} onFind={onQuick} />
+
       {ranked}
 
       <section class="card home-card friend-card">
-        <h2>Play a friend</h2>
+        <h2>Play with friends</h2>
+        <div class="friend-options">
+          <div class="friend-option">
+            <button type="button" class="btn btn-primary" disabled={busy} onClick={onCreate}>
+              Duel a friend
+            </button>
+            <p class="muted small">1 vs 1, all about speed: whoever names it first takes the point.</p>
+          </div>
+          <div class="friend-option">
+            <button type="button" class="btn btn-primary" disabled={busy} onClick={onCreateGroup}>
+              Group lobby
+            </button>
+            <p class="muted small">
+              Up to {GROUP_MAX_PLAYERS} players, you pick the games. Invite just one friend for a group game for two.
+            </p>
+          </div>
+        </div>
         <form
           class="home-actions"
           onSubmit={(e) => {
@@ -52,16 +74,8 @@ export function Home({ name, initialCode, busy, error, onCreate, onCreateGroup, 
             if (codeOk) onJoin(code);
           }}
         >
-          <button
-            type="button"
-            class="btn btn-primary btn-lg"
-            disabled={busy}
-            onClick={onCreate}
-          >
-            Create lobby
-          </button>
           <div class="or">
-            <span>or join a friend</span>
+            <span>or join with a code</span>
           </div>
           <div class="join-row">
             <input
@@ -84,12 +98,12 @@ export function Home({ name, initialCode, busy, error, onCreate, onCreateGroup, 
               Join lobby
             </button>
           </div>
-          {error && (
-            <p class="form-error" role="alert">
-              {error}
-            </p>
-          )}
         </form>
+        {error && (
+          <p class="form-error" role="alert">
+            {error}
+          </p>
+        )}
 
         {import.meta.env.DEV && (
           <div class="demo">
@@ -98,20 +112,6 @@ export function Home({ name, initialCode, busy, error, onCreate, onCreateGroup, 
             </button>
           </div>
         )}
-      </section>
-
-      <section class="card home-card group-card">
-        <h2>Group game</h2>
-        <p class="muted small">
-          Up to {GROUP_MAX_PLAYERS} players, everyone answers every round — right and quick scores most. After each game
-          the ranking shows who climbed and who fell; the best overall takes the throne. Friends join with the code
-          above.
-        </p>
-        <div class="btn-row">
-          <button type="button" class="btn btn-primary btn-lg" disabled={busy} onClick={onCreateGroup}>
-            Create group lobby
-          </button>
-        </div>
       </section>
 
       {below}

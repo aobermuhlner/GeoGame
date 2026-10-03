@@ -52,6 +52,13 @@ export async function createGroup(): Promise<string> {
   return ((await res.json()) as { code: string }).code;
 }
 
+/** "Find a game": the code of the public group lobby to join. */
+export async function quickGroup(): Promise<string> {
+  const res = await fetch(`${WORKER_URL}/quick`, { method: 'POST' });
+  if (!res.ok) throw new Error(`Could not find a game (${res.status})`);
+  return ((await res.json()) as { code: string }).code;
+}
+
 export type RoomKind = 'duel' | 'group';
 
 /** Which kind of lobby a code belongs to, or null if there is none. */
