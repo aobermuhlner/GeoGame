@@ -6,6 +6,8 @@ import {
   COUNTDOWN_MS,
   COUNTRY_BY_CODE,
   ROUND_TIME_MS,
+  CHALLENGE_BY_ID,
+  challengeCodes,
   dayOf,
   type DailyResponse,
   type LeaderboardResponse,
@@ -157,6 +159,22 @@ describe('linking a guest to Google', () => {
     expect((await db().rankedBoard(acc.user.id, 'flags')).you).toMatchObject({ name: 'Googler', played: 1 });
     expect(await scalar("SELECT player_a AS v FROM ranked_matches WHERE id = 'link-m1'")).toBe(acc.user.id);
     expect(await scalar('SELECT COUNT(*) AS v FROM users WHERE id = ?', g.user.id)).toBe(0);
+  });
+
+  it('merging keeps the faster challenge time and adds up the runs', async () => {
+    const acc = await db().loginGoogle(claims('link-challenge'));
+    const g = await guest('Fast');
+    const europe = challengeCodes(CHALLENGE_BY_ID.europe);
+    const africa = challengeCodes(CHALLENGE_BY_ID.africa);
+    await db().challengeResult(acc.user.id, 'europe', europe, 200_000);
+    await db().challengeResult(g.user.id, 'europe', europe, 150_000);
+    await db().challengeResult(g.user.id, 'europe', europe, 180_000);
+    await db().challengeResult(g.user.id, 'africa', africa, 300_000);
+
+    await db().linkGoogle(g.user.id, claims('link-challenge'));
+    expect((await db().challenges(acc.user.id)).bests).toEqual({ europe: 150_000, africa: 300_000 });
+    expect(await scalar("SELECT runs AS v FROM challenge_bests WHERE user_id = ? AND challenge = 'europe'", acc.user.id)).toBe(3);
+    expect(await count('challenge_bests', g.user.id)).toBe(0);
   });
 
   it('HTTP: needs a guest session and a valid credential', async () => {

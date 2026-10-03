@@ -282,6 +282,15 @@ export class Accounts extends DurableObject<Env> {
         this.sql.exec('UPDATE users SET provider_id = ? WHERE id = ?', providerId, userId);
         return;
       }
+      // Challenge times: keep the faster one and add up the runs.
+      this.sql.exec(
+        `UPDATE challenge_bests AS t SET
+           best_ms = MIN(t.best_ms, g.best_ms), runs = t.runs + g.runs, updated_at = MAX(t.updated_at, g.updated_at)
+         FROM challenge_bests AS g
+         WHERE t.user_id = ? AND g.user_id = ? AND t.challenge = g.challenge`,
+        target.id,
+        userId,
+      );
       // Every table keyed by user_id (later ones included) moves over; rows the target already has win.
       const tables = this.sql
         .exec<{ name: string }>(
