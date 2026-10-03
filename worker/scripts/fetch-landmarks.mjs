@@ -25,7 +25,7 @@ const args = process.argv.slice(2);
 const force = args.includes('--force');
 const only = new Set(args.filter((a) => !a.startsWith('--')));
 
-// Articles without coordinates in their page data.
+// Articles without coordinates in their page data, and the people in traditional dress.
 const MANUAL_COORDS = {
   kinderdijk: [51.884, 4.639],
   dubrovnik: [42.641, 18.11],
@@ -34,6 +34,29 @@ const MANUAL_COORDS = {
   kilimanjaro: [-3.0674, 37.3556],
   moai: [-27.1258, -109.2767],
   'twelve-apostles': [-38.665, 143.105],
+  'grand-canal-venice': [45.4375, 12.3358],
+  'blyde-river-canyon': [-24.58, 30.8],
+  // People in traditional dress: the heartland of the dress (or where the photo was taken)
+  kimono: [35.01, 135.77],
+  hanbok: [37.58, 126.98],
+  'ao-dai': [16.46, 107.59],
+  gho: [27.47, 89.64],
+  deel: [47.92, 106.92],
+  'barong-tagalog': [14.6, 120.98],
+  longyi: [16.84, 96.17],
+  kilt: [56.8, -4.2],
+  bunad: [61.0, 8.5],
+  'traje-de-flamenca': [37.39, -5.98],
+  vyshyvanka: [50.45, 30.52],
+  fustanella: [37.975, 23.737],
+  'habesha-kemis': [9.03, 38.74],
+  himba: [-18.06, 13.84],
+  charro: [20.67, -103.35],
+  pollera: [7.77, -80.27],
+  cholita: [-16.5, -68.15],
+  huaso: [-34.17, -70.74],
+  'kapa-haka': [-38.14, 176.25],
+  huli: [-5.85, 142.95],
 };
 
 const FREE = /^(cc[ -]by|cc[ -]by-sa|cc0|public domain|pd\b|pd-|attribution|gfdl|fal\b|free art|kogl type 1|no restrictions)/i;
