@@ -1,5 +1,6 @@
 import { DurableObject } from 'cloudflare:workers';
 import {
+  GROUP_MAX_PLAYERS,
   divisionOf,
   parseQueueMessage,
   queueWindow,
@@ -11,6 +12,9 @@ import type { RankedSeat } from './room';
 
 /** How often the queue is re-checked while someone is waiting (the rating window widens over time). */
 export const PAIR_INTERVAL_MS = 1000;
+
+/** A public lobby this close to its start no longer takes new players (they'd arrive mid-countdown). */
+export const QUICK_CLOSE_MS = 3_000;
 
 /** A queued player, stored on their socket (survives hibernation). */
 interface Waiting {
@@ -33,6 +37,9 @@ function randomHex(bytes: number): string {
  * the window of the one who has waited longer; they get a fresh ranked Room and a seat ticket each.
  */
 export class Matchmaker extends DurableObject<Env> {
+  /** Serializes quickGroup(): two players asking at once must land in the same lobby. */
+  private quickLock: Promise<unknown> = Promise.resolve();
+
   constructor(ctx: DurableObjectState, env: Env) {
     super(ctx, env);
     ctx.setWebSocketAutoResponse(new WebSocketRequestResponsePair('{"t":"ping"}', '{"t":"pong"}'));
@@ -145,6 +152,39 @@ export class Matchmaker extends DurableObject<Env> {
       this.send(ws, { t: 'error', message: 'Could not start the match. Please search again.' });
       ws.close(1011, 'no_room');
     }
+  }
+
+  // ---------- Public group games ("Find a game") ----------
+
+  /** The public lobby currently taking players, if any. */
+  private async openQuick(now: number) {
+    const code = await this.ctx.storage.get<string>('quick');
+    if (!code) return null;
+    const s = await this.env.GROUPS.getByName(code).summary();
+    const open =
+      s?.public &&
+      s.phase === 'lobby' &&
+      s.players < GROUP_MAX_PLAYERS &&
+      (s.autoStartAt === null || s.autoStartAt - now > QUICK_CLOSE_MS);
+    return open ? { code, ...s } : null;
+  }
+
+  /** Code of the public lobby to join: the open one, or a fresh one when it filled up or started. */
+  async quickGroup(): Promise<string | null> {
+    const run = this.quickLock.then(async () => {
+      const open = await this.openQuick(Date.now());
+      if (open) return open.code;
+      for (let attempt = 0; attempt < 5; attempt++) {
+        const code = randomRoomCode();
+        if (await this.env.ROOMS.getByName(code).summary()) continue;
+        if (!(await this.env.GROUPS.getByName(code).init(code, true))) continue;
+        await this.ctx.storage.put('quick', code);
+        return code;
+      }
+      return null;
+    });
+    this.quickLock = run.catch(() => {});
+    return run;
   }
 
   private send(ws: WebSocket, msg: QueueServerMessage) {

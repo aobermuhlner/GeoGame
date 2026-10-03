@@ -8,6 +8,9 @@ import {
   GROUP_STANDINGS_MS,
   MIN_POOL_SIZE,
   MODES,
+  QUICK_FILL_MS,
+  QUICK_GAMES,
+  QUICK_ROUNDS,
   RECONNECT_GRACE_MS,
   REGION_IDS,
   countriesInRegions,
@@ -92,6 +95,10 @@ export interface GroupState {
   roundCounts: RoundCounts;
   /** Play the games in a random order (drawn when each match starts; absent in rooms stored before it existed) */
   shuffle?: boolean;
+  /** A public game ("Find a game"): fixed settings, no host controls, starts on its own */
+  public?: boolean;
+  /** Public lobby: when the match starts; set once two players are in */
+  autoStartAt?: number | null;
   game: GameState | null;
   emptySince: number | null;
 }
@@ -148,7 +155,8 @@ export class GroupRoom extends DurableObject<Env> {
 
   // ---------- RPC ----------
 
-  async init(code: string): Promise<boolean> {
+  /** `isPublic`: a "Find a game" lobby — a few random games, every region, starts on its own. */
+  async init(code: string, isPublic = false): Promise<boolean> {
     if (this.state) return false;
     const now = Date.now();
     this.state = {
@@ -157,8 +165,13 @@ export class GroupRoom extends DurableObject<Env> {
       phase: 'lobby',
       players: [],
       regions: [...REGION_IDS],
-      modes: [...GAME_IDS],
-      roundCounts: { ...GROUP_DEFAULT_ROUND_COUNTS },
+      modes: isPublic ? shuffleGames(GAME_IDS).slice(0, QUICK_GAMES) : [...GAME_IDS],
+      roundCounts: isPublic
+        ? (Object.fromEntries(GAME_IDS.map((g) => [g, QUICK_ROUNDS])) as RoundCounts)
+        : { ...GROUP_DEFAULT_ROUND_COUNTS },
+      shuffle: isPublic,
+      public: isPublic,
+      autoStartAt: null,
       game: null,
       emptySince: now,
     };
@@ -166,8 +179,16 @@ export class GroupRoom extends DurableObject<Env> {
     return true;
   }
 
-  async summary(): Promise<{ phase: GroupPhase; players: number } | null> {
-    return this.state ? { phase: this.state.phase, players: this.state.players.length } : null;
+  async summary(): Promise<{
+    phase: GroupPhase;
+    players: number;
+    public: boolean;
+    autoStartAt: number | null;
+  } | null> {
+    const s = this.state;
+    return s
+      ? { phase: s.phase, players: s.players.length, public: !!s.public, autoStartAt: s.autoStartAt ?? null }
+      : null;
   }
 
   /** The item behind an image token (only for rounds that have started). */
@@ -256,6 +277,10 @@ export class GroupRoom extends DurableObject<Env> {
     const s = this.state!;
     const now = Date.now();
     const hostOnly = (what: string) => {
+      if (s.public) {
+        this.sendError(ws, 'not_allowed', 'Public games start on their own');
+        return false;
+      }
       if (seat !== 0 || s.phase !== 'lobby') {
         this.sendError(ws, 'not_allowed', `Only the host can ${what}`);
         return false;
@@ -335,7 +360,8 @@ export class GroupRoom extends DurableObject<Env> {
       }
 
       case 'backToLobby':
-        if (s.phase !== 'finished') return;
+        // A public game holds one match: "play again" finds a new one.
+        if (s.phase !== 'finished' || s.public) return;
         this.toLobby();
         break;
 
@@ -451,6 +477,27 @@ export class GroupRoom extends DurableObject<Env> {
     g!.revealEndsAt = now + groupRevealMsOf(r.game);
   }
 
+  /**
+   * Public lobby: the clock starts once two players are in and stops if they drop below two;
+   * when it runs out (or every seat is taken) the match starts.
+   */
+  private autoStart(now: number) {
+    const s = this.state!;
+    if (!s.public || s.phase !== 'lobby') return;
+    const here = s.players.filter((p) => p.connected).length;
+    if (here < GROUP_MIN_PLAYERS) {
+      s.autoStartAt = null;
+      return;
+    }
+    s.autoStartAt ??= now + QUICK_FILL_MS;
+    if (now >= s.autoStartAt || s.players.length >= GROUP_MAX_PLAYERS) {
+      // Seats of players who are away right now don't hold the match up.
+      for (let i = s.players.length - 1; i >= 0; i--) if (!s.players[i].connected) s.players.splice(i, 1);
+      s.autoStartAt = null;
+      this.startMatch(now);
+    }
+  }
+
   private toLobby() {
     const s = this.state!;
     s.phase = 'lobby';
@@ -500,7 +547,7 @@ export class GroupRoom extends DurableObject<Env> {
         if (!p.connected && p.disconnectedAt !== null && now >= p.disconnectedAt + RECONNECT_GRACE_MS) this.removePlayer(i);
       }
     }
-    await this.commit();
+    await this.commit(now);
   }
 
   private nextAlarmAt(): number | null {
@@ -513,6 +560,7 @@ export class GroupRoom extends DurableObject<Env> {
     if (s.phase === 'playing' && g?.rounds[g.current]) times.push(g.rounds[g.current].deadline);
     if (s.phase === 'reveal' && g?.revealEndsAt) times.push(g.revealEndsAt);
     if (s.phase === 'standings' && g?.standingsEndsAt) times.push(g.standingsEndsAt);
+    if (s.phase === 'lobby' && s.autoStartAt) times.push(s.autoStartAt);
     if (s.phase === 'lobby')
       for (const p of s.players)
         if (!p.connected && p.disconnectedAt !== null) times.push(p.disconnectedAt + RECONNECT_GRACE_MS);
@@ -528,7 +576,8 @@ export class GroupRoom extends DurableObject<Env> {
 
   // ---------- Persistence & broadcast ----------
 
-  private async commit() {
+  private async commit(now = Date.now()) {
+    this.autoStart(now);
     await this.ctx.storage.put('state', this.state!);
     const at = this.nextAlarmAt();
     if (at === null) await this.ctx.storage.deleteAlarm();
@@ -602,6 +651,8 @@ export class GroupRoom extends DurableObject<Env> {
         status: r && (s.phase === 'playing' || s.phase === 'reveal') && r.entries[i] ? statusOf(r, r.entries[i]) : null,
       })),
       maxPlayers: GROUP_MAX_PLAYERS,
+      public: !!s.public,
+      autoStartAt: s.phase === 'lobby' ? (s.autoStartAt ?? null) : null,
       regions: s.regions,
       countryCount: countriesInRegions(s.regions).length,
       modes: g ? g.stages : s.modes,

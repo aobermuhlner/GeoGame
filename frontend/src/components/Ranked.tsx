@@ -17,6 +17,12 @@ import {
 import { api } from '../api';
 import { Emblem } from './Emblem';
 
+/**
+ * Ranked (Flags, Capitals, GeoLocate) is archived for now: its cards, board and profile stats are hidden.
+ * The server side still works; flip this to bring it back.
+ */
+export const RANKED_ENABLED = false;
+
 const MODE_KEY = 'flagduel.rankedMode';
 
 export function loadRankedMode(): RankedModeId {

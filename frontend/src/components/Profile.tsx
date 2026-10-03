@@ -2,7 +2,7 @@ import { useEffect, useState } from 'preact/hooks';
 import { MAX_NAME_LENGTH, MODE_IDS, MODES, RANKED_MODE_IDS, type MeResponse, type RankedProfile, type UserView } from '@flagduel/shared';
 import { api } from '../api';
 import { GoogleButton } from './Login';
-import { DivisionBadge } from './Ranked';
+import { DivisionBadge, RANKED_ENABLED } from './Ranked';
 import { Avatar } from './NavBar';
 
 /** Guests: attach a Google account so the scores and ratings survive sign-out and other devices. */
@@ -143,7 +143,7 @@ export function Profile({
 
   useEffect(() => {
     api.me().then(setMe).catch(() => {});
-    api.ranked().then(setRanked).catch(() => {});
+    if (RANKED_ENABLED) api.ranked().then(setRanked).catch(() => {});
   }, [user.id]); // linking a guest to an existing Google account switches accounts
 
   const stats = me?.stats;
@@ -176,23 +176,25 @@ export function Profile({
         </div>
       </section>
 
-      <section class="card stats-card">
-        <h2>Ranked</h2>
-        <div class="stats-row">
-          {RANKED_MODE_IDS.map((m) => {
-            const r = ranked?.[m];
-            return (
-              <div class="stat" key={`r${m}`}>
-                <span class="stat-value">{r && !r.locked ? r.rating : dash}</span>
-                {r && !r.locked && <DivisionBadge division={r.division} small />}
-                <span class="stat-label">
-                  {MODES[m].label.toLowerCase()} · {r?.locked ? 'locked' : r && r.played ? `${r.wins}W ${r.losses}L` : 'unplayed'}
-                </span>
-              </div>
-            );
-          })}
-        </div>
-      </section>
+      {RANKED_ENABLED && (
+        <section class="card stats-card">
+          <h2>Ranked</h2>
+          <div class="stats-row">
+            {RANKED_MODE_IDS.map((m) => {
+              const r = ranked?.[m];
+              return (
+                <div class="stat" key={`r${m}`}>
+                  <span class="stat-value">{r && !r.locked ? r.rating : dash}</span>
+                  {r && !r.locked && <DivisionBadge division={r.division} small />}
+                  <span class="stat-label">
+                    {MODES[m].label.toLowerCase()} · {r?.locked ? 'locked' : r && r.played ? `${r.wins}W ${r.losses}L` : 'unplayed'}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      )}
     </main>
   );
 }

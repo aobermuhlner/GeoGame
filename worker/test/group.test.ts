@@ -1,7 +1,15 @@
 import { env, exports } from 'cloudflare:workers';
 import { runInDurableObject } from 'cloudflare:test';
 import { describe, expect, it } from 'vitest';
-import { COUNTRY_BY_CODE, GROUP_MAX_PLAYERS, higherOf, type GroupServerMessage } from '@flagduel/shared';
+import {
+  COUNTRY_BY_CODE,
+  GROUP_MAX_PLAYERS,
+  QUICK_FILL_MS,
+  QUICK_GAMES,
+  QUICK_ROUNDS,
+  higherOf,
+  type GroupServerMessage,
+} from '@flagduel/shared';
 import type { GroupRoom, GroupState } from '../src/group';
 import { BASE, Client, ORIGIN } from './helpers';
 
@@ -186,5 +194,60 @@ describe('group match', () => {
       (s) => (s as unknown as State).room.phase === 'reveal',
     );
     expect((reveal as unknown as State).room.reveal!.entries[0].end).toBe('correct');
+  });
+});
+
+describe('public games ("Find a game")', () => {
+  const quick = async () => {
+    const res = await exports.default.fetch(new Request(`${BASE}/quick`, { method: 'POST', headers: { Origin: ORIGIN } }));
+    expect(res.status).toBe(200);
+    return ((await res.json()) as { code: string }).code;
+  };
+
+  it('puts searching players into one lobby that starts a minute after the second joins', async () => {
+    const code = await quick();
+    expect(await quick()).toBe(code); // nobody joined yet: still the same lobby
+    const a = await joinGroup(code, 'Ann');
+    let s = await waitState(a.c, (x) => x.room.players.length === 1);
+    expect(s.room.public).toBe(true);
+    expect(s.room.autoStartAt).toBeNull();
+    expect(s.room.modes).toHaveLength(QUICK_GAMES);
+    expect(s.room.totalRounds).toBe(QUICK_GAMES * QUICK_ROUNDS);
+
+    const b = await joinGroup(code, 'Ben');
+    s = await waitState(a.c, (x) => x.room.players.length === 2 && x.room.autoStartAt !== null);
+    expect(s.room.autoStartAt! - s.now).toBeGreaterThan(QUICK_FILL_MS - 2_000);
+
+    // Nobody hosts: settings and "start" are refused.
+    const err = a.c.next('error');
+    a.c.send({ t: 'start' });
+    expect((await err).code).toBe('not_allowed');
+    const err2 = a.c.next('error');
+    a.c.send({ t: 'setModes', modes: ['flags'] });
+    expect((await err2).code).toBe('not_allowed');
+    expect((await internal(code)).phase).toBe('lobby');
+
+    // A third player still gets in while the clock runs.
+    expect(await quick()).toBe(code);
+    await joinGroup(code, 'Cat');
+    await waitState(a.c, (x) => x.room.players.length === 3);
+
+    await tickAt(code, (st) => st.autoStartAt!);
+    expect((await internal(code)).phase).toBe('countdown');
+    await waitState(b.c, (x) => x.room.phase === 'countdown');
+
+    // That lobby is playing: the next search opens a new one.
+    const next = await quick();
+    expect(next).not.toBe(code);
+  });
+
+  it('stops the clock when it drops back to one player', async () => {
+    const code = await quick();
+    const a = await joinGroup(code, 'Dan');
+    const b = await joinGroup(code, 'Eve');
+    await waitState(a.c, (x) => x.room.players.length >= 2 && x.room.autoStartAt !== null);
+    b.c.send({ t: 'leave' });
+    const s = await waitState(a.c, (x) => !x.room.players.some((p) => p.name === 'Eve'));
+    expect(s.room.autoStartAt).toBeNull();
   });
 });

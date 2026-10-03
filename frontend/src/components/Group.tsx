@@ -73,10 +73,13 @@ export function GroupPlay({
   name,
   onLeave,
   onPlaying,
+  onPlayAgain,
 }: {
   code: string;
   name: string;
   onLeave: (message?: string | null) => void;
+  /** Public games: find the next public game (they hold one match each) */
+  onPlayAgain: () => void;
   /** True while rounds are played (past the lobby, before the podium) */
   onPlaying: (playing: boolean) => void;
 }) {
@@ -163,11 +166,21 @@ export function GroupPlay({
           onRounds={(game, rounds) => conn.send({ t: 'setRounds', game, rounds })}
           onShuffle={(shuffle) => conn.send({ t: 'setShuffle', shuffle })}
           onLeave={leave}
+          toLocal={toLocal}
         />
       ) : room.phase === 'standings' ? (
         <GroupStandings room={room} you={you} toLocal={toLocal} onLeave={leave} />
       ) : room.phase === 'finished' ? (
-        <GroupPodium room={room} you={you} onLobby={() => conn.send({ t: 'backToLobby' })} onLeave={leave} />
+        <GroupPodium
+          room={room}
+          you={you}
+          onLobby={() => {
+            if (!room.public) return conn.send({ t: 'backToLobby' });
+            leave();
+            onPlayAgain();
+          }}
+          onLeave={leave}
+        />
       ) : (
         <GroupGame
           room={room}
@@ -195,9 +208,11 @@ function GroupLobby({
   onRounds,
   onShuffle,
   onLeave,
+  toLocal,
 }: {
   room: GroupView;
   you: number;
+  toLocal: (ms: number | null) => number | null;
   onStart: () => void;
   onRegions: (regions: RegionId[]) => void;
   onModes: (modes: GameId[]) => void;
@@ -206,6 +221,7 @@ function GroupLobby({
   onLeave: () => void;
 }) {
   const set = useGameSettings(room, onRegions, onModes, onRounds, onShuffle);
+  if (room.public) return <PublicLobby room={room} you={you} toLocal={toLocal} onLeave={onLeave} />;
   const isHost = you === 0;
   const here = room.players.filter((p) => p.connected).length;
   const enough = here >= GROUP_MIN_PLAYERS;
@@ -246,29 +262,7 @@ function GroupLobby({
               {room.players.length}/{room.maxPlayers}
             </span>
           </div>
-          <ul class="players g-seats">
-            {Array.from({ length: GROUP_MAX_PLAYERS }, (_, i) => {
-              const p = room.players[i];
-              if (!p)
-                return (
-                  <li class="player empty" key={i}>
-                    <span class="dot" />
-                    <span class="p-name">Open seat</span>
-                  </li>
-                );
-              return (
-                <li class={`player${i === you ? ' is-you' : ''}`} key={i}>
-                  <Avatar seat={i} name={p.name} size={26} />
-                  <span class="p-name">
-                    {p.name}
-                    {i === you && <span class="tag">you</span>}
-                    {i === 0 && <span class="tag host">host</span>}
-                  </span>
-                  <span class={`dot${p.connected ? ' on' : ''}`} title={p.connected ? 'Online' : 'Reconnecting…'} />
-                </li>
-              );
-            })}
-          </ul>
+          <SeatList room={room} you={you} host />
         </section>
 
         <RegionPicker
@@ -312,6 +306,128 @@ function GroupLobby({
             <button class="link" onClick={onLeave}>
               Leave lobby
             </button>
+          </div>
+        </section>
+      </div>
+    </main>
+  );
+}
+
+/** Seat list of a lobby: players, then open seats. */
+function SeatList({ room, you, host }: { room: GroupView; you: number; host: boolean }) {
+  return (
+    <ul class="players g-seats">
+      {Array.from({ length: GROUP_MAX_PLAYERS }, (_, i) => {
+        const p = room.players[i];
+        if (!p)
+          return (
+            <li class="player empty" key={i}>
+              <span class="dot" />
+              <span class="p-name">Open seat</span>
+            </li>
+          );
+        return (
+          <li class={`player${i === you ? ' is-you' : ''}`} key={i}>
+            <Avatar seat={i} name={p.name} size={26} />
+            <span class="p-name tagged">
+              <span class="p-text">{p.name}</span>
+              {i === you && <span class="tag">you</span>}
+              {host && i === 0 && <span class="tag host">host</span>}
+            </span>
+            <span class={`dot${p.connected ? ' on' : ''}`} title={p.connected ? 'Online' : 'Reconnecting…'} />
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
+
+/** "Find a game": nobody hosts. Once two players are in, a minute for more to join, then it starts. */
+function PublicLobby({
+  room,
+  you,
+  toLocal,
+  onLeave,
+}: {
+  room: GroupView;
+  you: number;
+  toLocal: (ms: number | null) => number | null;
+  onLeave: () => void;
+}) {
+  const startsAt = toLocal(room.autoStartAt);
+  const now = useNow(startsAt !== null, 250);
+  const left = startsAt !== null ? Math.max(0, startsAt - now) : null;
+  const rounds = room.totalRounds;
+  return (
+    <main class="stack mp-lobby quick-lobby">
+      <div class="lobby-col">
+        <section class="card lobby-card quick-card">
+          <header class="brand">
+            <Logo />
+            <h1>
+              Public <em>game</em>
+            </h1>
+          </header>
+          <div class={`quick-clock${left === null ? ' waiting' : ''}`} role="status" aria-live="polite">
+            {left === null ? (
+              <>
+                <span class="qc-kicker">Looking for players</span>
+                <strong class="qc-big">
+                  <span class="qc-dots" aria-hidden="true">
+                    <i />
+                    <i />
+                    <i />
+                  </span>
+                </strong>
+                <span class="muted small">The countdown starts as soon as one more player joins.</span>
+              </>
+            ) : (
+              <>
+                <span class="qc-kicker">Starting in</span>
+                <strong class="qc-big">{formatClock(left)}</strong>
+                <span class="muted small">More players can join until then — up to {room.maxPlayers}.</span>
+              </>
+            )}
+          </div>
+
+          <div class="regions-head g-players-head">
+            <h2>Players</h2>
+            <span class="pool">
+              {room.players.length}/{room.maxPlayers}
+            </span>
+          </div>
+          <SeatList room={room} you={you} host={false} />
+          <div class="center">
+            <button class="link" onClick={onLeave}>
+              Leave
+            </button>
+          </div>
+        </section>
+      </div>
+      <div class="lobby-col">
+        <section class="card quick-info">
+          <h2>This game</h2>
+          <p class="muted small">
+            {room.modes.length} games · {rounds} rounds · the whole world. Everyone answers every round: right answers score{' '}
+            {GROUP_BASE_POINTS} points plus up to {GROUP_SPEED_POINTS} for speed.
+          </p>
+          <ol class="quick-games">
+            {room.modes.map((g) => (
+              <li key={g}>
+                <strong>{gameLabel(g)}</strong>
+                <span class="muted small">
+                  {g === 'higher' ? 'Pick the country with the higher value.' : MODES[g].description}
+                </span>
+              </li>
+            ))}
+          </ol>
+          <p class="muted small">Friends can join this game too with the code below.</p>
+          <div class="code-box">
+            <span class="code-label">Game code</span>
+            <span class="code-big" aria-label={`Game code ${room.code.split('').join(' ')}`}>
+              {room.code}
+            </span>
+            <CopyInvite code={room.code} />
           </div>
         </section>
       </div>
@@ -919,7 +1035,9 @@ function GroupPodium({
   return (
     <main class="stack">
       <section class="card g-podium-card">
-        <span class="intro-kicker">Group game · {room.players.length} players</span>
+        <span class="intro-kicker">
+          {room.public ? 'Public game' : 'Group game'} · {room.players.length} players
+        </span>
         <h1 class="g-podium-title">
           {mine?.rank === 1 ? 'You take the throne!' : `${room.players[st[0]?.player]?.name ?? '?'} takes the throne!`}
         </h1>
@@ -959,7 +1077,7 @@ function GroupPodium({
         )}
         <div class="btn-row">
           <button class="btn btn-primary" onClick={onLobby}>
-            Back to lobby
+            {room.public ? 'Play again' : 'Back to lobby'}
           </button>
           <button class="btn btn-ghost" onClick={onLeave}>
             Leave

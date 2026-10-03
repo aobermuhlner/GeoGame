@@ -24,6 +24,12 @@ export const GROUP_DEFAULT_ROUND_COUNTS = Object.fromEntries(
   GAME_IDS.map((g) => [g, GROUP_DEFAULT_ROUNDS]),
 ) as RoundCounts;
 
+/** Public games ("Find a game"): once two players are in, the lobby stays open this long, then starts. */
+export const QUICK_FILL_MS = 60_000;
+/** A public game plays this many games, drawn at random, all regions. */
+export const QUICK_GAMES = 3;
+export const QUICK_ROUNDS = 5;
+
 /** Points for a right answer: base + speed bonus (linear in the time left), minus a bit per wrong try. */
 export const GROUP_BASE_POINTS = 50;
 export const GROUP_SPEED_POINTS = 50;
@@ -302,6 +308,10 @@ export interface GroupView {
   /** Index = seat; seat 0 is the host */
   players: GroupPlayerView[];
   maxPlayers: number;
+  /** A public game from "Find a game": fixed settings, no host, starts on its own */
+  public: boolean;
+  /** Public lobby: when the match starts (server clock; null while fewer than two players are in) */
+  autoStartAt: number | null;
   regions: RegionId[];
   countryCount: number;
   /** Selected games (lobby) or the games of the running match, in play order */

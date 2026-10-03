@@ -41,6 +41,8 @@ export function App() {
   const [dailyMode, setDailyMode] = useState<GameId | null>(dailyFromHash);
   const dailyRun = useMemo(() => (dailyMode && dailyMode !== 'higher' ? dailySource(dailyMode) : null), [dailyMode]);
   const [practiceMode, setPracticeMode] = useState<ModeId | null>(() => modeFromHash('practice'));
+  /** The main screen's "Find a game": the multiplayer tab opens and looks for a public game */
+  const [quick, setQuick] = useState(false);
   /** In a match or a daily round: hide the menu bar so a stray click can't leave the game. */
   const [immersive, setImmersive] = useState(false);
 
@@ -69,6 +71,12 @@ export function App() {
     setTab(t);
     setDailyMode(t === 'daily' ? mode : null);
     setPracticeMode(t === 'practice' && mode !== 'higher' ? mode : null);
+    setQuick(false);
+  }
+
+  function findGame() {
+    navigate('multi');
+    setQuick(true);
   }
 
   async function signOut() {
@@ -95,7 +103,7 @@ export function App() {
   return (
     <>
       {!immersive && <NavBar tab={tab} user={user} onTab={navigate} />}
-      {tab === 'lobby' && <MainLobby user={user} onNavigate={navigate} />}
+      {tab === 'lobby' && <MainLobby user={user} onNavigate={navigate} onQuick={findGame} />}
       {tab === 'profile' && <Profile user={user} onUser={setUser} onSignOut={signOut} />}
       {tab === 'daily' &&
         (dailyMode === 'higher' ? (
@@ -120,7 +128,7 @@ export function App() {
         />
       )}
       {tab === 'challenges' && <Challenges onImmersive={setImmersive} />}
-      {tab === 'multi' && <Multiplayer name={user.displayName} onImmersive={setImmersive} />}
+      {tab === 'multi' && <Multiplayer name={user.displayName} onImmersive={setImmersive} quick={quick} />}
       {!immersive && <CreditsLink />}
     </>
   );
