@@ -259,8 +259,8 @@ function GroupLobby({
               return (
                 <li class={`player${i === you ? ' is-you' : ''}`} key={i}>
                   <Avatar seat={i} name={p.name} size={26} />
-                  <span class="p-name">
-                    {p.name}
+                  <span class="p-name tagged">
+                    <span class="p-text">{p.name}</span>
                     {i === you && <span class="tag">you</span>}
                     {i === 0 && <span class="tag host">host</span>}
                   </span>
