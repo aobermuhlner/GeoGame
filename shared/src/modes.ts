@@ -60,7 +60,7 @@ export interface Mode {
   /** How long the reveal stays up (default: REVEAL_MS, LOCK_REVEAL_MS for lock-in games) */
   revealMs?: number;
   /**
-   * Estimation games: how close an answer is, 0â€¦1. Scored by closeness instead of right/wrong: solo and group
+   * Estimation games: how close an answer is, 0…1. Scored by closeness instead of right/wrong: solo and group
    * games give points for accuracy, duels a point to the closer answer (see game.ts).
    */
   accuracy?: (guess: string, item: string) => number;

@@ -244,7 +244,7 @@ function StatusLine({ vm }: { vm: GameVM }) {
                 ? formatEstimate(questionOf(vm.prompt, null)?.quantity ?? 'count', vm.myLock, units)
                 : vm.myLock
                   ? answerLabel(modeOf(vm), vm.myLock)
-                  : 'â€¦'}
+                  : '…'}
             </strong>
           </span>
           <span>{opp.locked || opp.passed ? 'Revealing…' : `Waiting for ${opp.name}…`}</span>
@@ -255,10 +255,10 @@ function StatusLine({ vm }: { vm: GameVM }) {
     return (
       <div class="status-line muted hint">
         {MODES[modeOf(vm)].input === 'pin'
-          ? 'Landmark inside your circle scores Â· smaller circle, more points Â· first right +1'
+          ? 'Landmark inside your circle scores · smaller circle, more points · first right +1'
           : MODES[modeOf(vm)].accuracy
-            ? 'One estimate each Â· closer = 1 point, spot on ðŸŽ¯ +1'
-            : 'One answer each Â· right = 1 point, first right +1'}
+            ? 'One estimate each · closer = 1 point, spot on 🎯 +1'
+            : 'One answer each · right = 1 point, first right +1'}
       </div>
     );
   }

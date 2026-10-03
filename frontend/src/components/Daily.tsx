@@ -421,9 +421,9 @@ function SoloScreen({
           ? `${run.wrong} wrong`
           : 'Speed doesn’t count, only correct answers'
         : mode.input === 'pin'
-          ? 'Pin the landmark Â· the smaller your circle and the sooner, the more points'
+          ? 'Pin the landmark · the smaller your circle and the sooner, the more points'
           : estimate
-            ? 'One estimate â€” the closer, the more points. Take your time'
+            ? 'One estimate — the closer, the more points. Take your time'
           : mode.lockIn
           ? 'One answer — lock it in. The sooner, the more points'
           : run.wrong > 0

@@ -591,9 +591,9 @@ function StatusLine({ room, you }: { room: GroupView; you: number }) {
       {done > 0
         ? `${done} of ${others.length} ${others.length === 1 ? 'player has' : 'players have'} answered`
         : isModeId(game) && MODES[game].input === 'pin'
-          ? 'Pin it Â· small circle and quick scores most'
+          ? 'Pin it · small circle and quick scores most'
           : isModeId(game) && MODES[game].accuracy
-            ? 'One estimate each Â· up to 100 points, the closer the more'
+            ? 'One estimate each · up to 100 points, the closer the more'
           : lockIn
           ? 'One answer · right and quick scores most'
           : 'Everyone answers · the quicker, the more points'}
