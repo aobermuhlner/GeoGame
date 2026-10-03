@@ -23,6 +23,8 @@ interface Props {
   region?: RegionId | readonly RegionId[] | null;
   /** Size the map's frame to the region (taller for compact regions, up to the window's height) */
   snug?: boolean;
+  /** Write these countries' names on the map (with `nameOf`), e.g. to reveal what was missed. */
+  labels?: readonly string[];
   /** Debug: show the hovered country's name. */
   showNames?: boolean;
   nameOf?: (code: string) => string;
@@ -81,6 +83,7 @@ const MAX_ZOOM = 40;
 const MARKER_R = 5; // on-screen px
 const MARKER_HIT = 12; // on-screen px
 const DRAG_PX = 5;
+const LABEL_PX = 11; // on-screen px
 
 export function LocateMap({
   onPick,
@@ -90,6 +93,7 @@ export function LocateMap({
   active = null,
   region,
   snug = false,
+  labels,
   showNames,
   nameOf,
   disabled,
@@ -426,6 +430,19 @@ export function LocateMap({
             </g>
           )}
           {layer?.(u)}
+          {labels && labels.length > 0 && (
+            // A constant on-screen size, so zooming in pulls crowded labels apart.
+            <g class="lm-labels" style={{ fontSize: `${LABEL_PX / u}px`, strokeWidth: `${(LABEL_PX / 3.5) / u}px` }}>
+              {labels.map((code) => {
+                const c = map.countries.find((x) => x.c === code);
+                return c && (
+                  <text key={code} x={c.l[0]} y={c.l[1]}>
+                    {nameOf ? nameOf(code) : code}
+                  </text>
+                );
+              })}
+            </g>
+          )}
         </g>
       </svg>
 

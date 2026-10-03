@@ -2394,6 +2394,11 @@ html.map-fs-open, html.map-fs-open body { overflow: hidden; overscroll-behavior:
 .cg-regions li.done { background: #eaf3ec; color: var(--green); }
 .lm-country.missed, .lm-marker.missed .dot { fill: #e98c8c; }
 .lm-zone.missed { fill: rgba(214, 60, 60, 0.15); stroke: var(--red); }
+.lm-labels { pointer-events: none; }
+.lm-labels text {
+  fill: #7a1c1c; font-weight: 600; text-anchor: middle; dominant-baseline: central;
+  stroke: rgba(255, 253, 247, 0.9); stroke-linejoin: round; paint-order: stroke;
+}
 .challenge-game .locate-map.disabled { cursor: grab; }
 .challenge-game .lm-country.hover { fill: #f7f2e4; }
 .challenge-game .lm-country.correct.hover { fill: #2fb35f; }

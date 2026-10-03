@@ -431,7 +431,7 @@ function ChallengeGame({
       )}
 
       <section class="card map-card">
-        <LocateMap region={ch.regions.length ? ch.regions : null} snug active={ch.regions.length ? pool : null} marks={marks} disabled />
+        <LocateMap region={ch.regions.length ? ch.regions : null} snug active={ch.regions.length ? pool : null} marks={marks} labels={missed} nameOf={nameOf} disabled />
       </section>
     </main>
   );

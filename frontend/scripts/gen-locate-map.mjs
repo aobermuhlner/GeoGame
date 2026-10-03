@@ -246,6 +246,66 @@ function hullArea(pts) {
   return Math.abs(a) / 2;
 }
 
+/**
+ * Where to write a country's name: the point of its largest landmass farthest from the coast (so the US label
+ * sits in the lower 48 rather than between Alaska and Hawaii, and South Africa's isn't on Lesotho). Coarse grid
+ * search, refined a few times around the best point.
+ */
+function labelPoint(features) {
+  let best = null;
+  for (const f of features) {
+    const g = f.geometry;
+    for (const poly of g.type === 'Polygon' ? [g.coordinates] : g.coordinates) {
+      const shape = { type: 'Polygon', coordinates: poly };
+      const area = geoPath(projOf(f)).area(shape);
+      if (!best || area > best.area) best = { area, f, shape };
+    }
+  }
+  // The polygon's projected rings (outer ring and holes, split at the seam if need be), filled even-odd.
+  const rings = [];
+  let ring = null;
+  geoPath(projOf(best.f), {
+    moveTo: (x, y) => rings.push((ring = [[x, y]])),
+    lineTo: (x, y) => ring.push([x, y]),
+    closePath() {},
+    arc() {},
+  })(best.shape);
+  const edges = rings.flatMap((r) => r.map((p, i) => [p, r[(i + 1) % r.length]]));
+  const inside = (x, y) => {
+    let c = false;
+    for (const [[ax, ay], [bx, by]] of edges) if (ay > y !== by > y && x < ((bx - ax) * (y - ay)) / (by - ay) + ax) c = !c;
+    return c;
+  };
+  const coast = (x, y) => {
+    let m = Infinity;
+    for (const [[ax, ay], [bx, by]] of edges) {
+      const dx = bx - ax;
+      const dy = by - ay;
+      const t = dx || dy ? Math.max(0, Math.min(1, ((x - ax) * dx + (y - ay) * dy) / (dx * dx + dy * dy))) : 0;
+      m = Math.min(m, Math.hypot(x - ax - t * dx, y - ay - t * dy));
+    }
+    return m;
+  };
+  let [x0, y0, x1, y1] = bbox(rings.flat());
+  let pick = [(x0 + x1) / 2, (y0 + y1) / 2];
+  let pickD = inside(...pick) ? coast(...pick) : -1;
+  const N = 24;
+  for (let round = 0; round < 5; round++) {
+    for (let i = 0; i <= N; i++)
+      for (let j = 0; j <= N; j++) {
+        const x = x0 + ((x1 - x0) * i) / N;
+        const y = y0 + ((y1 - y0) * j) / N;
+        if (!inside(x, y)) continue;
+        const dist = coast(x, y);
+        if (dist > pickD) ((pick = [x, y]), (pickD = dist));
+      }
+    const hw = (x1 - x0) / 6;
+    const hh = (y1 - y0) / 6;
+    [x0, y0, x1, y1] = [pick[0] - hw, pick[1] - hh, pick[0] + hw, pick[1] + hh];
+  }
+  return pick.map(r1);
+}
+
 const hullPath = (pts) => 'M' + pts.map(([x, y]) => `${r1(x)},${r1(y)}`).join('L') + 'Z';
 
 const countries = [];
@@ -259,7 +319,8 @@ for (const code of PLAYABLE) {
   if (MANUAL_POINTS[code]) polys = MANUAL_POINTS[code].map((ll) => [projection(ll)]);
   if (!polys.length) throw new Error(`No shape for ${code}`);
 
-  const entry = { c: code, d, b: bbox(polys.flat()).map(r1) };
+  const label = MANUAL_POINTS[code] ? polys[0][0].map(r1) : labelPoint(features);
+  const entry = { c: code, d, b: bbox(polys.flat()).map(r1), l: label };
   const spread = hullArea(paddedHull(polys.flat(), 0));
   const largest =
     Math.max(...polys.map(hullArea)) /
@@ -349,6 +410,7 @@ if (PACIFIC) {
       `import type { MapProjection, RegionId } from '@flagduel/shared';\n\n` +
       `export interface LocateCountry {\n  /** ISO alpha-2 */\n  c: string;\n  /** SVG path */\n  d: string;\n` +
       `  /** Bounding box [x0, y0, x1, y1] */\n  b: [number, number, number, number];\n` +
+      `  /** Where to write the name: inside the largest landmass, far from its coast */\n  l: [number, number];\n` +
       `  /** Click markers (one per island cluster) for places too small to hit */\n  m?: [number, number][];\n` +
       `  /** Island-group zones (SVG paths) that count as a hit */\n  z?: string[];\n}\n\n` +
       `export const LOCATE_MAP: {\n  width: number;\n  height: number;\n  other: string;\n  countries: LocateCountry[];\n` +
