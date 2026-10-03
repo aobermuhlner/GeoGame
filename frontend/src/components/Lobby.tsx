@@ -342,96 +342,100 @@ export function Lobby({ room, you, onReady, onStart, onRegions, onModes, onRound
   else if (!isHost) startHint = `Waiting for ${room.players[0].name} to start…`;
 
   return (
-    <main class="stack">
-      <section class="card lobby-card">
-        <header class="brand">
-          <Logo />
-          <h1>
-            Flag <em>Duel</em> lobby
-          </h1>
-        </header>
+    <main class="stack mp-lobby">
+      <div class="lobby-col">
+        <section class="card lobby-card">
+          <header class="brand">
+            <Logo />
+            <h1>
+              Flag <em>Duel</em> lobby
+            </h1>
+          </header>
 
-        <div class="code-box">
-          <span class="code-label">Lobby code</span>
-          <span class="code-big" aria-label={`Lobby code ${room.code.split('').join(' ')}`}>
-            {room.code}
-          </span>
-          <CopyInvite code={room.code} />
-        </div>
+          <div class="code-box">
+            <span class="code-label">Lobby code</span>
+            <span class="code-big" aria-label={`Lobby code ${room.code.split('').join(' ')}`}>
+              {room.code}
+            </span>
+            <CopyInvite code={room.code} />
+          </div>
 
-        <ul class="players">
-          {[0, 1].map((i) => {
-            const p = room.players[i];
-            if (!p)
+          <ul class="players">
+            {[0, 1].map((i) => {
+              const p = room.players[i];
+              if (!p)
+                return (
+                  <li class="player empty" key={i}>
+                    <span class="dot" />
+                    <span class="p-name">Waiting for opponent…</span>
+                  </li>
+                );
               return (
-                <li class="player empty" key={i}>
-                  <span class="dot" />
-                  <span class="p-name">Waiting for opponent…</span>
+                <li class={`player${i === you ? ' is-you' : ''}`} key={i}>
+                  <span class={`dot${p.connected ? ' on' : ''}`} title={p.connected ? 'Online' : 'Reconnecting…'} />
+                  <span class="p-name">
+                    {p.name}
+                    {i === you && <span class="tag">you</span>}
+                    {i === 0 && <span class="tag host">host</span>}
+                  </span>
+                  <span class={`ready-chip${p.ready ? ' ok' : ''}`}>{p.ready ? '✓ Ready' : 'Not ready'}</span>
                 </li>
               );
-            return (
-              <li class={`player${i === you ? ' is-you' : ''}`} key={i}>
-                <span class={`dot${p.connected ? ' on' : ''}`} title={p.connected ? 'Online' : 'Reconnecting…'} />
-                <span class="p-name">
-                  {p.name}
-                  {i === you && <span class="tag">you</span>}
-                  {i === 0 && <span class="tag host">host</span>}
-                </span>
-                <span class={`ready-chip${p.ready ? ' ok' : ''}`}>{p.ready ? '✓ Ready' : 'Not ready'}</span>
-              </li>
-            );
-          })}
-        </ul>
-      </section>
+            })}
+          </ul>
+        </section>
 
-      <GamesCard
-        modes={set.modes}
-        counts={set.counts}
-        totalRounds={set.totalRounds}
-        shuffle={set.shuffle}
-        editable={isHost}
-        hint={
-          isHost
-            ? `Pick any mix of games and how many rounds each lasts (${MIN_GAME_ROUNDS}–${MAX_GAME_ROUNDS}). ${set.shuffle ? 'They come in a random order' : "They're played in this order"}; most points overall wins.`
-            : `${room.players[0]?.name ?? 'The host'} picks the games.`
-        }
-        onToggle={set.toggleMode}
-        onRounds={set.setRounds}
-        onShuffle={set.setShuffle}
-      />
+        <RegionPicker
+          regions={set.regions}
+          countryCount={set.countryCount}
+          poolOk={set.poolOk}
+          countLabel={set.countLabel}
+          editable={isHost}
+          hint={
+            isHost
+              ? 'Click a region on the map (or in the list) to leave it out.'
+              : `${room.players[0]?.name ?? 'The host'} picks the regions.`
+          }
+          onToggle={set.toggleRegion}
+        />
 
-      <RegionPicker
-        regions={set.regions}
-        countryCount={set.countryCount}
-        poolOk={set.poolOk}
-        countLabel={set.countLabel}
-        editable={isHost}
-        hint={
-          isHost
-            ? 'Click a region on the map (or in the list) to leave it out.'
-            : `${room.players[0]?.name ?? 'The host'} picks the regions.`
-        }
-        onToggle={set.toggleRegion}
-      />
+      </div>
+      <div class="lobby-col">
+        <GamesCard
+          modes={set.modes}
+          counts={set.counts}
+          totalRounds={set.totalRounds}
+          shuffle={set.shuffle}
+          editable={isHost}
+          hint={
+            isHost
+              ? `Pick any mix of games and how many rounds each lasts (${MIN_GAME_ROUNDS}–${MAX_GAME_ROUNDS}). ${set.shuffle ? 'They come in a random order' : "They're played in this order"}; most points overall wins.`
+              : `${room.players[0]?.name ?? 'The host'} picks the games.`
+          }
+          onToggle={set.toggleMode}
+          onRounds={set.setRounds}
+          onShuffle={set.setShuffle}
+        />
 
-      <section class="card actions-card">
-        <div class="btn-row">
-          <button class={`btn btn-lg ${me.ready ? 'btn-ghost' : 'btn-primary'}`} onClick={() => onReady(!me.ready)}>
-            {me.ready ? 'Not ready' : "I'm ready"}
-          </button>
-          {isHost && (
-            <button class="btn btn-lg btn-primary" disabled={!allReady || !set.poolOk} onClick={onStart}>
-              Start game
+        <section class="card actions-card">
+          <div class="btn-row">
+            <button class={`btn btn-lg ${me.ready ? 'btn-ghost' : 'btn-primary'}`} onClick={() => onReady(!me.ready)}>
+              {me.ready ? 'Not ready' : "I'm ready"}
             </button>
-          )}
-        </div>
-        {startHint && <p class="muted small center">{startHint}</p>}
-        <div class="center">
-          <button class="link" onClick={onLeave}>
-            Leave lobby
-          </button>
-        </div>
-      </section>
+            {isHost && (
+              <button class="btn btn-lg btn-primary" disabled={!allReady || !set.poolOk} onClick={onStart}>
+                Start game
+              </button>
+            )}
+          </div>
+          {startHint && <p class="muted small center">{startHint}</p>}
+          <div class="center">
+            <button class="link" onClick={onLeave}>
+              Leave lobby
+            </button>
+          </div>
+        </section>
+      </div>
     </main>
   );
 }

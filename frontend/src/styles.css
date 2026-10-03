@@ -1222,6 +1222,32 @@ button.gt-main:active, .gt-btn:active:not(:disabled) { transform: translateY(3px
   background: var(--ink); color: #fffdf7; font-size: 0.8rem; font-weight: 600; padding: 4px 8px; border-radius: 8px;
 }
 
+/* ---------- Multiplayer: wider pages for desktop ---------- */
+/* Lobbies: code, players and regions on the left; games and the ready/start buttons on the right.
+   Narrow screens keep one column in the old order (players, games, regions, buttons). */
+.lobby-col { display: contents; }
+.mp-lobby .lobby-card { order: 1; }
+.mp-lobby .modes-card { order: 2; }
+.mp-lobby .regions-card { order: 3; }
+.mp-lobby .actions-card { order: 4; }
+@media (min-width: 980px) {
+  .stack.mp-lobby { max-width: 1180px; flex-direction: row; align-items: flex-start; }
+  .lobby-col { display: flex; flex-direction: column; gap: 16px; flex: 1 1 0; min-width: 0; }
+  .mp-lobby .actions-card { position: sticky; bottom: 16px; }
+}
+/* Multiplayer home: ranked beside playing friends */
+@media (min-width: 900px) {
+  .stack.home {
+    max-width: 1040px; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: start;
+  }
+  .stack.home > * { grid-column: 1 / -1; }
+  .stack.home > .home-card, .stack.home > .ranked-card { max-width: none; margin: 0; }
+  .stack.home > .home-hero { margin-top: 2vh; }
+  .stack.home > .ranked-card { grid-column: 1; grid-row: 2 / span 2; }
+  .stack.home > .friend-card, .stack.home > .group-card { grid-column: 2; }
+  .stack.home > .board-card { max-width: none; }
+}
+
 /* ---------- GeoLocate in a game ---------- */
 .stack.wide { max-width: 1180px; }
 .map-card { padding: 16px 18px; }

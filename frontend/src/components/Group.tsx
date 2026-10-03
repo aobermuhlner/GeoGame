@@ -72,10 +72,13 @@ export function GroupPlay({
   code,
   name,
   onLeave,
+  onPlaying,
 }: {
   code: string;
   name: string;
   onLeave: (message?: string | null) => void;
+  /** True while rounds are played (past the lobby, before the podium) */
+  onPlaying: (playing: boolean) => void;
 }) {
   const [room, setRoom] = useState<GroupView | null>(null);
   const [you, setYou] = useState(0);
@@ -99,8 +102,18 @@ export function GroupPlay({
       },
     });
     connRef.current = conn;
-    return () => conn.stop();
+    return () => {
+      // Unmounted by another menu tab: leave the lobby (a no-op after leave(), which already closed the socket).
+      conn.send({ t: 'leave' });
+      conn.stop();
+    };
   }, [code]);
+
+  const playing = !!room && room.phase !== 'lobby' && room.phase !== 'finished';
+  useEffect(() => {
+    onPlaying(playing);
+  }, [playing]);
+  useEffect(() => () => onPlaying(false), []);
 
   const conn = connRef.current;
   function leave() {
@@ -204,100 +217,104 @@ function GroupLobby({
   else if (!isHost) startHint = `Waiting for ${host} to start…`;
 
   return (
-    <main class="stack">
-      <section class="card lobby-card">
-        <header class="brand">
-          <Logo />
-          <h1>
-            Group <em>game</em> lobby
-          </h1>
-        </header>
-        <p class="muted small">
-          Everyone answers every round. Right answers score {GROUP_BASE_POINTS} points plus up to {GROUP_SPEED_POINTS}{' '}
-          for speed; GeoGuesser estimates score up to 100 the closer they are. After each game you see how the ranking
-          changed; the best overall takes the throne.
-        </p>
+    <main class="stack mp-lobby">
+      <div class="lobby-col">
+        <section class="card lobby-card">
+          <header class="brand">
+            <Logo />
+            <h1>
+              Group <em>game</em> lobby
+            </h1>
+          </header>
+          <p class="muted small">
+            Everyone answers every round. Right answers score {GROUP_BASE_POINTS} points plus up to {GROUP_SPEED_POINTS}{' '}
+            for speed; GeoGuesser estimates score up to 100 the closer they are. After each game you see how the ranking
+            changed; the best overall takes the throne.
+          </p>
 
-        <div class="code-box">
-          <span class="code-label">Lobby code</span>
-          <span class="code-big" aria-label={`Lobby code ${room.code.split('').join(' ')}`}>
-            {room.code}
-          </span>
-          <CopyInvite code={room.code} />
-        </div>
+          <div class="code-box">
+            <span class="code-label">Lobby code</span>
+            <span class="code-big" aria-label={`Lobby code ${room.code.split('').join(' ')}`}>
+              {room.code}
+            </span>
+            <CopyInvite code={room.code} />
+          </div>
 
-        <div class="regions-head g-players-head">
-          <h2>Players</h2>
-          <span class="pool">
-            {room.players.length}/{room.maxPlayers}
-          </span>
-        </div>
-        <ul class="players g-seats">
-          {Array.from({ length: GROUP_MAX_PLAYERS }, (_, i) => {
-            const p = room.players[i];
-            if (!p)
+          <div class="regions-head g-players-head">
+            <h2>Players</h2>
+            <span class="pool">
+              {room.players.length}/{room.maxPlayers}
+            </span>
+          </div>
+          <ul class="players g-seats">
+            {Array.from({ length: GROUP_MAX_PLAYERS }, (_, i) => {
+              const p = room.players[i];
+              if (!p)
+                return (
+                  <li class="player empty" key={i}>
+                    <span class="dot" />
+                    <span class="p-name">Open seat</span>
+                  </li>
+                );
               return (
-                <li class="player empty" key={i}>
-                  <span class="dot" />
-                  <span class="p-name">Open seat</span>
+                <li class={`player${i === you ? ' is-you' : ''}`} key={i}>
+                  <Avatar seat={i} name={p.name} size={26} />
+                  <span class="p-name">
+                    {p.name}
+                    {i === you && <span class="tag">you</span>}
+                    {i === 0 && <span class="tag host">host</span>}
+                  </span>
+                  <span class={`dot${p.connected ? ' on' : ''}`} title={p.connected ? 'Online' : 'Reconnecting…'} />
                 </li>
               );
-            return (
-              <li class={`player${i === you ? ' is-you' : ''}`} key={i}>
-                <Avatar seat={i} name={p.name} size={26} />
-                <span class="p-name">
-                  {p.name}
-                  {i === you && <span class="tag">you</span>}
-                  {i === 0 && <span class="tag host">host</span>}
-                </span>
-                <span class={`dot${p.connected ? ' on' : ''}`} title={p.connected ? 'Online' : 'Reconnecting…'} />
-              </li>
-            );
-          })}
-        </ul>
-      </section>
+            })}
+          </ul>
+        </section>
 
-      <GamesCard
-        modes={set.modes}
-        counts={set.counts}
-        totalRounds={set.totalRounds}
-        shuffle={set.shuffle}
-        editable={isHost}
-        hint={
-          isHost
-            ? `Pick the games and how many rounds each lasts (${MIN_GAME_ROUNDS}–${MAX_GAME_ROUNDS}). ${set.shuffle ? 'They come in a random order.' : "They're played in this order."}`
-            : `${host} picks the games.`
-        }
-        onToggle={set.toggleMode}
-        onRounds={set.setRounds}
-        onShuffle={set.setShuffle}
-      />
+        <RegionPicker
+          regions={set.regions}
+          countryCount={set.countryCount}
+          poolOk={set.poolOk}
+          countLabel={set.countLabel}
+          editable={isHost}
+          hint={isHost ? 'Click a region on the map (or in the list) to leave it out.' : `${host} picks the regions.`}
+          onToggle={set.toggleRegion}
+        />
 
-      <RegionPicker
-        regions={set.regions}
-        countryCount={set.countryCount}
-        poolOk={set.poolOk}
-        countLabel={set.countLabel}
-        editable={isHost}
-        hint={isHost ? 'Click a region on the map (or in the list) to leave it out.' : `${host} picks the regions.`}
-        onToggle={set.toggleRegion}
-      />
+      </div>
+      <div class="lobby-col">
+        <GamesCard
+          modes={set.modes}
+          counts={set.counts}
+          totalRounds={set.totalRounds}
+          shuffle={set.shuffle}
+          editable={isHost}
+          hint={
+            isHost
+              ? `Pick the games and how many rounds each lasts (${MIN_GAME_ROUNDS}–${MAX_GAME_ROUNDS}). ${set.shuffle ? 'They come in a random order.' : "They're played in this order."}`
+              : `${host} picks the games.`
+          }
+          onToggle={set.toggleMode}
+          onRounds={set.setRounds}
+          onShuffle={set.setShuffle}
+        />
 
-      <section class="card actions-card">
-        {isHost && (
-          <div class="btn-row">
-            <button class="btn btn-lg btn-primary" disabled={!enough || !set.poolOk} onClick={onStart}>
-              Start game ({here} players)
+        <section class="card actions-card">
+          {isHost && (
+            <div class="btn-row">
+              <button class="btn btn-lg btn-primary" disabled={!enough || !set.poolOk} onClick={onStart}>
+                Start game ({here} players)
+              </button>
+            </div>
+          )}
+          {startHint && <p class="muted small center">{startHint}</p>}
+          <div class="center">
+            <button class="link" onClick={onLeave}>
+              Leave lobby
             </button>
           </div>
-        )}
-        {startHint && <p class="muted small center">{startHint}</p>}
-        <div class="center">
-          <button class="link" onClick={onLeave}>
-            Leave lobby
-          </button>
-        </div>
-      </section>
+        </section>
+      </div>
     </main>
   );
 }

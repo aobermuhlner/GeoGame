@@ -291,8 +291,13 @@ export function Multiplayer({ name, onImmersive }: { name: string; onImmersive: 
     if (ROOM_CODE_RE.test(urlRoom) && urlRoom === loadLastRoom()) connect(urlRoom, loadTicket(urlRoom));
     else if (ROOM_CODE_RE.test(urlRoom) && urlRoom === loadLastGroup()) setGroup(urlRoom);
     return () => {
+      // Another menu tab was opened: leave the room for good (a reload doesn't unmount, so it still rejoins).
       queueRef.current?.stop();
-      onlineRef.current?.conn.stop();
+      if (onlineRef.current) leave();
+      if (loadLastGroup()) {
+        storeLastGroup(null);
+        setRoomInUrl(null);
+      }
       demoRef.current?.dispose();
     };
   }, []);
@@ -324,7 +329,15 @@ export function Multiplayer({ name, onImmersive }: { name: string; onImmersive: 
     };
   }
 
-  const immersive = !!online || !!demoVm || !!group;
+  /** A group match is past its lobby (GroupPlay reports it). */
+  const [groupPlaying, setGroupPlaying] = useState(false);
+  // The menu bar stays in lobbies and on result screens; it hides while rounds are played,
+  // and once a ranked opponent is found.
+  const room = online?.room;
+  const immersive =
+    (!!demoVm && demoVm.phase !== 'finished') ||
+    (!!room && (room.phase !== 'lobby' ? room.phase !== 'finished' : !!room.ranked)) ||
+    (!!group && groupPlaying);
   useEffect(() => {
     onImmersive(immersive);
   }, [immersive]);
@@ -372,7 +385,7 @@ export function Multiplayer({ name, onImmersive }: { name: string; onImmersive: 
     );
   }
 
-  if (group) return <GroupPlay key={group} code={group} name={name} onLeave={leaveGroup} />;
+  if (group) return <GroupPlay key={group} code={group} name={name} onLeave={leaveGroup} onPlaying={setGroupPlaying} />;
 
   if (online) {
     const banner =
