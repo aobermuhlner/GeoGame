@@ -1,7 +1,7 @@
 import type { ComponentChildren } from 'preact';
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { LOCATE_TRIES, type GuessOutcome, type RegionId } from '@flagduel/shared';
-import { LocateMap, type Mark } from './LocateMap';
+import { LocateMap, useRegionFocus, type Mark } from './LocateMap';
 
 interface Props {
   /** Country to find (null during a countdown) */
@@ -119,6 +119,7 @@ export function LocateBoard({
   hud,
 }: Props) {
   const { touch, fs, rotated, toggle } = useMapFullscreen();
+  const { partial, active } = useRegionFocus(regions);
   const [marks, setMarks] = useState<Record<string, Mark>>({});
   const [pending, setPending] = useState(false);
 
@@ -169,7 +170,8 @@ export function LocateBoard({
           marks={shown}
           focus={missed}
           resetKey={roundKey}
-          region={regions.length === 1 ? regions[0] : null}
+          region={partial ? regions : null}
+          active={active}
           disabled={blocked}
           rotated={rotated}
           extraControl={

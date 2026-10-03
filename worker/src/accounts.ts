@@ -36,7 +36,11 @@ import {
   soloGuess,
   soloNext,
   soloPass,
+  CHALLENGE_BY_ID,
+  isCompletion,
   type BoardId,
+  type ChallengeBests,
+  type ChallengeResultResponse,
   type RankedBoardEntry,
   type RankedBoardResponse,
   type RankedProfile,
@@ -220,6 +224,14 @@ export class Accounts extends DurableObject<Env> {
         state TEXT NOT NULL,
         finished_at INTEGER,
         PRIMARY KEY (user_id, mode)
+      );
+      CREATE TABLE IF NOT EXISTS challenge_bests (
+        user_id TEXT NOT NULL,
+        challenge TEXT NOT NULL,
+        best_ms INTEGER NOT NULL,
+        runs INTEGER NOT NULL DEFAULT 1,
+        updated_at INTEGER NOT NULL,
+        PRIMARY KEY (user_id, challenge)
       );
     `);
     this.migrate();
@@ -890,6 +902,42 @@ export class Accounts extends DurableObject<Env> {
       you: ranked.find((e) => e.you) ?? null,
       players: ranked.length,
     };
+  }
+
+  // ---------- Challenges ----------
+
+  private challengeBests(userId: string): ChallengeBests {
+    const rows = this.sql
+      .exec<{ challenge: string; best_ms: number }>('SELECT challenge, best_ms FROM challenge_bests WHERE user_id = ?', userId)
+      .toArray();
+    return Object.fromEntries(rows.filter((r) => CHALLENGE_BY_ID[r.challenge]).map((r) => [r.challenge, r.best_ms]));
+  }
+
+  async challenges(userId: string): Promise<{ bests: ChallengeBests }> {
+    return { bests: this.challengeBests(userId) };
+  }
+
+  /**
+   * A finished challenge run. The run itself is played in the browser (like Practice), so this only checks
+   * that it names every country within the bronze limit, and keeps the best time. Null if it doesn't.
+   */
+  async challengeResult(userId: string, id: string, codes: string[], timeMs: number, now = Date.now()): Promise<ChallengeResultResponse | null> {
+    const ch = CHALLENGE_BY_ID[id];
+    if (!ch || !isCompletion(ch, codes, timeMs)) return null;
+    const ms = Math.round(timeMs);
+    const before = this.sql
+      .exec<{ best_ms: number }>('SELECT best_ms FROM challenge_bests WHERE user_id = ? AND challenge = ?', userId, id)
+      .toArray()[0];
+    this.sql.exec(
+      `INSERT INTO challenge_bests (user_id, challenge, best_ms, runs, updated_at) VALUES (?, ?, ?, 1, ?)
+       ON CONFLICT (user_id, challenge) DO UPDATE SET best_ms = MIN(best_ms, excluded.best_ms), runs = runs + 1,
+       updated_at = excluded.updated_at`,
+      userId,
+      id,
+      ms,
+      now,
+    );
+    return { bests: this.challengeBests(userId), improved: !before || ms < before.best_ms };
   }
 
   // ---------- Leaderboards ----------

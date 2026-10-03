@@ -3,15 +3,16 @@ import { MODES, MODE_IDS, type ModeId, type UserView } from '@flagduel/shared';
 import { Logo } from './common';
 import { HIGHER_DESC, HIGHER_LABEL } from './Higher';
 
-export type Tab = 'lobby' | 'daily' | 'practice' | 'multi' | 'profile';
+export type Tab = 'lobby' | 'daily' | 'practice' | 'challenges' | 'multi' | 'profile';
 /** A flag game, or Higher or Lower (daily only) */
 export type GameId = ModeId | 'higher';
 
 /** `menu`: hovering lists the games, each linking straight to that game. */
-const TABS: { id: Tab; label: string; menu?: true }[] = [
+const TABS: { id: Tab; label: string; short?: string; menu?: true }[] = [
   { id: 'lobby', label: 'Lobby' },
-  { id: 'daily', label: 'Daily Games', menu: true },
+  { id: 'daily', label: 'Daily Games', short: 'Daily', menu: true },
   { id: 'practice', label: 'Practice', menu: true },
+  { id: 'challenges', label: 'Challenges' },
   { id: 'multi', label: 'Multiplayer' },
 ];
 
@@ -67,7 +68,14 @@ export function NavBar({
                 onTab(t.id);
               }}
             >
-              {t.label}
+              {t.short ? (
+                <>
+                  <span class="lbl-long">{t.label}</span>
+                  <span class="lbl-short">{t.short}</span>
+                </>
+              ) : (
+                t.label
+              )}
               {t.menu && (
                 <svg class="nav-caret" viewBox="0 0 10 6" width="9" height="6" aria-hidden="true">
                   <path d="M1 1l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />

@@ -1,9 +1,9 @@
 import type { ComponentChildren } from 'preact';
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'preact/hooks';
-import type { RegionId } from '@flagduel/shared';
+import { REGION_IDS, countriesInRegions, type RegionId } from '@flagduel/shared';
 import type { LOCATE_MAP, LocateCountry } from '../generated/locatemap';
 
-export type Mark = 'correct' | 'wrong' | 'target';
+export type Mark = 'correct' | 'wrong' | 'target' | 'missed';
 
 interface Props {
   /** Called with the ISO code of the clicked country (not called for drags or ocean clicks). */
@@ -14,8 +14,15 @@ interface Props {
   focus?: string | null;
   /** Zoom back out to the whole world whenever this changes. */
   resetKey?: string | number;
-  /** Start (and reset) zoomed in on this region instead of the whole world. */
-  region?: RegionId | null;
+  /** Only these countries are in play: the others are greyed out and can't be clicked (null: all). */
+  active?: ReadonlySet<string> | null;
+  /**
+   * Start (and reset) zoomed in on this region (or these regions together) instead of the whole world.
+   * Oceania alone gets the map with the Pacific continued east of the seam, so it can sit centred.
+   */
+  region?: RegionId | readonly RegionId[] | null;
+  /** Size the map's frame to the region (taller for compact regions, up to the window's height) */
+  snug?: boolean;
   /** Debug: show the hovered country's name. */
   showNames?: boolean;
   nameOf?: (code: string) => string;
@@ -38,6 +45,31 @@ interface Props {
 }
 
 type MapData = typeof LOCATE_MAP;
+
+const regionList = (region: RegionId | readonly RegionId[] | null | undefined): readonly RegionId[] =>
+  region ? (typeof region === 'string' ? [region] : region) : [];
+
+/** Whether these regions use the map with the Pacific continued east (Oceania on its own). */
+export const isPacific = (region: RegionId | readonly RegionId[] | null | undefined) => {
+  const ids = regionList(region);
+  return ids.length === 1 && ids[0] === 'oceania';
+};
+
+/** The map data (lazily loaded; the Pacific variant only when needed). */
+export const loadLocateMap = (pacific: boolean): Promise<MapData> =>
+  pacific ? import('../generated/locatemap-pacific').then((m) => m.LOCATE_MAP) : import('../generated/locatemap').then((m) => m.LOCATE_MAP);
+
+/**
+ * A match over some of the regions: zoom to them and grey out the rest of the world. `partial` is false
+ * (and `active` null) when every region is in play.
+ */
+export function useRegionFocus(regions: readonly RegionId[]) {
+  const key = regions.join();
+  return useMemo(() => {
+    const partial = regions.length > 0 && regions.length < REGION_IDS.length;
+    return { partial, active: partial ? new Set(countriesInRegions(regions)) : null };
+  }, [key]);
+}
 interface View {
   k: number;
   x: number;
@@ -55,7 +87,9 @@ export function LocateMap({
   marks = NO_MARKS,
   focus,
   resetKey,
+  active = null,
   region,
+  snug = false,
   showNames,
   nameOf,
   disabled,
@@ -80,20 +114,47 @@ export function LocateMap({
 
   useEffect(() => () => cancelAnimationFrame(frame.current), []);
 
+  const regions = regionList(region);
+  const regionKey = regions.join();
+  const pacific = isPacific(regions);
   useEffect(() => {
     let alive = true;
-    import('../generated/locatemap').then((m) => alive && setMap(m.LOCATE_MAP));
+    loadLocateMap(pacific).then((m) => alive && setMap(m));
     return () => {
       alive = false;
     };
-  }, []);
+  }, [pacific]);
+
+  const [winH, setWinH] = useState(() => window.innerHeight);
+  useEffect(() => {
+    if (!snug) return;
+    const on = () => setWinH(window.innerHeight);
+    window.addEventListener('resize', on);
+    return () => window.removeEventListener('resize', on);
+  }, [snug]);
 
   const W = map?.width ?? 1;
   const H = map?.height ?? 1;
+  /** The region's box [x0, y0, x1, y1] (map units), or null for the whole world */
+  const regionBox = useMemo(() => {
+    if (!map || regions.length === 0) return null;
+    const boxes = regions.map((r) => map.views[r]);
+    return [0, 1, 2, 3].map((i) => (i < 2 ? Math.min : Math.max)(...boxes.map((b) => b[i])));
+  }, [map, regionKey]);
+  // Height of the visible frame in map units: the map's own height, or (snug) taller, so the frame takes the
+  // region's shape (a little wider), as far as the window's height allows.
+  const maxPx = Math.max(280, winH - 270); // room for the page's header card above
+  const VH = useMemo(() => {
+    if (!snug || !regionBox) return H;
+    const [x0, y0, x1, y1] = regionBox;
+    const aspect = Math.min(W / H, Math.max(((x1 - x0) / (y1 - y0)) * 1.12, (unit * W) / maxPx));
+    return W / aspect;
+  }, [snug, regionBox, maxPx, unit, W, H]);
 
+  /** Keep the map covering the frame: at least as zoomed in as the frame's height needs. */
   function clamp(v: View): View {
-    const k = Math.min(MAX_ZOOM, Math.max(1, v.k));
-    return { k, x: Math.min(0, Math.max(W - W * k, v.x)), y: Math.min(0, Math.max(H - H * k, v.y)) };
+    const k = Math.min(MAX_ZOOM, Math.max(1, VH / H, v.k));
+    return { k, x: Math.min(0, Math.max(W - W * k, v.x)), y: Math.min(0, Math.max(VH - H * k, v.y)) };
   }
 
   /** Touch screens fire several moves per frame: re-render at most once a frame. */
@@ -112,8 +173,8 @@ export function LocateMap({
   function toMap(cx: number, cy: number): [number, number] {
     const r = svgRef.current!.getBoundingClientRect();
     // Turned clockwise: the map's top edge is on the right of the screen, its left edge at the top.
-    if (rotatedRef.current) return [((cy - r.top) / r.height) * W, ((r.right - cx) / r.width) * H];
-    return [((cx - r.left) / r.width) * W, ((cy - r.top) / r.height) * H];
+    if (rotatedRef.current) return [((cy - r.top) / r.height) * W, ((r.right - cx) / r.width) * VH];
+    return [((cx - r.left) / r.width) * W, ((cy - r.top) / r.height) * VH];
   }
 
   /** Pan by a pointer's movement from (ax, ay) to (bx, by), scaled by `f`. */
@@ -238,13 +299,13 @@ export function LocateMap({
 
   /** The view that shows box [x0, y0, x1, y1] (plus padding) as large as possible, centred. */
   function fit([x0, y0, x1, y1]: readonly number[], pad: number, maxK: number): View {
-    const k = Math.min(maxK, W / (x1 - x0 + pad * 2), H / (y1 - y0 + pad * 2));
-    return { k, x: W / 2 - ((x0 + x1) / 2) * k, y: H / 2 - ((y0 + y1) / 2) * k };
+    const k = Math.min(maxK, W / (x1 - x0 + pad * 2), VH / (y1 - y0 + pad * 2));
+    return { k, x: W / 2 - ((x0 + x1) / 2) * k, y: VH / 2 - ((y0 + y1) / 2) * k };
   }
 
   /** Where a round starts: the selected region, or the whole world. */
   function home(): View {
-    return map && region ? clamp(fit(map.views[region], 0, MAX_ZOOM)) : { k: 1, x: 0, y: 0 };
+    return clamp(regionBox ? fit(regionBox, 0, MAX_ZOOM) : { k: 1, x: 0, y: 0 });
   }
 
   const atHome = () => {
@@ -254,16 +315,17 @@ export function LocateMap({
   };
 
   // Start on the region as soon as the map has loaded (no animation).
+  // Also when the frame changes shape (window resized, or measured for the first time).
   useLayoutEffect(() => {
     if (map) setView((viewRef.current = home()));
-  }, [map]);
+  }, [map, VH]);
 
   // Region changed (e.g. a rematch with other settings): glide there.
   const firstRegion = useRef(true);
   useEffect(() => {
     if (firstRegion.current) return void (firstRegion.current = false);
     if (map && !atHome()) animateTo(home(), 450);
-  }, [region]);
+  }, [regionKey]);
 
   // Reveal / focus a country.
   useEffect(() => {
@@ -284,6 +346,7 @@ export function LocateMap({
 
   const hoverCode = hover?.code ?? null;
   const cls = (c: LocateCountry) => {
+    if (active && !active.has(c.c)) return ' off';
     const m = marks[c.c];
     return `${m ? ` ${m}` : ''}${hoverCode === c.c ? ' hover' : ''}`;
   };
@@ -307,7 +370,7 @@ export function LocateMap({
           </g>
         </>
       ),
-    [map, marks, hoverCode],
+    [map, marks, hoverCode, active],
   );
 
   if (!map) return <div class="locate-map loading" aria-hidden="true" />;
@@ -316,11 +379,15 @@ export function LocateMap({
   const u = unit * k; // screen px per map unit
 
   return (
-    <div class="locate-wrap" style={{ aspectRatio: `${W} / ${H}`, '--ar': W / H }}>
+    <div
+      class="locate-wrap"
+      // Snug: never taller than the window allows (on a short window the map gets narrower instead).
+      style={{ aspectRatio: `${W} / ${VH}`, '--ar': W / VH, ...(snug && { maxWidth: `${(maxPx * W) / VH}px`, margin: '0 auto' }) }}
+    >
       <svg
         ref={svgRef}
         class={`locate-map${disabled ? ' disabled' : ''}${onTap ? ' pin-mode' : ''}`}
-        viewBox={`0 0 ${W} ${H}`}
+        viewBox={`0 0 ${W} ${VH}`}
         role="img"
         aria-label="World map: click the country you are asked for. Scroll or pinch to zoom, drag to pan."
         onPointerDown={onPointerDown}
@@ -338,11 +405,11 @@ export function LocateMap({
           zoomAt(px, py, 2.2);
         }}
       >
-        <rect class="lm-ocean" width={W} height={H} />
+        <rect class="lm-ocean" width={W} height={VH} />
         <g transform={`translate(${x} ${y}) scale(${k})`}>
           {land}
           <g class="lm-markers">
-            {map.countries.flatMap((c) =>
+            {map.countries.filter((c) => !active || active.has(c.c)).flatMap((c) =>
               (c.m ?? []).map(([mx, my], i) => (
                 <g key={`${c.c}${i}`} data-c={c.c} class={`lm-marker${cls(c)}`}>
                   <circle class="hit" cx={mx} cy={my} r={MARKER_HIT / u} />
@@ -387,7 +454,7 @@ export function LocateMap({
     const v = viewRef.current;
     const k = Math.min(MAX_ZOOM, Math.max(1, v.k * f));
     const cx = W / 2;
-    const cy = H / 2;
+    const cy = VH / 2;
     animateTo({ k, x: cx - (cx - v.x) * (k / v.k), y: cy - (cy - v.y) * (k / v.k) }, 300);
   }
 }

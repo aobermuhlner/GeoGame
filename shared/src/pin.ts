@@ -87,7 +87,15 @@ export interface MapProjection {
   ty: number;
   /** Degrees added to the longitude before projecting */
   rot: number;
+  /**
+   * The Pacific east of the seam (longitudes west…east, south of `north`) is drawn past the map's right edge,
+   * the projection continued one turn further east. Its normal place, at the left edge, stays empty.
+   */
+  east?: { west: number; east: number; north: number };
 }
+
+const inEast = (p: MapProjection, lat: number, lon: number) =>
+  !!p.east && lon >= p.east.west && lon <= p.east.east && lat < p.east.north;
 
 function ne1(lambda: number, phi: number): [number, number] {
   const phi2 = phi * phi;
@@ -116,10 +124,20 @@ function ne1Invert(x: number, y: number): [number, number] {
 
 const wrap180 = (lon: number) => ((((lon + 180) % 360) + 360) % 360) - 180;
 
-/** [lat, lon] → map units. */
-export function project(p: MapProjection, lat: number, lon: number): [number, number] {
-  const [x, y] = ne1(rad(wrap180(lon + p.rot)), rad(lat));
-  return [p.tx + p.k * x, p.ty - p.k * y];
+/**
+ * [lat, lon] → map units. With `nearX`, of the point's two possible places (the normal one and one turn
+ * further east) the one closer to that x: keeps a circle around a pin in one piece near the east zone.
+ */
+export function project(p: MapProjection, lat: number, lon: number, nearX?: number): [number, number] {
+  const l = wrap180(lon + p.rot);
+  const at = (deg: number): [number, number] => {
+    const [x, y] = ne1(rad(deg), rad(lat));
+    return [p.tx + p.k * x, p.ty - p.k * y];
+  };
+  if (!p.east || l > 0) return at(l);
+  if (nearX === undefined) return at(inEast(p, lat, wrap180(lon)) ? l + 360 : l);
+  const [a, b] = [at(l), at(l + 360)];
+  return Math.abs(a[0] - nearX) <= Math.abs(b[0] - nearX) ? a : b;
 }
 
 /** Map units → [lat, lon], or null off the globe's outline. */
@@ -127,6 +145,9 @@ export function unproject(p: MapProjection, mx: number, my: number): [number, nu
   const [lambda, phi] = ne1Invert((mx - p.tx) / p.k, (p.ty - my) / p.k);
   const lat = deg(phi);
   const lon = deg(lambda);
-  if (!Number.isFinite(lat) || Math.abs(lat) > 90 || Math.abs(lon) > 180) return null;
-  return [lat, wrap180(lon - p.rot)];
+  if (!Number.isFinite(lat) || Math.abs(lat) > 90 || lon < -180) return null;
+  // Past the seam only the east zone is drawn; its normal place at the left edge is empty map.
+  const real = wrap180(lon - p.rot);
+  if (lon > 180 ? !inEast(p, lat, real) || lon > 360 : inEast(p, lat, real)) return null;
+  return [lat, real];
 }

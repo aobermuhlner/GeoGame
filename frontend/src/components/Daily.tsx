@@ -20,6 +20,7 @@ import {
   revealMsOf,
   roundTimeOf,
   topPercent,
+  type RegionId,
 } from '@flagduel/shared';
 import { EstimateLine, NumberInput, QuestionCard, UnitSystemSwitch, questionOf } from './Guess';
 import { api, dailyFlagSrc } from '../api';
@@ -147,6 +148,8 @@ export interface SoloSource {
   pass(round: number): Promise<DailyResponse>;
   next(round: number): Promise<DailyResponse>;
   flagSrc(flag: string): string;
+  /** Practice: the regions picked (the map zooms to them and greys out the rest); daily games use all */
+  regions?: readonly RegionId[];
 }
 
 export function dailySource(mode: ModeId): SoloSource {
@@ -483,6 +486,7 @@ function SoloScreen({
             locked={locked}
             answerCode={r?.code ?? null}
             serverWrong={run.wrong}
+            regions={source.regions}
             onGuess={onGuess}
             onPass={onPass}
             overlay={
@@ -557,6 +561,7 @@ function SoloScreen({
               locked={locked}
               onLock={onGuess}
               onDraft={source.draft && ((text) => source.draft!(run.round, text))}
+              regions={source.regions}
               worth={(i) => `${PIN_POINTS[i] * 20}%`}
               reveal={
                 r ? { landmark: r.code, pins: r.given ? [{ answer: r.given, correct: r.end === 'correct', me: true, label: 'You' }] : [] } : null

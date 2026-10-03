@@ -23,3 +23,4 @@ export * from './group';
 export * from './units';
 export * from './guessFacts';
 export * from './guess';
+export * from './challenges';

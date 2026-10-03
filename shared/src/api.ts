@@ -1,4 +1,5 @@
 // HTTP API shapes for accounts, the daily challenge and leaderboards (Worker ↔ browser).
+import type { ChallengeBests } from './challenges';
 import type { DailyView } from './daily';
 import type { GuessOutcome } from './game';
 import type { HigherRunView, PickOutcome, StatId } from './higher';
@@ -153,4 +154,15 @@ export const LEADERBOARD_SIZE = 50;
 export function topPercent(rank: number | null, players: number): number | null {
   if (rank === null || players < 2) return null;
   return Math.max(1, Math.ceil((rank / players) * 100));
+}
+
+/** GET /challenges: your best full-completion time per challenge id. */
+export interface ChallengesResponse {
+  bests: ChallengeBests;
+}
+
+/** POST /challenges/:id/result { codes, timeMs } */
+export interface ChallengeResultResponse extends ChallengesResponse {
+  /** This run beat your previous best (or was the first completion) */
+  improved: boolean;
 }

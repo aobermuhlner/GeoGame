@@ -3,6 +3,7 @@ import { MODE_IDS, ROOM_CODE_RE, type ModeId, type UserView } from '@flagduel/sh
 import { api, setSignedOutHandler } from './api';
 import { Login } from './components/Login';
 import { MainLobby } from './components/MainLobby';
+import { Challenges } from './components/Challenges';
 import { DailyHub, SoloGame, dailySource } from './components/Daily';
 import { HigherGame } from './components/Higher';
 import { NavBar, type GameId, type Tab } from './components/NavBar';
@@ -15,7 +16,7 @@ const hashPath = () => location.hash.replace(/^#\/?/, '').split('/');
 
 function tabFromHash(): Tab {
   const [h] = hashPath();
-  return h === 'daily' || h === 'multi' || h === 'practice' || h === 'profile' ? h : 'lobby';
+  return h === 'daily' || h === 'multi' || h === 'practice' || h === 'challenges' || h === 'profile' ? h : 'lobby';
 }
 
 /** #/daily/<mode> or #/practice/<mode> → that game; #/daily, #/practice → null (the tab's overview) */
@@ -118,6 +119,7 @@ export function App() {
           onImmersive={setImmersive}
         />
       )}
+      {tab === 'challenges' && <Challenges onImmersive={setImmersive} />}
       {tab === 'multi' && <Multiplayer name={user.displayName} onImmersive={setImmersive} />}
       {!immersive && <CreditsLink />}
     </>

@@ -6,7 +6,7 @@ import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { geoNaturalEarth1, geoPath } from 'd3-geo';
+import { geoNaturalEarth1, geoNaturalEarth1Raw, geoPath, geoProjection } from 'd3-geo';
 import { feature } from 'topojson-client';
 
 const require = createRequire(import.meta.url);
@@ -43,12 +43,38 @@ const MIN_ZONE = 14; // px: clusters narrower than this get a marker only, no da
 const w50 = require('world-atlas/countries-50m.json');
 const all = feature(w50, w50.objects.countries).features.filter((f) => f.id !== '010'); // no Antarctica
 
+// `--pacific` writes a second map (src/generated/locatemap-pacific.ts, used only for Oceania): the Pacific east
+// of the seam (169°W–120°W, south of 30°N: Hawaii, eastern Kiribati, Cook Islands, French Polynesia, Pitcairn)
+// is drawn past the right edge, the projection simply continued east, so Oceania has ocean on both sides.
+// Alaska and the rest of North America stay on the left. shared/src/pin.ts mirrors this.
+const PACIFIC = process.argv.includes('--pacific');
+const EAST = { west: -169, east: -120, north: 30 };
+const inEast = (lon, lat) => PACIFIC && lon >= EAST.west && lon <= EAST.east && lat < EAST.north;
+
 // Seam at 169°W (Bering Strait): keeps Fiji, Tonga, Samoa, Tuvalu and western Kiribati on one side.
 const projection = geoNaturalEarth1().rotate([-11, 0]).fitWidth(WIDTH, { type: 'FeatureCollection', features: all });
 const path = geoPath(projection).digits(1);
 const [[, y0], [, y1]] = path.bounds({ type: 'FeatureCollection', features: all });
 projection.translate([projection.translate()[0], projection.translate()[1] - y0 + 6]);
 const HEIGHT = Math.ceil(y1 - y0 + 12);
+// Same projection, one turn further east (longitudes arrive rotated into [-π, π]).
+// Only the western half is shifted: d3 centres the projection on λ = 0, which must stay put.
+const eastProjection = geoProjection((l, p) => geoNaturalEarth1Raw(l < 0 ? l + 2 * Math.PI : l, p))
+  .rotate(projection.rotate())
+  .scale(projection.scale())
+  .translate(projection.translate());
+const projOf = (f) => (f.east ? eastProjection : projection);
+const projectPoint = ([lon, lat]) => (inEast(lon, lat) ? eastProjection : projection)([lon, lat]);
+
+/** A feature's polygons, split into the normal part and the part drawn east of the seam (`east: true`). */
+function splitEast(f) {
+  const g = f.geometry;
+  const polys = g.type === 'Polygon' ? [g.coordinates] : g.coordinates;
+  const isEast = (poly) => poly[0].every(([lon, lat]) => inEast(lon, lat));
+  return [false, true]
+    .map((east) => ({ ...f, east, geometry: { type: 'MultiPolygon', coordinates: polys.filter((p) => isEast(p) === east) } }))
+    .filter((part) => part.geometry.coordinates.length > 0);
+}
 
 const r1 = (n) => Math.round(n * 10) / 10;
 const SIMPLIFY = 0.18; // px: Douglas–Peucker tolerance (the map is shown up to ~30× zoom)
@@ -96,8 +122,7 @@ function compactPath(features) {
     closePath() {},
     arc() {},
   };
-  const draw = geoPath(projection, ctx);
-  for (const f of features) draw(f);
+  for (const f of features) geoPath(projOf(f), ctx)(f);
   let d = '';
   for (const r of rings) {
     const pts = simplify(r, SIMPLIFY).map(([x, y]) => [Math.round(x * 10), Math.round(y * 10)]);
@@ -121,12 +146,13 @@ const byCode = new Map();
 const otherFeatures = [];
 for (const f of all) {
   const code = alpha2(f);
+  const parts = splitEast(f);
   if (!PLAYABLE.has(code)) {
-    otherFeatures.push(f);
+    otherFeatures.push(...parts);
     continue;
   }
   if (!byCode.has(code)) byCode.set(code, []);
-  byCode.get(code).push(f);
+  byCode.get(code).push(...parts);
 }
 const other = compactPath(otherFeatures);
 
@@ -134,15 +160,16 @@ const other = compactPath(otherFeatures);
 function projectedPolygons(features) {
   const polys = [];
   let ring = [];
-  const s = projection.stream({
+  const sink = {
     point: (x, y) => ring.push([x, y]),
     lineStart: () => (ring = []),
     lineEnd: () => ring.length > 2 && polys.push(ring),
     polygonStart() {},
     polygonEnd() {},
     sphere() {},
-  });
+  };
   for (const f of features) {
+    const s = projOf(f).stream(sink);
     const g = f.geometry;
     for (const poly of g.type === 'Polygon' ? [g.coordinates] : g.coordinates) {
       // Outer ring only; holes don't matter for hulls and boxes.
@@ -227,7 +254,7 @@ let zoneCount = 0;
 for (const code of PLAYABLE) {
   const features = byCode.get(code) ?? [];
   const d = compactPath(features);
-  const area = features.reduce((s, f) => s + path.area(f), 0);
+  const area = features.reduce((s, f) => s + geoPath(projOf(f)).area(f), 0);
   let polys = projectedPolygons(features);
   if (MANUAL_POINTS[code]) polys = MANUAL_POINTS[code].map((ll) => [projection(ll)]);
   if (!polys.length) throw new Error(`No shape for ${code}`);
@@ -264,7 +291,7 @@ const REGION_VIEWS = {
   europe: [-25, 34, 45, 71],
   asia: [25, -11, 148, 55],
   africa: [-26, -36, 58, 38],
-  oceania: [110, -48, 190, 20],
+  oceania: [110, -48, PACIFIC ? 210 : 190, 20],
   'north-america': [-168, 13, -52, 73],
   'central-america': [-93, 7, -77, 19],
   caribbean: [-86, 10, -59, 27.5],
@@ -279,37 +306,60 @@ for (const [region, [w, s, e, n]] of Object.entries(REGION_VIEWS)) {
     const lat = s + ((n - s) * i) / 20;
     pts.push([lon, s], [lon, n], [w, lat], [e, lat]);
   }
-  const wrap = (lon) => (lon > 180 ? lon - 360 : lon);
-  views[region] = bbox(pts.map(([lon, lat]) => projection([wrap(lon), lat]))).map(r1);
+  // Past 180 the view continues east of the seam (into the part drawn past the right edge).
+  views[region] = bbox(pts.map(([lon, lat]) => (lon > 180 ? projectPoint([lon - 360, lat]) : projection([lon, lat])))).map(r1);
 }
 
 // Landmarks game: where each landmark is, for the pin on the reveal map.
 const { LANDMARK_META } = await import(pathToFileURL(join(here, '../../shared/src/landmarkMeta.ts')).href);
 const pins = {};
-for (const [id, m] of Object.entries(LANDMARK_META)) if (m.lat !== null) pins[id] = projection([m.lon, m.lat]).map(r1);
+for (const [id, m] of Object.entries(LANDMARK_META)) if (m.lat !== null) pins[id] = projectPoint([m.lon, m.lat]).map(r1);
 
 // Landmarks game: lets the browser turn a click into lat/lon and draw the pin's circle (shared/src/pin.ts).
 const [tx, ty] = projection.translate();
-const proj = { k: projection.scale(), tx, ty, rot: projection.rotate()[0] };
+const proj = { k: projection.scale(), tx, ty, rot: projection.rotate()[0], ...(PACIFIC && { east: EAST }) };
 
-const out = { width: WIDTH, height: HEIGHT, other, countries, views, pins, proj };
+// The map runs on past the seam as far as the islands drawn there, plus some ocean.
+const eastEdge = Math.max(...countries.map((c) => c.b[2]), ...otherFeatures.filter((f) => f.east).map((f) => geoPath(eastProjection).bounds(f)[1][0]));
+// And far enough that the Oceania view can sit centred: a view as tall as the box is W·h/H wide (the map keeps its
+// aspect ratio), so its centre cx needs W ≥ cx + W·h/(2H).
+const [ox0, oy0, ox1, oy1] = views.oceania;
+const centred = ((ox0 + ox1) / 2) / (1 - (oy1 - oy0) / (2 * HEIGHT));
+const FULL_WIDTH = PACIFIC ? Math.ceil(Math.max(WIDTH, eastEdge + 40, centred + 10)) : WIDTH;
+
+const out = { width: FULL_WIDTH, height: HEIGHT, other, countries, views, pins, proj };
 mkdirSync(join(here, '../src/generated'), { recursive: true });
-writeFileSync(
-  join(here, '../src/generated/locatemap.ts'),
-  `// Generated by scripts/gen-locate-map.mjs — do not edit.\n` +
-    `import type { MapProjection, RegionId } from '@flagduel/shared';\n\n` +
-    `export interface LocateCountry {\n  /** ISO alpha-2 */\n  c: string;\n  /** SVG path */\n  d: string;\n` +
-    `  /** Bounding box [x0, y0, x1, y1] */\n  b: [number, number, number, number];\n` +
-    `  /** Click markers (one per island cluster) for places too small to hit */\n  m?: [number, number][];\n` +
-    `  /** Island-group zones (SVG paths) that count as a hit */\n  z?: string[];\n}\n\n` +
-    `export const LOCATE_MAP: {\n  width: number;\n  height: number;\n  other: string;\n  countries: LocateCountry[];\n` +
-    `  /** Starting view [x0, y0, x1, y1] for a match that uses only this region */\n` +
-    `  views: Record<RegionId, [number, number, number, number]>;\n` +
-    `  /** Landmark id → its position on the map */\n  pins: Record<string, [number, number]>;\n` +
-    `  /** The projection, for the Landmarks pin (shared/src/pin.ts) */\n  proj: MapProjection;\n} = ` +
-    `${JSON.stringify(out)};\n`,
-);
+if (PACIFIC) {
+  writeFileSync(
+    join(here, '../src/generated/locatemap-pacific.ts'),
+    `// Generated by scripts/gen-locate-map.mjs --pacific — do not edit.
+` +
+      `import type { LOCATE_MAP as World } from './locatemap';
+
+` +
+      `/** The GeoLocate map with the Pacific continued east of the seam (for Oceania) */
+` +
+      `export const LOCATE_MAP: typeof World = ${JSON.stringify(out)};
+`,
+  );
+} else {
+  writeFileSync(
+    join(here, '../src/generated/locatemap.ts'),
+    `// Generated by scripts/gen-locate-map.mjs — do not edit.\n` +
+      `import type { MapProjection, RegionId } from '@flagduel/shared';\n\n` +
+      `export interface LocateCountry {\n  /** ISO alpha-2 */\n  c: string;\n  /** SVG path */\n  d: string;\n` +
+      `  /** Bounding box [x0, y0, x1, y1] */\n  b: [number, number, number, number];\n` +
+      `  /** Click markers (one per island cluster) for places too small to hit */\n  m?: [number, number][];\n` +
+      `  /** Island-group zones (SVG paths) that count as a hit */\n  z?: string[];\n}\n\n` +
+      `export const LOCATE_MAP: {\n  width: number;\n  height: number;\n  other: string;\n  countries: LocateCountry[];\n` +
+      `  /** Starting view [x0, y0, x1, y1] for a match that uses only this region */\n` +
+      `  views: Record<RegionId, [number, number, number, number]>;\n` +
+      `  /** Landmark id → its position on the map */\n  pins: Record<string, [number, number]>;\n` +
+      `  /** The projection, for the Landmarks pin (shared/src/pin.ts) */\n  proj: MapProjection;\n} = ` +
+      `${JSON.stringify(out)};\n`,
+  );
+}
 const size = JSON.stringify(out).length;
 console.log(
-  `gen-locate-map: ${countries.length} countries, ${markerCount} markers, ${zoneCount} zones, ${(size / 1024).toFixed(0)} KB`,
+  `gen-locate-map${PACIFIC ? ' --pacific' : ''}: ${FULL_WIDTH}×${HEIGHT}, ${countries.length} countries, ${markerCount} markers, ${zoneCount} zones, ${(size / 1024).toFixed(0)} KB`,
 );

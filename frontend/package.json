@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "gen:map": "node scripts/gen-map.mjs && node scripts/gen-locate-map.mjs",
+    "gen:map": "node scripts/gen-map.mjs && node scripts/gen-locate-map.mjs && node scripts/gen-locate-map.mjs --pacific",
     "gen:emblems": "node scripts/gen-emblems.mjs",
     "predev": "npm run gen:map",
     "dev": "vite --port 5173 --strictPort",

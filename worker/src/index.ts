@@ -205,6 +205,18 @@ async function accountRoutes(request: Request, env: Env, url: URL, origin: strin
   }
   if (path === '/daily' && method === 'GET') return json(await db.dailySummary(user.id));
 
+  // GET /challenges · POST /challenges/:id/result { codes, timeMs }
+  if (path === '/challenges' && method === 'GET') return json(await db.challenges(user.id));
+  const ch = /^\/challenges\/([a-z-]+)\/result$/.exec(path);
+  if (ch && method === 'POST') {
+    const b = await readBody(request);
+    const codes = Array.isArray(b.codes) && b.codes.length <= 400 ? b.codes : null;
+    if (!codes || !codes.every((c) => typeof c === 'string' && /^[A-Z]{2}$/.test(c))) return fail(400, 'Missing countries');
+    if (typeof b.timeMs !== 'number') return fail(400, 'Missing time');
+    const r = await db.challengeResult(user.id, ch[1], codes, b.timeMs);
+    return r ? json(r) : fail(422, 'Not a completed challenge');
+  }
+
   // /higher/daily (GET) · /higher/daily/start|pick|next (POST)
   const hl = /^\/higher\/daily(?:\/(start|pick|next))?$/.exec(path);
   if (hl) {
@@ -290,7 +302,7 @@ export default {
     }
 
     // Accounts, daily challenge, leaderboards, ratings
-    if (/^\/(auth|me|daily|leaderboard|ranked|higher)(\/|$)/.test(url.pathname)) {
+    if (/^\/(auth|me|daily|leaderboard|ranked|higher|challenges)(\/|$)/.test(url.pathname)) {
       if (!origin) return new Response('Forbidden origin', { status: 403 });
       return withCors(await accountRoutes(request, env, url, origin), origin);
     }

@@ -2,6 +2,8 @@
 import type {
   AuthConfig,
   BoardId,
+  ChallengeResultResponse,
+  ChallengesResponse,
   DailyGuessResponse,
   DailyResponse,
   DailySummary,
@@ -109,6 +111,9 @@ export const api = {
     request<{ user: UserView }>('/me', { method: 'PATCH', body: { displayName } }).then((r) => r.user),
 
   dailySummary: () => request<DailySummary>('/daily'),
+  challenges: () => request<ChallengesResponse>('/challenges'),
+  challengeResult: (id: string, codes: string[], timeMs: number) =>
+    request<ChallengeResultResponse>(`/challenges/${id}/result`, { method: 'POST', body: { codes, timeMs } }),
   dailyStart: (mode: ModeId) => request<DailyResponse>(`/daily/${mode}/start`, { method: 'POST' }),
   dailyGet: (mode: ModeId) => request<DailyResponse>(`/daily/${mode}`),
   dailyGuess: (mode: ModeId, round: number, text: string) =>

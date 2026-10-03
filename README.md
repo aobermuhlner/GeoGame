@@ -64,6 +64,20 @@ played as often as you like. It runs entirely in the browser with the shared sol
 sent to the server, ranked or counted in stats. Flags come from `GET /practice/flags/:code`, landmark photos from
 `GET /practice/landmarks/:id`.
 
+### Challenges
+
+Fixed tasks against the clock, the same for everyone. The first kind: **name every country** of Europe, Asia, Africa,
+Oceania, North & Central America + Caribbean, South America, or the whole world. There are no suggestions: a country is
+entered (and coloured in on the map) as soon as it is spelled out, aliases and short forms included (UK, USA, DRC…).
+When the text also starts a longer name still to find ("Niger" → "Nigeria", "UK" → "Ukraine") it waits for Enter or
+for the next letters; Enter on an unknown name says to check the spelling.
+
+Each challenge has a **bronze, silver and gold** time limit (`CHALLENGES` in `shared/src/challenges.ts`, to be tuned).
+The server keeps your best full-completion time per challenge, and the medal follows from it (a bronze run finished
+within the gold time earns gold). A world medal counts for every region. The lobby map colours each region in its
+medal. Runs are played in the browser; the Worker only checks that a submitted run names every country within the
+bronze limit (`POST /challenges/:id/result`).
+
 ### Multiplayer — 1 vs 1
 
 Real-time 2-player geography duel. Your account display name is your in-game name. Both players see the same flag at the same moment; whoever answers first wins the point. Server-authoritative.

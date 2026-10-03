@@ -92,6 +92,7 @@ export function practiceSource(mode: ModeId, regions: RegionId[]): SoloSource {
       return view(now);
     },
     flagSrc: practiceFlagSrc(mode),
+    regions,
   };
 }
 

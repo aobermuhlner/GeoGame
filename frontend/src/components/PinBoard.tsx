@@ -16,7 +16,7 @@ import {
   type Pin,
   type RegionId,
 } from '@flagduel/shared';
-import { LocateMap } from './LocateMap';
+import { LocateMap, isPacific, loadLocateMap, useRegionFocus } from './LocateMap';
 
 export interface RevealPin {
   /** The locked-in answer ("lat,lon,km") */
@@ -46,25 +46,27 @@ interface Props {
 
 const duelWorth = (i: number) => `${PIN_POINTS[i]} pt${PIN_POINTS[i] === 1 ? '' : 's'}`;
 
-/** The map's projection (from the lazily loaded map module). */
-function useProjection(): MapProjection | null {
+/** The projection of the map shown (from the lazily loaded map module). */
+function useProjection(pacific: boolean): MapProjection | null {
   const [proj, setProj] = useState<MapProjection | null>(null);
   useEffect(() => {
     let alive = true;
-    import('../generated/locatemap').then((m) => alive && setProj(m.LOCATE_MAP.proj));
+    setProj(null);
+    loadLocateMap(pacific).then((m) => alive && setProj(m.proj));
     return () => {
       alive = false;
     };
-  }, []);
+  }, [pacific]);
   return proj;
 }
 
 /** The circle of `km` around (lat, lon) as an SVG path in map units, split where it crosses the map's seam. */
 function circlePath(proj: MapProjection, lat: number, lon: number, km: number): string {
   const pts: [number, number][] = [];
+  const [cx] = project(proj, lat, lon);
   for (let b = 0; b <= 360; b += 5) {
     const [la, lo] = destination(lat, lon, km, b);
-    pts.push(project(proj, la, lo));
+    pts.push(project(proj, la, lo, cx));
   }
   let d = '';
   pts.forEach(([x, y], i) => {
@@ -90,7 +92,8 @@ function PinMark({ x, y, u, cls, label }: { x: number; y: number; u: number; cls
 }
 
 export function PinBoard({ roundKey, locked, onLock, onDraft, mine, reveal, regions = [], worth = duelWorth }: Props) {
-  const proj = useProjection();
+  const { partial, active } = useRegionFocus(regions);
+  const proj = useProjection(partial && isPacific(regions));
   const [spot, setSpot] = useState<[number, number] | null>(null);
   const [km, setKm] = useState<number>(PIN_DEFAULT_RADIUS);
   const [pending, setPending] = useState(false);
@@ -160,7 +163,8 @@ export function PinBoard({ roundKey, locked, onLock, onDraft, mine, reveal, regi
         <LocateMap
           onTap={tap}
           resetKey={roundKey}
-          region={regions.length === 1 ? regions[0] : null}
+          region={partial ? regions : null}
+          active={active}
           disabled={blocked && !reveal}
           focusBox={focusBox}
           layer={(u) =>

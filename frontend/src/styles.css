@@ -934,6 +934,11 @@ em {
 }
 .nav-tabs a:hover { background: #f1ece0; }
 .nav-tabs a.on { background: var(--green); color: #fff; }
+.lbl-short { display: none; }
+@media (max-width: 620px) {
+  .lbl-long { display: none; }
+  .lbl-short { display: inline; }
+}
 .nav-tabs a:focus-visible, .nav-brand:focus-visible, .nav-user:focus-visible {
   outline: 2px solid var(--focus); outline-offset: 2px;
 }
@@ -1146,6 +1151,10 @@ button.gt-main:active, .gt-btn:active:not(:disabled) { transform: translateY(3px
   .nav-tabs { order: 3; width: 100%; margin: 0; }
   .nav-tabs li { flex: 1; }
   .nav-tabs a { text-align: center; padding: 8px 6px; font-size: 0.82rem; }
+  .nav-tabs { gap: 2px; }
+  .nav-tabs li { flex: 1 1 auto; }
+  .nav-tabs a { padding: 8px 4px; font-size: 0.78rem; }
+  .nav-tabs .nav-caret { display: none; }
   .nav-user { margin-left: auto; }
   .account-card { flex-wrap: wrap; gap: 14px; }
   .acc-main { flex: 1 1 180px; }
@@ -1197,6 +1206,9 @@ button.gt-main:active, .gt-btn:active:not(:disabled) { transform: translateY(3px
   fill: #fffdf7; stroke: #7c7563; stroke-width: 1.2px; vector-effect: non-scaling-stroke; transition: fill .12s;
 }
 .lm-country.hover { fill: #d9e8d6; }
+/* Not in play (other regions): greyed like the non-playable land, not clickable */
+.lm-country.off { fill: #e4ddc9; stroke: #cfc5ab; cursor: inherit; pointer-events: none; }
+.lm-zone.off { display: none; }
 .lm-zone.hover { fill: rgba(47, 179, 95, 0.12); }
 .lm-marker.hover .dot { fill: #9fd1ad; stroke: var(--green); }
 .lm-country.correct, .lm-marker.correct .dot { fill: #2fb35f; }
@@ -1285,7 +1297,7 @@ button.gt-main:active, .gt-btn:active:not(:disabled) { transform: translateY(3px
 html.map-fs-open, html.map-fs-open body { overflow: hidden; overscroll-behavior: none; }
 .locate-inner { display: contents; }
 .locate-board.fs {
-  --ar: 2000 / 919; /* the GeoLocate map's width / height */
+  --ar: 2000 / 919; /* the GeoLocate map's width / height (src/generated/locatemap.ts) */
   position: fixed; inset: 0; z-index: 80; background: var(--bg);
   display: grid; place-items: center; container-type: size;
   /* Same inset on both sides (the larger one), so a camera cutout doesn't push the map off-centre */
@@ -2274,3 +2286,92 @@ html.map-fs-open, html.map-fs-open body { overflow: hidden; overscroll-behavior:
 .er-body .qc-answer { font-size: 1.3rem; }
 .unit-switch { margin: 0; }
 .unit-switch button { flex: none; }
+
+/* ---------- Challenges ---------- */
+:root { --bronze: #c27c45; --silver: #a3adb7; --gold-medal: #dcaa22; }
+.medal circle { fill: #e2dccb; stroke: #c9bfa5; stroke-width: 1; }
+.medal .inner { fill: none; stroke: rgba(255, 255, 255, 0.45); stroke-width: 1.2; }
+.medal .star { fill: rgba(255, 255, 255, 0.85); }
+.medal.bronze circle:first-child { fill: var(--bronze); stroke: #9a5c2e; }
+.medal.silver circle:first-child { fill: var(--silver); stroke: #7d8892; }
+.medal.gold circle:first-child { fill: var(--gold-medal); stroke: #a87e0c; }
+.medal { flex: none; display: block; }
+
+.medal-map { margin-top: 4px; }
+.medal-region { cursor: pointer; outline: none; }
+.medal-region .shape, .medal-region .dot { fill: #f4efe2; stroke: #cfc5ab; stroke-width: 0.5; transition: fill .2s, opacity .2s; }
+.medal-region.bronze .shape, .medal-region.bronze .dot { fill: var(--bronze); }
+.medal-region.silver .shape, .medal-region.silver .dot { fill: var(--silver); }
+.medal-region.gold .shape, .medal-region.gold .dot { fill: var(--gold-medal); }
+.medal-region:hover .shape, .medal-region:hover .dot { opacity: 0.8; }
+.medal-region.none:hover .shape, .medal-region.none:hover .dot { fill: #e4dcc6; opacity: 1; }
+.medal-region:focus-visible .shape { stroke: var(--ink); stroke-width: 1.4; }
+.medal-legend { list-style: none; display: flex; gap: 16px; justify-content: center; margin: 10px 0 0; padding: 0; font-size: 0.82rem; color: var(--muted); }
+.medal-legend li { display: flex; align-items: center; gap: 6px; }
+
+.challenge-list { display: grid; gap: 10px; margin-top: 12px; }
+.challenge-row {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+  border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px; background: #fffdf7;
+  transition: border-color .2s, box-shadow .2s;
+}
+.challenge-row.world { background: #f6f1e3; }
+.challenge-row.active { border-color: var(--focus); box-shadow: 0 0 0 2px rgba(47, 179, 95, 0.25); }
+.ch-head { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.ch-text h3 { margin: 0; font-size: 1rem; }
+.ch-text p { margin: 2px 0 0; }
+.ch-medals { display: flex; gap: 6px; }
+.ch-medal {
+  display: flex; flex-direction: column; align-items: center; justify-content: center; min-width: 74px; min-height: 48px;
+  padding: 4px 10px; border-radius: 12px; border: 2px solid var(--c); background: #fff; cursor: pointer;
+  transition: transform .1s, background .15s;
+}
+.ch-medal.bronze { --c: var(--bronze); }
+.ch-medal.silver { --c: var(--silver); }
+.ch-medal.gold { --c: var(--gold-medal); }
+.ch-medal:hover { background: color-mix(in srgb, var(--c) 14%, #fff); }
+.ch-medal:active { transform: scale(0.97); }
+.ch-medal.won { background: var(--c); color: #fff; }
+.ch-medal-name { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; }
+.ch-medal-time { font-weight: 700; font-variant-numeric: tabular-nums; }
+@media (max-width: 560px) {
+  .ch-medals { width: 100%; }
+  .ch-medal { flex: 1; min-width: 0; }
+}
+
+.challenge-top { display: flex; flex-direction: column; gap: 12px; }
+.cg-head { display: flex; align-items: center; gap: 12px; }
+.cg-title { min-width: 0; flex: 1; }
+.cg-title h2 { margin: 0; font-size: 1.15rem; }
+.cg-stats { display: flex; align-items: baseline; gap: 16px; font-variant-numeric: tabular-nums; }
+.cg-count { color: var(--muted); }
+.cg-count b { color: var(--green); font-size: 1.3rem; }
+.cg-clock { font-size: 1.5rem; font-weight: 800; min-width: 3.2em; text-align: right; }
+.cg-clock.urgent { color: var(--red); }
+.cg-ready p { margin: 0 0 12px; line-height: 1.5; }
+.cg-ready .btn-row, .challenge-top > .btn-row { justify-content: center; }
+.cg-form { display: flex; gap: 10px; align-items: center; }
+.cg-input {
+  flex: 1; min-width: 0; font-size: 1.25rem; padding: 12px 16px; border-radius: 12px;
+  border: 2px solid var(--line); background: #fff; outline: none; transition: border-color .15s;
+}
+.cg-input:focus { border-color: var(--focus); }
+.cg-input.bad, .cg-input.bad:focus { border-color: var(--red); }
+.cg-notice { margin: -4px 0 0; min-height: 1.3em; font-size: 0.9rem; color: var(--green-600); font-weight: 600; }
+.cg-notice.bad { color: var(--red); animation: cg-shake .3s; }
+@keyframes cg-shake { 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
+.cg-result { display: flex; gap: 16px; align-items: center; }
+.cg-result.lost { display: block; }
+.cg-result h3 { margin: 0 0 4px; }
+.cg-result p { margin: 0; }
+.cg-missed { list-style: none; display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0 0; padding: 0; }
+.cg-missed li { background: var(--red-soft); color: #9b2323; border-radius: 999px; padding: 3px 10px; font-size: 0.85rem; }
+.cg-regions { list-style: none; display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin: -4px 0; padding: 0; }
+.cg-regions li { background: var(--card); border-radius: 999px; padding: 4px 12px; font-size: 0.82rem; box-shadow: var(--shadow); font-variant-numeric: tabular-nums; }
+.cg-regions li.done { background: #eaf3ec; color: var(--green); }
+.lm-country.missed, .lm-marker.missed .dot { fill: #e98c8c; }
+.lm-zone.missed { fill: rgba(214, 60, 60, 0.15); stroke: var(--red); }
+.challenge-game .locate-map.disabled { cursor: grab; }
+.challenge-game .lm-country.hover { fill: #f7f2e4; }
+.challenge-game .lm-country.correct.hover { fill: #2fb35f; }
+@media (prefers-reduced-motion: reduce) { .cg-notice.bad { animation: none; } }
