@@ -221,27 +221,6 @@ const RAW: Row[] = [
   ['nan-madol', 'Nan Madol', 'FM', 'Nan Madol', [0.5, 0.55]],
   ['great-barrier-reef', 'Great Barrier Reef', 'AU', 'Great Barrier Reef', [0.4, 0.6], 'Amazing Great Barrier Reef 1.jpg'],
   ['sydney-harbour-bridge', 'Sydney Harbour Bridge', 'AU', 'Sydney Harbour Bridge', [0.5, 0.35]],
-  // People in traditional dress (no single place: MANUAL_COORDS in fetch-landmarks.mjs puts them in their heartland)
-  ['kimono', 'Kimono', 'JP', 'Kimono', [0.66, 0.6]],
-  ['hanbok', 'Hanbok', 'KR', 'Hanbok', [0.55, 0.75], 'Female Hanbok From South Korea.jpg'],
-  ['ao-dai', 'Áo dài', 'VN', 'Áo dài', [0.55, 0.45]],
-  ['gho', 'Gho and kira', 'BT', 'Gho', [0.6, 0.5]],
-  ['deel', 'Deel', 'MN', 'Deel (clothing)', [0.55, 0.55], 'Sędziowie w deel na lokalnym festiwalu Naadam (03).jpg'],
-  ['barong-tagalog', 'Barong tagalog', 'PH', 'Barong tagalog', [0.6, 0.65], 'Barong Tagalog.png'],
-  ['longyi', 'Longyi', 'MM', 'Longyi', [0.38, 0.75]],
-  ['kilt', 'Kilt', 'GB', 'Kilt', [0.42, 0.55], 'Piper (4945825081).jpg'],
-  ['bunad', 'Bunad', 'NO', 'Bunad', [0.5, 0.6], 'Young girls in bunad.jpg'],
-  ['traje-de-flamenca', 'Flamenco dress', 'ES', 'Traje de flamenca', [0.6, 0.75]],
-  ['vyshyvanka', 'Vyshyvanka', 'UA', 'Vyshyvanka', [0.5, 0.75], 'Solomiya.jpg'],
-  ['fustanella', 'Fustanella (Evzones)', 'GR', 'Evzones', [0.55, 0.6], 'Evzones at Changing of the Guard, Syntagma Square, Athens.JPG'],
-  ['habesha-kemis', 'Habesha kemis', 'ET', 'Habesha kemis', [0.55, 0.75]],
-  ['himba', 'Himba', 'NA', 'Himba people', [0.5, 0.75]],
-  ['charro', 'Charro', 'MX', 'Charro', [0.48, 0.4]],
-  ['pollera', 'Pollera', 'PA', 'Pollera', [0.55, 0.65]],
-  ['cholita', 'Cholita', 'BO', 'Cholita', [0.33, 0.4], 'Urfolk i Bolivia.jpg'],
-  ['huaso', 'Huaso', 'CL', 'Huaso', [0.55, 0.35], 'Joven de Vicuña, Chile, vestido de huaso para las celebraciones conmemorativas del Combate Naval de Iquique.jpg'],
-  ['kapa-haka', 'Kapa haka', 'NZ', 'Kapa haka', [0.48, 0.85], 'Maori girl in traditional dress.jpg'],
-  ['huli', 'Huli wigmen', 'PG', 'Huli people', [0.55, 0.4]],
 ];
 
 export const LANDMARKS: Landmark[] = RAW.map(([id, name, country, wiki, focus, file]) => ({
