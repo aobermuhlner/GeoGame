@@ -273,6 +273,276 @@ export const LANDMARK_META: Record<string, LandmarkMeta> = {
     "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
     "source": "https://commons.wikimedia.org/wiki/File:Mostar_Old_Town_Panorama_2007.jpg"
   },
+  "louvre-pyramid": {
+    "lat": 48.861,
+    "lon": 2.3359,
+    "file": "Louvre Museum Wikimedia Commons.jpg",
+    "author": "Benh LIEU SONG (Flickr)",
+    "license": "CC BY-SA 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Louvre_Museum_Wikimedia_Commons.jpg"
+  },
+  "arc-de-triomphe": {
+    "lat": 48.8738,
+    "lon": 2.295,
+    "file": "Arc_de_Triomphe_-_Août_2026.jpg",
+    "author": "ZeusUpsistos",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Arc_de_Triomphe_-_Ao%C3%BBt_2026.jpg"
+  },
+  "trevi-fountain": {
+    "lat": 41.9008,
+    "lon": 12.4831,
+    "file": "Trevi_Fountain_-_Roma.jpg",
+    "author": "NikonZ7II",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Trevi_Fountain_-_Roma.jpg"
+  },
+  "florence-cathedral": {
+    "lat": 43.7731,
+    "lon": 11.2569,
+    "file": "Cattedrale_di_Santa_Maria_del_Fiore_–_Il_Duomo_di_Firenze.jpg",
+    "author": "Gary Campbell-Hall",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Cattedrale_di_Santa_Maria_del_Fiore_%E2%80%93_Il_Duomo_di_Firenze.jpg"
+  },
+  "grand-canal-venice": {
+    "lat": 45.4375,
+    "lon": 12.3358,
+    "file": "View_of_the_Grand_Canal_from_Rialto_to_Ca'Foscari.jpg",
+    "author": "Didier Descouens",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:View_of_the_Grand_Canal_from_Rialto_to_Ca%27Foscari.jpg"
+  },
+  "plaza-de-espana-seville": {
+    "lat": 37.3769,
+    "lon": -5.9869,
+    "file": "Plaza_de_España_(Sevilla)_-_01.jpg",
+    "author": "Carlos Delgado",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Plaza_de_Espa%C3%B1a_(Sevilla)_-_01.jpg"
+  },
+  "edinburgh-castle": {
+    "lat": 55.9486,
+    "lon": -3.2008,
+    "file": "City_of_Edinburgh_-_Edinburgh_Castle_-_20140421004403.jpg",
+    "author": "Enric",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:City_of_Edinburgh_-_Edinburgh_Castle_-_20140421004403.jpg"
+  },
+  "giants-causeway": {
+    "lat": 55.2408,
+    "lon": -6.5117,
+    "file": "Causeway-code_poet-4.jpg",
+    "author": "code poet on flickr.",
+    "license": "CC BY-SA 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Causeway-code_poet-4.jpg"
+  },
+  "meteora": {
+    "lat": 39.7142,
+    "lon": 21.6311,
+    "file": "Meteora's_monastery_2.jpg",
+    "author": "Stathis floros",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Meteora%27s_monastery_2.jpg"
+  },
+  "oia-santorini": {
+    "lat": 36.4667,
+    "lon": 25.3667,
+    "file": "Oia_sunset_-_panoramio_(2).jpg",
+    "author": "TomasEE",
+    "license": "CC BY 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/3.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Oia_sunset_-_panoramio_(2).jpg"
+  },
+  "moscow-kremlin": {
+    "lat": 55.7517,
+    "lon": 37.6178,
+    "file": "Moscow_Kremlin_(8281675670).jpg",
+    "author": "Pavel Kazachkov from Moscow, Russia",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Moscow_Kremlin_(8281675670).jpg"
+  },
+  "peterhof": {
+    "lat": 59.8844,
+    "lon": 29.9089,
+    "file": "Peterhof_Palace,_Saint_Petersburg,_Russia_(44408938295).jpg",
+    "author": "Ninara from Helsinki, Finland",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Peterhof_Palace,_Saint_Petersburg,_Russia_(44408938295).jpg"
+  },
+  "nyhavn": {
+    "lat": 55.6797,
+    "lon": 12.5906,
+    "file": "The_Nyhavn_Canal_3.jpg",
+    "author": "European Commission",
+    "license": "CC BY 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:The_Nyhavn_Canal_3.jpg"
+  },
+  "little-mermaid": {
+    "lat": 55.6929,
+    "lon": 12.5993,
+    "file": "Denmark, Copenhagen, Little Mermaid, Langelinie Promenade 150422-25.jpg",
+    "author": "Richardmaackphotography",
+    "license": "CC BY 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Denmark,_Copenhagen,_Little_Mermaid,_Langelinie_Promenade_150422-25.jpg"
+  },
+  "helsinki-cathedral": {
+    "lat": 60.1703,
+    "lon": 24.9522,
+    "file": "Kirkko3.png",
+    "author": "Manster323",
+    "license": "CC0",
+    "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+    "source": "https://commons.wikimedia.org/wiki/File:Kirkko3.png"
+  },
+  "chillon": {
+    "lat": 46.4142,
+    "lon": 6.9275,
+    "file": "001_Chateau_de_Chillon_and_Dents_du_Midi_Photo_by_Giles_Laurent.jpg",
+    "author": "Giles Laurent",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:001_Chateau_de_Chillon_and_Dents_du_Midi_Photo_by_Giles_Laurent.jpg"
+  },
+  "hallstatt": {
+    "lat": 47.562,
+    "lon": 13.649,
+    "file": "Hallstatt_-_Zentrum_.JPG",
+    "author": "C.Stadler/Bwag",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Hallstatt_-_Zentrum_.JPG"
+  },
+  "prague-castle": {
+    "lat": 50.09,
+    "lon": 14.4,
+    "file": "Karlův_most_Praha,_Staré_Město_20170810_007.jpg",
+    "author": "Tilman2007",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Karl%C5%AFv_most_Praha,_Star%C3%A9_M%C4%9Bsto_20170810_007.jpg"
+  },
+  "plitvice": {
+    "lat": 44.8806,
+    "lon": 15.6161,
+    "file": "View_in_Plitvice_Lakes_National_Park.jpg",
+    "author": "Zysko serhii",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:View_in_Plitvice_Lakes_National_Park.jpg"
+  },
+  "rila-monastery": {
+    "lat": 42.1333,
+    "lon": 23.3403,
+    "file": "Rila_Monastery,_August_2013.jpg",
+    "author": "Raggatt2000",
+    "license": "CC BY-SA 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Rila_Monastery,_August_2013.jpg"
+  },
+  "pena-palace": {
+    "lat": 38.7878,
+    "lon": -9.3906,
+    "file": "Sintra_Portugal_Palácio_da_Pena-01.jpg",
+    "author": "CEphoto, Uwe Aranas",
+    "license": "CC BY-SA 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Sintra_Portugal_Pal%C3%A1cio_da_Pena-01.jpg"
+  },
+  "tallinn-old-town": {
+    "lat": 59.4372,
+    "lon": 24.7453,
+    "file": "Old_Town_of_Tallinn,_Tallinn,_Estonia_-_panoramio_(58).jpg",
+    "author": "Ben Bender",
+    "license": "CC BY-SA 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Old_Town_of_Tallinn,_Tallinn,_Estonia_-_panoramio_(58).jpg"
+  },
+  "trakai": {
+    "lat": 54.6525,
+    "lon": 24.9331,
+    "file": "Traku_pilis_by_Augustas_Didzgalvis.jpg",
+    "author": "BigHead",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Traku_pilis_by_Augustas_Didzgalvis.jpg"
+  },
+  "bled": {
+    "lat": 46.3644,
+    "lon": 14.0947,
+    "file": "Lake_Bled_from_the_Mountain.jpg",
+    "author": "Canadianhockey91",
+    "license": "CC BY-SA 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Lake_Bled_from_the_Mountain.jpg"
+  },
+  "kaneo": {
+    "lat": 41.1111,
+    "lon": 20.7887,
+    "file": "Church_of_St._John_at_Kaneo_6.jpg",
+    "author": "kallerna",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Church_of_St._John_at_Kaneo_6.jpg"
+  },
+  "valletta": {
+    "lat": 35.8983,
+    "lon": 14.5125,
+    "file": "St_Sebastian_Curtain_(cropped).jpg",
+    "author": "Mandyy88",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:St_Sebastian_Curtain_(cropped).jpg"
+  },
+  "vianden-castle": {
+    "lat": 49.935,
+    "lon": 6.2022,
+    "file": "Burg_Vianden,_Luxemburg.jpg",
+    "author": "Jeff Croisé",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Burg_Vianden,_Luxemburg.jpg"
+  },
+  "st-sophia-kyiv": {
+    "lat": 50.4528,
+    "lon": 30.5144,
+    "file": "80-391-0151_Kyiv_St.Sophia's_Cathedral_RB_18_2_(cropped).jpg",
+    "author": "Rbrechko",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:80-391-0151_Kyiv_St.Sophia%27s_Cathedral_RB_18_2_(cropped).jpg"
+  },
+  "gergeti": {
+    "lat": 42.6625,
+    "lon": 44.6203,
+    "file": "Gergeti_Trinity_Church_09.23.jpg",
+    "author": "This Photo was taken by Supanut Arunoprayote. Feel free to use any of my images, but please mention me as the author and may send me a message. (สามารถใช้ภาพได้อิสระ แต่กรุณาใส่เครดิตผู้ถ่ายและอาจส่งข้อความบอกกล่าวด้วย) Please do not upload an updated image here without consultation with the Author. The author would like to make corrections only at his own source. This ensures that the changes are preserved.Please if you think that any changes should be required, please inform the author.Otherwise you can upload a new image with a new name. Please use one of the templates derivative or extract.",
+    "license": "CC BY 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Gergeti_Trinity_Church_09.23.jpg"
+  },
+  "khor-virap": {
+    "lat": 39.8783,
+    "lon": 44.5761,
+    "file": "Monasterio_Khor_Virap,_Armenia,_2016-10-01,_DD_25.jpg",
+    "author": "Diego Delso",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Monasterio_Khor_Virap,_Armenia,_2016-10-01,_DD_25.jpg"
+  },
   "taj-mahal": {
     "lat": 27.175,
     "lon": 78.0419,
@@ -498,6 +768,195 @@ export const LANDMARK_META: Record<string, LandmarkMeta> = {
     "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
     "source": "https://commons.wikimedia.org/wiki/File:Boudhanath_stupa_,_Kathmandu,_Nepal.jpg"
   },
+  "himeji-castle": {
+    "lat": 34.8394,
+    "lon": 134.6939,
+    "file": "Himeji_castle_in_may_2015.jpg",
+    "author": "Nikos Kitsakis",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Himeji_castle_in_may_2015.jpg"
+  },
+  "terracotta-army": {
+    "lat": 34.385,
+    "lon": 109.2731,
+    "file": "51714-Terracota-Army.jpg",
+    "author": "xiquinhosilva",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+    "source": "https://commons.wikimedia.org/wiki/File:51714-Terracota-Army.jpg"
+  },
+  "temple-of-heaven": {
+    "lat": 39.8822,
+    "lon": 116.4066,
+    "file": "Temple_of_Heaven_20160323_01.jpg",
+    "author": "Shujianyang",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Temple_of_Heaven_20160323_01.jpg"
+  },
+  "hawa-mahal": {
+    "lat": 26.9239,
+    "lon": 75.8267,
+    "file": "East_facade_Hawa_Mahal_Jaipur_from_ground_level_(July_2022)_-_img_01.jpg",
+    "author": "Chainwit.",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:East_facade_Hawa_Mahal_Jaipur_from_ground_level_(July_2022)_-_img_01.jpg"
+  },
+  "gateway-of-india": {
+    "lat": 18.922,
+    "lon": 72.8347,
+    "file": "Mumbai_03-2016_30_Gateway_of_India.jpg",
+    "author": "A.Savin",
+    "license": "FAL",
+    "licenseUrl": "http://artlibre.org/licence/lal/en",
+    "source": "https://commons.wikimedia.org/wiki/File:Mumbai_03-2016_30_Gateway_of_India.jpg"
+  },
+  "bagan": {
+    "lat": 21.1725,
+    "lon": 94.86,
+    "file": "Bagan,_Burma.jpg",
+    "author": "Corto Maltese 1999",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Bagan,_Burma.jpg"
+  },
+  "batu-caves": {
+    "lat": 3.2374,
+    "lon": 101.6839,
+    "file": "Batu_Caves_stairs_2022-05.jpg",
+    "author": "Chainwit.",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Batu_Caves_stairs_2022-05.jpg"
+  },
+  "hegra": {
+    "lat": 26.7917,
+    "lon": 37.9528,
+    "file": "Qasr al-Farid, a 1st-century AD Nabatean unfinished tomb carved into a giant boulder in Hegra (Mada'in Salih), the kingdom's second Nabatean capital after Petra, Saudi Arabia - 53535089614.jpg",
+    "author": "Carole Raddato from FRANKFURT, Germany",
+    "license": "CC BY-SA 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Qasr_al-Farid,_a_1st-century_AD_Nabatean_unfinished_tomb_carved_into_a_giant_boulder_in_Hegra_(Mada%27in_Salih),_the_kingdom%27s_second_Nabatean_capital_after_Petra,_Saudi_Arabia_-_53535089614.jpg"
+  },
+  "naqsh-e-jahan": {
+    "lat": 32.6575,
+    "lon": 51.6778,
+    "file": "Sheikh Lotfallah Esfahan.JPG",
+    "author": "Nicolas Hadjisavvas",
+    "license": "CC BY 2.5",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.5",
+    "source": "https://commons.wikimedia.org/wiki/File:Sheikh_Lotfallah_Esfahan.JPG"
+  },
+  "cappadocia": {
+    "lat": 38.6183,
+    "lon": 34.8672,
+    "file": "Cappadocia_balloon_trip,_Ortahisar_Castle_(11893715185).jpg",
+    "author": "Arian Zwegers from Brussels, Belgium",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Cappadocia_balloon_trip,_Ortahisar_Castle_(11893715185).jpg"
+  },
+  "pamukkale": {
+    "lat": 37.9239,
+    "lon": 29.1233,
+    "file": "Pamukkale,_Denizli_2026_68.jpg",
+    "author": "Biologg",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Pamukkale,_Denizli_2026_68.jpg"
+  },
+  "baalbek": {
+    "lat": 34.0063,
+    "lon": 36.2073,
+    "file": "Temple_of_Bacchus,_Baalbek,_Lebanon_(49890013476).jpg",
+    "author": "Lodo from Moscow, Russia",
+    "license": "CC BY-SA 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Temple_of_Bacchus,_Baalbek,_Lebanon_(49890013476).jpg"
+  },
+  "badshahi-mosque": {
+    "lat": 31.5881,
+    "lon": 74.3094,
+    "file": "Badshahi_Mosque_front_picture.jpg",
+    "author": "Romero Maia",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Badshahi_Mosque_front_picture.jpg"
+  },
+  "wat-xieng-thong": {
+    "lat": 19.8975,
+    "lon": 102.1431,
+    "file": "Temple_Wat_Xieng_Thong_-_Luang_Prabang_-_Laos.jpg",
+    "author": "Basile Morin",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Temple_Wat_Xieng_Thong_-_Luang_Prabang_-_Laos.jpg"
+  },
+  "n-seoul-tower": {
+    "lat": 37.5512,
+    "lon": 126.9883,
+    "file": "Namsan Seoul Tower (49174492933).jpg",
+    "author": "Matt Kieffer from London, United Kingdom",
+    "license": "CC BY-SA 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Namsan_Seoul_Tower_(49174492933).jpg"
+  },
+  "genghis-khan-statue": {
+    "lat": 47.8081,
+    "lon": 107.5298,
+    "file": "Genghis_Khan_Equestrian_Statue,_photo_by_Vaiz_Ha.jpg",
+    "author": "Vaiz Ha",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Genghis_Khan_Equestrian_Statue,_photo_by_Vaiz_Ha.jpg"
+  },
+  "darvaza": {
+    "lat": 40.2525,
+    "lon": 58.4396,
+    "file": "Darvasa_gas_crater_panorama.jpg",
+    "author": "Tormod Sandtorv",
+    "license": "CC BY-SA 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Darvasa_gas_crater_panorama.jpg"
+  },
+  "banaue": {
+    "lat": 16.9,
+    "lon": 121.05,
+    "file": "Banaue-terrace.JPG",
+    "author": "User: (WT-shared) Roundtheworld at wts wikivoyage",
+    "license": "Public domain",
+    "licenseUrl": null,
+    "source": "https://commons.wikimedia.org/wiki/File:Banaue-terrace.JPG"
+  },
+  "omar-ali-saifuddien-mosque": {
+    "lat": 4.8894,
+    "lon": 114.9392,
+    "file": "Sultan_Omar_Ali_Saifuddin_Mosque_with_the_ceremonial_ship.jpg",
+    "author": "Abdullah Geelah",
+    "license": "CC BY-SA 3.0",
+    "licenseUrl": "http://creativecommons.org/licenses/by-sa/3.0/",
+    "source": "https://commons.wikimedia.org/wiki/File:Sultan_Omar_Ali_Saifuddin_Mosque_with_the_ceremonial_ship.jpg"
+  },
+  "hoi-an": {
+    "lat": 15.8771,
+    "lon": 108.326,
+    "file": "2024_Hội_An_-_Japanese_Covered_Bridge_(Chùa_Cầu)_after_renovation_-_img_11.jpg",
+    "author": "Chainwit.",
+    "license": "CC BY 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:2024_H%E1%BB%99i_An_-_Japanese_Covered_Bridge_(Ch%C3%B9a_C%E1%BA%A7u)_after_renovation_-_img_11.jpg"
+  },
+  "grand-palace-bangkok": {
+    "lat": 13.7501,
+    "lon": 100.492,
+    "file": "0005574_-_Wat_Phra_Kaew_006.jpg",
+    "author": "Preecha.MJ",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:0005574_-_Wat_Phra_Kaew_006.jpg"
+  },
   "pyramids-of-giza": {
     "lat": 29.9761,
     "lon": 31.1328,
@@ -615,6 +1074,132 @@ export const LANDMARK_META: Record<string, LandmarkMeta> = {
     "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
     "source": "https://commons.wikimedia.org/wiki/File:Ile-de-goree.jpg"
   },
+  "karnak": {
+    "lat": 25.7183,
+    "lon": 32.6583,
+    "file": "Temple_de_Louxor_68.jpg",
+    "author": "René Hourdry",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Temple_de_Louxor_68.jpg"
+  },
+  "leptis-magna": {
+    "lat": 32.6392,
+    "lon": 14.2906,
+    "file": "Leptis_Magna_(29)_(8288918733).jpg",
+    "author": "joepyrek from Richmond, Va, USA",
+    "license": "CC BY-SA 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Leptis_Magna_(29)_(8288918733).jpg"
+  },
+  "sidi-bou-said": {
+    "lat": 36.8717,
+    "lon": 10.3472,
+    "file": "SidBS (47).JPG",
+    "author": "Hajotthu 14:41, 22. Feb. 2009 (CET)",
+    "license": "CC BY-SA 3.0",
+    "licenseUrl": "http://creativecommons.org/licenses/by-sa/3.0/",
+    "source": "https://commons.wikimedia.org/wiki/File:SidBS_(47).JPG"
+  },
+  "notre-dame-d-afrique": {
+    "lat": 36.8011,
+    "lon": 3.0425,
+    "file": "Notre_Dame_d'Afrique2_cropped.jpg",
+    "author": "Chettouh Nabil",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Notre_Dame_d%27Afrique2_cropped.jpg"
+  },
+  "chefchaouen": {
+    "lat": 35.1714,
+    "lon": -5.2697,
+    "file": "Chefchaouen-the-blue-city-of-morocco-with-palm-trees-and-the-mountain-view-in-the-backrgound.jpg",
+    "author": "Badr Rachadi",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Chefchaouen-the-blue-city-of-morocco-with-palm-trees-and-the-mountain-view-in-the-backrgound.jpg"
+  },
+  "hassan-ii-mosque": {
+    "lat": 33.6085,
+    "lon": -7.6327,
+    "file": "SOUR JDID, Casablanca, Morocco - panoramio (16).jpg",
+    "author": "karel291",
+    "license": "CC BY 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/3.0",
+    "source": "https://commons.wikimedia.org/wiki/File:SOUR_JDID,_Casablanca,_Morocco_-_panoramio_(16).jpg"
+  },
+  "fasil-ghebbi": {
+    "lat": 12.6075,
+    "lon": 37.47,
+    "file": "Fasilides_Palace_01.jpg",
+    "author": "Bernard Gagnon",
+    "license": "CC BY-SA 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Fasilides_Palace_01.jpg"
+  },
+  "meroe-pyramids": {
+    "lat": 16.9333,
+    "lon": 33.7264,
+    "file": "NubianMeroePyramids30sep2005(2).jpg",
+    "author": "Wufei07",
+    "license": "Public domain",
+    "licenseUrl": null,
+    "source": "https://commons.wikimedia.org/wiki/File:NubianMeroePyramids30sep2005(2).jpg"
+  },
+  "blyde-river-canyon": {
+    "lat": -24.58,
+    "lon": 30.8,
+    "file": "20131119_162543b.jpg",
+    "author": "Claudirene",
+    "license": "CC BY-SA 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+    "source": "https://commons.wikimedia.org/wiki/File:20131119_162543b.jpg"
+  },
+  "stone-town": {
+    "lat": -6.1624,
+    "lon": 39.1913,
+    "file": "Zanzibar_sultan_palace.jpg",
+    "author": "No machine-readable author provided. Mbz1 assumed (based on copyright claims).",
+    "license": "CC BY-SA 3.0",
+    "licenseUrl": "http://creativecommons.org/licenses/by-sa/3.0/",
+    "source": "https://commons.wikimedia.org/wiki/File:Zanzibar_sultan_palace.jpg"
+  },
+  "le-morne": {
+    "lat": -20.4519,
+    "lon": 57.3283,
+    "file": "Le_Morne_Peninsula_in_Mauritius_(53697779236).jpg",
+    "author": "\"dronepicr\"",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Le_Morne_Peninsula_in_Mauritius_(53697779236).jpg"
+  },
+  "anse-source-d-argent": {
+    "lat": -4.3715,
+    "lon": 55.8272,
+    "file": "La_Digue_asv2024-10_img22_Union_Estate.jpg",
+    "author": "A.Savin",
+    "license": "FAL",
+    "licenseUrl": "http://artlibre.org/licence/lal/en",
+    "source": "https://commons.wikimedia.org/wiki/File:La_Digue_asv2024-10_img22_Union_Estate.jpg"
+  },
+  "okavango-delta": {
+    "lat": -19.4,
+    "lon": 22.9,
+    "file": "Travesía del delta del Okavango en makoro, Botsuana, 2018-08-01, DD 22.jpg",
+    "author": "Diego Delso",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Traves%C3%ADa_del_delta_del_Okavango_en_makoro,_Botsuana,_2018-08-01,_DD_22.jpg"
+  },
+  "kasubi-tombs": {
+    "lat": 0.3292,
+    "lon": 32.5533,
+    "file": "Kampala_Kasubi_Tombs.jpg",
+    "author": "not not phil from SF, CA, US",
+    "license": "CC BY-SA 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Kampala_Kasubi_Tombs.jpg"
+  },
   "statue-of-liberty": {
     "lat": 40.6892,
     "lon": -74.0444,
@@ -713,6 +1298,60 @@ export const LANDMARK_META: Record<string, LandmarkMeta> = {
     "license": "CC BY-SA 3.0",
     "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
     "source": "https://commons.wikimedia.org/wiki/File:Bellas_Artes_01.jpg"
+  },
+  "hollywood-sign": {
+    "lat": 34.1341,
+    "lon": -118.3216,
+    "file": "Hollywood_sign_(8485145044).jpg",
+    "author": "Gnaphron",
+    "license": "CC BY-SA 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Hollywood_sign_(8485145044).jpg"
+  },
+  "white-house": {
+    "lat": 38.8978,
+    "lon": -77.0364,
+    "file": "Tourists by WH.JPG",
+    "author": "me",
+    "license": "Public domain",
+    "licenseUrl": null,
+    "source": "https://commons.wikimedia.org/wiki/File:Tourists_by_WH.JPG"
+  },
+  "times-square": {
+    "lat": 40.7575,
+    "lon": -73.9858,
+    "file": "New_york_times_square-terabass.jpg",
+    "author": "Terabass",
+    "license": "CC BY-SA 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+    "source": "https://commons.wikimedia.org/wiki/File:New_york_times_square-terabass.jpg"
+  },
+  "gateway-arch": {
+    "lat": 38.6246,
+    "lon": -90.185,
+    "file": "St_Louis_night_expblend_cropped.jpg",
+    "author": "St_Louis_night_expblend.jpg: Daniel Schwen derivative work: ←fetchcomms",
+    "license": "CC BY-SA 3.0",
+    "licenseUrl": "http://creativecommons.org/licenses/by-sa/3.0/",
+    "source": "https://commons.wikimedia.org/wiki/File:St_Louis_night_expblend_cropped.jpg"
+  },
+  "parliament-hill": {
+    "lat": 45.4247,
+    "lon": -75.6994,
+    "file": "Ottawa_-_ON_-_Stadtansicht.jpg",
+    "author": "Wladyslaw",
+    "license": "CC BY-SA 3.0",
+    "licenseUrl": "http://creativecommons.org/licenses/by-sa/3.0/",
+    "source": "https://commons.wikimedia.org/wiki/File:Ottawa_-_ON_-_Stadtansicht.jpg"
+  },
+  "tulum": {
+    "lat": 20.2147,
+    "lon": -87.4289,
+    "file": "Tulum_2.jpg",
+    "author": "Popo le Chien",
+    "license": "CC BY-SA 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Tulum_2.jpg"
   },
   "tikal": {
     "lat": 17.2219,
@@ -930,6 +1569,78 @@ export const LANDMARK_META: Record<string, LandmarkMeta> = {
     "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
     "source": "https://commons.wikimedia.org/wiki/File:Lobo_marino_(Zalophus_californianus_wollebaeki),_Punta_Pitt,_isla_de_San_Crist%C3%B3bal,_islas_Gal%C3%A1pagos,_Ecuador,_2015-07-24,_DD_11.JPG"
   },
+  "brasilia-cathedral": {
+    "lat": -15.7983,
+    "lon": -47.8756,
+    "file": "Catedral_Metropolitana_de_Brasilia.jpg",
+    "author": "Tissiana de A. de Souza",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Catedral_Metropolitana_de_Brasilia.jpg"
+  },
+  "cartagena": {
+    "lat": 10.4,
+    "lon": -75.5,
+    "file": "Clock Tower CTG 11 2019 1352.jpg",
+    "author": "Mariordo (Mario Roberto Durán Ortiz)",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Clock_Tower_CTG_11_2019_1352.jpg"
+  },
+  "nazca-lines": {
+    "lat": -14.6975,
+    "lon": -75.135,
+    "file": "Líneas_de_Nazca,_Nazca,_Perú,_2015-07-29,_DD_49.JPG",
+    "author": "Diego Delso",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:L%C3%ADneas_de_Nazca,_Nazca,_Per%C3%BA,_2015-07-29,_DD_49.JPG"
+  },
+  "rainbow-mountain": {
+    "lat": -13.8702,
+    "lon": -71.303,
+    "file": "Montañaarcoirisperuabanto.jpg",
+    "author": "Diego Aldrin Abanto Ricce",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Monta%C3%B1aarcoirisperuabanto.jpg"
+  },
+  "valle-de-la-luna": {
+    "lat": -22.9112,
+    "lon": -68.323,
+    "file": "Anfiteatro, Valle de la Luna, San Pedro de Atacama, Chile, 2016-02-01, DD 176-178 HDR.JPG",
+    "author": "Diego Delso",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Anfiteatro,_Valle_de_la_Luna,_San_Pedro_de_Atacama,_Chile,_2016-02-01,_DD_176-178_HDR.JPG"
+  },
+  "palacio-salvo": {
+    "lat": -34.9067,
+    "lon": -56.1983,
+    "file": "Palacio Salvo 6.JPG",
+    "author": "Maximasu",
+    "license": "CC BY-SA 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Palacio_Salvo_6.JPG"
+  },
+  "panteon-de-los-heroes": {
+    "lat": -25.2822,
+    "lon": -57.6352,
+    "file": "ASUNCION_PANTEON_NACIONAL_DE_LOS_HÉROES.jpg",
+    "author": "Felipe Antonio",
+    "license": "CC BY-SA 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+    "source": "https://commons.wikimedia.org/wiki/File:ASUNCION_PANTEON_NACIONAL_DE_LOS_H%C3%89ROES.jpg"
+  },
+  "tiwanaku": {
+    "lat": -16.5547,
+    "lon": -68.6733,
+    "file": "PUERTA_DEL_SOL_TIWANAKU.jpg",
+    "author": "CLAUDIOLD",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:PUERTA_DEL_SOL_TIWANAKU.jpg"
+  },
   "sydney-opera-house": {
     "lat": -33.8568,
     "lon": 151.2151,
@@ -983,5 +1694,203 @@ export const LANDMARK_META: Record<string, LandmarkMeta> = {
     "license": "Public domain",
     "licenseUrl": null,
     "source": "https://commons.wikimedia.org/wiki/File:Nan_madol.jpg"
+  },
+  "great-barrier-reef": {
+    "lat": -16.4,
+    "lon": 145.8,
+    "file": "Amazing Great Barrier Reef 1.jpg",
+    "author": "Sarah_Ackerman",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Amazing_Great_Barrier_Reef_1.jpg"
+  },
+  "sydney-harbour-bridge": {
+    "lat": -33.8522,
+    "lon": 151.2106,
+    "file": "Sydney_Harbour_Bridge-16_October_2025.jpg",
+    "author": "Servite et contribuere",
+    "license": "CC0",
+    "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+    "source": "https://commons.wikimedia.org/wiki/File:Sydney_Harbour_Bridge-16_October_2025.jpg"
+  },
+  "kimono": {
+    "lat": 35.01,
+    "lon": 135.77,
+    "file": "Two_young_maiko_in_Seirai-in_Temple_02.jpg",
+    "author": "Takaaki Kawai",
+    "license": "CC BY-SA 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Two_young_maiko_in_Seirai-in_Temple_02.jpg"
+  },
+  "hanbok": {
+    "lat": 37.58,
+    "lon": 126.98,
+    "file": "Female Hanbok From South Korea.jpg",
+    "author": "IssamBarhoumi",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Female_Hanbok_From_South_Korea.jpg"
+  },
+  "ao-dai": {
+    "lat": 16.46,
+    "lon": 107.59,
+    "file": "Áo_dài_hoa_phượng_-_Phát_Trương_-_51231007393_(cropped).jpg",
+    "author": "Phát Trương",
+    "license": "CC BY-SA 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0",
+    "source": "https://commons.wikimedia.org/wiki/File:%C3%81o_d%C3%A0i_hoa_ph%C6%B0%E1%BB%A3ng_-_Ph%C3%A1t_Tr%C6%B0%C6%A1ng_-_51231007393_(cropped).jpg"
+  },
+  "gho": {
+    "lat": 27.47,
+    "lon": 89.64,
+    "file": "Boys_in_Bhutan_national_dress.jpg",
+    "author": "Keith Mason",
+    "license": "CC BY-SA 3.0",
+    "licenseUrl": "http://creativecommons.org/licenses/by-sa/3.0/",
+    "source": "https://commons.wikimedia.org/wiki/File:Boys_in_Bhutan_national_dress.jpg"
+  },
+  "deel": {
+    "lat": 47.92,
+    "lon": 106.92,
+    "file": "Sędziowie w deel na lokalnym festiwalu Naadam (03).jpg",
+    "author": "Marcin Konsek",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:S%C4%99dziowie_w_deel_na_lokalnym_festiwalu_Naadam_(03).jpg"
+  },
+  "barong-tagalog": {
+    "lat": 14.6,
+    "lon": 120.98,
+    "file": "Barong Tagalog.png",
+    "author": "Inkallyoucan0922",
+    "license": "CC BY 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Barong_Tagalog.png"
+  },
+  "longyi": {
+    "lat": 16.84,
+    "lon": 96.17,
+    "file": "Longyi.jpg",
+    "author": "Unknown author",
+    "license": "Public domain",
+    "licenseUrl": null,
+    "source": "https://commons.wikimedia.org/wiki/File:Longyi.jpg"
+  },
+  "kilt": {
+    "lat": 56.8,
+    "lon": -4.2,
+    "file": "Piper (4945825081).jpg",
+    "author": "xlibber",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Piper_(4945825081).jpg"
+  },
+  "bunad": {
+    "lat": 61,
+    "lon": 8.5,
+    "file": "Young girls in bunad.jpg",
+    "author": "Elin",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Young_girls_in_bunad.jpg"
+  },
+  "traje-de-flamenca": {
+    "lat": 37.39,
+    "lon": -5.98,
+    "file": "Flamenca_001.jpg",
+    "author": "Schnobby",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Flamenca_001.jpg"
+  },
+  "vyshyvanka": {
+    "lat": 50.45,
+    "lon": 30.52,
+    "file": "Solomiya.jpg",
+    "author": "Vladimir Yaitskiy",
+    "license": "CC BY-SA 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Solomiya.jpg"
+  },
+  "fustanella": {
+    "lat": 37.975,
+    "lon": 23.737,
+    "file": "Evzones at Changing of the Guard, Syntagma Square, Athens.JPG",
+    "author": "Marshallhenrie",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Evzones_at_Changing_of_the_Guard,_Syntagma_Square,_Athens.JPG"
+  },
+  "habesha-kemis": {
+    "lat": 9.03,
+    "lon": 38.74,
+    "file": "Shewa_Amhara_girl_wearing_Shewa_Amhara_dress.jpg",
+    "author": "Zenithmuhaba",
+    "license": "CC0",
+    "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+    "source": "https://commons.wikimedia.org/wiki/File:Shewa_Amhara_girl_wearing_Shewa_Amhara_dress.jpg"
+  },
+  "himba": {
+    "lat": -18.06,
+    "lon": 13.84,
+    "file": "Namibie_Himba_0717a.jpg",
+    "author": "Yves Picq http://veton.picq.fr",
+    "license": "CC BY-SA 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Namibie_Himba_0717a.jpg"
+  },
+  "charro": {
+    "lat": 20.67,
+    "lon": -103.35,
+    "file": "CharroMexicano2115.jpg",
+    "author": "México en Fotos",
+    "license": "CC BY-SA 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0",
+    "source": "https://commons.wikimedia.org/wiki/File:CharroMexicano2115.jpg"
+  },
+  "pollera": {
+    "lat": 7.77,
+    "lon": -80.27,
+    "file": "PanamenianPollera.JPG",
+    "author": "Anelsalas at English Wikipedia",
+    "license": "CC BY-SA 3.0",
+    "licenseUrl": "http://creativecommons.org/licenses/by-sa/3.0/",
+    "source": "https://commons.wikimedia.org/wiki/File:PanamenianPollera.JPG"
+  },
+  "cholita": {
+    "lat": -16.5,
+    "lon": -68.15,
+    "file": "Urfolk i Bolivia.jpg",
+    "author": "Norsk Folkehjelp Norwegian People's Aid",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Urfolk_i_Bolivia.jpg"
+  },
+  "huaso": {
+    "lat": -34.17,
+    "lon": -70.74,
+    "file": "Joven de Vicuña, Chile, vestido de huaso para las celebraciones conmemorativas del Combate Naval de Iquique.jpg",
+    "author": "Unknown author",
+    "license": "CC BY 2.5",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.5",
+    "source": "https://commons.wikimedia.org/wiki/File:Joven_de_Vicu%C3%B1a,_Chile,_vestido_de_huaso_para_las_celebraciones_conmemorativas_del_Combate_Naval_de_Iquique.jpg"
+  },
+  "kapa-haka": {
+    "lat": -38.14,
+    "lon": 176.25,
+    "file": "Maori girl in traditional dress.jpg",
+    "author": "Seth Mazow",
+    "license": "CC BY-SA 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Maori_girl_in_traditional_dress.jpg"
+  },
+  "huli": {
+    "lat": -5.85,
+    "lon": 142.95,
+    "file": "Huli_wigman.jpg",
+    "author": "Nomadtales",
+    "license": "CC BY 2.1 au",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.1/au/deed.en",
+    "source": "https://commons.wikimedia.org/wiki/File:Huli_wigman.jpg"
   }
 };
