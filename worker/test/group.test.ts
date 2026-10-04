@@ -249,5 +249,24 @@ describe('public games ("Find a game")', () => {
     b.c.send({ t: 'leave' });
     const s = await waitState(a.c, (x) => !x.room.players.some((p) => p.name === 'Eve'));
     expect(s.room.autoStartAt).toBeNull();
+    a.c.send({ t: 'leave' });
+    while ((await internal(code)).players.length) await new Promise((r) => setTimeout(r, 10));
+  });
+
+  it('draws new games each time someone opens the empty lobby', async () => {
+    const seen = new Set<string>();
+    let code = '';
+    for (let i = 0; i < 8; i++) {
+      const next = await quick();
+      if (code) expect(next).toBe(code); // the same lobby is handed out again...
+      code = next;
+      const p = await joinGroup(code, `Solo${i}`);
+      const s = await waitState(p.c, (x) => x.room.players.length === 1);
+      expect(s.room.modes).toHaveLength(QUICK_GAMES);
+      seen.add(s.room.modes.join());
+      p.c.send({ t: 'leave' });
+      while ((await internal(code)).players.length) await new Promise((r) => setTimeout(r, 10));
+    }
+    expect(seen.size).toBeGreaterThan(1); // ...but not with the same games
   });
 });

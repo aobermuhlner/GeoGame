@@ -113,6 +113,11 @@ function randomHex(bytes: number): string {
 }
 
 /** Where the game of round `i` starts and how many rounds it has. */
+/** A public lobby's games: a few at random. */
+function quickModes(): GameId[] {
+  return shuffleGames(GAME_IDS).slice(0, QUICK_GAMES);
+}
+
 function stageSpan(games: readonly GameId[], i: number): { start: number; rounds: number } {
   let start = i;
   while (start > 0 && games[start - 1] === games[i]) start--;
@@ -165,7 +170,7 @@ export class GroupRoom extends DurableObject<Env> {
       phase: 'lobby',
       players: [],
       regions: [...REGION_IDS],
-      modes: isPublic ? shuffleGames(GAME_IDS).slice(0, QUICK_GAMES) : [...GAME_IDS],
+      modes: isPublic ? quickModes() : [...GAME_IDS],
       roundCounts: isPublic
         ? (Object.fromEntries(GAME_IDS.map((g) => [g, QUICK_ROUNDS])) as RoundCounts)
         : { ...GROUP_DEFAULT_ROUND_COUNTS },
@@ -265,6 +270,8 @@ export class GroupRoom extends DurableObject<Env> {
       this.sendError(ws, 'room_full', `This lobby is full (${GROUP_MAX_PLAYERS} players)`);
       return ws.close(4003, 'room_full');
     } else {
+      // An empty public lobby is handed out again on the next search: draw fresh games for whoever opens it.
+      if (s.public && !s.players.some((p) => p.connected)) s.modes = quickModes();
       player = { sessionId: msg.sessionId, name: msg.name, connected: true, disconnectedAt: null };
       s.players.push(player);
     }
