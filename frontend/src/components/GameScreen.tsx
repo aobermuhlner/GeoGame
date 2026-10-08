@@ -255,7 +255,7 @@ function StatusLine({ vm }: { vm: GameVM }) {
     return (
       <div class="status-line muted hint">
         {MODES[modeOf(vm)].input === 'pin'
-          ? 'Landmark inside your circle scores · smaller circle, more points · first right +1'
+          ? 'Landmark inside your circle scores · smaller circle, more points · no hurry'
           : MODES[modeOf(vm)].accuracy
             ? 'One estimate each · closer = 1 point, spot on 🎯 +1'
             : 'One answer each · right = 1 point, first right +1'}
@@ -269,6 +269,7 @@ function StatusLine({ vm }: { vm: GameVM }) {
 export function GameScreen({ vm, actions }: { vm: GameVM; actions: GameActions }) {
   const [confirmGiveUp, setConfirmGiveUp] = useState(false);
   const me = vm.players[vm.me];
+  const opp = vm.me === 0 ? 1 : 0;
   const locked = vm.phase !== 'playing' || me.passed || me.locked;
   const mode = MODES[modeOf(vm)];
   const isMap = mode.input === 'map' && !(vm.phase === 'reveal' && vm.reveal?.mode !== 'locate');
@@ -318,6 +319,17 @@ export function GameScreen({ vm, actions }: { vm: GameVM; actions: GameActions }
             }
             status={<StatusLine vm={vm} />}
             hud={<MapHud vm={vm} />}
+            others={
+              vm.phase === 'countdown'
+                ? []
+                : [
+                    {
+                      name: vm.players[opp].name,
+                      misses: vm.misses?.[opp] ?? [],
+                      found: vm.phase === 'reveal' && vm.reveal?.winner === opp,
+                    },
+                  ]
+            }
           />
           {giveUp(false)}
         </section>

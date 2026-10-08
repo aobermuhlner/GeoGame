@@ -74,6 +74,8 @@ export interface GameVM {
   focus: [number, number] | null;
   /** Lock-in games: your own locked-in answer this round */
   myLock: string | null;
+  /** Map games: the countries each player clicked wrongly this round */
+  misses: [string[], string[]] | null;
   /** Local-clock ms timestamps */
   countdownEndsAt: number | null;
   deadline: number | null;

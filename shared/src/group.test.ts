@@ -7,6 +7,7 @@ import {
   groupPass,
   groupPick,
   groupPoints,
+  GROUP_PIN_POINTS,
   groupTimeOf,
   newGroupRound,
   pickGroupPairs,
@@ -54,13 +55,20 @@ describe('group rounds', () => {
     expect(r.endedAt).toBe(T0 + ROUND_TIME_MS);
   });
 
-  it('landmarks: a right pin scores less the bigger its circle', () => {
+  it('GeoLocate: remembers the wrong clicks of every player', () => {
+    const r = newGroupRound('locate', 'KI', null, 3, T0);
+    expect(groupGuess(r, 0, 'MH', T0 + 1000)).toBe('wrong');
+    expect(groupGuess(r, 2, 'FJ', T0 + 1500)).toBe('wrong');
+    expect(groupGuess(r, 0, 'KI', T0 + 2000)).toBe('correct');
+    expect(r.entries.map((e) => e.misses ?? [])).toEqual([['MH'], [], ['FJ']]);
+  });
+
+  it('landmarks: a right pin scores less the bigger its circle, whatever the speed', () => {
     const r = newGroupRound('landmarks', 'eiffel-tower', null, 3, T0);
     expect(groupGuess(r, 0, '48.86,2.29,100', T0 + 2000)).toBe('locked');
     expect(groupGuess(r, 1, '48.86,2.29,1000', T0 + 2000)).toBe('locked');
     expect(groupGuess(r, 2, '40.7,-74,2000', T0 + 2000)).toBe('locked');
-    const full = groupPoints(2000, groupTimeOf('landmarks'), 0);
-    expect(r.entries.map((e) => e.points)).toEqual([full, Math.round((full * 2) / 5), 0]);
+    expect(r.entries.map((e) => e.points)).toEqual([GROUP_PIN_POINTS, Math.round((GROUP_PIN_POINTS * 2) / 5), 0]);
     expect(r.entries.map((e) => e.end)).toEqual(['correct', 'correct', 'wrong']);
   });
 
@@ -74,8 +82,8 @@ describe('group rounds', () => {
     expect(settleGroupRound(r, [true, true, true], r.deadline)).toBe(true);
     expect(r.entries.map((e) => e.end)).toEqual(['correct', 'wrong', null]);
     expect(r.entries[0].answer).toBe('48.860,2.290,500');
-    // No speed points: it only counted when the time was up.
-    expect(r.entries[0].points).toBe(Math.round((groupPoints(r.deadline - T0, r.deadline - T0, 0) * 3) / 5));
+    // As much as a quick lock-in: only the circle counts.
+    expect(r.entries[0].points).toBe(Math.round((GROUP_PIN_POINTS * 3) / 5));
   });
 
   it('takes one final answer per player in lock-in games, refusing typos', () => {

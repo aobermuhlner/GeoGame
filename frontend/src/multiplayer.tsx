@@ -128,6 +128,7 @@ function toVM(o: Online): GameVM | null {
     flagUrl: room.flag ? flagSrc(room.flag) : null,
     focus: room.focus,
     myLock: room.myLock,
+    misses: room.misses ?? null,
     countdownEndsAt: conn.toLocal(room.countdownEndsAt),
     deadline: conn.toLocal(room.deadline),
     regions: room.regions,

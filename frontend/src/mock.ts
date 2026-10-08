@@ -12,6 +12,7 @@ import {
   applyGuess,
   applyPass,
   applyTimeout,
+  countriesInRegions,
   decideMatch,
   destination,
   formatPin,
@@ -112,6 +113,7 @@ export function startMockGame(opts: {
       flagUrl: r && !counting ? flagUrl(mode, r.code) : null,
       focus: r && !counting && MODES[mode].prompt === 'photo' ? focusOf(r.code) : null,
       myLock: r && !r.end ? (r.locks?.[0]?.answer ?? null) : null,
+      misses: r && !counting && MODES[mode].input === 'map' ? [r.misses?.[0] ?? [], r.misses?.[1] ?? []] : null,
       countdownEndsAt,
       deadline: r && !r.end ? r.deadline : null,
       regions: opts.regions,
@@ -179,7 +181,10 @@ export function startMockGame(opts: {
     for (let k = 0; k < wrongs; k++) {
       later(2000 + Math.random() * 7000, () => {
         if (r.end || r !== rounds[current]) return;
-        if (applyGuess(r, 1, 'Atlantis', Date.now()) === 'wrong') oppWrongSeq++;
+        // Map modes: a click on some other country of the match's regions.
+        const others = m.input === 'map' ? countriesInRegions(opts.regions).filter((c) => c !== r.code && !r.misses?.[1].includes(c)) : [];
+        const miss = others.length ? others[Math.floor(Math.random() * others.length)] : 'Atlantis';
+        if (applyGuess(r, 1, miss, Date.now()) === 'wrong') oppWrongSeq++;
         if (r.end) finishRound(); // both out of tries (map modes)
         emit();
       });

@@ -656,6 +656,10 @@ export class GroupRoom extends DurableObject<Env> {
         correct: tally[i].correct,
         timeMs: tally[i].timeMs,
         status: r && (s.phase === 'playing' || s.phase === 'reveal') && r.entries[i] ? statusOf(r, r.entries[i]) : null,
+        misses:
+          r && mode && MODES[mode].input === 'map' && (s.phase === 'playing' || s.phase === 'reveal')
+            ? [...(r.entries[i]?.misses ?? [])]
+            : null,
       })),
       maxPlayers: GROUP_MAX_PLAYERS,
       public: !!s.public,

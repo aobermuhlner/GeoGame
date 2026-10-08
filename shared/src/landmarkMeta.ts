@@ -543,6 +543,294 @@ export const LANDMARK_META: Record<string, LandmarkMeta> = {
     "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
     "source": "https://commons.wikimedia.org/wiki/File:Monasterio_Khor_Virap,_Armenia,_2016-10-01,_DD_25.jpg"
   },
+  "notre-dame-paris": {
+    "lat": 48.8531,
+    "lon": 2.35,
+    "file": "Notre-Dame_de_Paris,_4_October_2017.jpg",
+    "author": "Ali Sabbagh",
+    "license": "CC0",
+    "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+    "source": "https://commons.wikimedia.org/wiki/File:Notre-Dame_de_Paris,_4_October_2017.jpg"
+  },
+  "versailles": {
+    "lat": 48.8047,
+    "lon": 2.1203,
+    "file": "Vue_aérienne_du_domaine_de_Versailles_par_ToucanWings_-_Creative_Commons_By_Sa_3.0_-_081_(cropped).jpg",
+    "author": "ToucanWings",
+    "license": "CC BY-SA 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Vue_a%C3%A9rienne_du_domaine_de_Versailles_par_ToucanWings_-_Creative_Commons_By_Sa_3.0_-_081_(cropped).jpg"
+  },
+  "pont-du-gard": {
+    "lat": 43.9472,
+    "lon": 4.5356,
+    "file": "Pont_du_Gard_BLS.jpg",
+    "author": "Benh LIEU SONG (Flickr)",
+    "license": "CC BY-SA 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Pont_du_Gard_BLS.jpg"
+  },
+  "carcassonne": {
+    "lat": 43.2066,
+    "lon": 2.364,
+    "file": "1_carcassonne_aerial_2016.jpg",
+    "author": "Chensiyuan",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:1_carcassonne_aerial_2016.jpg"
+  },
+  "milan-cathedral": {
+    "lat": 45.4642,
+    "lon": 9.1914,
+    "file": "Milan_Cathedral_from_Piazza_del_Duomo.jpg",
+    "author": "Jiuguang Wang",
+    "license": "CC BY-SA 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Milan_Cathedral_from_Piazza_del_Duomo.jpg"
+  },
+  "pompeii": {
+    "lat": 40.75,
+    "lon": 14.4861,
+    "file": "Aerial_image_of_Pompeii_and_Mount_Vesuvius_(view_from_the_southeast).jpg",
+    "author": "Carsten Steger",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Aerial_image_of_Pompeii_and_Mount_Vesuvius_(view_from_the_southeast).jpg"
+  },
+  "manarola": {
+    "lat": 44.1,
+    "lon": 9.75,
+    "file": "Manarola_NW_Cinque_Terre_Sep23_A7C_07233.jpg",
+    "author": "This Photo was taken by Timothy A. Gonsalves. Feel free to use my photos, but please mention me as the author. I would much appreciate if you send me an email tagooty@yahoo.com or write on my talk page, for my information. Please contact me before commercial use. Please do not upload an edited image here without consulting me. I would like to make corrections only at my own source to ensure that the changes improve the image and are preserved.Otherwise you may upload an edited image with a new name. Please use one of the templates derivative or extract.",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Manarola_NW_Cinque_Terre_Sep23_A7C_07233.jpg"
+  },
+  "guggenheim-bilbao": {
+    "lat": 43.2686,
+    "lon": -2.9339,
+    "file": "Museo_Guggenheim,_Bilbao_(31273245344).jpg",
+    "author": "Naotake Murayama",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Museo_Guggenheim,_Bilbao_(31273245344).jpg"
+  },
+  "aqueduct-of-segovia": {
+    "lat": 40.9479,
+    "lon": -4.1178,
+    "file": "Aqueduct_of_Segovia_08.jpg",
+    "author": "Bernard Gagnon",
+    "license": "CC BY-SA 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Aqueduct_of_Segovia_08.jpg"
+  },
+  "park-guell": {
+    "lat": 41.4136,
+    "lon": 2.1528,
+    "file": "Parc_guell_-_panoramio.jpg",
+    "author": "essetefano",
+    "license": "CC BY 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/3.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Parc_guell_-_panoramio.jpg"
+  },
+  "buckingham-palace": {
+    "lat": 51.5008,
+    "lon": -0.1419,
+    "file": "Buckingham_Palace_London_Morning_2020_01_(cropped).jpg",
+    "author": "Julian Herzog (Website)",
+    "license": "CC BY 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Buckingham_Palace_London_Morning_2020_01_(cropped).jpg"
+  },
+  "eilean-donan": {
+    "lat": 57.274,
+    "lon": -5.5161,
+    "file": "Eilean_Donan_Castle,_Scotland_-_Jan_2011.jpg",
+    "author": "Diliff",
+    "license": "CC BY-SA 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Eilean_Donan_Castle,_Scotland_-_Jan_2011.jpg"
+  },
+  "rhine-falls": {
+    "lat": 47.6772,
+    "lon": 8.6158,
+    "file": "SBB_RABe_514_DTZ_Rheinfall.jpg",
+    "author": "Kabelleger / David Gubler",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:SBB_RABe_514_DTZ_Rheinfall.jpg"
+  },
+  "grand-place": {
+    "lat": 50.8467,
+    "lon": 4.3525,
+    "file": "Grand-Place,_Brussels_-_panorama,_June_2018.jpg",
+    "author": "Celuici",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Grand-Place,_Brussels_-_panorama,_June_2018.jpg"
+  },
+  "dom-luis-bridge": {
+    "lat": 41.1399,
+    "lon": -8.6093,
+    "file": "Dom_Luís_I_Bridge_(36961760686).jpg",
+    "author": "Deensel",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Dom_Lu%C3%ADs_I_Bridge_(36961760686).jpg"
+  },
+  "navagio": {
+    "lat": 37.8596,
+    "lon": 20.6245,
+    "file": "Navagio,_Zante_01.jpg",
+    "author": "Wilnel José Verdú Guerrero",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Navagio,_Zante_01.jpg"
+  },
+  "kotor": {
+    "lat": 42.43,
+    "lon": 18.77,
+    "file": "20090719_Crkva_Gospa_od_Zdravlja_Kotor_Bay_Montenegro.jpg",
+    "author": "User:Ggia",
+    "license": "CC BY-SA 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+    "source": "https://commons.wikimedia.org/wiki/File:20090719_Crkva_Gospa_od_Zdravlja_Kotor_Bay_Montenegro.jpg"
+  },
+  "preikestolen": {
+    "lat": 58.9867,
+    "lon": 6.1875,
+    "file": "Lyse_Fjord_et_Preikestolen.jpg",
+    "author": "Clementp.fr",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Lyse_Fjord_et_Preikestolen.jpg"
+  },
+  "gamla-stan": {
+    "lat": 59.325,
+    "lon": 18.0708,
+    "file": "Gamla_stan_September_2014_01.jpg",
+    "author": "Arild Vågen",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Gamla_stan_September_2014_01.jpg"
+  },
+  "house-of-blackheads": {
+    "lat": 56.9472,
+    "lon": 24.1069,
+    "file": "House_of_Blackheads_at_Dusk_3,_Riga,_Latvia_-_Diliff.jpg",
+    "author": "Diliff",
+    "license": "CC BY-SA 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+    "source": "https://commons.wikimedia.org/wiki/File:House_of_Blackheads_at_Dusk_3,_Riga,_Latvia_-_Diliff.jpg"
+  },
+  "malbork-castle": {
+    "lat": 54.0397,
+    "lon": 19.0278,
+    "file": "Zespół_Zamku_Krzyżackiego_MALBORK_01.jpg",
+    "author": "Gregy",
+    "license": "CC BY-SA 3.0 pl",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/pl/deed.en",
+    "source": "https://commons.wikimedia.org/wiki/File:Zesp%C3%B3%C5%82_Zamku_Krzy%C5%BCackiego_MALBORK_01.jpg"
+  },
+  "fishermans-bastion": {
+    "lat": 47.5027,
+    "lon": 19.0344,
+    "file": "Halászbástya_2017.jpg",
+    "author": "Brian Adamson",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Hal%C3%A1szb%C3%A1stya_2017.jpg"
+  },
+  "peles-castle": {
+    "lat": 45.3598,
+    "lon": 25.5426,
+    "file": "01_Chateau_Peles.jpg",
+    "author": "Myrabella",
+    "license": "CC BY-SA 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+    "source": "https://commons.wikimedia.org/wiki/File:01_Chateau_Peles.jpg"
+  },
+  "spis-castle": {
+    "lat": 49.0006,
+    "lon": 20.7683,
+    "file": "Spiš Castle Aerial 2018.jpg",
+    "author": "VargaA",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Spi%C5%A1_Castle_Aerial_2018.jpg"
+  },
+  "church-of-saint-sava": {
+    "lat": 44.7981,
+    "lon": 20.4685,
+    "file": "Hram_svetog_save_beograd_0005_(edited).jpg",
+    "author": "Npps90",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Hram_svetog_save_beograd_0005_(edited).jpg"
+  },
+  "alexander-nevsky-sofia": {
+    "lat": 42.6958,
+    "lon": 23.333,
+    "file": "Catedral_de_Alejandro_Nevski_--_2019_--_Sofía,_Bulgaria.jpg",
+    "author": "Jose Ligero Loarte",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Catedral_de_Alejandro_Nevski_--_2019_--_Sof%C3%ADa,_Bulgaria.jpg"
+  },
+  "kizhi": {
+    "lat": 62.0667,
+    "lon": 35.225,
+    "file": "Kizhi_06-2017_img08_Pogost_view.jpg",
+    "author": "A.Savin",
+    "license": "FAL",
+    "licenseUrl": "http://artlibre.org/licence/lal/en",
+    "source": "https://commons.wikimedia.org/wiki/File:Kizhi_06-2017_img08_Pogost_view.jpg"
+  },
+  "monte-carlo-casino": {
+    "lat": 43.7394,
+    "lon": 7.4289,
+    "file": "The_Casino,_Monte_Carlo_-_panoramio_cropped.jpg",
+    "author": "Steve Hedin",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:The_Casino,_Monte_Carlo_-_panoramio_cropped.jpg"
+  },
+  "guaita": {
+    "lat": 43.9354,
+    "lon": 12.4496,
+    "file": "Guaita_Fortress_-_San_Marino_-_2024_02_13_-_GT_02_(details).jpg",
+    "author": "Terragio67",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Guaita_Fortress_-_San_Marino_-_2024_02_13_-_GT_02_(details).jpg"
+  },
+  "berat": {
+    "lat": 40.7022,
+    "lon": 19.9583,
+    "file": "Berat_57.jpg",
+    "author": "Arianit",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Berat_57.jpg"
+  },
+  "mir-castle": {
+    "lat": 53.4512,
+    "lon": 26.473,
+    "file": "Комплекс_Мирского_замка.JPG",
+    "author": "Вадзім Новикаў",
+    "license": "CC BY-SA 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+    "source": "https://commons.wikimedia.org/wiki/File:%D0%9A%D0%BE%D0%BC%D0%BF%D0%BB%D0%B5%D0%BA%D1%81_%D0%9C%D0%B8%D1%80%D1%81%D0%BA%D0%BE%D0%B3%D0%BE_%D0%B7%D0%B0%D0%BC%D0%BA%D0%B0.JPG"
+  },
+  "flame-towers": {
+    "lat": 40.3594,
+    "lon": 49.8267,
+    "file": "Flame towers from Baku boulevard.JPG",
+    "author": "Xoncha",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Flame_towers_from_Baku_boulevard.JPG"
+  },
   "taj-mahal": {
     "lat": 27.175,
     "lon": 78.0419,
@@ -957,6 +1245,249 @@ export const LANDMARK_META: Record<string, LandmarkMeta> = {
     "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
     "source": "https://commons.wikimedia.org/wiki/File:0005574_-_Wat_Phra_Kaew_006.jpg"
   },
+  "blue-mosque": {
+    "lat": 41.0054,
+    "lon": 28.9768,
+    "file": "Istanbul_(34223582516)_(cropped).jpg",
+    "author": "Pedro Szekely from Los Angeles, USA",
+    "license": "CC BY-SA 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Istanbul_(34223582516)_(cropped).jpg"
+  },
+  "kinkaku-ji": {
+    "lat": 35.0395,
+    "lon": 135.7285,
+    "file": "Golden_Pavilion_Kinkaku-ji_water_mirror_2024.jpg",
+    "author": "Nacaru",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Golden_Pavilion_Kinkaku-ji_water_mirror_2024.jpg"
+  },
+  "itsukushima": {
+    "lat": null,
+    "lon": null,
+    "file": "Itsukushima_Shrine_Torii_Gate_(13890465459).jpg",
+    "author": "redlegsfan21",
+    "license": "CC BY-SA 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Itsukushima_Shrine_Torii_Gate_(13890465459).jpg"
+  },
+  "qutub-minar": {
+    "lat": 28.5244,
+    "lon": 77.1852,
+    "file": "Qutb_Minar_2022.jpg",
+    "author": "Wasir kasab",
+    "license": "CC BY 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Qutb_Minar_2022.jpg"
+  },
+  "mysore-palace": {
+    "lat": 12.3039,
+    "lon": 76.6544,
+    "file": "Mysore_Palace_Morning.jpg",
+    "author": "Muhammad Mahdi Karim",
+    "license": "GFDL 1.2",
+    "licenseUrl": "http://www.gnu.org/licenses/old-licenses/fdl-1.2.html",
+    "source": "https://commons.wikimedia.org/wiki/File:Mysore_Palace_Morning.jpg"
+  },
+  "sultan-qaboos-mosque": {
+    "lat": 23.5839,
+    "lon": 58.3892,
+    "file": "Sultan Qaboos Grand Mosque (1).jpg",
+    "author": "Mostafameraji",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Sultan_Qaboos_Grand_Mosque_(1).jpg"
+  },
+  "kuwait-towers": {
+    "lat": 29.39,
+    "lon": 48.0031,
+    "file": "Kuwait Towers (158990699).jpg",
+    "author": "Em and Ernie from Calgary, Canada",
+    "license": "CC BY-SA 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Kuwait_Towers_(158990699).jpg"
+  },
+  "museum-of-islamic-art": {
+    "lat": 25.295,
+    "lon": 51.5393,
+    "file": "IslamicArtMuseumDohaSkyline.jpg",
+    "author": "Mohamod Fasil",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+    "source": "https://commons.wikimedia.org/wiki/File:IslamicArtMuseumDohaSkyline.jpg"
+  },
+  "krak-des-chevaliers": {
+    "lat": 34.757,
+    "lon": 36.2947,
+    "file": "KRAK_DES_CHEVALIERS_-_GAR_-_6-00.jpg",
+    "author": "Gianfranco Gazzetti",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:KRAK_DES_CHEVALIERS_-_GAR_-_6-00.jpg"
+  },
+  "ziggurat-of-ur": {
+    "lat": 30.9628,
+    "lon": 46.1031,
+    "file": "Ziggarat_of_Ur_001.jpg",
+    "author": "Tla2006 at English Wikipedia",
+    "license": "Public domain",
+    "licenseUrl": null,
+    "source": "https://commons.wikimedia.org/wiki/File:Ziggarat_of_Ur_001.jpg"
+  },
+  "shibam": {
+    "lat": 15.9269,
+    "lon": 48.6267,
+    "file": "مدينة_شبام_حضرموت.jpg",
+    "author": "Bkar6190",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:%D9%85%D8%AF%D9%8A%D9%86%D8%A9_%D8%B4%D8%A8%D8%A7%D9%85_%D8%AD%D8%B6%D8%B1%D9%85%D9%88%D8%AA.jpg"
+  },
+  "masada": {
+    "lat": 31.3156,
+    "lon": 35.3539,
+    "file": "Israel-2013-Aerial_21-Masada.jpg",
+    "author": "Godot13",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Israel-2013-Aerial_21-Masada.jpg"
+  },
+  "bayterek": {
+    "lat": 51.1283,
+    "lon": 71.4306,
+    "file": "Baiterek August.jpg",
+    "author": "Quarot",
+    "license": "CC0",
+    "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+    "source": "https://commons.wikimedia.org/wiki/File:Baiterek_August.jpg"
+  },
+  "burana-tower": {
+    "lat": 42.7469,
+    "lon": 75.2486,
+    "file": "Burana_Tower,_Kyrgyzstan.jpg",
+    "author": "Bernard Gagnon",
+    "license": "CC0",
+    "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+    "source": "https://commons.wikimedia.org/wiki/File:Burana_Tower,_Kyrgyzstan.jpg"
+  },
+  "faisal-mosque": {
+    "lat": 33.7297,
+    "lon": 73.0372,
+    "file": "Ali_Mujtaba_WLM2017_FAISAL_MOSQUE_019.jpg",
+    "author": "Ali Mujtaba",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Ali_Mujtaba_WLM2017_FAISAL_MOSQUE_019.jpg"
+  },
+  "national-parliament-dhaka": {
+    "lat": 23.7622,
+    "lon": 90.3786,
+    "file": "National_Assembly_of_Bangladesh_(10).jpg",
+    "author": "Saiful Aopu & Nahid Sultan",
+    "license": "CC BY-SA 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+    "source": "https://commons.wikimedia.org/wiki/File:National_Assembly_of_Bangladesh_(10).jpg"
+  },
+  "temple-of-the-tooth": {
+    "lat": 7.2936,
+    "lon": 80.6414,
+    "file": "SL_Kandy_asv2020-01_img33_Sacred_Tooth_Temple.jpg",
+    "author": "A.Savin",
+    "license": "FAL",
+    "licenseUrl": "http://artlibre.org/licence/lal/en",
+    "source": "https://commons.wikimedia.org/wiki/File:SL_Kandy_asv2020-01_img33_Sacred_Tooth_Temple.jpg"
+  },
+  "prambanan": {
+    "lat": -7.7522,
+    "lon": 110.4917,
+    "file": "Prambanan_Temple_Yogyakarta_Indonesia.jpg",
+    "author": "Christopher Michel",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Prambanan_Temple_Yogyakarta_Indonesia.jpg"
+  },
+  "tanah-lot": {
+    "lat": -8.6211,
+    "lon": 115.0872,
+    "file": "TanahLot_2014.JPG",
+    "author": "Grayswoodsurrey",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:TanahLot_2014.JPG"
+  },
+  "bayon": {
+    "lat": 13.4411,
+    "lon": 103.8586,
+    "file": "Bayon,_Angkor_Thom,_Camboya,_2013-08-17,_DD_37.JPG",
+    "author": "Diego Delso",
+    "license": "CC BY-SA 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Bayon,_Angkor_Thom,_Camboya,_2013-08-17,_DD_37.JPG"
+  },
+  "wat-rong-khun": {
+    "lat": 19.8247,
+    "lon": 99.7633,
+    "file": "Wat_Rong_Khun_-_Chiang_Rai.jpg",
+    "author": "JJ Harrison (https://www.jjharrison.com.au/)",
+    "license": "CC BY-SA 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Wat_Rong_Khun_-_Chiang_Rai.jpg"
+  },
+  "pha-that-luang": {
+    "lat": 17.9762,
+    "lon": 102.6343,
+    "file": "Pha_That_Luang,_July_2023.jpg",
+    "author": "Coalfruit1012",
+    "license": "CC0",
+    "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+    "source": "https://commons.wikimedia.org/wiki/File:Pha_That_Luang,_July_2023.jpg"
+  },
+  "bulguksa": {
+    "lat": 35.79,
+    "lon": 129.3322,
+    "file": "Lotus_Flower_Bridge_and_Seven_Treasure_Bridge_at_Bulguksa_in_Gyeongju,_Korea.jpg",
+    "author": "Unknown authorUnknown author",
+    "license": "Public domain",
+    "licenseUrl": null,
+    "source": "https://commons.wikimedia.org/wiki/File:Lotus_Flower_Bridge_and_Seven_Treasure_Bridge_at_Bulguksa_in_Gyeongju,_Korea.jpg"
+  },
+  "juche-tower": {
+    "lat": 39.0176,
+    "lon": 125.7637,
+    "file": "Tower_of_Juche_Idea,_Pyongyang,_North_Korea_(2909246855).jpg",
+    "author": "yeowatzup",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Tower_of_Juche_Idea,_Pyongyang,_North_Korea_(2909246855).jpg"
+  },
+  "zhangjiajie": {
+    "lat": 29.3499,
+    "lon": 110.4352,
+    "file": "1_tianzishan_wulingyuan_zhangjiajie_2012.jpg",
+    "author": "chensiyuan",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:1_tianzishan_wulingyuan_zhangjiajie_2012.jpg"
+  },
+  "the-bund": {
+    "lat": 31.238,
+    "lon": 121.4861,
+    "file": "The_Bund_2.jpg",
+    "author": "钉钉",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:The_Bund_2.jpg"
+  },
+  "merlion": {
+    "lat": 1.2868,
+    "lon": 103.8545,
+    "file": "Singapore_Skyline_2019-10.jpg",
+    "author": "Unwicked",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Singapore_Skyline_2019-10.jpg"
+  },
   "pyramids-of-giza": {
     "lat": 29.9761,
     "lon": 31.1328,
@@ -1200,6 +1731,168 @@ export const LANDMARK_META: Record<string, LandmarkMeta> = {
     "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0",
     "source": "https://commons.wikimedia.org/wiki/File:Kampala_Kasubi_Tombs.jpg"
   },
+  "sphinx": {
+    "lat": 29.9753,
+    "lon": 31.1376,
+    "file": "Sphinx_with_the_third_pyramid.jpg",
+    "author": "Hesham Ebaid",
+    "license": "CC0",
+    "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+    "source": "https://commons.wikimedia.org/wiki/File:Sphinx_with_the_third_pyramid.jpg"
+  },
+  "jemaa-el-fnaa": {
+    "lat": 31.6258,
+    "lon": -7.9894,
+    "file": "Djemaa_el_Fna.jpg",
+    "author": "Boris Macek",
+    "license": "CC BY-SA 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Djemaa_el_Fna.jpg"
+  },
+  "kairouan-mosque": {
+    "lat": null,
+    "lon": null,
+    "file": "Great_Mosque_of_Kairouan_Panorama_-_Grande_Mosquée_de_Kairouan_Panorama.jpg",
+    "author": "MAREK SZAREJKO from CLONMEL, IRELAND - POLAND",
+    "license": "CC BY-SA 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Great_Mosque_of_Kairouan_Panorama_-_Grande_Mosqu%C3%A9e_de_Kairouan_Panorama.jpg"
+  },
+  "timgad": {
+    "lat": 35.4842,
+    "lon": 6.4686,
+    "file": "Timgad_(15685889550).jpg",
+    "author": "Dan Sloan",
+    "license": "CC BY-SA 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Timgad_(15685889550).jpg"
+  },
+  "agadez-mosque": {
+    "lat": 16.9742,
+    "lon": 7.9884,
+    "file": "1997_277-9A_Agadez_mosque_cropped.jpg",
+    "author": "Dan Lundberg",
+    "license": "CC BY-SA 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0",
+    "source": "https://commons.wikimedia.org/wiki/File:1997_277-9A_Agadez_mosque_cropped.jpg"
+  },
+  "bobo-dioulasso-mosque": {
+    "lat": 11.1778,
+    "lon": -4.2959,
+    "file": "Moschee_von_Bobo-Dioulasso.jpg",
+    "author": "qiv",
+    "license": "CC BY-SA 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Moschee_von_Bobo-Dioulasso.jpg"
+  },
+  "cape-coast-castle": {
+    "lat": 5.1036,
+    "lon": -1.2411,
+    "file": "Cape_Coast_Castle,_Cape_Coast,_Ghana.JPG",
+    "author": "Rjruiziii",
+    "license": "CC BY-SA 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Cape_Coast_Castle,_Cape_Coast,_Ghana.JPG"
+  },
+  "zuma-rock": {
+    "lat": 9.1303,
+    "lon": 7.2339,
+    "file": "Zuma_Rock.jpg",
+    "author": "Jeff Attaway",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Zuma_Rock.jpg"
+  },
+  "african-renaissance-monument": {
+    "lat": 14.7222,
+    "lon": -17.495,
+    "file": "Monument_renaissance.jpg",
+    "author": "Tafsir207",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Monument_renaissance.jpg"
+  },
+  "lake-retba": {
+    "lat": 14.8383,
+    "lon": -17.2448,
+    "file": "RetbaLakeShore.jpg",
+    "author": "Jjm2311",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:RetbaLakeShore.jpg"
+  },
+  "fiat-tagliero": {
+    "lat": 15.3283,
+    "lon": 38.9258,
+    "file": "Fiat_tagliero,_08.JPG",
+    "author": "sailko",
+    "license": "CC BY-SA 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Fiat_tagliero,_08.JPG"
+  },
+  "lake-assal": {
+    "lat": 11.65,
+    "lon": 42.4167,
+    "file": "DjiboutiLacAssal.jpg",
+    "author": "Image taken by Charles Fred on flickr.",
+    "license": "CC BY-SA 3.0",
+    "licenseUrl": "http://creativecommons.org/licenses/by-sa/3.0/",
+    "source": "https://commons.wikimedia.org/wiki/File:DjiboutiLacAssal.jpg"
+  },
+  "mount-kenya": {
+    "lat": -0.1508,
+    "lon": 37.3075,
+    "file": "MtKenya.jpg",
+    "author": "Don Elvis Muraya",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:MtKenya.jpg"
+  },
+  "blue-nile-falls": {
+    "lat": 11.4905,
+    "lon": 37.5878,
+    "file": "Blue_Nile_Falls-03,_by_CT_Snow.jpg",
+    "author": "CT Snow from Hsinchu, Taiwan",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Blue_Nile_Falls-03,_by_CT_Snow.jpg"
+  },
+  "tsingy": {
+    "lat": null,
+    "lon": null,
+    "file": "Tsingy_de_Bemaraha.jpg",
+    "author": "My father (who approves of its use)",
+    "license": "CC BY-SA 3.0",
+    "licenseUrl": "http://creativecommons.org/licenses/by-sa/3.0/",
+    "source": "https://commons.wikimedia.org/wiki/File:Tsingy_de_Bemaraha.jpg"
+  },
+  "fish-river-canyon": {
+    "lat": -27.5893,
+    "lon": 17.5976,
+    "file": "Fish_River_Canyon_from_Main_View_Point.jpg",
+    "author": "RudiBosbouer",
+    "license": "CC BY-SA 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Fish_River_Canyon_from_Main_View_Point.jpg"
+  },
+  "cape-of-good-hope": {
+    "lat": -34.3581,
+    "lon": 18.4756,
+    "file": "Playa_Dias,_Cape_Point,_Sudáfrica,_2018-07-23,_DD_103.jpg",
+    "author": "Diego Delso",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Playa_Dias,_Cape_Point,_Sud%C3%A1frica,_2018-07-23,_DD_103.jpg"
+  },
+  "island-of-mozambique": {
+    "lat": -15.0367,
+    "lon": 40.7328,
+    "file": "Ilha_de_Mocambique.jpg",
+    "author": "Stig Nygaard from Copenhagen, Denmark",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Ilha_de_Mocambique.jpg"
+  },
   "statue-of-liberty": {
     "lat": 40.6892,
     "lon": -74.0444,
@@ -1353,6 +2046,87 @@ export const LANDMARK_META: Record<string, LandmarkMeta> = {
     "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
     "source": "https://commons.wikimedia.org/wiki/File:Tulum_2.jpg"
   },
+  "empire-state-building": {
+    "lat": 40.7483,
+    "lon": -73.9856,
+    "file": "Empire_State_Building_(aerial_view).jpg",
+    "author": "Sam Valadi",
+    "license": "Public domain",
+    "licenseUrl": null,
+    "source": "https://commons.wikimedia.org/wiki/File:Empire_State_Building_(aerial_view).jpg"
+  },
+  "lincoln-memorial": {
+    "lat": 38.8893,
+    "lon": -77.0501,
+    "file": "Lincoln_Memorial_east_side.JPG",
+    "author": "Martin Falbisoner",
+    "license": "CC BY-SA 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Lincoln_Memorial_east_side.JPG"
+  },
+  "delicate-arch": {
+    "lat": 38.7435,
+    "lon": -109.4993,
+    "file": "Delicate_arch_sunset.jpg",
+    "author": "Palacemusic",
+    "license": "CC BY-SA 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Delicate_arch_sunset.jpg"
+  },
+  "devils-tower": {
+    "lat": 44.5906,
+    "lon": -104.7153,
+    "file": "Columnar-jointed_porphyritic_phonolite_(Eocene,_49_Ma;_Devils_Tower,_Wyoming,_USA)_48.jpg",
+    "author": "James St. John",
+    "license": "CC BY 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Columnar-jointed_porphyritic_phonolite_(Eocene,_49_Ma;_Devils_Tower,_Wyoming,_USA)_48.jpg"
+  },
+  "las-vegas-strip": {
+    "lat": null,
+    "lon": null,
+    "file": "Las_Vegas_Strip_09_2017_4897.jpg",
+    "author": "Mariordo (Mario Roberto Durán Ortiz)",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Las_Vegas_Strip_09_2017_4897.jpg"
+  },
+  "peggys-cove": {
+    "lat": 44.4918,
+    "lon": -63.9186,
+    "file": "Peggy’s_Cove_Lighthouse.jpg",
+    "author": "_shawnp",
+    "license": "CC0",
+    "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+    "source": "https://commons.wikimedia.org/wiki/File:Peggy%E2%80%99s_Cove_Lighthouse.jpg"
+  },
+  "notre-dame-montreal": {
+    "lat": 45.5044,
+    "lon": -73.5561,
+    "file": "Basílica_de_Notre-Dame,_Montreal,_Canadá,_2017-08-11,_DD_26-28_HDR.jpg",
+    "author": "Diego Delso",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Bas%C3%ADlica_de_Notre-Dame,_Montreal,_Canad%C3%A1,_2017-08-11,_DD_26-28_HDR.jpg"
+  },
+  "palenque": {
+    "lat": 17.4842,
+    "lon": -92.0464,
+    "file": "Palenque Temple of Inscriptions.JPG",
+    "author": "Strobilomyces",
+    "license": "CC BY-SA 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Palenque_Temple_of_Inscriptions.JPG"
+  },
+  "monte-alban": {
+    "lat": 17.0439,
+    "lon": -96.7678,
+    "file": "Monte_Alban_West_Side_Platform.jpg",
+    "author": "nsaum75 !Dígame¡‎",
+    "license": "CC BY-SA 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Monte_Alban_West_Side_Platform.jpg"
+  },
   "tikal": {
     "lat": 17.2219,
     "lon": -89.6236,
@@ -1416,6 +2190,24 @@ export const LANDMARK_META: Record<string, LandmarkMeta> = {
     "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0",
     "source": "https://commons.wikimedia.org/wiki/File:Nicaragua_2017-03-13_(33663091692).jpg"
   },
+  "lake-atitlan": {
+    "lat": 14.7,
+    "lon": -91.2,
+    "file": "Lake Atitlan, Volcan Tolimán and Volcan Atitlán.jpg",
+    "author": "Arian Zwegers from Brussels, Belgium",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Lake_Atitlan,_Volcan_Tolim%C3%A1n_and_Volcan_Atitl%C3%A1n.jpg"
+  },
+  "panama-viejo": {
+    "lat": 9.0056,
+    "lon": -79.4858,
+    "file": "Torre_de_panama_viejo.jpg",
+    "author": "Melpanama",
+    "license": "CC BY 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/3.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Torre_de_panama_viejo.jpg"
+  },
   "el-capitolio": {
     "lat": 23.1353,
     "lon": -82.3594,
@@ -1460,6 +2252,33 @@ export const LANDMARK_META: Record<string, LandmarkMeta> = {
     "license": "CC BY-SA 4.0",
     "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
     "source": "https://commons.wikimedia.org/wiki/File:Maison_du_gouverneur_Don_Diego_Colomb.jpg"
+  },
+  "malecon-havana": {
+    "lat": 23.1417,
+    "lon": -82.3681,
+    "file": "Havana_malecon_(cropped).jpg",
+    "author": "Lukas Mathis",
+    "license": "CC BY-SA 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Havana_malecon_(cropped).jpg"
+  },
+  "altagracia-basilica": {
+    "lat": 18.6161,
+    "lon": -68.7169,
+    "file": "BasilicaAtHiguey_1000W.jpg",
+    "author": "JohnHarvey at English Wikipedia",
+    "license": "CC BY-SA 2.5",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.5",
+    "source": "https://commons.wikimedia.org/wiki/File:BasilicaAtHiguey_1000W.jpg"
+  },
+  "atlantis-paradise-island": {
+    "lat": 25.085,
+    "lon": -77.3208,
+    "file": "The_Atlantis_Paradise_Island_complex.jpg",
+    "author": "Whoisjohngalt",
+    "license": "CC0",
+    "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+    "source": "https://commons.wikimedia.org/wiki/File:The_Atlantis_Paradise_Island_complex.jpg"
   },
   "machu-picchu": {
     "lat": -13.1633,
@@ -1641,6 +2460,78 @@ export const LANDMARK_META: Record<string, LandmarkMeta> = {
     "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
     "source": "https://commons.wikimedia.org/wiki/File:PUERTA_DEL_SOL_TIWANAKU.jpg"
   },
+  "lencois-maranhenses": {
+    "lat": -2.5333,
+    "lon": -43.1167,
+    "file": "Lençóis_Maranhenses_2018.jpg",
+    "author": "Julius Dadalti",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Len%C3%A7%C3%B3is_Maranhenses_2018.jpg"
+  },
+  "teatro-amazonas": {
+    "lat": -3.1303,
+    "lon": -60.0233,
+    "file": "Noite_no_Teatro_Amazonas_(cropped).jpg",
+    "author": "Susan Valentim",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Noite_no_Teatro_Amazonas_(cropped).jpg"
+  },
+  "cotopaxi": {
+    "lat": -0.6806,
+    "lon": -78.4378,
+    "file": "Cotopaxi_volcano_2008-06-27T1322.jpg",
+    "author": "Gerard Prins",
+    "license": "CC BY-SA 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Cotopaxi_volcano_2008-06-27T1322.jpg"
+  },
+  "casa-rosada": {
+    "lat": -34.6081,
+    "lon": -58.3703,
+    "file": "Casa_Rosada_exterior_from_Plaza_de_Mayo.JPG",
+    "author": "Lars Curfs (Grashoofd)",
+    "license": "CC BY-SA 3.0 nl",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/nl/deed.en",
+    "source": "https://commons.wikimedia.org/wiki/File:Casa_Rosada_exterior_from_Plaza_de_Mayo.JPG"
+  },
+  "cano-cristales": {
+    "lat": 2.2642,
+    "lon": -73.7944,
+    "file": "Caño_Cristales_01.jpg",
+    "author": "Astromario",
+    "license": "CC BY-SA 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Ca%C3%B1o_Cristales_01.jpg"
+  },
+  "sacsayhuaman": {
+    "lat": -13.5078,
+    "lon": -71.9822,
+    "file": "Sacsayhuamán,_Cusco,_Perú,_2015-07-31,_DD_27.JPG",
+    "author": "Diego Delso",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Sacsayhuam%C3%A1n,_Cusco,_Per%C3%BA,_2015-07-31,_DD_27.JPG"
+  },
+  "la-mano": {
+    "lat": -34.9579,
+    "lon": -54.9372,
+    "file": "Thehandofpuntadeleste.jpg",
+    "author": "Coolcaesar",
+    "license": "CC BY-SA 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Thehandofpuntadeleste.jpg"
+  },
+  "paramaribo-cathedral": {
+    "lat": 5.8287,
+    "lon": -55.1541,
+    "file": "Sint-Petrus-en-Pauluskathedraal.jpg",
+    "author": "Forrestjunky",
+    "license": "CC BY-SA 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Sint-Petrus-en-Pauluskathedraal.jpg"
+  },
   "sydney-opera-house": {
     "lat": -33.8568,
     "lon": 151.2151,
@@ -1712,5 +2603,77 @@ export const LANDMARK_META: Record<string, LandmarkMeta> = {
     "license": "CC0",
     "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
     "source": "https://commons.wikimedia.org/wiki/File:Sydney_Harbour_Bridge-16_October_2025.jpg"
+  },
+  "aoraki": {
+    "lat": -43.595,
+    "lon": 170.1419,
+    "file": "Mt_Cook_LC0247.jpg",
+    "author": "Jörg Hempel",
+    "license": "CC BY-SA 3.0 de",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/de/deed.en",
+    "source": "https://commons.wikimedia.org/wiki/File:Mt_Cook_LC0247.jpg"
+  },
+  "hobbiton": {
+    "lat": -37.8575,
+    "lon": 175.6797,
+    "file": "Waterhouse_Lake_Front.jpg",
+    "author": "Harsh.gavhane",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Waterhouse_Lake_Front.jpg"
+  },
+  "bungle-bungle": {
+    "lat": -17.4214,
+    "lon": 128.4449,
+    "file": "Bungle_Bungles.jpg",
+    "author": "Nichollas Harrison",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Bungle_Bungles.jpg"
+  },
+  "flinders-street-station": {
+    "lat": -37.8181,
+    "lon": 144.9668,
+    "file": "Flinders_Station_and_trams.jpg",
+    "author": "Created by Philip Mallis in 2021; cropped by HappyWaldo",
+    "license": "CC BY-SA 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Flinders_Station_and_trams.jpg"
+  },
+  "mount-yasur": {
+    "lat": -19.5283,
+    "lon": 169.4483,
+    "file": "Mount_Yasur_eruption_2006,_Tanna_Island,_Vanuatu,_VAN_0516.jpg",
+    "author": "Rolf Cosar",
+    "license": "CC BY 2.5",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.5",
+    "source": "https://commons.wikimedia.org/wiki/File:Mount_Yasur_eruption_2006,_Tanna_Island,_Vanuatu,_VAN_0516.jpg"
+  },
+  "rock-islands": {
+    "lat": 7.2333,
+    "lon": 134.3,
+    "file": "Ngerukewid-2016-aerial-view-Luka-Peternel.jpg",
+    "author": "Luka Peternel",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Ngerukewid-2016-aerial-view-Luka-Peternel.jpg"
+  },
+  "haamonga": {
+    "lat": -21.1367,
+    "lon": -175.0481,
+    "file": "Haʻamonga.jpg",
+    "author": "Tauʻolunga",
+    "license": "CC BY-SA 3.0",
+    "licenseUrl": "http://creativecommons.org/licenses/by-sa/3.0/",
+    "source": "https://commons.wikimedia.org/wiki/File:Ha%CA%BBamonga.jpg"
+  },
+  "parliament-png": {
+    "lat": -9.4281,
+    "lon": 147.1917,
+    "file": "Papua_New_Guinea_1991-039_Parliament_House,_Port_Moresby_(33351725760).jpg",
+    "author": "Brian ireland",
+    "license": "CC BY-SA 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Papua_New_Guinea_1991-039_Parliament_House,_Port_Moresby_(33351725760).jpg"
   }
 };

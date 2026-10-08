@@ -919,6 +919,10 @@ export class Room extends DurableObject<Env> {
       shuffle: !!s.shuffle && !s.ranked,
       higher: this.duelView(),
       myLock: null,
+      misses:
+        cur && (s.phase === 'playing' || s.phase === 'reveal') && MODES[cur.mode ?? 'flags'].input === 'map'
+          ? [[...(cur.misses?.[0] ?? [])], [...(cur.misses?.[1] ?? [])]]
+          : null,
     };
   }
 

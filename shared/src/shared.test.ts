@@ -289,6 +289,18 @@ describe('GeoLocate mode', () => {
     expect(r.winner).toBeNull();
   });
 
+  it('remembers which countries each player clicked wrongly (map modes only)', () => {
+    const r = newRound('KI', 0, 'locate');
+    applyGuess(r, 0, 'MH', 1);
+    applyGuess(r, 1, 'FJ', 2);
+    applyGuess(r, 0, 'Atlantis', 3); // a wrong try, but no country to show
+    applyGuess(r, 0, 'TV', 4);
+    expect(r.misses).toEqual([['MH', 'TV'], ['FJ']]);
+    const f = newRound('FR', 0, 'flags');
+    applyGuess(f, 0, 'Spain', 1);
+    expect(f.misses).toBeUndefined();
+  });
+
   it('text modes keep unlimited guesses', () => {
     const r = newRound('FR', 0, 'flags');
     for (let i = 0; i < 10; i++) applyGuess(r, 0, 'Spain', 1);

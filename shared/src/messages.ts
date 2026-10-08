@@ -147,6 +147,8 @@ export interface RoomView {
   focus: [number, number] | null;
   /** Your own locked-in answer this round (lock-in modes; each player only gets theirs) */
   myLock: string | null;
+  /** Map modes: the countries each player clicked wrongly this round (playing and reveal; null otherwise) */
+  misses: [string[], string[]] | null;
   /** 1-based current round over the whole match (0 before the first round) */
   round: number;
   totalRounds: number;

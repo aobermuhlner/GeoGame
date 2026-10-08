@@ -3,7 +3,8 @@ import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'preact/ho
 import { REGION_IDS, countriesInRegions, type RegionId } from '@flagduel/shared';
 import type { LOCATE_MAP, LocateCountry } from '../generated/locatemap';
 
-export type Mark = 'correct' | 'wrong' | 'target' | 'missed';
+/** 'other': another player's wrong click (multiplayer) */
+export type Mark = 'correct' | 'wrong' | 'target' | 'missed' | 'other';
 
 interface Props {
   /** Called with the ISO code of the clicked country (not called for drags or ocean clicks). */
@@ -25,6 +26,8 @@ interface Props {
   snug?: boolean;
   /** Write these countries' names on the map (with `nameOf`), e.g. to reveal what was missed. */
   labels?: readonly string[];
+  /** Extra class of a label's text */
+  labelClass?: (code: string) => string;
   /** Fill the parent's box (any shape) instead of keeping the map's own aspect ratio */
   fill?: boolean;
   /** Debug: show the hovered country's name. */
@@ -96,6 +99,7 @@ export function LocateMap({
   region,
   snug = false,
   labels,
+  labelClass,
   fill = false,
   showNames,
   nameOf,
@@ -484,7 +488,7 @@ export function LocateMap({
               {labels.map((code) => {
                 const c = map.countries.find((x) => x.c === code);
                 return c && (
-                  <text key={code} x={c.l[0]} y={c.l[1]}>
+                  <text key={code} x={c.l[0]} y={c.l[1]} class={labelClass?.(code) || undefined}>
                     {nameOf ? nameOf(code) : code}
                   </text>
                 );

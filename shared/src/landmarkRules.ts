@@ -21,10 +21,18 @@ export const focusOf = (id: string): [number, number] => LANDMARK_BY_ID[id]?.foc
 
 /** How far in a landmark round starts (times the full photo), and how long it takes to zoom all the way out. */
 export const PHOTO_START_ZOOM = 5;
-export const PHOTO_ZOOM_MS = 22_500;
+export const PHOTO_ZOOM_MS = 25_000;
+/**
+ * Once 60% of the photo's width shows (zoom 1/0.6), the zoom-out slows down: the first part takes
+ * PHOTO_SLOW_AT_MS, the last 40% the rest of PHOTO_ZOOM_MS (about 3× slower), so the whole photo only shows
+ * for the round's last 5 seconds.
+ */
+export const PHOTO_SLOW_ZOOM = 1 / 0.6;
+export const PHOTO_SLOW_AT_MS = 10_000;
 
-/** Zoom factor `elapsedMs` into a round: exponential, so it feels like a steady zoom-out, then the full photo. */
+/** Zoom factor `elapsedMs` into a round: exponential (a steady zoom-out) in two speeds, then the full photo. */
 export function photoZoom(elapsedMs: number): number {
-  const t = Math.max(0, Math.min(1, elapsedMs / PHOTO_ZOOM_MS));
-  return Math.pow(PHOTO_START_ZOOM, 1 - t);
+  const t = Math.max(0, Math.min(PHOTO_ZOOM_MS, elapsedMs));
+  if (t < PHOTO_SLOW_AT_MS) return PHOTO_START_ZOOM * Math.pow(PHOTO_SLOW_ZOOM / PHOTO_START_ZOOM, t / PHOTO_SLOW_AT_MS);
+  return Math.pow(PHOTO_SLOW_ZOOM, 1 - (t - PHOTO_SLOW_AT_MS) / (PHOTO_ZOOM_MS - PHOTO_SLOW_AT_MS));
 }

@@ -25,7 +25,19 @@ interface Props {
   status?: ComponentChildren;
   /** Round / score / timer, shown over the map in full-screen mode (the page's top card is hidden then) */
   hud?: ComponentChildren;
+  /** Multiplayer: the other players' wrong clicks this round (marked on the map with their names) and who found it */
+  others?: readonly OtherPlayer[];
 }
+
+export interface OtherPlayer {
+  name: string;
+  /** Countries they clicked wrongly */
+  misses: readonly string[];
+  /** Found the country (shown once the round is over) */
+  found?: boolean;
+}
+
+const NO_OTHERS: readonly OtherPlayer[] = [];
 
 const FS_KEY = 'fd.mapFullscreen';
 const isTouch = () => typeof matchMedia === 'function' && matchMedia('(pointer: coarse)').matches;
@@ -117,6 +129,7 @@ export function LocateBoard({
   overlay,
   status,
   hud,
+  others = NO_OTHERS,
 }: Props) {
   const { touch, fs, rotated, toggle } = useMapFullscreen();
   const { partial, active } = useRegionFocus(regions);
@@ -146,7 +159,21 @@ export function LocateBoard({
 
   // The reveal can arrive before our own click's result: wait for it before showing a miss.
   const missed = answerCode && !found && !pending ? answerCode : null;
-  const shown = missed ? { ...marks, [missed]: 'target' as Mark } : marks;
+
+  // Who clicked what: the others' misses get their own colour (yours stay red) and their names.
+  const names = new Map<string, string[]>();
+  for (const o of others) for (const c of o.misses) names.set(c, [...(names.get(c) ?? []), o.name]);
+  for (const [c, m] of Object.entries(marks)) if (m === 'wrong' && names.has(c)) names.get(c)!.unshift('You');
+  const finders = [...(found ? ['You'] : []), ...others.filter((o) => o.found).map((o) => o.name)];
+  if (answerCode && finders.length) names.set(answerCode, finders);
+  const shown: Record<string, Mark> = {
+    ...Object.fromEntries([...names.keys()].map((c) => [c, 'other' as Mark])),
+    ...marks,
+    ...(answerCode && finders.length > 0 && !marks[answerCode] ? { [answerCode]: 'correct' as Mark } : {}),
+    ...(missed ? { [missed]: 'target' as Mark } : {}),
+  };
+  const labels = [...names.keys()];
+  const labelOf = (c: string) => (c === answerCode ? `✓ ${names.get(c)!.join(', ')}` : names.get(c)!.join(', '));
 
   return (
     <div class={`locate-board${fs ? ' fs' : ''}${rotated ? ' rotated' : ''}`}>
@@ -169,6 +196,9 @@ export function LocateBoard({
           fill={!fs}
           onPick={pick}
           marks={shown}
+          labels={labels}
+          nameOf={labelOf}
+          labelClass={(c) => (c === answerCode ? 'found' : '')}
           focus={missed}
           resetKey={roundKey}
           region={partial ? regions : null}

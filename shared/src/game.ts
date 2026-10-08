@@ -34,7 +34,10 @@ export interface Lock {
   auto?: boolean;
 }
 
-/** Lock-in rounds: a correct answer scores 1 (pins: 1–5 by radius), and the quicker of the correct answers 1 more. */
+/**
+ * Lock-in rounds: a correct answer scores 1, and the quicker of the correct answers 1 more. Pins score 1–5 by
+ * radius and nothing for speed: the photo keeps revealing itself, so waiting for it is part of the game.
+ */
 export const LOCK_POINTS = 1;
 export const LOCK_SPEED_BONUS = 1;
 
@@ -57,6 +60,8 @@ export interface RoundState {
   points?: [number, number];
   /** Auto-lock modes: each player's latest draft (e.g. a placed pin), locked in at the deadline if they didn't */
   drafts?: [string | null, string | null];
+  /** Map modes: the countries each player clicked wrongly, in order (shown to both players) */
+  misses?: [string[], string[]];
 }
 
 export function countriesInRegions(regions: readonly RegionId[]): string[] {
@@ -229,6 +234,7 @@ export function applyGuess(round: RoundState, slot: Slot, text: string, now: num
     return 'correct';
   }
   round.wrong[slot]++;
+  if (mode.input === 'map' && mode.nameOf(text)) (round.misses ??= [[], []])[slot].push(text);
   // Out of tries (map modes): counts as passing.
   const max = mode.maxWrong;
   if (max !== undefined && round.wrong[slot] >= max) applyPass(round, slot, now);
@@ -313,7 +319,7 @@ function scoreLocks(round: RoundState) {
     points[s] = worth ? worth(l.answer) : LOCK_POINTS;
     if (!l.auto && (first === null || l.at < locks[first]!.at)) first = s;
   }
-  if (first !== null) points[first] += LOCK_SPEED_BONUS;
+  if (first !== null && !worth) points[first] += LOCK_SPEED_BONUS;
   round.points = points;
   round.winner = points[0] === points[1] ? null : points[0] > points[1] ? 0 : 1;
 }

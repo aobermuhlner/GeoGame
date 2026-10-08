@@ -36,6 +36,10 @@ const MANUAL_COORDS = {
   'twelve-apostles': [-38.665, 143.105],
   'grand-canal-venice': [45.4375, 12.3358],
   'blyde-river-canyon': [-24.58, 30.8],
+  itsukushima: [34.2959, 132.3199],
+  'kairouan-mosque': [35.6814, 10.1036],
+  tsingy: [-18.75, 44.72],
+  'las-vegas-strip': [36.1147, -115.1728],
 };
 
 const FREE = /^(cc[ -]by|cc[ -]by-sa|cc0|public domain|pd\b|pd-|attribution|gfdl|fal\b|free art|kogl type 1|no restrictions)/i;

@@ -35,6 +35,8 @@ export const GROUP_BASE_POINTS = 50;
 export const GROUP_SPEED_POINTS = 50;
 export const GROUP_WRONG_PENALTY = 5;
 export const GROUP_MIN_POINTS = 10;
+/** Pins (Landmarks): a right answer with the smallest circle; bigger circles get less, speed doesn't count. */
+export const GROUP_PIN_POINTS = GROUP_BASE_POINTS + GROUP_SPEED_POINTS;
 
 /** Reveal after each round: everyone's result is listed, so it stays up a little longer than a duel's. */
 export const GROUP_REVEAL_MS = 4_000;
@@ -78,6 +80,8 @@ export interface Entry {
   accuracy?: number;
   /** Auto-lock games: the latest draft (a placed pin), locked in at the deadline if they didn't */
   draft?: string;
+  /** Map games: the countries clicked wrongly, in order (shown to everyone) */
+  misses?: string[];
 }
 
 export interface GroupRound {
@@ -117,10 +121,13 @@ function finishEntry(r: GroupRound, e: Entry, end: EntryEnd, now: number) {
     e.points = estimatePoints(e.accuracy);
     return;
   }
-  e.points = end === 'correct' ? groupPoints(now - r.startedAt, r.deadline - r.startedAt, e.wrong) : 0;
-  // Pins: a bigger circle is worth less.
   const m = r.game === 'higher' ? null : MODES[r.game];
-  if (m?.lockPoints && e.points && e.answer) e.points = Math.round((e.points * m.lockPoints(e.answer)) / m.maxLockPoints!);
+  // Pins: only the circle counts (a smaller one is worth more), not the speed.
+  if (m?.lockPoints) {
+    e.points = end === 'correct' && e.answer ? Math.round((GROUP_PIN_POINTS * m.lockPoints(e.answer)) / m.maxLockPoints!) : 0;
+    return;
+  }
+  e.points = end === 'correct' ? groupPoints(now - r.startedAt, r.deadline - r.startedAt, e.wrong) : 0;
 }
 
 const open = (r: GroupRound, i: number, now: number) => !r.ended && now < r.deadline && !!r.entries[i] && !r.entries[i].end;
@@ -139,6 +146,7 @@ export function groupGuess(r: GroupRound, i: number, text: string, now: number):
     return 'correct';
   }
   e.wrong++;
+  if (mode.input === 'map' && mode.nameOf(text)) (e.misses ??= []).push(text);
   if (mode.maxWrong !== undefined && e.wrong >= mode.maxWrong) finishEntry(r, e, 'wrong', now);
   return 'wrong';
 }
@@ -263,6 +271,8 @@ export interface GroupPlayerView {
   timeMs: number;
   /** This round (null outside a round) */
   status: EntryStatus | null;
+  /** Map games: the countries they clicked wrongly this round (null outside a round) */
+  misses: string[] | null;
 }
 
 export interface GroupEntryView {

@@ -93,9 +93,9 @@ function endSoloRound(run: DailyRun, end: SoloEnd, now: number) {
   // Estimation games: points for accuracy, whatever the speed.
   if (r.accuracy !== undefined) r.points = estimatePoints(r.accuracy);
   else if (end === 'correct') {
-    r.points = soloPoints(now - r.startsAt, r.wrong, r.deadline - r.startsAt);
-    // Pins: a bigger circle is worth less.
-    if (m.lockPoints && r.given) r.points = Math.round((r.points * m.lockPoints(r.given)) / m.maxLockPoints!);
+    // Pins: only the circle counts (a bigger one is worth less), not the speed.
+    if (m.lockPoints) r.points = r.given ? Math.round(((SOLO_BASE_POINTS + SOLO_SPEED_POINTS) * m.lockPoints(r.given)) / m.maxLockPoints!) : 0;
+    else r.points = soloPoints(now - r.startsAt, r.wrong, r.deadline - r.startsAt);
   }
   // Map modes: wrong clicks cost points even when the country is never found.
   else if (m.maxWrong !== undefined) r.points = -SOLO_WRONG_PENALTY * r.wrong;

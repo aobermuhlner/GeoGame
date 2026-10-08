@@ -244,7 +244,7 @@ function GroupLobby({
           </header>
           <p class="muted small">
             Everyone answers every round. Right answers score {GROUP_BASE_POINTS} points plus up to {GROUP_SPEED_POINTS}{' '}
-            for speed; GeoGuesser estimates score up to 100 the closer they are. After each game you see how the ranking
+            for speed; Landmarks pins score by circle size only, GeoGuesser estimates up to 100 the closer they are. After each game you see how the ranking
             changed; the best overall takes the throne.
           </p>
 
@@ -591,7 +591,7 @@ function StatusLine({ room, you }: { room: GroupView; you: number }) {
       {done > 0
         ? `${done} of ${others.length} ${others.length === 1 ? 'player has' : 'players have'} answered`
         : isModeId(game) && MODES[game].input === 'pin'
-          ? 'Pin it · small circle and quick scores most'
+          ? 'Pin it · the smaller your circle, the more points · no hurry'
           : isModeId(game) && MODES[game].accuracy
             ? 'One estimate each · up to 100 points, the closer the more'
           : lockIn
@@ -769,6 +769,13 @@ function GroupGame({
             overlay={intro}
             status={<StatusLine room={room} you={you} />}
             hud={<MapHud room={room} you={you} toLocal={toLocal} />}
+            others={
+              counting
+                ? []
+                : room.players.flatMap((p, i) =>
+                    i === you ? [] : [{ name: p.name, misses: p.misses ?? [], found: room.phase === 'reveal' && p.status === 'correct' }],
+                  )
+            }
           />
           <LeaveLink onLeave={onLeave} />
         </section>

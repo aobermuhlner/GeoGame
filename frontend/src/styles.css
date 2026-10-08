@@ -2546,6 +2546,10 @@ html.map-fs-open, html.map-fs-open body { overflow: hidden; overscroll-behavior:
   fill: #7a1c1c; font-weight: 600; text-anchor: middle; dominant-baseline: central;
   stroke: rgba(255, 253, 247, 0.9); stroke-linejoin: round; paint-order: stroke;
 }
+.lm-labels text.found { fill: #1d7a3f; font-weight: 700; }
+/* Multiplayer: another player's wrong click (yours stay red) */
+.lm-country.other, .lm-marker.other .dot { fill: #f0a35e; }
+.lm-zone.other { fill: rgba(210, 100, 26, 0.16); stroke: var(--orange); }
 .challenge-game .locate-map.disabled { cursor: grab; }
 .challenge-game .lm-country.hover { fill: #f7f2e4; }
 .challenge-game .lm-country.correct.hover { fill: #2fb35f; }

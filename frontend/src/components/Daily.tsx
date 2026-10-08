@@ -115,7 +115,7 @@ export function DailyHub({ onPlay }: { onPlay: (game: GameId) => void }) {
           Each game can be played <strong>once per day</strong> — everyone gets the same 10 countries. A correct answer
           is worth {SOLO_BASE_POINTS} points plus up to {SOLO_SPEED_POINTS} for speed, minus {SOLO_WRONG_PENALTY} per
           wrong guess. In GeoLocate every wrong click costs {SOLO_WRONG_PENALTY} points, even if you never find the
-          country. Landmarks and Languages take one answer per round: lock it in — a wrong one scores nothing.
+          country. Landmarks and Languages take one answer per round: lock it in — a wrong one scores nothing. Landmarks score by circle size only, not speed.
           GeoGuesser asks for a number (30 s per question): up to {GUESS_MAX_POINTS} points the closer your estimate
           is, whatever units you answer in. Your score and total time go on today's ranking — on equal points the
           faster run ranks higher, and your results show which top percentage of today's players you are in.
@@ -421,7 +421,7 @@ function SoloScreen({
           ? `${run.wrong} wrong`
           : 'Speed doesn’t count, only correct answers'
         : mode.input === 'pin'
-          ? 'Pin the landmark · the smaller your circle and the sooner, the more points'
+          ? 'Pin the landmark · the smaller your circle, the more points. Take your time'
           : estimate
             ? 'One estimate — the closer, the more points. Take your time'
           : mode.lockIn

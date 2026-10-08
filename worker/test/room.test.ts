@@ -274,7 +274,7 @@ describe('lock-in games (Landmarks)', () => {
     guest.c.send({ t: 'pass', round: 1 });
     const r = (await reveal).room.reveal!;
     expect(r.locks).toEqual([{ answer: pin, correct: true, accuracy: null }, null]);
-    expect(r.points).toEqual([6, 0]); // smallest circle 5, first right +1
+    expect(r.points).toEqual([5, 0]); // smallest circle 5 (no speed bonus for pins)
     expect(r.answer).toBe(LANDMARK_BY_ID[id].name);
     expect(r.detail).toBe(COUNTRY_BY_CODE[LANDMARK_BY_ID[id].country].name);
     expect(r.end).toBe('locked');
@@ -316,7 +316,7 @@ describe('lock-in games (Landmarks)', () => {
     const r = (await reveal).room.reveal!;
     expect(r.end).toBe('timeout');
     expect(r.locks).toEqual([{ answer: pin, correct: true, accuracy: null }, null]);
-    expect(r.points).toEqual([4, 0]); // 250 km circle; no speed bonus for a pin that wasn't locked in
+    expect(r.points).toEqual([4, 0]); // 250 km circle
   });
 
   it('GeoGuesser: 30 s rounds, estimates stay hidden, the closer one scores', async () => {
@@ -389,6 +389,6 @@ describe('lock-in games (Landmarks)', () => {
     expect((await guestLocked).outcome).toBe('locked');
     const r = (await reveal).room.reveal!;
     expect(r.end).toBe('locked');
-    expect(r.points).toEqual([0, 4]); // 500 km circle 3, first right +1
+    expect(r.points).toEqual([0, 3]); // 500 km circle
   });
 });

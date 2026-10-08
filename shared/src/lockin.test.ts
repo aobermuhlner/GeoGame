@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { soloDraft, soloGuess, soloPoints, newDailyRun, dailyView, settleRun } from './daily';
-import { applyDraft, applyGuess, applyPass, applyTimeout, decideMatch, newRound, pickStages, scoresOf, smallestPool } from './game';
+import { SOLO_BASE_POINTS, SOLO_SPEED_POINTS, soloDraft, soloGuess, newDailyRun, dailyView, settleRun } from './daily';
+import { applyDraft, applyGuess, applyPass, applyTimeout, newRound, pickStages, scoresOf, smallestPool } from './game';
 import { LANDMARKS } from './landmarks';
 import { LANDMARK_META } from './landmarkMeta';
-import { landmarksInRegions, photoZoom, PHOTO_START_ZOOM } from './landmarkRules';
+import { landmarksInRegions, photoZoom, PHOTO_SLOW_AT_MS, PHOTO_SLOW_ZOOM, PHOTO_START_ZOOM, PHOTO_ZOOM_MS } from './landmarkRules';
 import { PLAYED_LANGUAGES, SENTENCE_ITEMS, languageOfItem, resolveLanguage } from './languageRules';
 import { MODES } from './modes';
 import { COUNTRY_BY_CODE } from './countries';
@@ -33,6 +33,18 @@ describe('landmarks data', () => {
   it('zooms out from the start zoom to the full photo', () => {
     expect(photoZoom(0)).toBeCloseTo(PHOTO_START_ZOOM);
     expect(photoZoom(60_000)).toBe(1);
+  });
+
+  it('slows down once 60% of the photo shows; the whole photo only for the last 5 seconds', () => {
+    expect(photoZoom(PHOTO_SLOW_AT_MS)).toBeCloseTo(PHOTO_SLOW_ZOOM);
+    // Zoom-out speed (log zoom per ms) before and after the slow point
+    const speed = (t: number) => Math.log(photoZoom(t) / photoZoom(t + 100)) / 100;
+    expect(speed(PHOTO_SLOW_AT_MS + 100)).toBeLessThan(speed(PHOTO_SLOW_AT_MS - 200) / 2.5);
+    // Never jumps
+    for (let t = 0; t < PHOTO_ZOOM_MS; t += 50) expect(photoZoom(t) / photoZoom(t + 50)).toBeLessThan(1.02);
+    expect(MODES.landmarks.timeMs! - PHOTO_ZOOM_MS).toBe(5_000);
+    expect(photoZoom(PHOTO_ZOOM_MS - 1)).toBeGreaterThan(1);
+    expect(photoZoom(PHOTO_ZOOM_MS)).toBe(1);
   });
 
   it('is right when the landmark is inside the circle', () => {
@@ -94,14 +106,14 @@ describe('languages data', () => {
 describe('lock-in rounds', () => {
   const round = () => newRound('eiffel-tower', T0, 'landmarks');
 
-  it('takes one answer per player and scores at the end: points by radius, first right +1', () => {
+  it('takes one answer per player and scores at the end: points by radius only, no speed bonus', () => {
     const r = round();
     expect(applyGuess(r, 1, LONDON_500, T0 + 3000)).toBe('locked');
     expect(r.end).toBeNull();
     expect(applyGuess(r, 1, PARIS, T0 + 3500)).toBe('ignored'); // no second answer
     expect(applyGuess(r, 0, PARIS, T0 + 5000)).toBe('locked');
     expect(r.end).toBe('locked');
-    expect(r.points).toEqual([5, 4]);
+    expect(r.points).toEqual([5, 3]); // both right: the bigger circle is worth less, being first is worth nothing
     expect(r.winner).toBe(0);
   });
 
@@ -116,7 +128,7 @@ describe('lock-in rounds', () => {
     const r = round();
     applyGuess(r, 0, LONDON_250, T0 + 1000);
     applyGuess(r, 1, PARIS, T0 + 9000);
-    expect(r.points).toEqual([0, 6]);
+    expect(r.points).toEqual([0, 5]);
     expect(r.wrong).toEqual([1, 0]);
   });
 
@@ -126,7 +138,7 @@ describe('lock-in rounds', () => {
     expect(applyPass(r, 0, T0 + 1500)).toBe(false); // already locked in: can't pass
     expect(applyPass(r, 1, T0 + 2000)).toBe(true);
     expect(r.end).toBe('locked');
-    expect(r.points).toEqual([4, 0]);
+    expect(r.points).toEqual([3, 0]);
   });
 
   it('times out with whatever was locked in', () => {
@@ -134,7 +146,7 @@ describe('lock-in rounds', () => {
     applyGuess(r, 1, PARIS, T0 + 1000);
     expect(applyTimeout(r, r.deadline)).toBe(true);
     expect(r.end).toBe('timeout');
-    expect(r.points).toEqual([0, 6]);
+    expect(r.points).toEqual([0, 5]);
   });
 
   it('match scores add up the lock-in points next to race rounds', () => {
@@ -143,11 +155,10 @@ describe('lock-in rounds', () => {
     applyGuess(a, 1, '48.86,2.29,2000', T0 + 2000);
     const b = newRound('FR', T0, 'flags');
     applyGuess(b, 1, 'France', T0 + 1000);
-    expect(scoresOf([a, b])).toEqual([2, 2]);
-    expect(decideMatch([a, b]).decidedBy).toBe('draw');
+    expect(scoresOf([a, b])).toEqual([1, 2]);
   });
 
-  it('a pin placed but not locked in counts when the time runs out, without the speed bonus', () => {
+  it('a pin placed but not locked in counts when the time runs out, like a locked-in one', () => {
     const r = round();
     expect(r.deadline - r.startedAt).toBe(30_000);
     expect(applyDraft(r, 0, 'France', T0 + 500)).toBe(false);
@@ -157,7 +168,7 @@ describe('lock-in rounds', () => {
     applyGuess(r, 1, LONDON_500, T0 + 20_000); // locking in beats the draft
     expect(applyTimeout(r, r.deadline)).toBe(true);
     expect(r.locks?.[0]).toMatchObject({ answer: '51.500,-0.120,500', correct: true, auto: true });
-    expect(r.points).toEqual([3, 4]);
+    expect(r.points).toEqual([3, 3]);
     expect(applyDraft(r, 0, PARIS, r.deadline + 1)).toBe(false);
   });
 
@@ -189,14 +200,14 @@ describe('solo lock-in', () => {
     expect(v.reveal?.detail).toBe('France');
   });
 
-  it('a placed pin counts at the deadline, with the points of a last-second answer', () => {
+  it('a placed pin counts at the deadline, worth as much as a quick one (only the circle counts)', () => {
     const run = newDailyRun('', 'landmarks', ['eiffel-tower', 'colosseum'], T0, 't');
     const r = run.rounds[0];
     expect(soloDraft(run, 1, PARIS, r.startsAt + 1000)).toBe(true);
     expect(settleRun(run, r.deadline + 50)).toBe(true);
     expect(r.end).toBe('correct');
     expect(r.given).toBe('48.860,2.290,100');
-    expect(r.points).toBe(soloPoints(30_000, 0, 30_000));
+    expect(r.points).toBe(SOLO_BASE_POINTS + SOLO_SPEED_POINTS);
   });
 
   it('a bigger circle scores less', () => {
