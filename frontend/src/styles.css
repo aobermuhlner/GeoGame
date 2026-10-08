@@ -213,13 +213,15 @@ em {
   margin-top: 22px;
   width: min(340px, 100%);
   aspect-ratio: 4 / 3;
+  min-height: 0; /* else a tall flag (Nepal) stretches the frame past 4:3 */
   display: grid;
+  grid-template: 100% / 100%;
   place-items: center;
 }
+/* Flags keep their real proportions (Nepal 0.82 … Qatar 2.55): fit inside the frame, never crop */
 .flag {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+  max-width: 100%;
+  max-height: 100%;
   border-radius: 16px;
   box-shadow: 0 14px 30px rgba(40, 30, 10, 0.18), 0 2px 6px rgba(40, 30, 10, 0.1);
   background: #fff;
@@ -630,9 +632,8 @@ em {
   color: #4b5048;
 }
 .thumb {
-  width: 40px;
-  height: 30px;
-  object-fit: cover;
+  max-width: 40px;
+  max-height: 30px;
   border-radius: 5px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
   display: block;
@@ -1286,7 +1287,7 @@ button.gt-main:active, .gt-btn:active:not(:disabled) { transform: translateY(3px
 .map-card { padding: 16px 18px; }
 .locate-board { display: flex; flex-direction: column; gap: 10px; }
 .locate-board .locate-prompt { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 52px; }
-.locate-flag { height: 26px; width: 35px; object-fit: cover; background: #fff; border-radius: 4px; box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.08); margin-right: 4px; }
+.locate-flag { height: 26px; width: auto; background: #fff; border-radius: 4px; box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.08); margin-right: 4px; }
 .locate-stage { position: relative; }
 .locate-overlay {
   position: absolute; inset: 0; display: grid; place-items: center;
@@ -1350,7 +1351,7 @@ html.map-fs-open, html.map-fs-open body { overflow: hidden; overscroll-behavior:
 .locate-board.fs .locate-prompt {
   min-height: 0; padding: 4px 14px; font-size: 1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
-.fs .locate-flag { height: 18px; width: 24px; }
+.fs .locate-flag { height: 18px; }
 .fs .locate-hud {
   display: flex; align-items: center; gap: 10px; padding: 4px 12px;
   font-size: 0.85rem; font-weight: 700; white-space: nowrap; font-variant-numeric: tabular-nums;
@@ -1681,9 +1682,11 @@ html.map-fs-open, html.map-fs-open body { overflow: hidden; overscroll-behavior:
 .hl-tile.higher { border-color: #3f9a52; background: #eaf5ec; }
 .hl-tile.lower { opacity: 0.8; }
 .hl-tile.wrong { border-color: var(--red); background: var(--red-soft); opacity: 1; }
+/* A fixed box so both tiles line up whatever the flags' proportions; the flag fits inside it uncropped */
+.hl-flag-box { display: grid; grid-template: 100% / 100%; place-items: center; width: min(150px, 100%); aspect-ratio: 4 / 3; min-height: 0; }
 .hl-flag {
-  width: min(150px, 100%); aspect-ratio: 4 / 3; object-fit: cover; border-radius: 6px;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.18); background: var(--track);
+  max-width: 100%; max-height: 100%; border-radius: 6px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.18); background: #fff;
 }
 .hl-name { font-weight: 800; font-size: 1.05rem; line-height: 1.2; text-align: center; overflow-wrap: anywhere; }
 .hl-value {
@@ -1742,7 +1745,7 @@ html.map-fs-open, html.map-fs-open body { overflow: hidden; overscroll-behavior:
   .hl-board { grid-template-columns: 1fr; gap: 26px; }
   .hl-badge { left: auto; right: 12px; transform: none; }
   .hl-tile { flex-direction: row; flex-wrap: wrap; justify-content: center; padding: 14px 12px; column-gap: 12px; row-gap: 4px; }
-  .hl-flag { width: 88px; }
+  .hl-flag-box { width: 88px; }
   .hl-tile .hl-name { flex: 1 1 8em; text-align: left; }
   .hl-tile .hl-value { flex-basis: 100%; text-align: center; font-size: 1.2rem; min-height: 1.4em; }
   .hl-question { font-size: 1rem; }
@@ -1799,6 +1802,9 @@ html.map-fs-open, html.map-fs-open body { overflow: hidden; overscroll-behavior:
 .photo-thumb {
   width: 48px;
   height: 36px;
+  max-width: none;
+  max-height: none;
+  object-fit: cover;
 }
 .photo-credit {
   margin: 4px 0 0;
@@ -1814,6 +1820,7 @@ html.map-fs-open, html.map-fs-open body { overflow: hidden; overscroll-behavior:
   width: 100%;
   aspect-ratio: auto;
   min-height: 150px;
+  grid-template: none;
 }
 .sentence-card {
   margin: 0;
@@ -2352,6 +2359,7 @@ html.map-fs-open, html.map-fs-open body { overflow: hidden; overscroll-behavior:
   width: 100%;
   aspect-ratio: auto;
   min-height: 150px;
+  grid-template: none;
 }
 .question-card {
   margin: 0;
@@ -2510,7 +2518,7 @@ html.map-fs-open, html.map-fs-open body { overflow: hidden; overscroll-behavior:
   display: flex; align-items: center; gap: 10px; margin: -4px 0 0; min-height: 40px;
   font-size: 0.95rem; color: var(--green-600); font-weight: 600;
 }
-.cg-flag { height: 40px; max-width: 72px; border-radius: 4px; box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2); flex: none; }
+.cg-flag { max-height: 40px; max-width: 72px; border-radius: 4px; box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2); flex: none; }
 /* Every flag named so far, newest first: one scrolling row so the map keeps its room */
 .cg-trail {
   list-style: none; display: flex; gap: 6px; margin: -4px 0 0; padding: 2px 2px 6px;

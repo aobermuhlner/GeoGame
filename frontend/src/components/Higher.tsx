@@ -110,7 +110,9 @@ export function PairBoard({
         aria-label={`${name}${revealed ? `: ${fmt(revealed.values[i])}` : ''}`}
         onClick={() => onPick(code)}
       >
-        <img class="hl-flag" src={codeFlagSrc(code)} alt="" draggable={false} />
+        <span class="hl-flag-box">
+          <img class="hl-flag" src={codeFlagSrc(code)} alt="" draggable={false} />
+        </span>
         <span class="hl-name">{name}</span>
         <span class={`hl-value${revealed ? ' shown' : i === 1 && known !== null ? ' known' : ''}`}>
           {revealed ? (
