@@ -2506,7 +2506,20 @@ html.map-fs-open, html.map-fs-open body { overflow: hidden; overscroll-behavior:
 }
 .cg-input:focus { border-color: var(--focus); }
 .cg-input.bad, .cg-input.bad:focus { border-color: var(--red); }
-.cg-notice { margin: -4px 0 0; min-height: 1.3em; font-size: 0.9rem; color: var(--green-600); font-weight: 600; }
+.cg-notice {
+  display: flex; align-items: center; gap: 10px; margin: -4px 0 0; min-height: 40px;
+  font-size: 0.95rem; color: var(--green-600); font-weight: 600;
+}
+.cg-flag { height: 40px; max-width: 72px; border-radius: 4px; box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2); flex: none; }
+/* Every flag named so far, newest first: one scrolling row so the map keeps its room */
+.cg-trail {
+  list-style: none; display: flex; gap: 6px; margin: -4px 0 0; padding: 2px 2px 6px;
+  overflow-x: auto; scrollbar-width: thin;
+}
+.cg-trail li { flex: none; }
+.cg-trail-flag { display: block; height: 24px; border-radius: 3px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2); }
+.cg-missed-flag { height: 14px; border-radius: 2px; margin-right: 6px; vertical-align: -2px; box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.12); }
+.ch-kinds { justify-content: center; width: fit-content; margin: 4px auto 10px; }
 .cg-notice.bad { color: var(--red); animation: cg-shake .3s; }
 @keyframes cg-shake { 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
 .cg-result { display: flex; gap: 16px; align-items: center; }

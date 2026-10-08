@@ -13,6 +13,7 @@ import {
   type TypingNotice,
   type TypingResult,
   medalForTime,
+  VOCABS,
 } from './challenges';
 import { COUNTRIES } from './countries';
 
@@ -21,10 +22,24 @@ const pool = new Set(challengeCodes(europe));
 
 describe('challenges', () => {
   it('covers every country once across the regional challenges, and all of them in the world one', () => {
-    const regional = CHALLENGES.filter((c) => c.id !== 'world').flatMap(challengeCodes);
+    const regional = CHALLENGES.filter((c) => c.kind === 'countries' && c.id !== 'world').flatMap(challengeCodes);
     expect(regional).toHaveLength(COUNTRIES.length);
     expect(new Set(regional).size).toBe(COUNTRIES.length);
     expect(challengeCodes(CHALLENGE_BY_ID.world)).toHaveLength(COUNTRIES.length);
+  });
+
+  it('has a capital challenge for every country challenge, with the same times', () => {
+    for (const c of CHALLENGES.filter((x) => x.kind === 'countries')) {
+      const cap = CHALLENGE_BY_ID[`capitals-${c.id}`];
+      expect(cap).toMatchObject({ kind: 'capitals', regions: c.regions, limits: c.limits });
+      expect(challengeCodes(cap)).toEqual(challengeCodes(c));
+    }
+  });
+
+  it('keeps the world medals of countries and capitals apart', () => {
+    const bests = { world: 14 * 60_000 };
+    expect(challengeStanding(CHALLENGE_BY_ID['capitals-africa'], bests).medal).toBe(null);
+    expect(challengeStanding(CHALLENGE_BY_ID['capitals-africa'], { 'capitals-world': 14 * 60_000 }).medal).toBe('silver');
   });
 
   it('gives harder medals less time', () => {
@@ -84,6 +99,25 @@ describe('typing in a challenge', () => {
   it('tells repeats and countries of other regions apart', () => {
     expect(matchTyped('France', pool, new Set(['FR']))).toEqual({ kind: 'repeat', code: 'FR' });
     expect(matchTyped('Turkey', pool, none)).toEqual({ kind: 'outside', code: 'TR' });
+  });
+});
+
+describe('typing capitals', () => {
+  const caps = VOCABS.capitals;
+  const none = new Set<string>();
+
+  it('knows a capital for every country', () => {
+    const named = new Set(caps.lookup.values());
+    expect(COUNTRIES.filter((c) => !named.has(c.code))).toEqual([]);
+  });
+
+  it('enters capitals, not countries', () => {
+    expect(matchTyped('Paris', pool, none, caps)).toEqual({ kind: 'add', code: 'FR' });
+    expect(matchTyped('wien', pool, none, caps)).toEqual({ kind: 'add', code: 'AT' });
+    expect(matchTyped('France', pool, none, caps)).toEqual({ kind: 'none' });
+    expect(matchTyped('Tokyo', pool, none, caps)).toEqual({ kind: 'outside', code: 'JP' });
+    expect(submitText('Paris', null, pool, new Set(['FR']), caps).notice).toEqual({ kind: 'repeat', code: 'FR' });
+    expect(typeText('Berlin', null, pool, none, caps)).toMatchObject({ text: '', added: ['DE'] });
   });
 });
 
