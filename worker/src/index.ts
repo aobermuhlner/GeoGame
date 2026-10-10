@@ -16,6 +16,7 @@ import {
 } from '@flagduel/shared';
 import { FLAGS } from './generated/flags';
 import { verifyGoogleIdToken } from './google';
+import { ADMIN_PAGE } from './admin-page';
 
 export { Room } from './room';
 export { Accounts } from './accounts';
@@ -301,6 +302,20 @@ export default {
     // GET /practice/landmarks/:id → a landmark photo by id (practice only; same reasoning as the flags above)
     const practicePhoto = /^\/practice\/landmarks\/([a-z0-9-]+)$/.exec(url.pathname);
     if (practicePhoto && request.method === 'GET') return itemImage(practicePhoto[1], env);
+
+    // GET /admin → the stats page (asks for the token itself; holds no data)
+    if (url.pathname === '/admin' && request.method === 'GET') {
+      return new Response(ADMIN_PAGE, {
+        headers: {
+          'Content-Type': 'text/html; charset=utf-8',
+          'Cache-Control': 'no-store',
+          'Content-Security-Policy':
+            "default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; connect-src 'self'; form-action 'none'; frame-ancestors 'none'",
+          'X-Robots-Tag': 'noindex',
+          'Referrer-Policy': 'no-referrer',
+        },
+      });
+    }
 
     // GET /admin/stats?days=7 → play counts and daily rankings, for the developer only.
     // Needs the ADMIN_TOKEN secret (`wrangler secret put ADMIN_TOKEN`); without it the route doesn't exist.

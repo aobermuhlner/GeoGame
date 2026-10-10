@@ -384,6 +384,14 @@ describe('admin stats', () => {
     expect(stats.days.map((d) => d.date)).toEqual([0, 1, 2].map((i) => dayOf(Date.now() - i * 86_400_000)));
   });
 
+  it('serves the stats page without any data in it', async () => {
+    const res = await exports.default.fetch(new Request(`${BASE}/admin`));
+    expect(res.status).toBe(200);
+    expect(res.headers.get('Content-Type')).toContain('text/html');
+    expect(res.headers.get('Content-Security-Policy')).toContain("connect-src 'self'");
+    expect(await res.text()).toContain('/admin/stats');
+  });
+
   it('counts daily runs and matches per day, with the full daily ranking', async () => {
     const t = Date.parse('2031-03-05T12:00:00Z');
     const { user } = await devLogin('StatsA');
