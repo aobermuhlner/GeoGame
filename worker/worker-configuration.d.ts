@@ -6,6 +6,7 @@ interface __BaseEnv_Env {
 	ALLOWED_ORIGINS: string;
 	GOOGLE_CLIENT_ID: string;
 	DEV_LOGIN: string;
+	ADMIN_TOKEN: string;
 	ROOMS: DurableObjectNamespace<import("./src/index").Room>;
 	ACCOUNTS: DurableObjectNamespace<import("./src/index").Accounts>;
 	MATCHMAKER: DurableObjectNamespace<import("./src/index").Matchmaker>;

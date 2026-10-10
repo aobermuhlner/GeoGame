@@ -366,3 +366,52 @@ function internalRun(userId: string, mode: string, now: number) {
 function runSql<T extends Record<string, SqlStorageValue>>(query: string, ...args: SqlStorageValue[]) {
   return runInDurableObject(db(), (_obj: Accounts, state) => state.storage.sql.exec<T>(query, ...args).toArray());
 }
+
+describe('admin stats', () => {
+  const admin = (token?: string, query = '') =>
+    exports.default.fetch(
+      new Request(`${BASE}/admin/stats${query}`, token ? { headers: { Authorization: `Bearer ${token}` } } : {}),
+    );
+
+  it('needs the admin token, and hides the route otherwise', async () => {
+    expect((await admin()).status).toBe(404);
+    expect((await admin('wrong-token')).status).toBe(404);
+    const { token } = await devLogin('NotAdmin');
+    expect((await admin(token)).status).toBe(404);
+    const res = await admin('test-admin-token', '?days=3');
+    expect(res.status).toBe(200);
+    const stats = (await res.json()) as { days: { date: string }[] };
+    expect(stats.days.map((d) => d.date)).toEqual([0, 1, 2].map((i) => dayOf(Date.now() - i * 86_400_000)));
+  });
+
+  it('counts daily runs and matches per day, with the full daily ranking', async () => {
+    const t = Date.parse('2031-03-05T12:00:00Z');
+    const { user } = await devLogin('StatsA');
+    const { user: other } = await devLogin('StatsB');
+    await db().dailyStart(user.id, 'flags', t);
+    let now = t + COUNTDOWN_MS;
+    for (let round = 1; round <= 10; round++) {
+      if (round > 1) await db().dailyNext(user.id, 'flags', round - 1, now);
+      await db().dailyPass(user.id, 'flags', round, now);
+    }
+    await db().dailyStart(other.id, 'flags', t); // started, never finished
+    await db().recordPlay('duel', ['flags', 'capitals'], 2, t);
+    await db().recordPlay('duel', ['flags'], 2, t);
+    await db().recordPlay('quick', ['higher', 'higher'], 5, t); // a game listed twice counts once
+    await db().recordPlay('duel', ['flags'], 2, t - 86_400_000);
+
+    const { days } = await db().adminStats(2, t);
+    const [today, yesterday] = days;
+    expect(today.date).toBe('2031-03-05');
+    expect(today.daily.flags).toEqual({ started: 2, finished: 1 });
+    expect(today.dailyPlayers).toBe(2);
+    expect(today.matches).toEqual({
+      duel: { flags: { matches: 2, players: 4 }, capitals: { matches: 1, players: 2 } },
+      quick: { higher: { matches: 1, players: 5 } },
+    });
+    expect(today.boards.flags.map((e) => e.name)).toEqual(['StatsA']);
+    expect(today.higher).toBeNull(); // no Higher or Lower puzzle was drawn that day (and looking didn't draw one)
+    expect(yesterday.matches).toEqual({ duel: { flags: { matches: 1, players: 2 } } });
+    expect((await db().adminStats(2, t)).days[0].higher).toBeNull();
+  });
+});

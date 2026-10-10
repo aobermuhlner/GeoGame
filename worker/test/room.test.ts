@@ -1,4 +1,4 @@
-import { exports } from 'cloudflare:workers';
+import { env, exports } from 'cloudflare:workers';
 import { runDurableObjectAlarm, runInDurableObject } from 'cloudflare:test';
 import { describe, expect, it } from 'vitest';
 import type { Room } from '../src/room';
@@ -390,5 +390,23 @@ describe('lock-in games (Landmarks)', () => {
     const r = (await reveal).room.reveal!;
     expect(r.end).toBe('locked');
     expect(r.points).toEqual([0, 3]); // 500 km circle
+  });
+});
+
+describe('play counts', () => {
+  it('a started duel is counted for the admin stats', async () => {
+    const accounts = env.ACCOUNTS.getByName('main');
+    const before = (await accounts.adminStats(1)).days[0].matches.duel?.flags?.matches ?? 0;
+    const code = await createRoom();
+    const host = await join(code, 'Counter');
+    const guest = await join(code, 'Counted');
+    await host.c.state({ t: 'ready', ready: true }, (s) => s.room.players[0].ready);
+    await guest.c.state({ t: 'ready', ready: true }, (s) => s.room.players[1].ready);
+    const started = guest.c.state(null, (s) => s.room.phase === 'countdown');
+    host.c.send({ t: 'start' });
+    await started;
+    await expect
+      .poll(async () => (await accounts.adminStats(1)).days[0].matches.duel?.flags?.matches ?? 0)
+      .toBe(before + 1);
   });
 });

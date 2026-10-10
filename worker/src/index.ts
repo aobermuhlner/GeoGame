@@ -87,6 +87,13 @@ function bearer(request: Request): string | null {
   return t && SESSION_TOKEN_RE.test(t) ? t : null;
 }
 
+/** Constant-time string comparison (for the admin token). */
+async function sameSecret(a: string, b: string): Promise<boolean> {
+  const enc = new TextEncoder();
+  const [x, y] = await Promise.all([a, b].map((v) => crypto.subtle.digest('SHA-256', enc.encode(v))));
+  return crypto.subtle.timingSafeEqual(x, y);
+}
+
 const isRound = (v: unknown): v is number => typeof v === 'number' && Number.isInteger(v) && v >= 1 && v < 1000;
 
 const json = (data: unknown, status = 200) => Response.json(data, { status });
@@ -294,6 +301,15 @@ export default {
     // GET /practice/landmarks/:id → a landmark photo by id (practice only; same reasoning as the flags above)
     const practicePhoto = /^\/practice\/landmarks\/([a-z0-9-]+)$/.exec(url.pathname);
     if (practicePhoto && request.method === 'GET') return itemImage(practicePhoto[1], env);
+
+    // GET /admin/stats?days=7 → play counts and daily rankings, for the developer only.
+    // Needs the ADMIN_TOKEN secret (`wrangler secret put ADMIN_TOKEN`); without it the route doesn't exist.
+    if (url.pathname === '/admin/stats' && request.method === 'GET') {
+      const given = /^Bearer (\S+)$/.exec(request.headers.get('Authorization') ?? '')?.[1];
+      if (!env.ADMIN_TOKEN || !given || !(await sameSecret(given, env.ADMIN_TOKEN))) return new Response('Not found', { status: 404 });
+      const days = Number(url.searchParams.get('days') ?? 7) || 7;
+      return json(await env.ACCOUNTS.getByName('main').adminStats(days));
+    }
 
     // GET /ranked/ws → WebSocket to the ranked queue (the session token is sent in the first message)
     if (url.pathname === '/ranked/ws' && request.method === 'GET') {

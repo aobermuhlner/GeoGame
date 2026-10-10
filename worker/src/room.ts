@@ -585,6 +585,11 @@ export class Room extends DurableObject<Env> {
       s.game.duel = { pool: s.pool ?? countriesInRegions(s.regions), rounds: [], regular: counts.higher };
     s.phase = 'countdown';
     for (const p of s.players) p.rematch = false;
+    this.ctx.waitUntil(
+      this.env.ACCOUNTS.getByName('main')
+        .recordPlay(s.ranked ? 'ranked' : 'duel', games, s.players.length, now)
+        .catch((e) => console.error('play count failed', e)),
+    );
   }
 
   private startRound(i: number, now: number) {

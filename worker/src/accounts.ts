@@ -1,5 +1,6 @@
 import { DurableObject } from 'cloudflare:workers';
 import {
+  BOARD_IDS,
   COUNTDOWN_MS,
   LEADERBOARD_SIZE,
   MODE_IDS,
@@ -75,6 +76,11 @@ export const SESSION_TTL_MS = 90 * 24 * 3600_000;
 export const GUEST_SESSION_TTL_MS = 5 * 365 * 24 * 3600_000;
 /** Flag tokens of daily rounds are kept this many days. */
 const FLAG_TOKEN_DAYS = 3;
+/** Most days the admin stats look back. */
+const MAX_STATS_DAYS = 60;
+
+/** Matches counted in `plays` (daily games are counted from their runs instead). */
+export type PlayKind = 'duel' | 'ranked' | 'group' | 'quick' | 'challenge';
 
 interface UserRow {
   id: string;
@@ -105,6 +111,25 @@ export interface RankedOutcome {
   before: number;
   after: number;
   delta: number;
+}
+
+export interface AdminDay {
+  date: string;
+  newAccounts: number;
+  /** Players who started at least one daily game */
+  dailyPlayers: number;
+  /** Daily games by mode ('higher' = Higher or Lower) */
+  daily: Record<string, { started: number; finished: number }>;
+  /** kind → game → matches started and players in them (summed) */
+  matches: Record<string, Record<string, { matches: number; players: number }>>;
+  /** That day's full daily rankings */
+  boards: Record<BoardId, LeaderboardEntry[]>;
+  higher: { stat: StatId; entries: HigherBoardEntry[] } | null;
+}
+
+export interface AdminStats {
+  now: number;
+  days: AdminDay[];
 }
 
 const toView = (u: UserRow): UserView => ({
@@ -232,6 +257,14 @@ export class Accounts extends DurableObject<Env> {
         runs INTEGER NOT NULL DEFAULT 1,
         updated_at INTEGER NOT NULL,
         PRIMARY KEY (user_id, challenge)
+      );
+      CREATE TABLE IF NOT EXISTS plays (
+        date TEXT NOT NULL,
+        kind TEXT NOT NULL,
+        game TEXT NOT NULL,
+        matches INTEGER NOT NULL DEFAULT 0,
+        players INTEGER NOT NULL DEFAULT 0,
+        PRIMARY KEY (date, kind, game)
       );
     `);
     this.migrate();
@@ -654,7 +687,7 @@ export class Accounts extends DurableObject<Env> {
   }
 
   /** Ranking: longest flawless start, then most correct, then least time (equal on all three share a rank). */
-  private higherBoardOf(date: string, userId: string | null): HigherBoardResponse {
+  private higherBoardOf(date: string, userId: string | null, limit = LEADERBOARD_SIZE): HigherBoardResponse {
     const { stat, pairs } = this.higherPuzzle(date);
     const rows = this.sql
       .exec<{ user_id: string; name: string; flawless: number; correct: number; timeMs: number }>(
@@ -681,7 +714,7 @@ export class Accounts extends DurableObject<Env> {
       date,
       stat,
       rounds: pairs.length,
-      entries: ranked.slice(0, LEADERBOARD_SIZE),
+      entries: ranked.slice(0, limit),
       you: ranked.find((e) => e.you) ?? null,
       players: ranked.length,
     };
@@ -946,6 +979,7 @@ export class Accounts extends DurableObject<Env> {
       ms,
       now,
     );
+    this.countPlay('challenge', [id], 1, now);
     return { bests: this.challengeBests(userId), improved: !before || ms < before.best_ms };
   }
 
@@ -955,7 +989,7 @@ export class Accounts extends DurableObject<Env> {
     return this.board(date, board, userId);
   }
 
-  private board(date: string, board: BoardId, userId: string | null): LeaderboardResponse {
+  private board(date: string, board: BoardId, userId: string | null, limit = LEADERBOARD_SIZE): LeaderboardResponse {
     const rows =
       board === 'overall'
         ? this.sql
@@ -987,9 +1021,83 @@ export class Accounts extends DurableObject<Env> {
     return {
       date,
       board,
-      entries: ranked.slice(0, LEADERBOARD_SIZE),
+      entries: ranked.slice(0, limit),
       you: ranked.find((e) => e.you) ?? null,
       players: ranked.length,
     };
+  }
+
+  // ---------- Admin stats (never shown to players) ----------
+
+  /** A match of each of `games` started (a mixed match counts once per game), with `players` in it. */
+  async recordPlay(kind: PlayKind, games: readonly string[], players: number, now = Date.now()): Promise<void> {
+    this.countPlay(kind, games, players, now);
+  }
+
+  private countPlay(kind: PlayKind, games: readonly string[], players: number, now: number) {
+    for (const game of new Set(games))
+      this.sql.exec(
+        `INSERT INTO plays (date, kind, game, matches, players) VALUES (?, ?, ?, 1, ?)
+         ON CONFLICT (date, kind, game) DO UPDATE SET matches = matches + 1, players = players + excluded.players`,
+        dayOf(now),
+        kind,
+        game,
+        players,
+      );
+  }
+
+  /**
+   * How much each game was played on each of the last `days` days (today first), and that day's daily
+   * rankings in full. Daily runs are never deleted, so any past day can be looked at.
+   */
+  async adminStats(days = 7, now = Date.now()): Promise<AdminStats> {
+    const n = Math.max(1, Math.min(MAX_STATS_DAYS, Math.floor(days)));
+    const dates = Array.from({ length: n }, (_, i) => dayOf(now - i * 86_400_000));
+    const out: AdminDay[] = dates.map((date) => {
+      const daily: AdminDay['daily'] = {};
+      for (const r of this.sql.exec<{ mode: string; started: number; finished: number }>(
+        `SELECT mode, COUNT(*) AS started, COUNT(finished_at) AS finished FROM daily_runs WHERE date = ? GROUP BY mode`,
+        date,
+      ))
+        daily[r.mode] = { started: r.started, finished: r.finished };
+      const h = this.sql
+        .exec<{ started: number; finished: number }>(
+          'SELECT COUNT(*) AS started, COUNT(finished_at) AS finished FROM higher_runs WHERE date = ?',
+          date,
+        )
+        .toArray()[0];
+      if (h?.started) daily.higher = { started: h.started, finished: h.finished };
+      const dailyPlayers =
+        this.sql
+          .exec<{ n: number }>(
+            `SELECT COUNT(*) AS n FROM (SELECT user_id FROM daily_runs WHERE date = ? UNION SELECT user_id FROM higher_runs WHERE date = ?)`,
+            date,
+            date,
+          )
+          .toArray()[0]?.n ?? 0;
+
+      const matches: AdminDay['matches'] = {};
+      for (const r of this.sql.exec<{ kind: string; game: string; matches: number; players: number }>(
+        'SELECT kind, game, matches, players FROM plays WHERE date = ? ORDER BY kind, game',
+        date,
+      ))
+        (matches[r.kind] ??= {})[r.game] = { matches: r.matches, players: r.players };
+
+      const start = Date.parse(`${date}T00:00:00Z`);
+      const newAccounts =
+        this.sql
+          .exec<{ n: number }>('SELECT COUNT(*) AS n FROM users WHERE created_at >= ? AND created_at < ?', start, start + 86_400_000)
+          .toArray()[0]?.n ?? 0;
+
+      const boards = Object.fromEntries(
+        BOARD_IDS.map((b) => [b, this.board(date, b, null, Infinity).entries]),
+      ) as AdminDay['boards'];
+      // Only days that had a Higher or Lower puzzle (looking one up would draw it).
+      const hasHigher = this.sql.exec('SELECT 1 FROM higher_puzzles WHERE date = ?', date).toArray().length > 0;
+      const hb = hasHigher ? this.higherBoardOf(date, null, Infinity) : null;
+      const higher = hb ? { stat: hb.stat, entries: hb.entries } : null;
+      return { date, newAccounts, dailyPlayers, daily, matches, boards, higher };
+    });
+    return { now, days: out };
   }
 }

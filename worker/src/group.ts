@@ -449,6 +449,12 @@ export class GroupRoom extends DurableObject<Env> {
       standingsEndsAt: null,
     };
     s.phase = 'countdown';
+    const players = s.players.filter((p) => p.connected).length;
+    this.ctx.waitUntil(
+      this.env.ACCOUNTS.getByName('main')
+        .recordPlay(s.public ? 'quick' : 'group', games, players, now)
+        .catch((e) => console.error('play count failed', e)),
+    );
   }
 
   private startRound(i: number, now: number) {
