@@ -32,9 +32,9 @@ function devFlags(): Plugin {
   };
 }
 
-// GitHub Pages project page is served from /<repo-name>/
-export default defineConfig(({ command }) => ({
-  base: command === 'build' ? '/GeoGame/' : '/',
+// Cloudflare Pages serves the site from the root of its domain.
+export default defineConfig(() => ({
+  base: '/',
   plugins: [preact(), devFlags()],
   build: {
     rollupOptions: {

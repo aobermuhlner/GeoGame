@@ -1,5 +1,7 @@
 # Flag Duel
 
+**Play: [georivals.pages.dev](https://georivals.pages.dev)**
+
 Geography flag games with accounts (Google sign-in), a **daily single-player challenge** with a daily
 ranking, and a **real-time 1 vs 1 duel**. After signing in you land in the main lobby (account, stats,
 today's status); the menu bar switches between **Lobby**, **Daily Games**, **Practice** and **Multiplayer**.
@@ -151,7 +153,7 @@ To try ranked locally you need two accounts, but both tabs of one origin share t
 if Vite only answers on one of them, start it with `--host 127.0.0.1`).
 
 ```
-/frontend   Vite + TypeScript + Preact  → GitHub Pages
+/frontend   Vite + TypeScript + Preact  → Cloudflare Pages
 /worker     Cloudflare Worker + SQLite-backed Durable Objects: `Room` (one per lobby or ranked match),
             `Matchmaker` (one instance: the ranked queue) and
             `Accounts` (one instance: users, sessions, daily runs, ratings, leaderboards)
@@ -234,30 +236,36 @@ Cloudflare asks you to pick a `workers.dev` subdomain the first time.
 - The Durable Objects are SQLite-backed (`new_sqlite_classes` migrations), as the free plan requires.
 - **Google sign-in:** in [Google Cloud Console](https://console.cloud.google.com/apis/credentials) create an
   *OAuth client ID* of type **Web application**. Under *Authorized JavaScript origins* add
-  `https://aobermuhlner.github.io` and `http://localhost:5173` (no redirect URIs needed — it uses the
+  `https://georivals.pages.dev` and `http://localhost:5173` (no redirect URIs needed — it uses the
   popup/ID-token flow). Put the client id (`…apps.googleusercontent.com`, public, not a secret) into
   `worker/wrangler.jsonc` → `vars.GOOGLE_CLIENT_ID` and redeploy. The frontend reads it from
   `GET /auth/config`, so no frontend rebuild is needed.
 - Keep `DEV_LOGIN` `"false"` in `wrangler.jsonc`; it is only for `.dev.vars`.
 - Allowed browser origins live in `worker/wrangler.jsonc` → `vars.ALLOWED_ORIGINS`. It already
-  contains `https://aobermuhlner.github.io`; add your origin there if you host the page elsewhere,
+  contains `https://georivals.pages.dev`; add your origin there if you host the page elsewhere,
   then redeploy.
 - Free-plan friendly by design: hibernatable WebSockets, alarms instead of timers, keep-alive pings
   answered without waking the object, rooms delete themselves 10 minutes after the last player left.
 
-### 2. Frontend → GitHub Pages
+### 2. Frontend → Cloudflare Pages
 
-One-time setup in the GitHub repo:
+One-time setup:
 
-1. **Settings → Pages → Build and deployment → Source: GitHub Actions**
-2. **Settings → Secrets and variables → Actions → Variables → New repository variable**
-   `VITE_WORKER_URL` = the Worker URL from step 1 (no trailing slash)
+1. Create the Pages project: `npx wrangler pages project create georivals --production-branch main`
+2. In Cloudflare: **My Profile → API Tokens → Create Token → Custom token** with the permission
+   **Account → Cloudflare Pages → Edit**.
+3. In the GitHub repo, **Settings → Secrets and variables → Actions**:
+   - Secret `CLOUDFLARE_API_TOKEN` = the token from step 2
+   - Variable `CLOUDFLARE_ACCOUNT_ID` = your account id (`npx wrangler whoami`)
+   - Variable `VITE_WORKER_URL` = the Worker URL from step 1 (no trailing slash)
 
 Then every push to `main` that touches `frontend/` or `shared/` runs
-[`.github/workflows/pages.yml`](.github/workflows/pages.yml) and publishes to
-`https://<user>.github.io/GeoGame/`. You can also run it manually from the Actions tab
-(**Deploy frontend to GitHub Pages → Run workflow**). The Vite `base` is `/GeoGame/`
-(`frontend/vite.config.ts`); change it if the repository is renamed.
+[`.github/workflows/deploy.yml`](.github/workflows/deploy.yml) and publishes to
+`https://georivals.pages.dev`. You can also run it manually from the Actions tab
+(**Deploy frontend to Cloudflare Pages → Run workflow**).
+
+The old GitHub Pages address (`https://aobermuhlner.github.io/GeoGame/`) only redirects there, keeping the path
+and query so old invite links still work ([`.github/workflows/pages-redirect.yml`](.github/workflows/pages-redirect.yml)).
 
 [`.github/workflows/test.yml`](.github/workflows/test.yml) runs the tests and type checks on every push and PR.
 
