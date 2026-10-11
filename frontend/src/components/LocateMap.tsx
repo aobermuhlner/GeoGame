@@ -49,6 +49,8 @@ interface Props {
   layer?: (u: number) => ComponentChildren;
   /** Animate the view to show this box [x0, y0, x1, y1] (map units) */
   focusBox?: readonly number[] | null;
+  /** No panning or zooming: the start view already shows everything (the zoom buttons are hidden too) */
+  locked?: boolean;
 }
 
 type MapData = typeof LOCATE_MAP;
@@ -110,6 +112,7 @@ export function LocateMap({
   onTap,
   layer,
   focusBox,
+  locked = false,
 }: Props) {
   const [map, setMap] = useState<MapData | null>(null);
   const [view, setView] = useState<View>({ k: 1, x: 0, y: 0 });
@@ -120,6 +123,8 @@ export function LocateMap({
   viewRef.current = view;
   const rotatedRef = useRef(rotated);
   rotatedRef.current = rotated;
+  const lockedRef = useRef(locked);
+  lockedRef.current = locked;
   const anim = useRef(0);
   /** The view is (or is gliding to) the start view */
   const homing = useRef(true);
@@ -253,6 +258,7 @@ export function LocateMap({
     const el = svgRef.current;
     if (!el) return;
     const onWheel = (e: WheelEvent) => {
+      if (lockedRef.current) return; // the page scrolls instead
       e.preventDefault();
       const [px, py] = toMap(e.clientX, e.clientY);
       const dy = e.deltaMode === 1 ? e.deltaY * 16 : e.deltaY;
@@ -268,6 +274,7 @@ export function LocateMap({
 
   function onPointerDown(e: PointerEvent) {
     if (e.button !== 0 && e.pointerType === 'mouse') return;
+    if (locked) return;
     svgRef.current!.setPointerCapture(e.pointerId);
     pointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
     const code = (e.target as Element).closest?.('[data-c]')?.getAttribute('data-c') ?? null;
@@ -395,6 +402,11 @@ export function LocateMap({
     if (map) goHome(450);
   }, [resetKey]);
 
+  // Locked (e.g. once a challenge starts): back to the start view, which then can't move.
+  useEffect(() => {
+    if (map && locked) goHome(300);
+  }, [locked]);
+
   const hoverCode = hover?.code ?? null;
   const cls = (c: LocateCountry) => {
     if (active && !active.has(c.c)) return ' off';
@@ -442,7 +454,7 @@ export function LocateMap({
     >
       <svg
         ref={svgRef}
-        class={`locate-map${disabled ? ' disabled' : ''}${onTap ? ' pin-mode' : ''}`}
+        class={`locate-map${disabled ? ' disabled' : ''}${onTap ? ' pin-mode' : ''}${locked ? ' locked' : ''}`}
         viewBox={`0 0 ${W} ${VH}`}
         role="img"
         aria-label="World map: click the country you are asked for. Scroll or pinch to zoom, drag to pan."
@@ -457,6 +469,7 @@ export function LocateMap({
           if (!showNames) setHover(code ? { code, x: 0, y: 0 } : null);
         }}
         onDblClick={(e) => {
+          if (locked) return;
           const [px, py] = toMap(e.clientX, e.clientY);
           zoomAt(px, py, 2.2);
         }}
@@ -498,17 +511,19 @@ export function LocateMap({
         </g>
       </svg>
 
-      <div class="lm-controls">
-        <button type="button" aria-label="Zoom in" onClick={() => zoomAnimated(1.8)}>
-          +
-        </button>
-        <button type="button" aria-label="Zoom out" onClick={() => zoomAnimated(1 / 1.8)}>
-          −
-        </button>
-        <button type="button" aria-label="Reset view" title="Reset view" onClick={() => goHome()}>
-          ⤢
-        </button>
-      </div>
+      {!locked && (
+        <div class="lm-controls">
+          <button type="button" aria-label="Zoom in" onClick={() => zoomAnimated(1.8)}>
+            +
+          </button>
+          <button type="button" aria-label="Zoom out" onClick={() => zoomAnimated(1 / 1.8)}>
+            −
+          </button>
+          <button type="button" aria-label="Reset view" title="Reset view" onClick={() => goHome()}>
+            ⤢
+          </button>
+        </div>
+      )}
       {extraControl}
 
       {showNames && hover && hover.x > 0 && (

@@ -37,6 +37,7 @@ import type { WORLD_MAP } from '../generated/worldmap';
 import { formatClock, formatDuration, useNow } from './common';
 import { LocateMap, type Mark } from './LocateMap';
 import { NO_AUTOFILL } from '../noAutofill';
+import { isTouch } from '../platform';
 
 const nameOf = (code: string) => COUNTRY_BY_CODE[code]?.name ?? code;
 const capitalOf = (code: string) => CAPITAL_BY_CODE[code]?.name ?? code;
@@ -347,6 +348,10 @@ function ChallengeGame({
   const missed = phase === 'lost' ? challengeCodes(ch).filter((c) => !foundSet.has(c)) : [];
   const earned = phase === 'won' ? medalForTime(ch, endMs) : null;
   const typing = phase === 'playing';
+  // Phones while typing: the page fits the screen above the keyboard, and a region's map can't be dragged away
+  // (it already shows every country asked for). The world map stays movable: its small countries need zooming.
+  const fitScreen = typing && isTouch;
+  const lockMap = fitScreen && !isWorldChallenge(ch);
   const dead = typing && text.trim().length >= 2 && !isLivePrefix(text, vocab);
   const waiting = typing && held && !held.added && held.text === text;
   // Per-region progress when a challenge spans several regions.
@@ -357,7 +362,7 @@ function ChallengeGame({
   }) : [];
 
   return (
-    <main class="stack wide challenge-game">
+    <main class={`stack wide challenge-game${fitScreen ? ' fit cg-fit' : ''}`}>
       <section class="card challenge-top">
         <div class="cg-head">
           <MedalBadge medal={medal} size={28} />
@@ -505,7 +510,17 @@ function ChallengeGame({
       )}
 
       <section class="card map-card">
-        <LocateMap region={ch.regions.length ? ch.regions : null} snug active={ch.regions.length ? pool : null} marks={marks} labels={missed} nameOf={answerOf(ch.kind)} disabled />
+        <LocateMap
+          region={ch.regions.length ? ch.regions : null}
+          snug={!fitScreen}
+          fill={fitScreen}
+          locked={lockMap}
+          active={ch.regions.length ? pool : null}
+          marks={marks}
+          labels={missed}
+          nameOf={answerOf(ch.kind)}
+          disabled
+        />
       </section>
     </main>
   );

@@ -1207,6 +1207,8 @@ button.gt-main:active, .gt-btn:active:not(:disabled) { transform: translateY(3px
   cursor: grab;
 }
 .locate-map:active { cursor: grabbing; }
+/* Locked: nothing to drag, and a swipe over the map may scroll the page */
+.locate-map.locked, .locate-map.locked:active { touch-action: manipulation; cursor: default; }
 .locate-map.loading { aspect-ratio: 2 / 1; background: #c9dcd6; border-radius: 14px; }
 .lm-ocean { fill: #c9dcd6; }
 .lm-other {
@@ -2554,6 +2556,22 @@ html.map-fs-open, html.map-fs-open body { overflow: hidden; overscroll-behavior:
 .challenge-game .lm-country.hover { fill: #f7f2e4; }
 .challenge-game .lm-country.correct.hover { fill: #2fb35f; }
 @media (prefers-reduced-motion: reduce) { .cg-notice.bad { animation: none; } }
+
+/* Challenges on a phone while typing (.cg-fit, with .fit): the whole game sits above the keyboard and the map
+   takes what is left. index.html's viewport has interactive-widget=resizes-content, so 100dvh already excludes
+   the keyboard. */
+.stack.fit.cg-fit { min-height: 0; gap: 8px; }
+.cg-fit > .challenge-top { flex: none; gap: 8px; padding: 10px 12px; }
+.cg-fit .cg-head { gap: 8px; }
+.cg-fit .cg-title h2 { font-size: 1rem; }
+.cg-fit .cg-title .muted { display: none; }
+.cg-fit .cg-clock { font-size: 1.25rem; }
+.cg-fit .cg-input { font-size: 1.1rem; padding: 8px 12px; }
+.cg-fit .cg-notice { min-height: 28px; margin: 0; }
+.cg-fit .cg-trail { margin: 0; padding-bottom: 2px; }
+.cg-fit > .cg-regions { flex: none; flex-wrap: nowrap; justify-content: flex-start; overflow-x: auto; margin: 0; padding: 2px; }
+.cg-fit .cg-regions li { flex: none; box-shadow: none; }
+.stack.fit.cg-fit > .map-card { display: flex; padding: 6px; }
 
 /* ---------- Find a game (public group games) ---------- */
 .quick-find {
