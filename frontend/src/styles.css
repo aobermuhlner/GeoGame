@@ -2163,14 +2163,24 @@ html.map-fs-open, html.map-fs-open body { overflow: hidden; overscroll-behavior:
 }
 .photo-big .ps-map,
 .map-big .ps-photo {
-  top: calc(100% - var(--mini) - var(--gap));
-  left: calc(100% - var(--mini) - var(--gap));
+  --far: calc(100% - var(--mini) - var(--gap));
+  top: var(--far);
+  left: var(--far);
   right: var(--gap);
   bottom: var(--gap);
   z-index: 2;
   border-radius: 10px;
   box-shadow: 0 0 0 3px #fffdf7, 0 8px 24px rgba(30, 25, 10, 0.35);
+  transition: top 0.3s ease, left 0.3s ease, right 0.3s ease, bottom 0.3s ease, transform 0.3s ease;
 }
+/* Which corner the small pane sits in (moved with its handle; bottom-right by default) */
+.mini-tl.photo-big .ps-map, .mini-tl.map-big .ps-photo,
+.mini-tr.photo-big .ps-map, .mini-tr.map-big .ps-photo { top: var(--gap); bottom: var(--far); }
+.mini-tl.photo-big .ps-map, .mini-tl.map-big .ps-photo,
+.mini-bl.photo-big .ps-map, .mini-bl.map-big .ps-photo { left: var(--gap); right: var(--far); }
+.ps-pane.dragging { transition: none; z-index: 4; opacity: 0.92; }
+/* With the small photo at the top, the map's hint goes to the bottom */
+.map-big.mini-tl .pin-tip, .map-big.mini-tr .pin-tip { top: auto; bottom: 10px; }
 /* Reveal: the map with the whole photo beside it (below it on an upright stage) */
 .pin-stage { container-type: size; --side: 32%; }
 .revealed .ps-map { right: calc(var(--side) + var(--gap)); }
@@ -2192,6 +2202,20 @@ html.map-fs-open, html.map-fs-open body { overflow: hidden; overscroll-behavior:
   background: var(--card); color: var(--green); box-shadow: var(--shadow);
 }
 .ps-grow:hover { background: #f1ede1; }
+/* Drag handle of the small pane (beside the grow button on the map; over the "Photo" cover on the photo) */
+.ps-move {
+  position: absolute; left: 6px; top: 6px; z-index: 4;
+  width: 28px; height: 28px; display: grid; place-items: center;
+  border: 0; border-radius: 8px; cursor: grab; touch-action: none;
+  background: var(--card); color: var(--green); box-shadow: var(--shadow);
+}
+.ps-map .ps-move { left: 40px; }
+.ps-move:hover { background: #f1ede1; }
+.dragging .ps-move { cursor: grabbing; }
+@media (pointer: coarse) {
+  .ps-grow, .ps-move { width: 32px; height: 32px; }
+  .ps-map .ps-move { left: 44px; }
+}
 .photo-big .pin-tip { top: 6px; left: auto; right: 6px; transform: none; padding: 2px 9px; font-size: 0.72rem; }
 .ps-photo {
   background: #24221e;
@@ -2239,7 +2263,7 @@ html.map-fs-open, html.map-fs-open body { overflow: hidden; overscroll-behavior:
   .stack.fit > .pin-card { padding: 10px; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .ps-pane { transition: none; }
+  .ps-pane, .photo-big .ps-map, .map-big .ps-photo { transition: none; }
 }
 .locate-map.pin-mode {
   cursor: crosshair;

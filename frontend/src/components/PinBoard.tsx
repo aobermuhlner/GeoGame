@@ -2,9 +2,10 @@
 // inside the circle; the smaller the circle, the more it is worth. The reveal shows everyone's circles.
 // The photo and the map share one stage that fills the screen. Rounds start with the photo large and the map
 // small in the corner: the small map works as it is (zoom, pan, pin), or its button makes it the large one
-// (click the small photo to swap back). The reveal shows the map with the photo beside it.
+// (click the small photo to swap back). The small pane can be dragged to any corner by its handle, so it
+// never sits on the part of the map you need. The reveal shows the map with the photo beside it.
 import type { ComponentChildren } from 'preact';
-import { useEffect, useMemo, useState } from 'preact/hooks';
+import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import {
   LANDMARK_META,
   PIN_DEFAULT_RADIUS,
@@ -50,6 +51,102 @@ interface Props {
   worth?: (i: number) => string;
   /** More buttons beside "Lock in" (Pass, Next round) */
   actions?: ComponentChildren;
+}
+
+/** Where the small pane sits: top/bottom, left/right */
+type Corner = 'tl' | 'tr' | 'bl' | 'br';
+const CORNER_KEY = 'fd.pinCorner';
+
+function savedCorner(): Corner {
+  try {
+    const c = localStorage.getItem(CORNER_KEY);
+    if (c === 'tl' || c === 'tr' || c === 'bl' || c === 'br') return c;
+  } catch {
+    /* private mode */
+  }
+  return 'br';
+}
+
+/**
+ * The handle that moves the small pane: drag it anywhere and it snaps to the nearest corner on release;
+ * a tap (or Enter) sends it to the other side.
+ */
+function MoveHandle({ corner, onMove }: { corner: Corner; onMove: (c: Corner) => void }) {
+  const drag = useRef<{ id: number; x: number; y: number; moved: boolean; pane: HTMLElement } | null>(null);
+  const flip = (): Corner => `${corner[0]}${corner[1] === 'l' ? 'r' : 'l'}` as Corner;
+
+  function down(e: PointerEvent) {
+    const pane = (e.currentTarget as HTMLElement).closest<HTMLElement>('.ps-pane');
+    if (!pane || e.button !== 0) return;
+    e.preventDefault();
+    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+    drag.current = { id: e.pointerId, x: e.clientX, y: e.clientY, moved: false, pane };
+  }
+
+  function move(e: PointerEvent) {
+    const d = drag.current;
+    if (!d || d.id !== e.pointerId) return;
+    const dx = e.clientX - d.x;
+    const dy = e.clientY - d.y;
+    if (!d.moved && Math.hypot(dx, dy) < 6) return;
+    d.moved = true;
+    d.pane.classList.add('dragging');
+    d.pane.style.transform = `translate(${dx}px, ${dy}px)`;
+  }
+
+  function up(e: PointerEvent) {
+    const d = drag.current;
+    if (!d || d.id !== e.pointerId) return;
+    drag.current = null;
+    if (!d.moved) {
+      onMove(flip());
+      return;
+    }
+    // Snap to the corner nearest the pane's centre; the transition carries it there from where it was let go.
+    const stage = d.pane.parentElement!.getBoundingClientRect();
+    const r = d.pane.getBoundingClientRect();
+    const top = r.top + r.height / 2 < stage.top + stage.height / 2;
+    const left = r.left + r.width / 2 < stage.left + stage.width / 2;
+    d.pane.classList.remove('dragging');
+    d.pane.style.transform = '';
+    onMove(`${top ? 't' : 'b'}${left ? 'l' : 'r'}` as Corner);
+  }
+
+  function cancel() {
+    const d = drag.current;
+    if (!d) return;
+    drag.current = null;
+    d.pane.classList.remove('dragging');
+    d.pane.style.transform = '';
+  }
+
+  return (
+    <button
+      type="button"
+      class="ps-move"
+      aria-label="Move to the other corner"
+      title="Drag to move"
+      onPointerDown={down}
+      onPointerMove={move}
+      onPointerUp={up}
+      onPointerCancel={cancel}
+      onClick={(e) => {
+        // Pointer taps are handled on pointerup; this is the keyboard's way in.
+        if (e.detail === 0) onMove(flip());
+      }}
+    >
+      <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">
+        <path
+          d="M8 1v14M1 8h14M8 1 5.8 3.2M8 1l2.2 2.2M8 15l-2.2-2.2M8 15l2.2-2.2M1 8l2.2-2.2M1 8l2.2 2.2M15 8l-2.2-2.2M15 8l-2.2 2.2"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.6"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+      </svg>
+    </button>
+  );
 }
 
 const duelWorth = (i: number) => `${PIN_POINTS[i]} pt${PIN_POINTS[i] === 1 ? '' : 's'}`;
@@ -117,6 +214,16 @@ export function PinBoard({
   const [km, setKm] = useState<number>(PIN_DEFAULT_RADIUS);
   const [pending, setPending] = useState(false);
   const [mapBig, setMapBig] = useState(false);
+  const [corner, setCorner] = useState<Corner>(savedCorner);
+
+  function moveTo(c: Corner) {
+    setCorner(c);
+    try {
+      localStorage.setItem(CORNER_KEY, c);
+    } catch {
+      /* private mode */
+    }
+  }
 
   useEffect(() => {
     setSpot(null);
@@ -180,7 +287,7 @@ export function PinBoard({
 
   return (
     <div class="pin-board">
-      <div class={`pin-stage ${reveal ? 'revealed' : mapBig ? 'map-big' : 'photo-big'}`}>
+      <div class={`pin-stage ${reveal ? 'revealed' : mapBig ? 'map-big' : 'photo-big'} mini-${corner}`}>
         <div class="ps-pane ps-photo">
           <div class="ps-photo-box">{photo}</div>
           {mapBig && !reveal && (
@@ -188,6 +295,7 @@ export function PinBoard({
               <span class="ps-label">Photo</span>
             </button>
           )}
+          {mapBig && !reveal && <MoveHandle corner={corner} onMove={moveTo} />}
         </div>
         <div class="ps-pane ps-map">
           <LocateMap
@@ -233,6 +341,7 @@ export function PinBoard({
               </svg>
             </button>
           )}
+          {!mapBig && !reveal && <MoveHandle corner={corner} onMove={moveTo} />}
         </div>
       </div>
       {(!reveal || actions) && (
