@@ -197,6 +197,27 @@ em {
   padding-top: 28px;
   padding-bottom: 22px;
 }
+/* Phones: a clock in the answer card, which is what stays visible above the keyboard (see useAboveKeyboard) */
+.game-card { position: relative; scroll-margin-top: 8px; }
+.card-timer { display: none; }
+@media (pointer: coarse) {
+  .card-timer {
+    display: block; position: absolute; top: 12px; right: 16px;
+    font-size: 1.15rem; font-weight: 800; color: var(--green); font-variant-numeric: tabular-nums;
+  }
+  .card-timer.urgent { color: var(--red); }
+  /* .card-clock: the answer card has the clock, so the header doesn't need one */
+  .card-clock .status-row .timer { display: none; }
+}
+/* Phones: a smaller flag higher up, so flag, input and buttons fit above the keyboard */
+@media (pointer: coarse) and (max-width: 520px) {
+  .card-clock .status-row { grid-template-columns: 1fr auto; grid-template-areas: 'round score'; }
+  .card-clock .scoreboard { justify-content: flex-end; }
+  .card-clock .game-card { padding-top: 12px; }
+  .card-clock .round-badge { width: 36px; height: 36px; font-size: 0.95rem; box-shadow: none; }
+  .card-clock .flag-frame { margin-top: 10px; }
+  .card-clock .flag-frame.flag-prompt { width: min(250px, 100%); }
+}
 .round-badge {
   width: 60px;
   height: 60px;
@@ -2568,7 +2589,9 @@ html.map-fs-open, html.map-fs-open body { overflow: hidden; overscroll-behavior:
 .cg-fit .cg-clock { font-size: 1.25rem; }
 .cg-fit .cg-input { font-size: 1.1rem; padding: 8px 12px; }
 .cg-fit .cg-notice { min-height: 28px; margin: 0; }
-.cg-fit .cg-trail { margin: 0; padding-bottom: 2px; }
+.cg-fit .cg-flag { max-height: 26px; }
+.cg-below { margin-top: 12px; }
+.cg-below .cg-trail { flex-wrap: wrap; overflow: visible; margin: 0; padding: 0; }
 .cg-fit > .cg-regions { flex: none; flex-wrap: nowrap; justify-content: flex-start; overflow-x: auto; margin: 0; padding: 2px; }
 .cg-fit .cg-regions li { flex: none; box-shadow: none; }
 .stack.fit.cg-fit > .map-card { display: flex; padding: 6px; }

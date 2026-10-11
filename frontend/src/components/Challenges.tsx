@@ -361,168 +361,175 @@ function ChallengeGame({
     return { r, total: codes.length, got: codes.filter((c) => foundSet.has(c)).length };
   }) : [];
 
-  return (
-    <main class={`stack wide challenge-game${fitScreen ? ' fit cg-fit' : ''}`}>
-      <section class="card challenge-top">
-        <div class="cg-head">
-          <MedalBadge medal={medal} size={28} />
-          <div class="cg-title">
-            <h2>{ch.label}</h2>
-            <span class="muted small">
-              {MEDAL_LABELS[medal]} · {formatClock(limit)}
-            </span>
-          </div>
-          <div class="cg-stats">
-            <span class="cg-count">
-              <b>{found.length}</b> / {pool.size}
-            </span>
-            <span class={`cg-clock${typing && left < 20_000 ? ' urgent' : ''}`}>{formatClock(phase === 'won' ? limit - endMs : left)}</span>
-          </div>
-        </div>
+  const trail = found.length > 0 && (
+    <ul class="cg-trail" aria-label={`Named so far (${found.length})`}>
+      {[...found].reverse().map((c) => (
+        <li key={c} title={entryText(ch.kind, c)}>
+          <Flag code={c} class="cg-trail-flag" />
+        </li>
+      ))}
+    </ul>
+  );
 
-        {phase === 'ready' && (
-          <div class="cg-ready">
-            {capitals ? (
-              <p>
-                Name the capitals of all <b>{pool.size}</b> countries of {isWorldChallenge(ch) ? 'the world' : ch.label} in{' '}
-                <b>{formatClock(limit)}</b>. A capital is entered as soon as it's spelled right; local names count too
-                (Wien, Roma, Praha…). Each one shows its country's flag.
-              </p>
-            ) : (
-              <p>
-                Name all <b>{pool.size}</b> countries of {isWorldChallenge(ch) ? 'the world' : ch.label} in <b>{formatClock(limit)}</b>. A country is entered
-                as soon as it's spelled right; common short forms count too (UK, USA, DRC…). Each one shows its flag.
-              </p>
-            )}
-            <div class="btn-row">
-              <button class="btn btn-ghost" onClick={onExit}>
-                Back
-              </button>
-              <button class="btn btn-lg btn-primary" onClick={start}>
-                Start
-              </button>
+  return (
+    <>
+      <main class={`stack wide challenge-game${fitScreen ? ' fit cg-fit' : ''}`}>
+        <section class="card challenge-top">
+          <div class="cg-head">
+            <MedalBadge medal={medal} size={28} />
+            <div class="cg-title">
+              <h2>{ch.label}</h2>
+              <span class="muted small">
+                {MEDAL_LABELS[medal]} · {formatClock(limit)}
+              </span>
+            </div>
+            <div class="cg-stats">
+              <span class="cg-count">
+                <b>{found.length}</b> / {pool.size}
+              </span>
+              <span class={`cg-clock${typing && left < 20_000 ? ' urgent' : ''}`}>{formatClock(phase === 'won' ? limit - endMs : left)}</span>
             </div>
           </div>
-        )}
 
-        {typing && (
-          <form
-            class="cg-form"
-            onSubmit={(e) => {
-              e.preventDefault();
-              apply(submitText(text, held, pool, foundSet, vocab));
-            }}
-          >
-            <input
-              ref={inputRef}
-              class={`cg-input${dead ? ' bad' : ''}`}
-              value={text}
-              placeholder={capitals ? 'Type a capital…' : 'Type a country…'}
-              aria-label={capitals ? 'Capital name' : 'Country name'}
-              autocapitalize="off"
-              {...NO_AUTOFILL}
-              enterKeyHint="enter"
-              onInput={(e) => apply(typeText((e.currentTarget as HTMLInputElement).value, held, pool, foundSet, vocab))}
-            />
-            <button type="button" class="btn btn-ghost btn-sm" onClick={() => finish('lost', Date.now() - startedAt)}>
-              Give up
-            </button>
-          </form>
-        )}
-        {typing && (
-          <p class={`cg-notice${dead || (!waiting && notice?.bad) ? ' bad' : ''}`} key={notice?.key} aria-live="polite">
-            {!waiting && !dead && notice?.flags?.map((c) => <Flag key={c} code={c} />)}
-            <span>
-              {waiting
-                ? `Press Enter for ${answerOf(ch.kind)(held.code)} (or keep typing)`
-                : dead
-                  ? `No ${capitals ? 'capital' : 'country'} starts like that — check the spelling.`
-                  : (notice?.text ?? ' ')}
-            </span>
-          </p>
-        )}
-        {found.length > 0 && (
-          <ul class="cg-trail" aria-label={`Named so far (${found.length})`}>
-            {[...found].reverse().map((c) => (
-              <li key={c} title={entryText(ch.kind, c)}>
-                <Flag code={c} class="cg-trail-flag" />
+          {phase === 'ready' && (
+            <div class="cg-ready">
+              {capitals ? (
+                <p>
+                  Name the capitals of all <b>{pool.size}</b> countries of {isWorldChallenge(ch) ? 'the world' : ch.label} in{' '}
+                  <b>{formatClock(limit)}</b>. A capital is entered as soon as it's spelled right; local names count too
+                  (Wien, Roma, Praha…). Each one shows its country's flag.
+                </p>
+              ) : (
+                <p>
+                  Name all <b>{pool.size}</b> countries of {isWorldChallenge(ch) ? 'the world' : ch.label} in <b>{formatClock(limit)}</b>. A country is entered
+                  as soon as it's spelled right; common short forms count too (UK, USA, DRC…). Each one shows its flag.
+                </p>
+              )}
+              <div class="btn-row">
+                <button class="btn btn-ghost" onClick={onExit}>
+                  Back
+                </button>
+                <button class="btn btn-lg btn-primary" onClick={start}>
+                  Start
+                </button>
+              </div>
+            </div>
+          )}
+
+          {typing && (
+            <form
+              class="cg-form"
+              onSubmit={(e) => {
+                e.preventDefault();
+                apply(submitText(text, held, pool, foundSet, vocab));
+              }}
+            >
+              <input
+                ref={inputRef}
+                class={`cg-input${dead ? ' bad' : ''}`}
+                value={text}
+                placeholder={capitals ? 'Type a capital…' : 'Type a country…'}
+                aria-label={capitals ? 'Capital name' : 'Country name'}
+                autocapitalize="off"
+                {...NO_AUTOFILL}
+                enterKeyHint="enter"
+                onInput={(e) => apply(typeText((e.currentTarget as HTMLInputElement).value, held, pool, foundSet, vocab))}
+              />
+              <button type="button" class="btn btn-ghost btn-sm" onClick={() => finish('lost', Date.now() - startedAt)}>
+                Give up
+              </button>
+            </form>
+          )}
+          {typing && (
+            <p class={`cg-notice${dead || (!waiting && notice?.bad) ? ' bad' : ''}`} key={notice?.key} aria-live="polite">
+              {!waiting && !dead && notice?.flags?.map((c) => <Flag key={c} code={c} />)}
+              <span>
+                {waiting
+                  ? `Press Enter for ${answerOf(ch.kind)(held.code)} (or keep typing)`
+                  : dead
+                    ? `No ${capitals ? 'capital' : 'country'} starts like that — check the spelling.`
+                    : (notice?.text ?? ' ')}
+              </span>
+            </p>
+          )}
+          {!fitScreen && trail}
+
+          {phase === 'won' && (
+            <div class="cg-result won">
+              <MedalBadge medal={earned} size={56} />
+              <div>
+                <h3>
+                  {earned ? `${MEDAL_LABELS[earned]}!` : 'Done!'} All {pool.size} in {formatDuration(endMs)}
+                </h3>
+                <p class="muted small">
+                  {earned && medalRank(earned) > medalRank(medal) && <>Fast enough for {MEDAL_LABELS[earned].toLowerCase()}. </>}
+                  {saved === null
+                    ? 'Saving…'
+                    : saved === 'error'
+                      ? 'Could not save this result.'
+                      : saved.improved
+                        ? 'New personal best.'
+                        : 'Not faster than your best.'}
+                </p>
+              </div>
+            </div>
+          )}
+          {phase === 'lost' && (
+            <div class="cg-result lost">
+              <h3>
+                {elapsed >= limit ? "Time's up" : 'Given up'} — {found.length} of {pool.size}
+              </h3>
+              <p class="muted small">Missed ({missed.length}):</p>
+              <ul class="cg-missed">
+                {missed.map((c) => (
+                  <li key={c}>
+                    <Flag code={c} class="cg-missed-flag" />
+                    {entryText(ch.kind, c)}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+          {(phase === 'won' || phase === 'lost') && (
+            <div class="btn-row">
+              <button class="btn btn-ghost" onClick={onExit}>
+                Challenges
+              </button>
+              <button class="btn btn-primary" onClick={onRetry}>
+                Play again
+              </button>
+            </div>
+          )}
+        </section>
+
+        {perRegion.length > 0 && (
+          <ul class="cg-regions" aria-label="Progress by region">
+            {perRegion.map(({ r, got, total }) => (
+              <li key={r} class={got === total ? 'done' : ''}>
+                {REGION_LABELS[r]} <b>{got}</b>/{total}
               </li>
             ))}
           </ul>
         )}
 
-        {phase === 'won' && (
-          <div class="cg-result won">
-            <MedalBadge medal={earned} size={56} />
-            <div>
-              <h3>
-                {earned ? `${MEDAL_LABELS[earned]}!` : 'Done!'} All {pool.size} in {formatDuration(endMs)}
-              </h3>
-              <p class="muted small">
-                {earned && medalRank(earned) > medalRank(medal) && <>Fast enough for {MEDAL_LABELS[earned].toLowerCase()}. </>}
-                {saved === null
-                  ? 'Saving…'
-                  : saved === 'error'
-                    ? 'Could not save this result.'
-                    : saved.improved
-                      ? 'New personal best.'
-                      : 'Not faster than your best.'}
-              </p>
-            </div>
-          </div>
-        )}
-        {phase === 'lost' && (
-          <div class="cg-result lost">
-            <h3>
-              {elapsed >= limit ? "Time's up" : 'Given up'} — {found.length} of {pool.size}
-            </h3>
-            <p class="muted small">Missed ({missed.length}):</p>
-            <ul class="cg-missed">
-              {missed.map((c) => (
-                <li key={c}>
-                  <Flag code={c} class="cg-missed-flag" />
-                  {entryText(ch.kind, c)}
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-        {(phase === 'won' || phase === 'lost') && (
-          <div class="btn-row">
-            <button class="btn btn-ghost" onClick={onExit}>
-              Challenges
-            </button>
-            <button class="btn btn-primary" onClick={onRetry}>
-              Play again
-            </button>
-          </div>
-        )}
-      </section>
-
-      {perRegion.length > 0 && (
-        <ul class="cg-regions" aria-label="Progress by region">
-          {perRegion.map(({ r, got, total }) => (
-            <li key={r} class={got === total ? 'done' : ''}>
-              {REGION_LABELS[r]} <b>{got}</b>/{total}
-            </li>
-          ))}
-        </ul>
-      )}
-
-      <section class="card map-card">
-        <LocateMap
-          region={ch.regions.length ? ch.regions : null}
-          snug={!fitScreen}
-          fill={fitScreen}
-          locked={lockMap}
-          active={ch.regions.length ? pool : null}
-          marks={marks}
-          labels={missed}
-          nameOf={answerOf(ch.kind)}
-          disabled
-        />
-      </section>
-    </main>
+        <section class="card map-card">
+          <LocateMap
+            region={ch.regions.length ? ch.regions : null}
+            snug={!fitScreen}
+            fill={fitScreen}
+            locked={lockMap}
+            active={ch.regions.length ? pool : null}
+            marks={marks}
+            labels={missed}
+            nameOf={answerOf(ch.kind)}
+            disabled
+          />
+        </section>
+      </main>
+      {/* Phones while typing: the flags go below the screen-filling game (scroll down to check them), so the
+          space above the keyboard is the map's */}
+      {fitScreen && trail && <div class="stack wide cg-below">{trail}</div>}
+    </>
   );
 
   function onRetry() {

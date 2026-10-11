@@ -35,6 +35,7 @@ import { Leaderboard } from './Leaderboard';
 import { HigherBoard, HigherCard, HigherRules } from './Higher';
 import type { GameId } from './NavBar';
 import { Logo, formatClock, formatDuration, useNow } from './common';
+import { useAboveKeyboard } from '../platform';
 
 function formatHms(ms: number): string {
   const s = Math.max(0, Math.floor(ms / 1000));
@@ -361,6 +362,9 @@ function SoloScreen({
   const now = useNow(run.phase === 'playing' || run.phase === 'countdown', 100);
   const deadline = run.deadline !== null ? local(run.deadline) : null;
   const left = run.phase === 'playing' && deadline !== null ? deadline - now : null;
+  /** The answer card (flag, input, buttons); on phones it stays at the top while the keyboard is open */
+  const cardRef = useRef<HTMLElement>(null);
+  useAboveKeyboard(cardRef, run.phase === 'countdown' || run.phase === 'playing', `${run.round}:${run.phase}`);
   const done = run.history.length;
   const locked = run.phase !== 'playing';
   const r = run.reveal;
@@ -433,7 +437,7 @@ function SoloScreen({
   );
 
   return (
-    <main class={`stack${isMap || mode.input === 'pin' ? ' wide fit' : ''}`}>
+    <main class={`stack${isMap || mode.input === 'pin' ? ' wide fit' : ' card-clock'}`}>
       <section class="card top-card">
         <header class="brand">
           <Logo />
@@ -569,8 +573,10 @@ function SoloScreen({
           <SoloNote onQuit={onQuit} />
         </section>
       ) : (
-        <section class="card game-card">
+        <section class="card game-card" ref={cardRef}>
           <div class="round-badge">{run.round}</div>
+          {/* Phones: the header's clock is scrolled away while typing, so the card shows one too */}
+          {left !== null && <span class={`card-timer${left <= 5000 ? ' urgent' : ''}`}>{formatClock(left)}</span>}
           <div class={`flag-frame ${mode.prompt}-prompt`}>
             {run.phase === 'countdown' ? (
               <div class="countdown" key={Math.ceil((local(run.startsAt) - now) / 1000)}>
