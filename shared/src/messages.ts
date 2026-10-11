@@ -19,6 +19,22 @@ export const FLAG_TOKEN_RE = /^[ABCDEFGHJKLMNPQRSTUVWXYZ23456789]{5}[0-9a-f]{16}
 export const MIN_POOL_SIZE = 10;
 export const MAX_NAME_LENGTH = 16;
 
+/** Group lobby chat: message length, how many lines the room keeps, and the gap a player must leave between lines. */
+export const MAX_CHAT_LENGTH = 200;
+export const CHAT_HISTORY = 50;
+export const CHAT_MIN_GAP_MS = 700;
+
+export interface ChatLine {
+  /** Increasing per room */
+  id: number;
+  /** Seat when it was sent (for the avatar colour) */
+  seat: number;
+  name: string;
+  text: string;
+  /** Server time */
+  at: number;
+}
+
 /** Every game a friend lobby can play: the minigames plus the Higher or Lower duel, in play order. */
 export const GAME_IDS = [...MODE_IDS, 'higher'] as const;
 export type GameId = (typeof GAME_IDS)[number];
@@ -40,6 +56,9 @@ export function shuffleGames(games: readonly GameId[], rng: () => number = Math.
   return out;
 }
 
+/** Group lobbies play this many games per match, picked by the players' votes, in random order. */
+export const MATCH_GAMES = 5;
+
 /** Rounds each game lasts in a friend lobby (host's choice; ranked always uses the defaults). */
 export type RoundCounts = Record<GameId, number>;
 export const MIN_GAME_ROUNDS = 1;
@@ -60,6 +79,12 @@ export type ClientMessage =
   | { t: 'setRounds'; game: GameId; rounds: number }
   /** Play the games in a random order, drawn anew for every match (host only, lobby only) */
   | { t: 'setShuffle'; shuffle: boolean }
+  /** Group lobbies: the games you vote for (up to MATCH_GAMES, in GAME_IDS order; [] takes your votes back) */
+  | { t: 'vote'; games: GameId[] }
+  /** Group lobbies: say something in the chat */
+  | { t: 'chat'; text: string }
+  /** Group lobbies: rounds of every game (host only, lobby only) */
+  | { t: 'setAllRounds'; rounds: number }
   | { t: 'ready'; ready: boolean }
   | { t: 'start' }
   | { t: 'guess'; round: number; text: string }
@@ -200,6 +225,17 @@ export function cleanName(v: unknown): string | null {
   return name.length > 0 ? name : null;
 }
 
+/** A chat line as it is kept: no control characters, single spaces, at most MAX_CHAT_LENGTH. */
+export function cleanChat(v: unknown): string | null {
+  if (typeof v !== 'string') return null;
+  const text = v
+    .replace(/[\u0000-\u001f\u007f]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, MAX_CHAT_LENGTH);
+  return text.length > 0 ? text : null;
+}
+
 /** Parse and validate an incoming client message. Returns null for anything malformed. */
 export function parseClientMessage(raw: unknown): ClientMessage | null {
   if (typeof raw !== 'string' || raw.length > 2000) return null;
@@ -226,6 +262,19 @@ export function parseClientMessage(raw: unknown): ClientMessage | null {
       if (!m.modes.every((x) => typeof x === 'string' && GAME_SET.has(x))) return null;
       return { t: 'setModes', modes: GAME_IDS.filter((x) => (m.modes as string[]).includes(x)) };
     }
+    case 'vote': {
+      if (!Array.isArray(m.games) || m.games.length > MATCH_GAMES) return null;
+      if (!m.games.every((x) => typeof x === 'string' && GAME_SET.has(x))) return null;
+      return { t: 'vote', games: GAME_IDS.filter((x) => (m.games as string[]).includes(x)) };
+    }
+    case 'chat': {
+      const text = cleanChat(m.text);
+      return text ? { t: 'chat', text } : null;
+    }
+    case 'setAllRounds':
+      if (!Number.isInteger(m.rounds) || (m.rounds as number) < MIN_GAME_ROUNDS || (m.rounds as number) > MAX_GAME_ROUNDS)
+        return null;
+      return { t: 'setAllRounds', rounds: m.rounds as number };
     case 'ready':
       return typeof m.ready === 'boolean' ? { t: 'ready', ready: m.ready } : null;
     case 'setShuffle':

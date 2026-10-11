@@ -114,8 +114,17 @@ announcement is followed by extra rounds until exactly one player is right.
 ### Multiplayer — Group game
 
 **Create group lobby** under Multiplayer opens a lobby for **2–8 players** (friends join with the same code box or
-invite link as a duel; the Worker tells which kind of lobby a code is). It starts with every game selected, 5 rounds
-each; the host can change games, rounds and regions like in a duel, and starts once at least two players are there.
+invite link as a duel; the Worker tells which kind of lobby a code is). A match plays **5 games**, picked by vote:
+every player votes for up to 5 games and sees everyone else's votes (an avatar per voter on each game). The 5 most
+voted games are played; ties at the cut, and the open spots when there are too few votes, are drawn at random when the
+match starts. The order is always random, and each game is only revealed when it starts. Games the selected regions are
+too small for can't be voted for. The host picks the regions and the rounds per game (5 by default) and starts once
+at least two players are there. Public games ("Find a game") vote the same way while the lobby fills.
+
+**Chat.** Every group lobby has a chat: a card in the lobby, and a chat button (with an unread count) during the match
+and on the podium. It closes by itself when a round starts and is hidden on phones while a round runs, so it never
+covers the answer input. Lines are up to 200 characters, one every 0.7 s per player; the room keeps the last 50 and
+sends them to whoever joins or reconnects.
 
 Everyone answers every round. A right answer scores 50 points plus up to 50 for speed (linear in the time left);
 in Flags, Capitals and GeoLocate each wrong try costs 5 (minimum 10). Landmarks, Languages and Higher or Lower take

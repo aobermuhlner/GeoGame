@@ -1,14 +1,13 @@
 // Group game: up to 8 players, everyone answers every round. Lobby, rounds, standings between games, podium.
 import { useEffect, useRef, useState } from 'preact/hooks';
 import {
+  GAME_IDS,
   GROUP_BASE_POINTS,
   GROUP_MAX_PLAYERS,
   GROUP_MIN_PLAYERS,
   GROUP_SPEED_POINTS,
   GROUP_STANDINGS_MS,
   HIGHER_GAME,
-  MAX_GAME_ROUNDS,
-  MIN_GAME_ROUNDS,
   MODES,
   PIN_POINTS,
   answerLabel,
@@ -16,6 +15,9 @@ import {
   gameLabel,
   groupTimeOf,
   isModeId,
+  playableGames,
+  voteStanding,
+  type ChatLine,
   type EntryStatus,
   type GameId,
   type GroupEntryView,
@@ -25,30 +27,18 @@ import {
   type StandingView,
 } from '@flagduel/shared';
 import { connectGroup, groupFlagSrc, type ConnStatus, type RoomConnection } from '../net';
+import { isTouch } from '../platform';
+import { ChatCard, ChatDock } from './Chat';
 import { CountryInput } from './CountryInput';
 import { EstimateLine, NumberInput, QuestionCard, questionOf } from './Guess';
 import { FlagImage } from './GameScreen';
 import { PairBoard, StatHeader, TimeBar, type PickTag } from './Higher';
-import { CopyInvite, GamesCard, RegionPicker, useGameSettings } from './Lobby';
+import { GameIcon } from './GameIcons';
+import { CopyInvite, RegionPicker, RoundsStepper, useGameSettings } from './Lobby';
 import { LocateBoard } from './LocateBoard';
 import { PinBoard } from './PinBoard';
 import { LanguageFacts, PhotoCredit, SentenceCard, ZoomPhoto } from './RoundPrompt';
-import { Logo, RegionChips, StageSteps, formatClock, useNow } from './common';
-
-/** One color per seat, for the avatars. */
-const SEAT_COLORS = ['#2a6a40', '#d2641a', '#3a6ea5', '#a53a7a', '#8a6d1f', '#5a4fb0', '#1f8a8a', '#b8403a'];
-
-function Avatar({ seat, name, size = 32 }: { seat: number; name: string; size?: number }) {
-  return (
-    <span
-      class="g-avatar"
-      style={{ background: SEAT_COLORS[seat % SEAT_COLORS.length], width: `${size}px`, height: `${size}px`, fontSize: `${size * 0.45}px` }}
-      aria-hidden="true"
-    >
-      {name.slice(0, 1).toUpperCase()}
-    </span>
-  );
-}
+import { Avatar, Logo, RegionChips, StageSteps, formatClock, useNow } from './common';
 
 const nameOf = (room: GroupView, seat: number, you: number) => (seat === you ? 'You' : room.players[seat]?.name ?? '?');
 
@@ -87,6 +77,8 @@ export function GroupPlay({
   const [you, setYou] = useState(0);
   const [status, setStatus] = useState<ConnStatus>('connecting');
   const [toast, setToast] = useState<string | null>(null);
+  const [chat, setChat] = useState<ChatLine[]>([]);
+  const [draft, setDraft] = useState('');
   const connRef = useRef<RoomConnection<GroupView, number> | null>(null);
 
   useEffect(() => {
@@ -96,6 +88,12 @@ export function GroupPlay({
         setYou(y);
       },
       onStatus: setStatus,
+      onChat: (lines, reset) =>
+        setChat((old) => {
+          if (reset) return lines;
+          const known = new Set(old.map((l) => l.id));
+          return [...old, ...lines.filter((l) => !known.has(l.id))].slice(-100);
+        }),
       onError: (_code, message, fatal) => {
         if (fatal) onLeave(message);
         else {
@@ -152,19 +150,24 @@ export function GroupPlay({
   }
 
   const toLocal = (ms: number | null) => conn.toLocal(ms);
+  const chatProps: ChatProps = { lines: chat, you, draft, setDraft, onSend: (text) => conn.send({ t: 'chat', text }) };
   return (
     <>
       {banner}
       {toastEl}
+      {room.phase !== 'lobby' && (
+        // Out of the answer input's way on phones while a round runs.
+        <ChatDock {...chatProps} hidden={isTouch && room.phase === 'playing'} closeKey={room.phase === 'playing' ? room.round : -1} />
+      )}
       {room.phase === 'lobby' ? (
         <GroupLobby
           room={room}
           you={you}
+          chat={chatProps}
           onStart={() => conn.send({ t: 'start' })}
           onRegions={(regions) => conn.send({ t: 'setRegions', regions })}
-          onModes={(modes) => conn.send({ t: 'setModes', modes })}
-          onRounds={(game, rounds) => conn.send({ t: 'setRounds', game, rounds })}
-          onShuffle={(shuffle) => conn.send({ t: 'setShuffle', shuffle })}
+          onVote={(games) => conn.send({ t: 'vote', games })}
+          onRounds={(rounds) => conn.send({ t: 'setAllRounds', rounds })}
           onLeave={leave}
           toLocal={toLocal}
         />
@@ -199,29 +202,35 @@ export function GroupPlay({
 
 // ---------- Lobby ----------
 
+type ChatProps = Omit<Parameters<typeof ChatCard>[0], 'autoFocus'>;
+
 function GroupLobby({
   room,
   you,
+  chat,
   onStart,
   onRegions,
-  onModes,
+  onVote,
   onRounds,
-  onShuffle,
   onLeave,
   toLocal,
 }: {
   room: GroupView;
   you: number;
+  chat: ChatProps;
   toLocal: (ms: number | null) => number | null;
   onStart: () => void;
   onRegions: (regions: RegionId[]) => void;
-  onModes: (modes: GameId[]) => void;
-  onRounds: (game: GameId, rounds: number) => void;
-  onShuffle: (shuffle: boolean) => void;
+  onVote: (games: GameId[]) => void;
+  onRounds: (rounds: number) => void;
   onLeave: () => void;
 }) {
-  const set = useGameSettings(room, onRegions, onModes, onRounds, onShuffle);
-  if (room.public) return <PublicLobby room={room} you={you} toLocal={toLocal} onLeave={onLeave} />;
+  // Only the regions go through the shared settings; games are voted on.
+  const none = () => {};
+  const set = useGameSettings(room, onRegions, none, none, none);
+  const playable = playableGames(set.regions);
+  if (room.public)
+    return <PublicLobby room={room} you={you} chat={chat} toLocal={toLocal} onVote={onVote} onLeave={onLeave} />;
   const isHost = you === 0;
   const here = room.players.filter((p) => p.connected).length;
   const enough = here >= GROUP_MIN_PLAYERS;
@@ -229,7 +238,7 @@ function GroupLobby({
 
   let startHint = '';
   if (!enough) startHint = 'Share the code — you need at least one more player.';
-  else if (!set.poolOk) startHint = set.poolHint;
+  else if (!playable.length) startHint = 'These regions are too small for any game — add regions.';
   else if (!isHost) startHint = `Waiting for ${host} to start…`;
 
   return (
@@ -265,10 +274,12 @@ function GroupLobby({
           <SeatList room={room} you={you} host />
         </section>
 
+        <ChatCard {...chat} />
+
         <RegionPicker
           regions={set.regions}
           countryCount={set.countryCount}
-          poolOk={set.poolOk}
+          poolOk={playable.length > 0}
           countLabel={set.countLabel}
           editable={isHost}
           hint={isHost ? 'Click a region on the map (or in the list) to leave it out.' : `${host} picks the regions.`}
@@ -277,26 +288,12 @@ function GroupLobby({
 
       </div>
       <div class="lobby-col">
-        <GamesCard
-          modes={set.modes}
-          counts={set.counts}
-          totalRounds={set.totalRounds}
-          shuffle={set.shuffle}
-          editable={isHost}
-          hint={
-            isHost
-              ? `Pick the games and how many rounds each lasts (${MIN_GAME_ROUNDS}–${MAX_GAME_ROUNDS}). ${set.shuffle ? 'They come in a random order.' : "They're played in this order."}`
-              : `${host} picks the games.`
-          }
-          onToggle={set.toggleMode}
-          onRounds={set.setRounds}
-          onShuffle={set.setShuffle}
-        />
+        <VoteCard room={room} you={you} playable={playable} roundsEditable={isHost} onVote={onVote} onRounds={onRounds} />
 
         <section class="card actions-card">
           {isHost && (
             <div class="btn-row">
-              <button class="btn btn-lg btn-primary" disabled={!enough || !set.poolOk} onClick={onStart}>
+              <button class="btn btn-lg btn-primary" disabled={!enough || !playable.length} onClick={onStart}>
                 Start game ({here} players)
               </button>
             </div>
@@ -346,12 +343,16 @@ function SeatList({ room, you, host }: { room: GroupView; you: number; host: boo
 function PublicLobby({
   room,
   you,
+  chat,
   toLocal,
+  onVote,
   onLeave,
 }: {
   room: GroupView;
   you: number;
+  chat: ChatProps;
   toLocal: (ms: number | null) => number | null;
+  onVote: (games: GameId[]) => void;
   onLeave: () => void;
 }) {
   const startsAt = toLocal(room.autoStartAt);
@@ -403,24 +404,16 @@ function PublicLobby({
             </button>
           </div>
         </section>
+        <ChatCard {...chat} />
       </div>
       <div class="lobby-col">
+        <VoteCard room={room} you={you} playable={room.modes} roundsEditable={false} onVote={onVote} onRounds={() => {}} />
         <section class="card quick-info">
           <h2>This game</h2>
           <p class="muted small">
-            {room.modes.length} games · {rounds} rounds · the whole world. Everyone answers every round: right answers score{' '}
-            {GROUP_BASE_POINTS} points plus up to {GROUP_SPEED_POINTS} for speed.
+            {Math.min(room.matchGames, room.modes.length)} games · {rounds} rounds · the whole world. Everyone answers
+            every round: right answers score {GROUP_BASE_POINTS} points plus up to {GROUP_SPEED_POINTS} for speed.
           </p>
-          <ol class="quick-games">
-            {room.modes.map((g) => (
-              <li key={g}>
-                <strong>{gameLabel(g)}</strong>
-                <span class="muted small">
-                  {g === 'higher' ? 'Pick the country with the higher value.' : MODES[g].description}
-                </span>
-              </li>
-            ))}
-          </ol>
           <p class="muted small">Friends can join this game too with the code below.</p>
           <div class="code-box">
             <span class="code-label">Game code</span>
@@ -432,6 +425,132 @@ function PublicLobby({
         </section>
       </div>
     </main>
+  );
+}
+
+/**
+ * The games vote: everyone picks up to `matchGames` games and sees who voted for what. The most voted are
+ * played, in random order; ties at the cut are drawn when the match starts.
+ */
+function VoteCard({
+  room,
+  you,
+  playable,
+  roundsEditable,
+  onVote,
+  onRounds,
+}: {
+  room: GroupView;
+  you: number;
+  /** Games the selected regions can play */
+  playable: GameId[];
+  roundsEditable: boolean;
+  onVote: (games: GameId[]) => void;
+  onRounds: (rounds: number) => void;
+}) {
+  const serverMine = room.players[you]?.votes ?? [];
+  // Optimistic: quick clicks build on each other, not on a stale snapshot.
+  const [draft, setDraft] = useState<GameId[] | null>(null);
+  const mine = draft ?? serverMine;
+  useEffect(() => {
+    if (draft && draft.join() === serverMine.join()) setDraft(null);
+  }, [serverMine.join()]);
+  const [roundsDraft, setRoundsDraft] = useState<number | null>(null);
+  const rounds = roundsDraft ?? room.rounds;
+  useEffect(() => {
+    if (roundsDraft === room.rounds) setRoundsDraft(null);
+  }, [room.rounds]);
+
+  const max = room.matchGames;
+  // Only players who are here count, like on the server.
+  const voters = room.players.map((p, i) => (i === you ? mine : p.connected && !p.left ? p.votes : []));
+  const standing = voteStanding(voters, playable, max);
+  const games = Math.min(max, playable.length);
+  const left = max - mine.length;
+  const anyVotes = voters.some((v) => v.length > 0);
+
+  function toggle(g: GameId) {
+    const on = mine.includes(g);
+    if (!on && mine.length >= max) return;
+    const next = GAME_IDS.filter((x) => (x === g ? !on : mine.includes(x)));
+    setDraft(next);
+    onVote(next);
+  }
+
+  return (
+    <section class="card modes-card vote-card">
+      <div class="regions-head">
+        <h2>Vote for the games</h2>
+        <span class="pool">
+          {games} games · {games * rounds} rounds
+        </span>
+      </div>
+      <p class="muted small">
+        Pick up to {max}. The {max} games with the most votes are played, in a random order you only find out as it
+        goes; ties are drawn at random.{' '}
+        {!anyVotes ? `No votes yet: it would be ${max} random games. ` : ''}
+        {left > 0 ? `You have ${left} of ${max} votes left.` : 'All your votes are in.'}
+      </p>
+      <div class="vote-rounds">
+        <span class="m-name">Rounds per game</span>
+        <RoundsStepper
+          value={rounds}
+          label="Every game"
+          editable={roundsEditable}
+          onChange={(n) => {
+            setRoundsDraft(n);
+            onRounds(n);
+          }}
+        />
+      </div>
+      <ul class="vote-list" aria-label="Games">
+        {GAME_IDS.map((g) => {
+          const ok = playable.includes(g);
+          const on = mine.includes(g);
+          const seats = voters.flatMap((v, i) => (v.includes(g) ? [i] : []));
+          // Before anyone votes, everything is a tie: no point marking it.
+          const st = ok && anyVotes ? standing[g] : undefined;
+          return (
+            <li key={g}>
+              <button
+                type="button"
+                class={`vote-opt${on ? ' on' : ''}${st ? ` ${st}` : ''}${ok ? '' : ' off'}`}
+                aria-pressed={on}
+                disabled={!ok || (!on && left <= 0)}
+                title={!ok ? 'Not enough to play in these regions' : !on && left <= 0 ? 'Take a vote back to pick this one' : undefined}
+                onClick={() => toggle(g)}
+              >
+                <span class="vote-icon">
+                  <GameIcon id={g} />
+                </span>
+                <span class="mode-text">
+                  <span class="m-name">
+                    {gameLabel(g)}
+                    {st === 'in' && <span class="vote-tag in">Playing</span>}
+                    {st === 'tie' && <span class="vote-tag tie">{seats.length ? 'Tie — drawn' : 'Random pick'}</span>}
+                    {!ok && <span class="vote-tag">Too few in these regions</span>}
+                  </span>
+                  <span class="m-desc">{isModeId(g) ? MODES[g].description : HIGHER_GAME.description}</span>
+                  <span class="vote-voters" aria-label={`${seats.length} ${seats.length === 1 ? 'vote' : 'votes'}`}>
+                    {seats.map((i) => (
+                      <span key={i} title={nameOf(room, i, you)}>
+                        <Avatar seat={i} name={room.players[i]?.name ?? '?'} size={20} />
+                      </span>
+                    ))}
+                  </span>
+                </span>
+                <span class="vote-count" aria-hidden="true">
+                  {seats.length || ''}
+                </span>
+                <span class="vote-check" aria-hidden="true">
+                  {on ? '✓' : ''}
+                </span>
+              </button>
+            </li>
+          );
+        })}
+      </ul>
+    </section>
   );
 }
 

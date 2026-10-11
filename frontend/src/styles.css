@@ -907,6 +907,46 @@ em {
 .rounds-val { min-width: 5.2em; text-align: center; font-variant-numeric: tabular-nums; }
 .rounds-fixed { margin-top: 4px; font-size: 0.85rem; font-weight: 600; color: var(--green); }
 
+/* Group lobbies: everyone votes for the games */
+.vote-rounds {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap;
+  padding: 8px 14px; margin: 0 0 10px; border: 1.5px solid var(--line); border-radius: 12px; font-size: 0.9rem;
+}
+.vote-rounds .rounds-step, .vote-rounds .rounds-fixed { margin: 0; }
+.vote-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.vote-opt {
+  width: 100%; display: flex; align-items: center; gap: 12px; padding: 10px 14px; text-align: left;
+  font: inherit; color: var(--ink); background: #f7f5ef; border: 1.5px solid var(--line); border-radius: 12px;
+  cursor: pointer; transition: border-color 0.15s, background 0.15s;
+}
+.vote-opt:hover:not(:disabled) { border-color: #9cc5a8; }
+.vote-opt:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.vote-opt.in { background: #eaf3ec; border-color: #9cc5a8; }
+.vote-opt.tie { background: #fbf3dc; border-color: #e0bf5c; }
+.vote-opt.on { box-shadow: inset 0 0 0 1.5px var(--green); }
+.vote-opt:disabled { cursor: default; }
+.vote-opt.off { opacity: 0.5; }
+.vote-icon { width: 52px; flex: none; display: grid; place-items: center; }
+.vote-icon .gt-icon { width: 52px; transition: none; }
+.vote-opt .mode-text { flex: 1; gap: 2px; }
+.vote-opt .m-name { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; }
+.vote-tag {
+  font-size: 0.7rem; font-weight: 700; padding: 1px 8px; border-radius: 999px; background: #ebe6d8; color: var(--muted);
+}
+.vote-tag.in { background: var(--green); color: #fff; }
+.vote-tag.tie { background: #e0bf5c; color: #3d2f05; }
+.vote-voters { display: flex; flex-wrap: wrap; gap: 3px; min-height: 20px; margin-top: 4px; }
+.vote-count { min-width: 1.4em; text-align: right; font-weight: 800; font-size: 1.1rem; font-variant-numeric: tabular-nums; }
+.vote-check {
+  width: 24px; height: 24px; flex: none; border-radius: 50%; display: grid; place-items: center;
+  border: 1.5px solid #c9c3b3; font-size: 0.8rem; font-weight: 800; color: #fff;
+}
+.vote-opt.on .vote-check { background: var(--green); border-color: var(--green); }
+@media (max-width: 520px) {
+  .vote-icon { display: none; }
+  .vote-opt { padding: 10px 12px; }
+}
+
 .stage-steps {
   list-style: none; margin: 0 0 10px; padding: 0; display: flex; flex-wrap: wrap; gap: 6px 18px;
   font-size: 0.85rem; font-weight: 600; color: var(--muted);
@@ -1286,6 +1326,8 @@ button.gt-main:active, .gt-btn:active:not(:disabled) { transform: translateY(3px
 .mp-lobby .regions-card { order: 3; }
 .mp-lobby .actions-card { order: 4; }
 .mp-lobby .quick-info { order: 2; }
+/* Phones: after the games vote, before the regions */
+.mp-lobby .chat-card { order: 3; }
 @media (min-width: 980px) {
   .stack.mp-lobby { max-width: 1180px; flex-direction: row; align-items: flex-start; }
   .lobby-col { display: flex; flex-direction: column; gap: 16px; flex: 1 1 0; min-width: 0; }
@@ -2664,4 +2706,43 @@ html.map-fs-open, html.map-fs-open body { overflow: hidden; overscroll-behavior:
 .quick-lobby h2 { margin: 0 0 6px; font-size: 1.1rem; font-weight: 800; }
 @media (prefers-reduced-motion: reduce) {
   .qc-dots i { animation: none; }
+}
+
+/* ---------- Group chat ---------- */
+.chat { display: flex; flex-direction: column; gap: 8px; }
+.chat-lines {
+  list-style: none; margin: 0; padding: 4px 2px; display: flex; flex-direction: column; gap: 8px;
+  height: 200px; overflow-y: auto; overscroll-behavior: contain;
+}
+.chat-empty { margin: auto; text-align: center; }
+.chat-line { display: flex; align-items: flex-start; gap: 8px; }
+.chat-body { display: flex; flex-direction: column; min-width: 0; }
+.chat-meta { display: flex; align-items: baseline; gap: 6px; font-size: 0.78rem; }
+.chat-meta time { color: var(--muted); font-size: 0.7rem; font-variant-numeric: tabular-nums; }
+.chat-text {
+  font-size: 0.9rem; line-height: 1.35; overflow-wrap: anywhere;
+  background: #f4f0e6; padding: 5px 10px; border-radius: 4px 12px 12px 12px; margin-top: 2px;
+}
+.chat-line.mine .chat-text { background: #eaf3ec; }
+.chat-form { display: flex; gap: 8px; }
+.chat-input {
+  flex: 1; min-width: 0; height: 38px; padding: 0 12px; font: inherit; font-size: 16px; color: var(--ink);
+  background: #fff; border: 1.5px solid var(--line); border-radius: 10px;
+}
+.chat-input:focus { outline: none; border-color: var(--focus); }
+.chat-dock {
+  position: fixed; right: 16px; bottom: 16px; z-index: 40;
+  display: flex; flex-direction: column; align-items: flex-end; gap: 10px;
+}
+.chat-pop { width: min(340px, calc(100vw - 32px)); padding: 14px; box-shadow: var(--shadow), 0 10px 30px rgba(60, 45, 20, 0.18); }
+.chat-pop .regions-head { margin-bottom: 6px; }
+.chat-pop .chat-lines { height: min(260px, 40vh); }
+.chat-fab {
+  position: relative; width: 48px; height: 48px; border-radius: 50%; border: none; cursor: pointer;
+  display: grid; place-items: center; background: var(--green); color: #fff; box-shadow: var(--shadow);
+}
+.chat-fab:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.chat-badge {
+  position: absolute; top: -4px; right: -4px; min-width: 20px; height: 20px; padding: 0 5px; border-radius: 999px;
+  background: var(--orange); color: #fff; font-size: 0.7rem; font-weight: 800; display: grid; place-items: center;
 }

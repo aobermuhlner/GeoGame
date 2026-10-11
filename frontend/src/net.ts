@@ -1,4 +1,5 @@
 import type {
+  ChatLine,
   ClientMessage,
   ErrorCode,
   GroupServerMessage,
@@ -77,6 +78,8 @@ interface Handlers<V, Y> {
   /** Fatal errors end the connection (room full, not found, …); others are informational. */
   onError(code: ErrorCode, message: string, fatal: boolean): void;
   onOppWrong?(round: number): void;
+  /** Group lobbies: chat lines (`reset`: the whole history, replacing what you had) */
+  onChat?(lines: ChatLine[], reset: boolean): void;
 }
 
 const FATAL: ErrorCode[] = ['room_full', 'not_found', 'in_progress'];
@@ -137,6 +140,9 @@ export class RoomConnection<V = RoomView, Y = Slot> {
         break;
       case 'oppWrong':
         this.h.onOppWrong?.(m.round);
+        break;
+      case 'chat':
+        this.h.onChat?.(m.lines, m.reset);
         break;
       case 'error': {
         const fatal = FATAL.includes(m.code);

@@ -1,6 +1,6 @@
 import type { ComponentChildren } from 'preact';
 import { useState } from 'preact/hooks';
-import { GROUP_MAX_PLAYERS, ROOM_CODE_LENGTH } from '@flagduel/shared';
+import { GROUP_MAX_PLAYERS, MATCH_GAMES, ROOM_CODE_LENGTH } from '@flagduel/shared';
 import { Logo } from './common';
 import { QuickCard } from './Quick';
 import { NO_AUTOFILL } from '../noAutofill';
@@ -64,7 +64,7 @@ export function Home({ name, initialCode, busy, error, onQuick, onCreate, onCrea
               Group lobby
             </button>
             <p class="muted small">
-              Up to {GROUP_MAX_PLAYERS} players, you pick the games. Invite just one friend for a group game for two.
+              Up to {GROUP_MAX_PLAYERS} players, everyone votes for the {MATCH_GAMES} games. Invite just one friend for a group game for two.
             </p>
           </div>
         </div>

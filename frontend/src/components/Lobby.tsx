@@ -44,7 +44,7 @@ export function inviteLink(code: string): string {
 }
 
 /** "− 10 rounds +" for the host; plain text for the guest. */
-function RoundsStepper({
+export function RoundsStepper({
   value,
   label,
   editable,

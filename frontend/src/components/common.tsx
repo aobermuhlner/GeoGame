@@ -13,6 +13,21 @@ export function useNow(active: boolean, ms = 200): number {
   return now;
 }
 
+/** One color per seat, for the avatars. */
+const SEAT_COLORS = ['#2a6a40', '#d2641a', '#3a6ea5', '#a53a7a', '#8a6d1f', '#5a4fb0', '#1f8a8a', '#b8403a'];
+
+export function Avatar({ seat, name, size = 32 }: { seat: number; name: string; size?: number }) {
+  return (
+    <span
+      class="g-avatar"
+      style={{ background: SEAT_COLORS[seat % SEAT_COLORS.length], width: `${size}px`, height: `${size}px`, fontSize: `${size * 0.45}px` }}
+      aria-hidden="true"
+    >
+      {name.slice(0, 1).toUpperCase()}
+    </span>
+  );
+}
+
 export function Logo({ size = 44 }: { size?: number }) {
   return (
     <svg class="logo" width={size} height={size} viewBox="0 0 48 48" aria-hidden="true">

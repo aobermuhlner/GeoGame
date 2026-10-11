@@ -12,7 +12,10 @@ import {
   newGroupRound,
   pickGroupPairs,
   ranksOf,
+  pickVotedGames,
+  playableGames,
   settleGroupRound,
+  voteStanding,
   tallyOf,
 } from './group';
 import { COUNTRIES } from './countries';
@@ -134,5 +137,52 @@ describe('ranking', () => {
     const t = tallyOf([a], 4);
     expect(t[0]).toEqual(t[1]);
     expect(ranksOf(t)).toEqual([1, 1, 3, 4]);
+  });
+});
+
+describe('game votes', () => {
+  const all = ['flags', 'capitals', 'locate', 'landmarks', 'languages', 'guess', 'higher'] as const;
+
+  it('plays the most voted games and draws ties at the cut', () => {
+    const votes = [
+      ['flags', 'capitals', 'locate'],
+      ['flags', 'capitals', 'guess'],
+      ['flags', 'higher'],
+    ] as const;
+    // flags 3, capitals 2, then locate/guess/higher 1 each, landmarks/languages 0: five games, no tie.
+    expect(voteStanding(votes, all)).toEqual({
+      flags: 'in',
+      capitals: 'in',
+      locate: 'in',
+      guess: 'in',
+      higher: 'in',
+      landmarks: 'out',
+      languages: 'out',
+    });
+    for (let i = 0; i < 20; i++) expect([...pickVotedGames(votes, all)].sort()).toEqual(['capitals', 'flags', 'guess', 'higher', 'locate']);
+
+    // Four sure games, three tied for the last place.
+    const tied = [['flags', 'capitals', 'locate', 'guess']] as const;
+    const st = voteStanding(tied, all);
+    expect([st.flags, st.capitals, st.locate, st.guess]).toEqual(['in', 'in', 'in', 'in']);
+    expect([st.landmarks, st.languages, st.higher]).toEqual(['tie', 'tie', 'tie']);
+    const fifth = new Set<string>();
+    for (let i = 0; i < 60; i++) {
+      const g = pickVotedGames(tied, all);
+      expect(g).toHaveLength(5);
+      expect(g).toEqual(expect.arrayContaining(['flags', 'capitals', 'locate', 'guess']));
+      fifth.add(g.find((x) => !tied[0].includes(x as never))!);
+    }
+    expect(fifth.size).toBe(3);
+  });
+
+  it('shuffles the order and leaves out games the regions are too small for', () => {
+    const orders = new Set<string>();
+    for (let i = 0; i < 40; i++) orders.add(pickVotedGames([], all).join());
+    expect(orders.size).toBeGreaterThan(5);
+    expect(playableGames(['caribbean'])).not.toContain('landmarks');
+    expect(playableGames(['caribbean'])).toContain('languages');
+    expect(voteStanding([['flags']], ['flags', 'languages'])).toEqual({ flags: 'in', languages: 'in' });
+    expect(pickVotedGames([['landmarks']], ['flags', 'languages'])).toHaveLength(2);
   });
 });

@@ -1,15 +1,16 @@
 import { DurableObject } from 'cloudflare:workers';
 import {
+  CHAT_HISTORY,
+  CHAT_MIN_GAP_MS,
   GAME_IDS,
   GROUP_DEFAULT_ROUND_COUNTS,
   GROUP_MAX_PLAYERS,
   GROUP_MIN_PLAYERS,
   GROUP_STAGE_INTRO_MS,
   GROUP_STANDINGS_MS,
-  MIN_POOL_SIZE,
+  MATCH_GAMES,
   MODES,
   QUICK_FILL_MS,
-  QUICK_GAMES,
   QUICK_ROUNDS,
   RECONNECT_GRACE_MS,
   REGION_IDS,
@@ -27,13 +28,13 @@ import {
   parseClientMessage,
   pickGroupPairs,
   pickStages,
-  poolLabel,
+  pickVotedGames,
+  playableGames,
   ranksOf,
   revealedPair,
   settleGroupRound,
-  shuffleGames,
-  smallestPool,
   tallyOf,
+  type ChatLine,
   type ClientMessage,
   type Entry,
   type EntryStatus,
@@ -63,6 +64,10 @@ interface Player {
   disconnectedAt: number | null;
   /** Left mid-game or from the results; keeps its place in the ranking but never comes back. */
   left?: boolean;
+  /** The games they vote for (absent in rooms stored before votes existed) */
+  votes?: GameId[];
+  /** When they last said something in the chat */
+  lastChatAt?: number;
 }
 
 interface GameState {
@@ -91,16 +96,19 @@ export interface GroupState {
   /** Index = seat; seat 0 is the host */
   players: Player[];
   regions: RegionId[];
+  /** Games of the last match (the next one's are picked by vote when it starts) */
   modes: GameId[];
   roundCounts: RoundCounts;
-  /** Play the games in a random order (drawn when each match starts; absent in rooms stored before it existed) */
-  shuffle?: boolean;
   /** A public game ("Find a game"): fixed settings, no host controls, starts on its own */
   public?: boolean;
   /** Public lobby: when the match starts; set once two players are in */
   autoStartAt?: number | null;
   game: GameState | null;
   emptySince: number | null;
+  /** The last CHAT_HISTORY chat lines (absent in rooms stored before the chat existed) */
+  chat?: ChatLine[];
+  /** Id of the next chat line */
+  chatSeq?: number;
 }
 
 interface Attachment {
@@ -113,11 +121,6 @@ function randomHex(bytes: number): string {
 }
 
 /** Where the game of round `i` starts and how many rounds it has. */
-/** A public lobby's games: a few at random. */
-function quickModes(): GameId[] {
-  return shuffleGames(GAME_IDS).slice(0, QUICK_GAMES);
-}
-
 function stageSpan(games: readonly GameId[], i: number): { start: number; rounds: number } {
   let start = i;
   while (start > 0 && games[start - 1] === games[i]) start--;
@@ -144,7 +147,8 @@ function statusOf(r: GroupRound, e: Entry): EntryStatus {
 }
 
 /**
- * A group lobby: up to 8 players, everyone answers every round. The host picks the games and regions;
+ * A group lobby: up to 8 players, everyone answers every round. The players vote for the games (the
+ * MATCH_GAMES most voted are played, in random order), the host picks the regions and rounds;
  * after each game the standings show who moved up or down, and the match ends on a podium.
  */
 export class GroupRoom extends DurableObject<Env> {
@@ -160,7 +164,7 @@ export class GroupRoom extends DurableObject<Env> {
 
   // ---------- RPC ----------
 
-  /** `isPublic`: a "Find a game" lobby — a few random games, every region, starts on its own. */
+  /** `isPublic`: a "Find a game" lobby — voted games, every region, starts on its own. */
   async init(code: string, isPublic = false): Promise<boolean> {
     if (this.state) return false;
     const now = Date.now();
@@ -170,11 +174,10 @@ export class GroupRoom extends DurableObject<Env> {
       phase: 'lobby',
       players: [],
       regions: [...REGION_IDS],
-      modes: isPublic ? quickModes() : [...GAME_IDS],
+      modes: [],
       roundCounts: isPublic
         ? (Object.fromEntries(GAME_IDS.map((g) => [g, QUICK_ROUNDS])) as RoundCounts)
         : { ...GROUP_DEFAULT_ROUND_COUNTS },
-      shuffle: isPublic,
       public: isPublic,
       autoStartAt: null,
       game: null,
@@ -207,6 +210,14 @@ export class GroupRoom extends DurableObject<Env> {
 
   async debugState(): Promise<GroupState | null> {
     return structuredClone(this.state);
+  }
+
+  /** Tests: start a match with these games in this order (and rounds), as if the votes had picked them. */
+  async debugStart(games: GameId[], rounds: Partial<RoundCounts> = {}): Promise<void> {
+    const s = this.state!;
+    s.roundCounts = { ...s.roundCounts, ...rounds };
+    this.startMatch(Date.now(), games);
+    await this.commit();
   }
 
   // ---------- WebSocket ----------
@@ -270,14 +281,13 @@ export class GroupRoom extends DurableObject<Env> {
       this.sendError(ws, 'room_full', `This lobby is full (${GROUP_MAX_PLAYERS} players)`);
       return ws.close(4003, 'room_full');
     } else {
-      // An empty public lobby is handed out again on the next search: draw fresh games for whoever opens it.
-      if (s.public && !s.players.some((p) => p.connected)) s.modes = quickModes();
-      player = { sessionId: msg.sessionId, name: msg.name, connected: true, disconnectedAt: null };
+      player = { sessionId: msg.sessionId, name: msg.name, connected: true, disconnectedAt: null, votes: [] };
       s.players.push(player);
     }
     ws.serializeAttachment({ sessionId: msg.sessionId } satisfies Attachment);
     s.emptySince = null;
     await this.commit();
+    this.send(ws, { t: 'chat', lines: s.chat ?? [], reset: true });
   }
 
   private async onPlayerMessage(ws: WebSocket, seat: number, msg: ClientMessage) {
@@ -295,41 +305,46 @@ export class GroupRoom extends DurableObject<Env> {
       return true;
     };
     switch (msg.t) {
+      case 'chat': {
+        const p = s.players[seat];
+        if (p.left) return;
+        if (p.lastChatAt !== undefined && now - p.lastChatAt < CHAT_MIN_GAP_MS)
+          return this.sendError(ws, 'not_allowed', 'Slow down a little');
+        p.lastChatAt = now;
+        const line: ChatLine = { id: s.chatSeq ?? 1, seat, name: p.name, text: msg.text, at: now };
+        s.chatSeq = line.id + 1;
+        s.chat = [...(s.chat ?? []), line].slice(-CHAT_HISTORY);
+        // Only the new line goes out; the room snapshot doesn't change.
+        await this.ctx.storage.put('state', s);
+        for (const other of this.ctx.getWebSockets())
+          if (this.seatOf(other) !== null) this.send(other, { t: 'chat', lines: [line], reset: false });
+        return;
+      }
+
       case 'setRegions':
         if (!hostOnly('change regions')) return;
         s.regions = msg.regions;
         break;
 
-      case 'setModes':
-        if (!hostOnly('pick the games')) return;
-        s.modes = msg.modes;
+      case 'vote':
+        // Everyone votes, in public games too.
+        if (s.phase !== 'lobby') return;
+        s.players[seat].votes = msg.games;
         break;
 
-      case 'setRounds':
-        if (!hostOnly('pick the games')) return;
-        s.roundCounts = { ...s.roundCounts, [msg.game]: msg.rounds };
-        break;
-
-      case 'setShuffle':
-        if (!hostOnly('pick the games')) return;
-        s.shuffle = msg.shuffle;
+      case 'setAllRounds':
+        if (!hostOnly('change the rounds')) return;
+        s.roundCounts = Object.fromEntries(GAME_IDS.map((g) => [g, msg.rounds])) as RoundCounts;
         break;
 
       case 'start': {
         if (!hostOnly('start')) return;
         if (s.players.filter((p) => p.connected).length < GROUP_MIN_PLAYERS)
           return this.sendError(ws, 'not_allowed', `At least ${GROUP_MIN_PLAYERS} players are needed`);
-        if (s.modes.includes('higher') && countriesInRegions(s.regions).length < MIN_POOL_SIZE)
-          return this.sendError(ws, 'pool_too_small', `Select regions with at least ${MIN_POOL_SIZE} countries`);
-        const modes = s.modes.filter(isModeId);
-        const small = modes.length ? smallestPool(s.regions, modes) : null;
-        if (small && small.size < MIN_POOL_SIZE)
-          return this.sendError(
-            ws,
-            'pool_too_small',
-            `${MODES[small.mode].label} needs regions with at least ${poolLabel(small.mode, MIN_POOL_SIZE)}`,
-          );
-        this.startMatch(now);
+        const games = this.votedGames();
+        if (!games.length)
+          return this.sendError(ws, 'pool_too_small', 'The selected regions are too small for any game: add regions');
+        this.startMatch(now, games);
         break;
       }
 
@@ -410,10 +425,16 @@ export class GroupRoom extends DurableObject<Env> {
 
   // ---------- Game flow ----------
 
-  private startMatch(now: number) {
+  /** The next match's games: the most voted by the players who are here, in random order. */
+  private votedGames(): GameId[] {
     const s = this.state!;
-    // Random order: a new one every match.
-    const games = s.shuffle ? shuffleGames(s.modes) : s.modes;
+    const votes = s.players.filter((p) => p.connected && !p.left).map((p) => p.votes ?? []);
+    return pickVotedGames(votes, playableGames(s.regions), MATCH_GAMES);
+  }
+
+  private startMatch(now: number, games: GameId[]) {
+    const s = this.state!;
+    s.modes = games;
     const counts = s.roundCounts;
     const picked = pickStages(s.regions, games.filter(isModeId), (m: ModeId) => counts[m]);
     const pool = countriesInRegions(s.regions);
@@ -507,7 +528,7 @@ export class GroupRoom extends DurableObject<Env> {
       // Seats of players who are away right now don't hold the match up.
       for (let i = s.players.length - 1; i >= 0; i--) if (!s.players[i].connected) s.players.splice(i, 1);
       s.autoStartAt = null;
-      this.startMatch(now);
+      this.startMatch(now, this.votedGames());
     }
   }
 
@@ -638,6 +659,9 @@ export class GroupRoom extends DurableObject<Env> {
     const r = g && g.current >= 0 && !counting ? g.rounds[g.current] : undefined;
     const playing = s.phase === 'playing' && r;
     const mode = r && isModeId(r.game) ? r.game : null;
+    const playable = g ? [] : playableGames(s.regions);
+    // Rounds per game: the same for every game (rooms stored before that use the Flags count).
+    const perGame = s.roundCounts.flags;
 
     // Stage info: during a countdown the game about to start; otherwise the current round's.
     const games = g?.roundGames ?? [];
@@ -666,20 +690,23 @@ export class GroupRoom extends DurableObject<Env> {
           r && mode && MODES[mode].input === 'map' && (s.phase === 'playing' || s.phase === 'reveal')
             ? [...(r.entries[i]?.misses ?? [])]
             : null,
+        votes: s.phase === 'lobby' ? (p.votes ?? []) : [],
       })),
       maxPlayers: GROUP_MAX_PLAYERS,
       public: !!s.public,
       autoStartAt: s.phase === 'lobby' ? (s.autoStartAt ?? null) : null,
       regions: s.regions,
       countryCount: countriesInRegions(s.regions).length,
-      modes: g ? g.stages : s.modes,
+      modes: g ? g.stages : playable,
       roundCounts: s.roundCounts,
-      shuffle: !!s.shuffle,
+      rounds: perGame,
+      matchGames: MATCH_GAMES,
+      shuffle: true,
       stage: g && span ? Math.max(0, g.stages.indexOf(games[at])) : 0,
       stageRound: g && span && !counting ? g.current - span.start + 1 : 0,
-      stageRounds: span?.rounds ?? s.roundCounts[s.modes[0]],
+      stageRounds: span?.rounds ?? perGame,
       round: g ? g.current + 1 : 0,
-      totalRounds: g ? games.length : s.modes.reduce((k, m) => k + s.roundCounts[m], 0),
+      totalRounds: g ? games.length : Math.min(MATCH_GAMES, playable.length) * perGame,
       flag: playing && g!.tokens[g!.current] ? g!.tokens[g!.current] : null,
       prompt: playing && mode ? (MODES[mode].promptText?.(r.code) ?? null) : null,
       // The zoom point stays through the reveal, so the photo doesn't jump when the round ends.

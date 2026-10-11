@@ -4,11 +4,13 @@ import { describe, expect, it } from 'vitest';
 import {
   COUNTRY_BY_CODE,
   GROUP_MAX_PLAYERS,
+  MATCH_GAMES,
   QUICK_FILL_MS,
-  QUICK_GAMES,
   QUICK_ROUNDS,
   higherOf,
+  type GameId,
   type GroupServerMessage,
+  type RoundCounts,
 } from '@flagduel/shared';
 import type { GroupRoom, GroupState } from '../src/group';
 import { BASE, Client, ORIGIN } from './helpers';
@@ -42,6 +44,9 @@ function waitState(c: Client, pred: (s: State) => boolean): Promise<State> {
 
 const stub = (code: string) => env.GROUPS.getByName(code);
 const internal = (code: string) => runInDurableObject(stub(code), (r: GroupRoom) => r.debugState()).then((s) => s!);
+/** Start a match with these games in this order, as if the votes had picked them. */
+const startWith = (code: string, games: GameId[], rounds: Partial<RoundCounts> = {}) =>
+  runInDurableObject(stub(code), (room: GroupRoom) => room.debugStart(games, rounds));
 async function tickAt(code: string, at: (st: GroupState) => number) {
   await runInDurableObject(stub(code), async (room: GroupRoom) => {
     const st = (await room.debugState())!;
@@ -50,7 +55,7 @@ async function tickAt(code: string, at: (st: GroupState) => number) {
 }
 
 describe('group lobby', () => {
-  it('starts with every game at 5 rounds and seats up to 8 players', async () => {
+  it('offers every game at 5 rounds, plays 5 of them, and seats up to 8 players', async () => {
     const code = await createGroup();
     const info = await exports.default.fetch(new Request(`${BASE}/rooms/${code}`));
     expect(await info.json()).toMatchObject({ code, kind: 'group', phase: 'lobby' });
@@ -61,7 +66,8 @@ describe('group lobby', () => {
     const last = await waitState(seats[0].c, (s) => s.room.players.length === GROUP_MAX_PLAYERS);
     expect(last.room.modes).toEqual(['flags', 'capitals', 'locate', 'landmarks', 'languages', 'guess', 'higher']);
     expect(Object.values(last.room.roundCounts).every((n) => n === 5)).toBe(true);
-    expect(last.room.totalRounds).toBe(35);
+    expect(last.room.matchGames).toBe(MATCH_GAMES);
+    expect(last.room.totalRounds).toBe(MATCH_GAMES * 5);
 
     const res = await exports.default.fetch(
       new Request(`${BASE}/groups/${code}/ws`, { headers: { Upgrade: 'websocket', Origin: ORIGIN } }),
@@ -85,20 +91,57 @@ describe('group lobby', () => {
   });
 });
 
+describe('group chat', () => {
+  type Chat = Extract<GroupServerMessage, { t: 'chat' }>;
+  const chats = (c: Client) => (c.messages as unknown as GroupServerMessage[]).filter((m): m is Chat => m.t === 'chat');
+  async function until<T>(f: () => T | undefined): Promise<T> {
+    for (let i = 0; i < 200; i++) {
+      const v = f();
+      if (v !== undefined) return v;
+      await new Promise((r) => setTimeout(r, 10));
+    }
+    throw new Error('timed out');
+  }
+
+  it('sends lines to everyone, keeps the history for newcomers, and limits the pace', async () => {
+    const code = await createGroup();
+    const a = await joinGroup(code, 'Ann');
+    const b = await joinGroup(code, 'Ben');
+    // Hello gets the (empty) history.
+    expect((await until(() => chats(b.c).find((m) => m.reset))).lines).toEqual([]);
+
+    a.c.send({ t: 'chat', text: '  hi   all  ' });
+    const got = await until(() => chats(b.c).find((m) => !m.reset));
+    expect(got.lines).toMatchObject([{ id: 1, seat: 0, name: 'Ann', text: 'hi all' }]);
+
+    // Too quick after the last line.
+    const err = a.c.next('error');
+    a.c.send({ t: 'chat', text: 'again' });
+    expect((await err).code).toBe('not_allowed');
+
+    // Empty and overlong lines.
+    const bad = b.c.next('error');
+    b.c.send({ t: 'chat', text: '   ' });
+    expect((await bad).code).toBe('bad_message');
+    b.c.send({ t: 'chat', text: 'x'.repeat(500) });
+    const long = await until(() => chats(a.c).find((m) => m.lines[0]?.seat === 1));
+    expect(long.lines[0].text).toHaveLength(200);
+
+    const c = await joinGroup(code, 'Cid');
+    const history = await until(() => chats(c.c).find((m) => m.reset));
+    expect(history.lines.map((l) => l.id)).toEqual([1, 2]);
+  });
+});
+
 describe('group match', () => {
   it('plays rounds where everyone answers, shows standings after each game, and ends on the podium', async () => {
     const code = await createGroup();
     const a = await joinGroup(code, 'Ann');
     const b = await joinGroup(code, 'Ben');
     const c = await joinGroup(code, 'Cid');
-    a.c.send({ t: 'setModes', modes: ['flags', 'higher'] });
-    a.c.send({ t: 'setRounds', game: 'flags', rounds: 2 });
-    await waitState(a.c, (s) => s.room.roundCounts.flags === 2 && s.room.modes.length === 2);
-    a.c.send({ t: 'setRounds', game: 'higher', rounds: 1 });
-    await waitState(a.c, (s) => s.room.roundCounts.higher === 1);
-
-    const counting = await a.c.state({ t: 'start' }, (s) => (s as unknown as State).room.phase === 'countdown');
-    expect((counting as unknown as State).room.totalRounds).toBe(3);
+    await startWith(code, ['flags', 'higher'], { flags: 2, higher: 1 });
+    const counting = await waitState(a.c, (s) => s.room.phase === 'countdown');
+    expect(counting.room.totalRounds).toBe(3);
 
     for (let round = 1; round <= 2; round++) {
       await tickAt(code, (st) => st.game!.countdownEndsAt ?? st.game!.revealEndsAt!);
@@ -160,30 +203,57 @@ describe('group match', () => {
     expect((lobby as unknown as State).room.players).toHaveLength(3);
   });
 
-  it('random order: games are shuffled when the match starts', async () => {
+  it('plays the most voted games, in random order, and shows everyone the votes', async () => {
     const code = await createGroup();
     const a = await joinGroup(code, 'Ann');
-    await joinGroup(code, 'Ben');
-    for (const game of ['flags', 'capitals', 'locate', 'landmarks', 'languages', 'guess', 'higher'] as const)
-      a.c.send({ t: 'setRounds', game, rounds: 1 });
-    a.c.send({ t: 'setShuffle', shuffle: true });
-    await waitState(a.c, (s) => s.room.shuffle && s.room.totalRounds === 7);
+    const b = await joinGroup(code, 'Ben');
+    const c = await joinGroup(code, 'Cid');
+    a.c.send({ t: 'setAllRounds', rounds: 1 });
+    // Five games get two votes each; Cid's lone vote for Higher or Lower loses.
+    const five: GameId[] = ['flags', 'capitals', 'locate', 'languages', 'guess'];
+    a.c.send({ t: 'vote', games: five });
+    b.c.send({ t: 'vote', games: ['flags', 'capitals', 'locate', 'languages', 'guess'] });
+    c.c.send({ t: 'vote', games: ['higher'] });
+    const seen = await waitState(c.c, (s) => s.room.players.every((p) => p.votes.length > 0) && s.room.rounds === 1);
+    expect(seen.room.players.map((p) => p.votes)).toEqual([five, five, ['higher']]);
+    expect(seen.room.totalRounds).toBe(MATCH_GAMES);
+
+    // More than MATCH_GAMES votes is malformed.
+    const err = c.c.next('error');
+    c.c.send({ t: 'vote', games: ['flags', 'capitals', 'locate', 'landmarks', 'languages', 'guess'] });
+    expect((await err).code).toBe('bad_message');
+
     await a.c.state({ t: 'start' }, (s) => (s as unknown as State).room.phase === 'countdown');
     const st = await internal(code);
-    expect([...st.game!.stages].sort()).toEqual([...st.modes].sort());
+    expect([...st.game!.stages].sort()).toEqual([...five].sort());
     expect(st.game!.roundGames).toEqual(st.game!.stages);
     const counting = await waitState(a.c, (s) => s.room.phase === 'countdown');
     expect(counting.room.modes).toEqual(st.game!.stages);
+    expect(counting.room.shuffle).toBe(true);
     expect(counting.room.stage).toBe(0);
+    // Votes can't change mid-match.
+    expect(counting.room.players.every((p) => p.votes.length === 0)).toBe(true);
+  });
+
+  it('fills up to five games at random when there are too few votes', async () => {
+    const code = await createGroup();
+    const a = await joinGroup(code, 'Ann');
+    await joinGroup(code, 'Ben');
+    a.c.send({ t: 'vote', games: ['higher'] });
+    await waitState(a.c, (s) => s.room.players[0].votes.length === 1);
+    await a.c.state({ t: 'start' }, (s) => (s as unknown as State).room.phase === 'countdown');
+    const st = await internal(code);
+    expect(st.game!.stages).toHaveLength(MATCH_GAMES);
+    expect(new Set(st.game!.stages).size).toBe(MATCH_GAMES);
+    expect(st.game!.stages).toContain('higher');
   });
 
   it('stops waiting for a player who left', async () => {
     const code = await createGroup();
     const a = await joinGroup(code, 'Ann');
     const b = await joinGroup(code, 'Ben');
-    a.c.send({ t: 'setModes', modes: ['flags'] });
-    await waitState(a.c, (s) => s.room.modes.length === 1);
-    await a.c.state({ t: 'start' }, (s) => (s as unknown as State).room.phase === 'countdown');
+    await startWith(code, ['flags']);
+    await waitState(a.c, (s) => s.room.phase === 'countdown');
     await tickAt(code, (st) => st.game!.countdownEndsAt!);
     await waitState(a.c, (s) => s.room.phase === 'playing');
     b.c.send({ t: 'leave' });
@@ -211,8 +281,8 @@ describe('public games ("Find a game")', () => {
     let s = await waitState(a.c, (x) => x.room.players.length === 1);
     expect(s.room.public).toBe(true);
     expect(s.room.autoStartAt).toBeNull();
-    expect(s.room.modes).toHaveLength(QUICK_GAMES);
-    expect(s.room.totalRounds).toBe(QUICK_GAMES * QUICK_ROUNDS);
+    expect(s.room.matchGames).toBe(MATCH_GAMES);
+    expect(s.room.totalRounds).toBe(MATCH_GAMES * QUICK_ROUNDS);
 
     const b = await joinGroup(code, 'Ben');
     s = await waitState(a.c, (x) => x.room.players.length === 2 && x.room.autoStartAt !== null);
@@ -223,8 +293,12 @@ describe('public games ("Find a game")', () => {
     a.c.send({ t: 'start' });
     expect((await err).code).toBe('not_allowed');
     const err2 = a.c.next('error');
-    a.c.send({ t: 'setModes', modes: ['flags'] });
+    a.c.send({ t: 'setAllRounds', rounds: 2 });
     expect((await err2).code).toBe('not_allowed');
+    // ...but everyone votes.
+    a.c.send({ t: 'vote', games: ['flags', 'capitals', 'locate', 'landmarks', 'higher'] });
+    b.c.send({ t: 'vote', games: ['flags', 'capitals', 'locate', 'landmarks', 'higher'] });
+    await waitState(b.c, (x) => x.room.players.every((p) => p.votes.length === 5));
     expect((await internal(code)).phase).toBe('lobby');
 
     // A third player still gets in while the clock runs.
@@ -233,7 +307,9 @@ describe('public games ("Find a game")', () => {
     await waitState(a.c, (x) => x.room.players.length === 3);
 
     await tickAt(code, (st) => st.autoStartAt!);
-    expect((await internal(code)).phase).toBe('countdown');
+    const started = await internal(code);
+    expect(started.phase).toBe('countdown');
+    expect([...started.game!.stages].sort()).toEqual(['capitals', 'flags', 'higher', 'landmarks', 'locate']);
     await waitState(b.c, (x) => x.room.phase === 'countdown');
 
     // That lobby is playing: the next search opens a new one.
@@ -251,22 +327,5 @@ describe('public games ("Find a game")', () => {
     expect(s.room.autoStartAt).toBeNull();
     a.c.send({ t: 'leave' });
     while ((await internal(code)).players.length) await new Promise((r) => setTimeout(r, 10));
-  });
-
-  it('draws new games each time someone opens the empty lobby', async () => {
-    const seen = new Set<string>();
-    let code = '';
-    for (let i = 0; i < 8; i++) {
-      const next = await quick();
-      if (code) expect(next).toBe(code); // the same lobby is handed out again...
-      code = next;
-      const p = await joinGroup(code, `Solo${i}`);
-      const s = await waitState(p.c, (x) => x.room.players.length === 1);
-      expect(s.room.modes).toHaveLength(QUICK_GAMES);
-      seen.add(s.room.modes.join());
-      p.c.send({ t: 'leave' });
-      while ((await internal(code)).players.length) await new Promise((r) => setTimeout(r, 10));
-    }
-    expect(seen.size).toBeGreaterThan(1); // ...but not with the same games
   });
 });

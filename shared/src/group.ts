@@ -1,6 +1,6 @@
 // Group game: 2–8 players, every player answers every round. Points for being right and for being quick.
 // Pure rules shared by the GroupRoom Durable Object (authoritative) and the browser.
-import { ROUND_TIME_MS, type GuessOutcome } from './game';
+import { ROUND_TIME_MS, countriesInRegions, type GuessOutcome } from './game';
 import {
   DUEL_TIME_MS,
   higherOf,
@@ -12,7 +12,16 @@ import {
   type RevealedPair,
 } from './higher';
 import { GUESS_REVEAL_MS, estimatePoints } from './guess';
-import { GAME_IDS, type ErrorCode, type GameId, type RoundCounts } from './messages';
+import {
+  GAME_IDS,
+  MATCH_GAMES,
+  MIN_POOL_SIZE,
+  shuffleGames,
+  type ChatLine,
+  type ErrorCode,
+  type GameId,
+  type RoundCounts,
+} from './messages';
 import { MODES, type ModeId } from './modes';
 import type { RegionId } from './regions';
 
@@ -24,10 +33,61 @@ export const GROUP_DEFAULT_ROUND_COUNTS = Object.fromEntries(
   GAME_IDS.map((g) => [g, GROUP_DEFAULT_ROUNDS]),
 ) as RoundCounts;
 
+// ---------- Game votes ----------
+
+/** Games the selected regions have enough items for (a game needs MIN_POOL_SIZE to be played). */
+export function playableGames(regions: readonly RegionId[]): GameId[] {
+  return GAME_IDS.filter(
+    (g) => (g === 'higher' ? countriesInRegions(regions).length : MODES[g].pool(regions).length) >= MIN_POOL_SIZE,
+  );
+}
+
+/** Votes per game. */
+export function voteCounts(votes: readonly (readonly GameId[])[]): Record<GameId, number> {
+  const out = Object.fromEntries(GAME_IDS.map((g) => [g, 0])) as Record<GameId, number>;
+  for (const v of votes) for (const g of new Set(v)) if (g in out) out[g]++;
+  return out;
+}
+
+/**
+ * Where each playable game stands: certain to be played ('in'), tied at the cut so it's drawn at random ('tie'),
+ * or not played ('out'). Unplayable games are left out.
+ */
+export function voteStanding(
+  votes: readonly (readonly GameId[])[],
+  playable: readonly GameId[],
+  n = MATCH_GAMES,
+): Partial<Record<GameId, 'in' | 'tie' | 'out'>> {
+  const counts = voteCounts(votes);
+  const sorted = [...playable].sort((a, b) => counts[b] - counts[a]);
+  if (sorted.length <= n) return Object.fromEntries(sorted.map((g) => [g, 'in']));
+  const cut = counts[sorted[n - 1]];
+  const above = sorted.filter((g) => counts[g] > cut).length;
+  const atCut = sorted.filter((g) => counts[g] === cut).length;
+  return Object.fromEntries(
+    sorted.map((g) => [g, counts[g] > cut ? 'in' : counts[g] < cut ? 'out' : above + atCut <= n ? 'in' : 'tie']),
+  );
+}
+
+/**
+ * The games of a match: the `n` most voted playable games (ties at the cut drawn at random, so with no votes
+ * at all it's `n` random games), in a random order.
+ */
+export function pickVotedGames(
+  votes: readonly (readonly GameId[])[],
+  playable: readonly GameId[],
+  n = MATCH_GAMES,
+  rng: () => number = Math.random,
+): GameId[] {
+  const counts = voteCounts(votes);
+  // Shuffle first: the sort is stable, so equal counts stay in random order.
+  const ranked = shuffleGames(playable, rng).sort((a, b) => counts[b] - counts[a]);
+  return shuffleGames(ranked.slice(0, n), rng);
+}
+
 /** Public games ("Find a game"): once two players are in, the lobby stays open this long, then starts. */
 export const QUICK_FILL_MS = 60_000;
-/** A public game plays this many games, drawn at random, all regions. */
-export const QUICK_GAMES = 3;
+/** Public games play MATCH_GAMES games (voted on while the lobby fills), all regions, this many rounds each. */
 export const QUICK_ROUNDS = 5;
 
 /** Points for a right answer: base + speed bonus (linear in the time left), minus a bit per wrong try. */
@@ -273,6 +333,8 @@ export interface GroupPlayerView {
   status: EntryStatus | null;
   /** Map games: the countries they clicked wrongly this round (null outside a round) */
   misses: string[] | null;
+  /** Lobby: the games they voted for */
+  votes: GameId[];
 }
 
 export interface GroupEntryView {
@@ -324,10 +386,14 @@ export interface GroupView {
   autoStartAt: number | null;
   regions: RegionId[];
   countryCount: number;
-  /** Selected games (lobby) or the games of the running match, in play order */
+  /** Lobby: the games the selected regions can play (votes decide which MATCH_GAMES of them); in a match: its games in play order */
   modes: GameId[];
   roundCounts: RoundCounts;
-  /** Games are played in a random order (the games still to come stay hidden) */
+  /** Rounds per game */
+  rounds: number;
+  /** How many games a match plays (the most voted) */
+  matchGames: number;
+  /** Games are played in a random order (the games still to come stay hidden); always true */
   shuffle: boolean;
   /** 0-based index into `modes` of the game being played, about to start, or just finished (standings) */
   stage: number;
@@ -361,6 +427,8 @@ export interface GroupView {
 export type GroupServerMessage =
   | { t: 'state'; room: GroupView; you: number; now: number }
   | { t: 'guessResult'; round: number; outcome: GuessOutcome }
+  /** Chat lines: the whole history after hello (`reset`), then each new line */
+  | { t: 'chat'; lines: ChatLine[]; reset: boolean }
   | { t: 'error'; code: ErrorCode; message: string }
   | { t: 'pong' };
 
