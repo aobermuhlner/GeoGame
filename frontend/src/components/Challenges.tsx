@@ -36,6 +36,7 @@ import { api, codeFlagSrc } from '../api';
 import type { WORLD_MAP } from '../generated/worldmap';
 import { formatClock, formatDuration, useNow } from './common';
 import { LocateMap, type Mark } from './LocateMap';
+import { NO_AUTOFILL } from '../noAutofill';
 
 const nameOf = (code: string) => COUNTRY_BY_CODE[code]?.name ?? code;
 const capitalOf = (code: string) => CAPITAL_BY_CODE[code]?.name ?? code;
@@ -413,10 +414,8 @@ function ChallengeGame({
               value={text}
               placeholder={capitals ? 'Type a capital…' : 'Type a country…'}
               aria-label={capitals ? 'Capital name' : 'Country name'}
-              autocomplete="off"
-              autocorrect="off"
               autocapitalize="off"
-              spellcheck={false}
+              {...NO_AUTOFILL}
               enterKeyHint="enter"
               onInput={(e) => apply(typeText((e.currentTarget as HTMLInputElement).value, held, pool, foundSet, vocab))}
             />

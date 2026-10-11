@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'preact/hooks';
 import type { AuthConfig, UserView } from '@flagduel/shared';
 import { api } from '../api';
 import { Logo } from './common';
+import { NO_AUTOFILL } from '../noAutofill';
 
 // Minimal typing for Google Identity Services (https://accounts.google.com/gsi/client)
 interface Gsi {
@@ -143,6 +144,7 @@ export function Login({ onSignedIn, roomCode }: { onSignedIn: (u: UserView) => v
                 value={guestName}
                 placeholder="Your name"
                 aria-label="Your name"
+                {...NO_AUTOFILL}
                 onInput={(e) => setGuestName((e.target as HTMLInputElement).value)}
               />
               <button class="btn btn-primary" type="submit" disabled={!guestName.trim() || busy}>
@@ -175,6 +177,7 @@ export function Login({ onSignedIn, roomCode }: { onSignedIn: (u: UserView) => v
                 value={devName}
                 placeholder="Any name"
                 aria-label="Dev account name"
+                {...NO_AUTOFILL}
                 onInput={(e) => setDevName((e.target as HTMLInputElement).value)}
               />
               <button class="btn btn-ghost" type="submit" disabled={!devName.trim() || busy}>

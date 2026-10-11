@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "preact/hooks";
 import { suggestCountries, type GuessOutcome } from "@flagduel/shared";
+import { NO_AUTOFILL } from "../noAutofill";
 
 interface Props {
   /**
@@ -88,10 +89,8 @@ export function CountryInput({
           value={value}
           maxLength={60}
           aria-disabled={locked}
-          autoComplete="off"
-          autoCorrect="off"
           autoCapitalize="off"
-          spellcheck={false}
+          {...NO_AUTOFILL}
           enterKeyHint="send"
           role="combobox"
           aria-expanded={showList}

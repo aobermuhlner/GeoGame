@@ -24,6 +24,7 @@ import {
   type UnitPrefs,
 } from '@flagduel/shared';
 import { codeFlagSrc } from '../api';
+import { NO_AUTOFILL } from '../noAutofill';
 
 // ---------- Unit preferences (per browser) ----------
 
@@ -244,9 +245,7 @@ export function NumberInput({
             maxLength={32}
             aria-disabled={locked}
             aria-label={`Your estimate${unit ? ` in ${unit}` : ''}`}
-            autoComplete="off"
-            autoCorrect="off"
-            spellcheck={false}
+            {...NO_AUTOFILL}
             enterKeyHint="send"
             onInput={(e) => {
               const el = e.target as HTMLInputElement;

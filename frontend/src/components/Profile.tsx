@@ -4,6 +4,7 @@ import { api } from '../api';
 import { GoogleButton } from './Login';
 import { DivisionBadge, RANKED_ENABLED } from './Ranked';
 import { Avatar } from './NavBar';
+import { NO_AUTOFILL } from '../noAutofill';
 
 /** Guests: attach a Google account so the scores and ratings survive sign-out and other devices. */
 function LinkGoogle({ onUser }: { onUser: (u: UserView) => void }) {
@@ -79,6 +80,7 @@ function AccountCard({
               value={name}
               maxLength={MAX_NAME_LENGTH}
               aria-label="Display name"
+              {...NO_AUTOFILL}
               autoFocus
               onInput={(e) => setName((e.target as HTMLInputElement).value)}
             />

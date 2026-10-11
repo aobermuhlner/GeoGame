@@ -3,6 +3,7 @@ import { useState } from 'preact/hooks';
 import { GROUP_MAX_PLAYERS, ROOM_CODE_LENGTH } from '@flagduel/shared';
 import { Logo } from './common';
 import { QuickCard } from './Quick';
+import { NO_AUTOFILL } from '../noAutofill';
 
 interface Props {
   /** Account display name, used as the in-game name */
@@ -85,9 +86,7 @@ export function Home({ name, initialCode, busy, error, onQuick, onCreate, onCrea
               placeholder="CODE"
               aria-label="Lobby code"
               autoCapitalize="characters"
-              autoComplete="off"
-              autoCorrect="off"
-              spellcheck={false}
+              {...NO_AUTOFILL}
               onInput={(e) => {
                 const v = (e.target as HTMLInputElement).value.toUpperCase().replace(NOT_CODE_CHARS, '');
                 (e.target as HTMLInputElement).value = v;
