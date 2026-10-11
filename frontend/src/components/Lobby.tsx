@@ -19,6 +19,7 @@ import {
   type RoomView,
   type Slot,
 } from '@flagduel/shared';
+import { isApp, isTouch } from '../platform';
 import { Logo } from './common';
 import { REGION_COLORS, WorldMap } from './WorldMap';
 
@@ -34,6 +35,10 @@ interface Props {
   onLeave: () => void;
 }
 
+/**
+ * The app shows the public site itself (a TWA has no local pages), so its origin is the site's too: an
+ * invite from the app opens in any browser, and in the app where it's installed.
+ */
 export function inviteLink(code: string): string {
   return `${location.origin}${import.meta.env.BASE_URL}?room=${code}`;
 }
@@ -308,11 +313,13 @@ export function GamesCard({
   );
 }
 
-/** "Copy invite link" button that says when it worked. */
+/** In the app and on phones the invite goes through the share sheet (WhatsApp, Messages…); elsewhere it's copied. */
+const canShare = (isApp || isTouch) && typeof navigator.share === 'function';
+
+/** "Share invite link" / "Copy invite link" button that says when copying worked. */
 export function CopyInvite({ code }: { code: string }) {
   const [copied, setCopied] = useState(false);
-  async function copy() {
-    const link = inviteLink(code);
+  async function copy(link: string) {
     try {
       await navigator.clipboard.writeText(link);
     } catch {
@@ -321,9 +328,19 @@ export function CopyInvite({ code }: { code: string }) {
     setCopied(true);
     setTimeout(() => setCopied(false), 1800);
   }
+  async function invite() {
+    const link = inviteLink(code);
+    if (!canShare) return copy(link);
+    try {
+      await navigator.share({ title: 'Flag Duel', text: `Join my Flag Duel game (code ${code})`, url: link });
+    } catch (e) {
+      // AbortError: the player closed the share sheet. Anything else: sharing isn't possible here, so copy.
+      if ((e as Error).name !== 'AbortError') await copy(link);
+    }
+  }
   return (
-    <button class="btn btn-ghost btn-sm" onClick={copy}>
-      {copied ? '✓ Link copied' : 'Copy invite link'}
+    <button class="btn btn-ghost btn-sm" onClick={invite}>
+      {copied ? '✓ Link copied' : canShare ? 'Share invite link' : 'Copy invite link'}
     </button>
   );
 }

@@ -88,7 +88,7 @@ describe('auth', () => {
   });
 
   it('guest login works from production and makes a new account each time', async () => {
-    const origin = 'https://aobermuhlner.github.io';
+    const origin = 'https://georivals.pages.dev';
     const login = async (name: string) => {
       const res = await call('/auth/guest', { method: 'POST', body: { name }, origin });
       expect(res.status).toBe(200);
@@ -103,9 +103,9 @@ describe('auth', () => {
   });
 
   it('dev login is refused from non-local origins', async () => {
-    const res = await call('/auth/dev', { method: 'POST', body: { name: 'Eve' }, origin: 'https://aobermuhlner.github.io' });
+    const res = await call('/auth/dev', { method: 'POST', body: { name: 'Eve' }, origin: 'https://georivals.pages.dev' });
     expect(res.status).toBe(404);
-    const cfg = await (await call('/auth/config', { origin: 'https://aobermuhlner.github.io' })).json();
+    const cfg = await (await call('/auth/config', { origin: 'https://georivals.pages.dev' })).json();
     expect(cfg).toEqual({ googleClientId: 'test-client.apps.googleusercontent.com', devLogin: false, guestLogin: true });
   });
 
