@@ -6,3 +6,7 @@ dist/
 .DS_Store
 worker/src/generated/
 frontend/src/generated/
+
+# Android signing keys (never commit)
+*.jks
+*.keystore

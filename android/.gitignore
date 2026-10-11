@@ -1,0 +1,18 @@
+# Gradle / Android Studio
+.gradle/
+build/
+local.properties
+.idea/
+*.iml
+captures/
+
+# Build outputs (rebuilt by `bubblewrap build`)
+*.apk
+*.aab
+*.idsig
+
+# Signing: the upload key lives outside the repo (see README). Never commit keys or passwords.
+*.jks
+*.keystore
+*.password
+keystore.properties

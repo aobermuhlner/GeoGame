@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.aobermuhlner.geogame",
+      "sha256_cert_fingerprints": [
+        "3D:83:E0:F7:32:32:4E:65:64:4B:77:84:64:65:94:2A:82:D5:FB:1E:A8:C2:D2:D9:22:72:D6:9F:B8:3D:32:D4"
+      ]
+    }
+  }
+]

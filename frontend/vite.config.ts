@@ -56,7 +56,8 @@ function serviceWorker(): Plugin {
         }
       };
       await walk(outDir);
-      const precache = files.filter((f) => f !== 'sw.js' && !f.endsWith('.map')).sort();
+      // .well-known/ (Android asset links) is read by the OS, never by the app.
+      const precache = files.filter((f) => f !== 'sw.js' && !f.endsWith('.map') && !f.startsWith('.well-known/')).sort();
       const template = await readFile(join(dirname(fileURLToPath(import.meta.url)), 'sw.js'), 'utf8');
       const hash = createHash('sha256').update(template);
       for (const f of precache) hash.update(f).update(await readFile(join(outDir, f)));
