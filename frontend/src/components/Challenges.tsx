@@ -199,10 +199,8 @@ function ChallengeHub({
         </div>
         <p class="muted small rules">
           {kind === 'capitals'
-            ? "Name the capital of every country in a region before the clock runs out. There are no suggestions: spell a capital out and it's in."
-            : "Name every country of a region before the clock runs out. There are no suggestions: spell a country out and it's in."}{' '}
-          Each one you get shows its flag. Bronze, silver and gold differ only in the time you get, and naming the
-          whole world counts for every region.
+            ? 'Name every capital in a region before time runs out.'
+            : 'Name every country in a region before time runs out.'}
         </p>
         <MedalMap kind={kind} bests={shown} onPick={pick} />
         <ul class="medal-legend" aria-label="Legend">
@@ -396,13 +394,11 @@ function ChallengeGame({
               {capitals ? (
                 <p>
                   Name the capitals of all <b>{pool.size}</b> countries of {isWorldChallenge(ch) ? 'the world' : ch.label} in{' '}
-                  <b>{formatClock(limit)}</b>. A capital is entered as soon as it's spelled right; local names count too
-                  (Wien, Roma, Praha…). Each one shows its country's flag.
+                  <b>{formatClock(limit)}</b>.
                 </p>
               ) : (
                 <p>
-                  Name all <b>{pool.size}</b> countries of {isWorldChallenge(ch) ? 'the world' : ch.label} in <b>{formatClock(limit)}</b>. A country is entered
-                  as soon as it's spelled right; common short forms count too (UK, USA, DRC…). Each one shows its flag.
+                  Name all <b>{pool.size}</b> countries of {isWorldChallenge(ch) ? 'the world' : ch.label} in <b>{formatClock(limit)}</b>.
                 </p>
               )}
               <div class="btn-row">

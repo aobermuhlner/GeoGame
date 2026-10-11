@@ -171,7 +171,7 @@ export const MODES: Record<ModeId, Mode> = {
   },
   landmarks: {
     label: 'Landmarks',
-    description: 'A famous place, zoomed in. Pin it on the map — the smaller your circle, the more points.',
+    description: 'Pin a famous place on the map.',
     title: (n) => `Pin ${n} Landmarks`,
     placeholder: '',
     input: 'pin',
@@ -197,7 +197,7 @@ export const MODES: Record<ModeId, Mode> = {
   },
   languages: {
     label: 'Languages',
-    description: 'Read a sentence, name its language — one answer, locked in.',
+    description: 'Read a sentence, name its language.',
     title: (n) => `Name ${n} Languages`,
     placeholder: 'Type a language…',
     input: 'text',
@@ -221,7 +221,7 @@ export const MODES: Record<ModeId, Mode> = {
   },
   guess: {
     label: 'GeoGuesser',
-    description: 'Estimate the number: heights, distances, temperatures, populations. The closer, the more points.',
+    description: 'Estimate the number — closer scores more.',
     title: (n) => `Estimate ${n} Numbers`,
     placeholder: 'Your estimate…',
     input: 'number',

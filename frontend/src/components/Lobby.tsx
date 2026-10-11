@@ -426,7 +426,7 @@ export function Lobby({ room, you, onReady, onStart, onRegions, onModes, onRound
           editable={isHost}
           hint={
             isHost
-              ? `Pick any mix of games and how many rounds each lasts (${MIN_GAME_ROUNDS}–${MAX_GAME_ROUNDS}). ${set.shuffle ? 'They come in a random order' : "They're played in this order"}; most points overall wins.`
+              ? `Pick games and rounds each (${MIN_GAME_ROUNDS}–${MAX_GAME_ROUNDS}).`
               : `${room.players[0]?.name ?? 'The host'} picks the games.`
           }
           onToggle={set.toggleMode}

@@ -1,11 +1,8 @@
 import { useEffect, useRef, useState } from 'preact/hooks';
 import {
-  GUESS_MAX_POINTS,
   MODE_IDS,
   MODES,
   PIN_POINTS,
-  SOLO_BASE_POINTS,
-  SOLO_SPEED_POINTS,
   SOLO_WRONG_PENALTY,
   type DailyGuessResponse,
   type DailyResponse,
@@ -112,15 +109,7 @@ export function DailyHub({ onPlay }: { onPlay: (game: GameId) => void }) {
           <h2 class="page-title">Daily Games</h2>
           {s && <NextDaily at={s.nextAt} />}
         </div>
-        <p class="muted small rules">
-          Each game can be played <strong>once per day</strong> — everyone gets the same 10 countries. A correct answer
-          is worth {SOLO_BASE_POINTS} points plus up to {SOLO_SPEED_POINTS} for speed, minus {SOLO_WRONG_PENALTY} per
-          wrong guess. In GeoLocate every wrong click costs {SOLO_WRONG_PENALTY} points, even if you never find the
-          country. Landmarks and Languages take one answer per round: lock it in — a wrong one scores nothing. Landmarks score by circle size only, not speed.
-          GeoGuesser asks for a number (30 s per question): up to {GUESS_MAX_POINTS} points the closer your estimate
-          is, whatever units you answer in. Your score and total time go on today's ranking — on equal points the
-          faster run ranks higher, and your results show which top percentage of today's players you are in.
-        </p>
+        <p class="muted small rules">One try per game each day — same questions for everyone.</p>
         {error && <p class="form-error">{error}</p>}
         <div class="daily-modes">
           {MODE_IDS.map((mode) => (
@@ -425,7 +414,7 @@ function SoloScreen({
           ? `${run.wrong} wrong`
           : 'Speed doesn’t count, only correct answers'
         : mode.input === 'pin'
-          ? 'Pin the landmark · the smaller your circle, the more points. Take your time'
+          ? 'Pin the landmark · smaller circle, more points'
           : estimate
             ? 'One estimate — the closer, the more points. Take your time'
           : mode.lockIn

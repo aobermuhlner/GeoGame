@@ -255,7 +255,7 @@ function StatusLine({ vm }: { vm: GameVM }) {
     return (
       <div class="status-line muted hint">
         {MODES[modeOf(vm)].input === 'pin'
-          ? 'Landmark inside your circle scores · smaller circle, more points · no hurry'
+          ? 'Smaller circle, more points'
           : MODES[modeOf(vm)].accuracy
             ? 'One estimate each · closer = 1 point, spot on 🎯 +1'
             : 'One answer each · right = 1 point, first right +1'}

@@ -26,7 +26,7 @@ export const isModeId = (g: GameId): g is ModeId => g !== 'higher';
 
 export const HIGHER_GAME = {
   label: 'Higher or Lower',
-  description: 'Two countries, one category — pick the higher one. Only being right counts.',
+  description: 'Two countries, one category — pick the higher one.',
 };
 export const gameLabel = (g: GameId): string => (isModeId(g) ? MODES[g].label : HIGHER_GAME.label);
 

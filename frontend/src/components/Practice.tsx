@@ -103,10 +103,7 @@ function PracticeMenu({ onMode }: { onMode: (m: ModeId) => void }) {
     <main class="stack">
       <section class="card">
         <h2 class="page-title">Practice</h2>
-        <p class="muted small rules">
-          Play any game as often as you like — {ROUNDS_PER_GAME} random rounds from the regions you pick. Practice
-          isn't scored on a ranking and doesn't count towards your stats.
-        </p>
+        <p class="muted small rules">Random rounds from the regions you pick — nothing is saved.</p>
         <div class="daily-modes">
           {MODE_IDS.map((m) => (
             <article class="daily-mode" key={m}>

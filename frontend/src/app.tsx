@@ -153,7 +153,7 @@ function OfflineCard() {
       <section class="card center-card">
         <Logo size={56} />
         <h1>You're offline</h1>
-        <p class="muted">Flag Duel needs a connection for daily games, rankings and duels. It picks up again by itself once you're back online.</p>
+        <p class="muted">It reconnects automatically once you're back online.</p>
       </section>
     </main>
   );

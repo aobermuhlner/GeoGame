@@ -104,7 +104,7 @@ export function Login({ onSignedIn, roomCode }: { onSignedIn: (u: UserView) => v
         <p class="tagline">
           {roomCode
             ? `Sign in to join lobby ${roomCode}.`
-            : 'Daily flag challenges and real-time duels. Sign in or pick a name to start playing.'}
+            : 'Daily flag challenges and real-time duels.'}
         </p>
 
         <ul class="login-points">
@@ -153,7 +153,7 @@ export function Login({ onSignedIn, roomCode }: { onSignedIn: (u: UserView) => v
             </div>
             <p class="muted center">
               {config.googleClientId
-                ? 'Guest scores stay in this browser. You can link Google later to keep them.'
+                ? 'Guest scores stay in this browser.'
                 : 'Your scores are saved in this browser.'}
             </p>
           </form>

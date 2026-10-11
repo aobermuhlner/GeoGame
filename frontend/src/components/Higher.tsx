@@ -242,10 +242,7 @@ export function HigherCard({ info, onPlay }: { info: HigherSummary | undefined; 
 export function HigherRules() {
   return (
     <p class="muted small rules">
-      <strong>Daily {HIGHER_LABEL}:</strong> one category for everyone, 15 questions, 10 seconds each. Each question
-      brings in a new country against the last one, whose value you already know. You play all 15, but what counts is{' '}
-      <strong>how far you get without a mistake</strong>: 9 right before your first slip beats 2 right before it,
-      however well the rest goes. Correct answers after that, then your time, only break ties.
+      <strong>Daily {HIGHER_LABEL}:</strong> your score is how many you get right before the first mistake.
     </p>
   );
 }
@@ -406,7 +403,7 @@ function HigherScreen({
             ? `${run.correct} correct so far — breaks ties`
             : `${run.flawless} flawless in a row`
           : run.flawless === run.round - 1
-            ? `Your flawless streak ends at ${run.flawless}. Keep going — correct answers still break ties.`
+            ? `Streak ends at ${run.flawless}.`
             : `${r.answer === r.a ? r.aName : r.bName} is higher`}
       </span>
     </div>
@@ -517,7 +514,7 @@ function HigherResults({ run, onExit }: { run: HigherRunView; onExit: () => void
         <p class="muted small">
           {perfect
             ? 'Not a single mistake. Only time can beat you now.'
-            : `You got ${run.flawless} right before your first mistake. That's what the ranking counts first; your ${run.correct} correct answers and your time only break ties.`}
+            : `${run.flawless} right before your first mistake.`}
         </p>
         <div class="btn-row">
           <button class="btn btn-primary" onClick={onExit}>
